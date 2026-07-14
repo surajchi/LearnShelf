@@ -183,6 +183,40 @@
     return fromHTML('<p class="empty-state">' + esc(message) + "</p>");
   }
 
+  // Collapsible accordion group for one folder/section on the course page.
+  // Returns { group, body }: append chapter rows into `body`. Clicking the
+  // header expands/collapses the group. Starts open (`startOpen` default true).
+  function chapterGroup(title, count, startOpen) {
+    var open = startOpen !== false;
+    var badge = count
+      ? '<span class="badge">' + count + (count === 1 ? " chapter" : " chapters") + "</span>"
+      : "";
+    var group = fromHTML(
+      '<section class="chapter-group" style="margin:var(--space-5) 0 var(--space-2)">' +
+        '<button type="button" class="chapter-group__head" aria-expanded="' + (open ? "true" : "false") + '" ' +
+          'style="display:flex;align-items:center;gap:var(--space-3);width:100%;background:none;' +
+          "border:0;cursor:pointer;padding:var(--space-2) 0;text-align:left;color:inherit;font:inherit\">" +
+          '<span class="chapter-group__chevron" aria-hidden="true" ' +
+            'style="transition:transform .2s;transform:' + (open ? "none" : "rotate(-90deg)") + '">▾</span>' +
+          '<h2 style="font-size:var(--text-lg);margin:0">' + esc(title) + "</h2>" +
+          badge +
+        "</button>" +
+        '<div class="chapter-group__body grid" role="list" ' +
+          'style="grid-template-columns:1fr;gap:var(--space-3);' + (open ? "" : "display:none") + '"></div>' +
+      "</section>"
+    );
+    var head = group.querySelector(".chapter-group__head");
+    var body = group.querySelector(".chapter-group__body");
+    var chevron = group.querySelector(".chapter-group__chevron");
+    head.addEventListener("click", function () {
+      var isOpen = body.style.display !== "none";
+      body.style.display = isOpen ? "none" : "";
+      head.setAttribute("aria-expanded", isOpen ? "false" : "true");
+      chevron.style.transform = isOpen ? "rotate(-90deg)" : "none";
+    });
+    return { group: group, body: body };
+  }
+
   /* ---- public API ------------------------------------------------------- */
 
   window.UI = {
@@ -194,6 +228,7 @@
     tagBadges: tagBadges,
     courseCard: courseCard,
     chapterRow: chapterRow,
+    chapterGroup: chapterGroup,
     clear: clear,
     emptyState: emptyState
   };

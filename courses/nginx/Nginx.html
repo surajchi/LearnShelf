@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nginx from First Principles — The Engineer's Field Book</title>
+<style>
+  :root{
+    --ink:#0B1120;
+    --ink-2:#1A2332;
+    --paper:#F7F5F0;
+    --paper-2:#EFEBE2;
+    --green:#2E9E5B;
+    --green-dim:#1F7A44;
+    --brick:#C9432D;
+    --muted:#8B8577;
+    --line:#DAD4C4;
+    --code-bg:#0D1420;
+    --code-fg:#D8DEE9;
+    --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif;
+    --body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --mono: 'SF Mono', 'Consolas', 'Menlo', monospace;
+    --maxw: 780px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--body);
+    line-height:1.65;
+    font-size:17px;
+  }
+  html.dark body{
+    background:var(--ink);
+    color:var(--paper);
+  }
+  html.dark{ --paper:#0B1120; --ink:#F7F5F0; --paper-2:#131C2E; --line:#26314A; --code-bg:#05080F; }
+
+  /* progress bar */
+  #progress{
+    position:fixed; top:0; left:0; height:3px; width:0%;
+    background:linear-gradient(90deg, var(--green), var(--green-dim));
+    z-index:9999; transition:width .1s ease-out;
+  }
+
+  /* layout */
+  .shell{ display:flex; max-width:1240px; margin:0 auto; }
+  nav.sidebar{
+    position:sticky; top:0; align-self:flex-start; height:100vh;
+    width:280px; flex-shrink:0; overflow-y:auto;
+    padding:32px 20px 32px 32px;
+    border-right:1px solid var(--line);
+    font-size:14px;
+  }
+  nav.sidebar::-webkit-scrollbar{width:6px;}
+  nav.sidebar::-webkit-scrollbar-thumb{background:var(--line); border-radius:3px;}
+  .brand{
+    font-family:var(--serif); font-weight:700; font-size:16px;
+    letter-spacing:.02em; margin-bottom:4px;
+  }
+  .brand-sub{ color:var(--muted); font-size:12px; margin-bottom:24px; }
+  .toc-part{ margin-top:20px; font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--green); font-weight:600; }
+  .toc-link{
+    display:block; padding:6px 0 6px 12px; color:inherit; text-decoration:none;
+    border-left:2px solid transparent; opacity:.72; font-size:13.5px;
+  }
+  .toc-link:hover{ opacity:1; border-left-color:var(--line); }
+  .toc-link.active{ opacity:1; border-left-color:var(--green); color:var(--green-dim); font-weight:600; }
+  html.dark .toc-link.active{ color:var(--green); }
+
+  #theme-toggle{
+    margin-top:24px; padding:8px 12px; border:1px solid var(--line); background:none;
+    color:inherit; border-radius:6px; cursor:pointer; font-family:var(--body); font-size:13px;
+    display:flex; align-items:center; gap:8px;
+  }
+  #theme-toggle:hover{ border-color:var(--green); }
+
+  main{ flex:1; min-width:0; padding:0 40px; }
+  .content{ max-width:var(--maxw); margin:0 auto; padding:80px 0 120px; }
+
+  /* cover */
+  .cover{
+    min-height:92vh; display:flex; flex-direction:column; justify-content:center;
+    max-width:var(--maxw); margin:0 auto; padding:40px 0;
+  }
+  .cover .eyebrow{ color:var(--green); font-size:13px; letter-spacing:.15em; text-transform:uppercase; font-weight:600; margin-bottom:18px;}
+  .cover h1{
+    font-family:var(--serif); font-size:56px; line-height:1.08; margin:0 0 24px; font-weight:700;
+  }
+  .cover .sub{ font-size:19px; color:var(--muted); max-width:560px; line-height:1.6; margin-bottom:40px; }
+  .cover-svg{ margin:24px 0 40px; }
+  .cover-meta{ display:flex; gap:32px; font-size:13px; color:var(--muted); border-top:1px solid var(--line); padding-top:20px; }
+
+  /* typography */
+  h1,h2,h3,h4{ font-family:var(--serif); font-weight:700; line-height:1.25; }
+  h2.chapter-title{ font-size:34px; margin:0 0 8px; }
+  h3{ font-size:24px; margin-top:48px; }
+  h4{ font-size:19px; margin-top:32px; color:var(--green-dim); }
+  html.dark h4{ color:var(--green); }
+  p{ margin:16px 0; }
+  a{ color:var(--green-dim); }
+  html.dark a{ color:var(--green); }
+  strong{ font-weight:700; }
+
+  .chapter-opener{ padding-top:60px; border-top:1px solid var(--line); margin-top:100px; }
+  .chapter-opener:first-of-type{ border-top:none; margin-top:0; }
+  .chapter-num{ font-family:var(--serif); font-size:88px; font-weight:700; color:var(--paper-2); line-height:1; -webkit-text-stroke:1.5px var(--green); color:transparent; }
+  .chapter-eyebrow{ font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+  .chapter-motif{ margin:28px 0; }
+  .objectives{
+    background:var(--paper-2); border-left:3px solid var(--green); border-radius:6px;
+    padding:20px 24px; margin:32px 0; font-size:15.5px;
+  }
+  .objectives h4{ margin-top:0; color:inherit; font-size:13px; text-transform:uppercase; letter-spacing:.08em; }
+  .objectives ul{ margin:8px 0 0; padding-left:20px; }
+  .objectives li{ margin:6px 0; }
+
+  /* callouts */
+  .box{ border-radius:8px; padding:20px 24px; margin:28px 0; border:1px solid var(--line); }
+  .box-eli5{ background:#FBF7EE; border-color:#E8DCC0; }
+  html.dark .box-eli5{ background:#1C1A12; border-color:#3A331E; }
+  .box-eli5 .label{ color:#9B7A1F; }
+  .box-mistake{ background:#FCEEEB; border-color:#EAC3BA; }
+  html.dark .box-mistake{ background:#211213; border-color:#4A2620; }
+  .box-mistake .label{ color:var(--brick); }
+  .box-mnemonic{ background:#EAF6EE; border-color:#C3E4CE; }
+  html.dark .box-mnemonic{ background:#0E1F15; border-color:#1F4A2E; }
+  .box-mnemonic .label{ color:var(--green-dim); }
+  html.dark .box-mnemonic .label{ color:var(--green); }
+  .box .label{ font-size:12px; text-transform:uppercase; letter-spacing:.1em; font-weight:700; margin-bottom:8px; }
+
+  /* code */
+  pre{
+    background:var(--code-bg); color:var(--code-fg); border-radius:8px; padding:18px 20px;
+    overflow-x:auto; font-family:var(--mono); font-size:13.5px; line-height:1.6; position:relative;
+    margin:20px 0;
+  }
+  pre code{ counter-reset:line; display:block; }
+  .code-line{ display:block; }
+  .code-line::before{ counter-increment:line; content:counter(line); display:inline-block; width:2em; margin-right:14px; color:#4A5568; text-align:right; user-select:none; }
+  .copy-btn{
+    position:absolute; top:10px; right:10px; background:var(--ink-2); color:var(--paper);
+    border:1px solid #2A3550; border-radius:5px; padding:5px 10px; font-size:11px; cursor:pointer;
+    font-family:var(--body); opacity:.7;
+  }
+  .copy-btn:hover{ opacity:1; border-color:var(--green); }
+  code.inline{ background:var(--paper-2); padding:2px 6px; border-radius:4px; font-family:var(--mono); font-size:.88em; }
+
+  /* tables */
+  table{ width:100%; border-collapse:collapse; margin:24px 0; font-size:14.5px; }
+  th,td{ text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); }
+  th{ font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); font-weight:600; }
+  tr:last-child td{ border-bottom:1px solid var(--line); }
+
+  /* revision */
+  .revision{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:28px 0; }
+  .revision > div{ background:var(--paper-2); border-radius:8px; padding:16px 20px; }
+  .revision h4{ margin:0 0 8px; font-size:13px; text-transform:uppercase; }
+  @media (max-width:640px){ .revision{ grid-template-columns:1fr; } }
+
+  /* flashcards */
+  .flashcard{
+    border:1px solid var(--line); border-radius:8px; padding:16px 20px; margin:12px 0;
+    cursor:pointer; background:var(--paper-2);
+  }
+  .flashcard .q{ font-weight:600; }
+  .flashcard .a{ display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); color:var(--muted); }
+  .flashcard.open .a{ display:block; }
+
+  /* quiz / interview details */
+  details.quiz{
+    border:1px solid var(--line); border-radius:8px; padding:14px 18px; margin:14px 0; background:var(--paper-2);
+  }
+  details.quiz summary{ cursor:pointer; font-weight:600; list-style:none; }
+  details.quiz summary::-webkit-details-marker{ display:none; }
+  details.quiz summary::before{ content:'▸ '; color:var(--green); }
+  details.quiz[open] summary::before{ content:'▾ '; }
+  details.quiz .answer{ margin-top:12px; padding-top:12px; border-top:1px dashed var(--line); }
+  .trick{ color:var(--brick); font-size:12px; text-transform:uppercase; letter-spacing:.06em; font-weight:700; margin-left:6px; }
+
+  svg.diagram{ width:100%; height:auto; display:block; }
+  .diagram-caption{ text-align:center; font-size:13px; color:var(--muted); margin-top:8px; font-style:italic; }
+
+  footer.book-footer{ text-align:center; padding:60px 0; color:var(--muted); font-size:13px; }
+
+  /* mobile */
+  @media (max-width:900px){
+    nav.sidebar{ display:none; }
+    main{ padding:0 20px; }
+    .cover h1{ font-size:38px; }
+    .chapter-num{ font-size:60px; }
+  }
+
+  /* print */
+  @media print{
+    nav.sidebar, #theme-toggle, #progress, .copy-btn{ display:none !important; }
+    body{ background:#fff; color:#000; font-size:11pt; }
+    .content{ max-width:100%; padding:0; }
+    .chapter-opener{ page-break-before:always; margin-top:0; }
+    details.quiz{ display:block !important; }
+    details.quiz .answer{ display:block !important; }
+    pre{ white-space:pre-wrap; word-break:break-word; border:1px solid #ccc; }
+    a{ color:#000; text-decoration:underline; }
+    .cover-svg, .chapter-motif{ break-inside:avoid; }
+    table{ break-inside:avoid; }
+  }
+
+  ::selection{ background:var(--green); color:#fff; }
+  :focus-visible{ outline:2px solid var(--green); outline-offset:2px; }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div class="shell">
+<nav class="sidebar" id="sidebar">
+  <div class="brand">Nginx from First Principles</div>
+  <div class="brand-sub">The Engineer's Field Book</div>
+
+  <a class="toc-link" href="#cover">Cover</a>
+  <a class="toc-link" href="#preface">Preface</a>
+
+  <div class="toc-part">Part I · Foundations</div>
+  <a class="toc-link" href="#ch1">1. How the Web Actually Works</a>
+  <a class="toc-link" href="#ch2">2. Meet Nginx &amp; the C10K Problem</a>
+
+  <div class="toc-part">Part II · Under the Hood</div>
+  <a class="toc-link" href="#ch3">3. Master/Worker &amp; the Event Loop</a>
+  <a class="toc-link" href="#ch4">4. Configuration &amp; Location Matching</a>
+
+  <div class="toc-part">Part III · In Production</div>
+  <a class="toc-link" href="#ch5">5. Static Files &amp; Caching</a>
+  <a class="toc-link" href="#ch6">6. Reverse Proxy &amp; Load Balancing</a>
+  <a class="toc-link" href="#ch7">7. TLS &amp; Security</a>
+  <a class="toc-link" href="#ch8">8. Performance Tuning &amp; HA Reference Architecture</a>
+
+  <div class="toc-part">Back Matter</div>
+  <a class="toc-link" href="#glossary">Glossary</a>
+  <a class="toc-link" href="#cheatsheet">Config Cheat Sheet</a>
+  <a class="toc-link" href="#interview-cheatsheet">Interview Cheat Sheet</a>
+  <a class="toc-link" href="#checklist">Revision Checklist</a>
+
+  <button id="theme-toggle" aria-label="Toggle dark mode">🌓 <span id="theme-label">Dark mode</span></button>
+</nav>
+
+<main>
+<div class="content">
+
+<section class="cover" id="cover">
+  <div class="eyebrow">The Engineer's Field Book</div>
+  <h1>Nginx from<br>First Principles</h1>
+  <p class="sub">A chapter-by-chapter tour of the web server that quietly runs most of the internet — from how a browser resolves a URL, to the epoll event loop under the hood, to a full high-availability reference architecture you could defend in an interview.</p>
+
+  <div class="cover-svg">
+    <svg class="diagram" viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="gcover" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#2E9E5B"/>
+          <stop offset="1" stop-color="#1F7A44"/>
+        </linearGradient>
+      </defs>
+      <circle cx="120" cy="110" r="70" fill="none" stroke="url(#gcover)" stroke-width="2" stroke-dasharray="4 6"/>
+      <circle cx="120" cy="110" r="8" fill="url(#gcover)"/>
+      <text x="120" y="200" text-anchor="middle" font-size="12" fill="#8B8577" font-family="Georgia,serif">event loop</text>
+
+      <path d="M210,110 L330,60 M210,110 L330,110 M210,110 L330,160" stroke="#8B8577" stroke-width="1.5" fill="none"/>
+      <rect x="330" y="45" width="90" height="30" rx="4" fill="none" stroke="#2E9E5B" stroke-width="1.5"/>
+      <rect x="330" y="95" width="90" height="30" rx="4" fill="none" stroke="#2E9E5B" stroke-width="1.5"/>
+      <rect x="330" y="145" width="90" height="30" rx="4" fill="none" stroke="#2E9E5B" stroke-width="1.5"/>
+      <text x="375" y="64" text-anchor="middle" font-size="11" fill="#8B8577">worker</text>
+      <text x="375" y="114" text-anchor="middle" font-size="11" fill="#8B8577">worker</text>
+      <text x="375" y="164" text-anchor="middle" font-size="11" fill="#8B8577">worker</text>
+
+      <path d="M420,60 L560,110 M420,110 L560,110 M420,160 L560,110" stroke="#8B8577" stroke-width="1.5" fill="none"/>
+      <rect x="560" y="85" width="110" height="50" rx="6" fill="none" stroke="#C9432D" stroke-width="1.5"/>
+      <text x="615" y="115" text-anchor="middle" font-size="12" fill="#C9432D" font-family="Georgia,serif">upstream</text>
+    </svg>
+  </div>
+
+  <div class="cover-meta">
+    <span>8 Chapters</span>
+    <span>3 Parts</span>
+    <span>Field-guide format</span>
+    <span>Offline, single file</span>
+  </div>
+</section>
+
+<section id="preface" style="padding-top:40px; border-top:1px solid var(--line);">
+  <h2 class="chapter-title">Preface</h2>
+  <p>Nginx is one of those pieces of infrastructure that most engineers rely on daily and understand shallowly. You know it "serves stuff fast" and "sits in front of your app," but the moment an interviewer or an incident asks <em>why</em> — why does a worker process handle ten thousand connections without ten thousand threads, why does <code class="inline">location</code> matching pick the block it does, why did a reload just drop connections — the shallow model runs out.</p>
+  <p>This book was built one chapter at a time, on purpose. Each chapter stands as a complete unit: objectives, definitions, history, internals, diagrams, worked examples, common mistakes, and a spaced-repetition style revision pass. By the end, you should be able to reason about Nginx from the socket up, not just copy configuration blocks from memory.</p>
+  <p>Read it in order the first time. After that, use the sidebar to jump straight to whatever you're debugging.</p>
+</section>
+
+<section class="chapter-opener" id="ch1">
+  <div class="chapter-eyebrow">Part I · Foundations</div>
+  <div class="chapter-num">01</div>
+  <h2 class="chapter-title">How the Web Actually Works</h2>
+
+  <div class="chapter-motif">
+    <svg class="diagram" viewBox="0 0 720 160" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="60" cy="80" r="26" fill="none" stroke="#2E9E5B" stroke-width="2"/>
+      <text x="60" y="85" text-anchor="middle" font-size="11" fill="#2E9E5B">You</text>
+      <path d="M90,80 H180" stroke="#8B8577" stroke-width="1.5" marker-end="url(#arrow1)"/>
+      <text x="135" y="70" text-anchor="middle" font-size="10" fill="#8B8577">DNS lookup</text>
+      <rect x="180" y="55" width="90" height="50" rx="6" fill="none" stroke="#8B8577" stroke-width="1.5"/>
+      <text x="225" y="84" text-anchor="middle" font-size="11" fill="#8B8577">Resolver</text>
+      <path d="M270,80 H360" stroke="#8B8577" stroke-width="1.5" marker-end="url(#arrow1)"/>
+      <text x="315" y="70" text-anchor="middle" font-size="10" fill="#8B8577">TCP + TLS</text>
+      <rect x="360" y="55" width="90" height="50" rx="6" fill="none" stroke="#8B8577" stroke-width="1.5"/>
+      <text x="405" y="84" text-anchor="middle" font-size="11" fill="#8B8577">Handshake</text>
+      <path d="M450,80 H540" stroke="#8B8577" stroke-width="1.5" marker-end="url(#arrow1)"/>
+      <text x="495" y="70" text-anchor="middle" font-size="10" fill="#8B8577">HTTP request</text>
+      <rect x="540" y="50" width="120" height="60" rx="6" fill="none" stroke="#C9432D" stroke-width="2"/>
+      <text x="600" y="84" text-anchor="middle" font-size="12" fill="#C9432D" font-family="Georgia,serif">Nginx</text>
+      <defs>
+        <marker id="arrow1" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 Z" fill="#8B8577"/>
+        </marker>
+      </defs>
+    </svg>
+    <div class="diagram-caption">Fig 1.1 — The trip a single request makes before Nginx ever sees it</div>
+  </div>
+
+  <div class="objectives">
+    <h4>Learning objectives</h4>
+    <ul>
+      <li>Trace a URL from address bar to rendered page, naming every hop</li>
+      <li>Explain DNS resolution, TCP's three-way handshake, and the TLS handshake at a level you could whiteboard</li>
+      <li>Distinguish HTTP/1.1, HTTP/2, and HTTP/3 at the transport level</li>
+      <li>Understand why "the web is stateless" matters for how servers like Nginx are built</li>
+    </ul>
+  </div>
+
+  <h3>Definition</h3>
+  <p>The web is a client–server system built on a stack of agreed-upon protocols: DNS to turn names into addresses, TCP (or QUIC) to move bytes reliably, TLS to encrypt them, and HTTP to give those bytes meaning as requests and responses. Nginx lives at the HTTP layer, but everything below it shapes how it behaves.</p>
+
+  <h3>Why it exists</h3>
+  <p>None of this was inevitable. Early networked systems assumed trusted, stable links between known machines. The web needed something else: a way for any client to reach any server, by name, over an unreliable public network, with content that could be cached, redirected, and load-balanced along the way. Each protocol layer solves one piece of that problem so the layers above don't have to.</p>
+
+  <h3>A brief history</h3>
+  <p>Tim Berners-Lee's original 1989 proposal paired three ideas that still hold: a naming scheme (URLs), a markup format (HTML), and a transfer protocol (HTTP). HTTP/1.0 opened and closed a new TCP connection for every request — brutally wasteful. HTTP/1.1 (1997) added persistent connections and pipelining. HTTP/2 (2015) multiplexed many requests over one connection using binary framing. HTTP/3 (finalized 2022) went further, replacing TCP itself with QUIC, a UDP-based transport designed to avoid head-of-line blocking.</p>
+
+  <h3>Internal working: the request lifecycle</h3>
+  <p>When you type a URL and hit enter, roughly this happens:</p>
+  <ol>
+    <li><strong>DNS resolution</strong> — your OS asks a resolver to map the hostname to an IP address, often walking a chain of root, TLD, and authoritative name servers, cached at each level.</li>
+    <li><strong>TCP handshake</strong> — client and server exchange SYN, SYN-ACK, ACK to establish a reliable, ordered byte stream.</li>
+    <li><strong>TLS handshake</strong> — client and server negotiate a cipher suite and exchange keys (TLS 1.3 does this in one round trip instead of two) so everything after is encrypted.</li>
+    <li><strong>HTTP request/response</strong> — the client sends a method, path, and headers; the server (often Nginx, first) decides how to handle it.</li>
+  </ol>
+
+  <div class="box box-eli5">
+    <div class="label">ELI5 — The Restaurant</div>
+    <p>Looking up a domain name is like asking a directory service for a restaurant's address (DNS). Walking there and confirming you're both at the right table is the TCP handshake. Agreeing on a language and putting up a "private conversation" screen is TLS. Placing your order and getting food back is HTTP. Nginx is the maître d' who decides which kitchen station handles your order.</p>
+  </div>
+
+  <h4>Level 1 — One sentence</h4>
+  <p>The web works by layering naming, reliable transport, encryption, and a request/response protocol on top of each other.</p>
+  <h4>Level 2 — One paragraph</h4>
+  <p>A browser resolves a hostname via DNS, opens a reliable connection via TCP (or QUIC for HTTP/3), secures it via TLS, then sends an HTTP request describing what it wants. The server processes that request and returns a response with a status code, headers, and a body. Every layer is independently swappable — you can change TLS versions or HTTP versions without touching DNS.</p>
+  <h4>Level 3 — Technical depth</h4>
+  <p>Each layer has failure modes engineers must reason about: DNS caching and TTLs affect how fast changes propagate; TCP's congestion control affects throughput on lossy networks; TLS handshake cost affects latency for short-lived connections, which is why session resumption and TLS 1.3's 1-RTT matter; and HTTP/2's multiplexing removes application-layer head-of-line blocking but not TCP-layer blocking, which HTTP/3 (QUIC) finally fixes by making streams independent at the transport level.</p>
+  <h4>Level 4 — Interview depth</h4>
+  <p>Be ready to discuss: why HTTP/2 server push was deprecated in most browsers (poor cache alignment with actual client need), why QUIC uses UDP instead of extending TCP (deploying a new transport is easier in userspace over UDP than getting new TCP behavior adopted in kernels worldwide), and how connection reuse and keep-alive interact with load balancer algorithms upstream of Nginx.</p>
+
+  <pre><code><span class="code-line">curl -v https://example.com</span><span class="code-line">*   Trying 93.184.216.34:443...</span><span class="code-line">* Connected to example.com (93.184.216.34) port 443</span><span class="code-line">* TLS handshake, Client hello (1):</span><span class="code-line">* TLS handshake, Server hello (2):</span><span class="code-line">&gt; GET / HTTP/1.1</span><span class="code-line">&gt; Host: example.com</span><span class="code-line">&lt; HTTP/1.1 200 OK</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+
+  <div class="box box-mistake">
+    <div class="label">Common mistake</div>
+    <p>Assuming "HTTPS is slow" is inherent to encryption. In practice, the dominant cost is handshake round trips, not the cipher itself — which is why connection reuse, session resumption, and TLS 1.3 matter far more for perceived latency than CPU-bound encryption overhead.</p>
+  </div>
+
+  <div class="box box-mnemonic">
+    <div class="label">Mnemonic</div>
+    <p><strong>"Dumb Trucks Transport Heavy loads"</strong> — DNS, TCP, TLS, HTTP: the order every request travels through before an application ever sees it.</p>
+  </div>
+
+  <div class="revision">
+    <div>
+      <h4>30-second revision</h4>
+      <p>DNS resolves names → TCP/QUIC transports bytes → TLS encrypts them → HTTP gives them meaning. Nginx operates at the HTTP layer but its performance is shaped by everything beneath it.</p>
+    </div>
+    <div>
+      <h4>5-minute revision</h4>
+      <p>Walk through the full request lifecycle out loud: resolution, handshake, TLS negotiation, request, response. Name one thing that changed at each HTTP version (1.1: persistent connections, 2: multiplexing/binary framing, 3: QUIC/UDP transport). Explain why TLS 1.3 reduced handshake round trips.</p>
+    </div>
+  </div>
+
+  <div class="flashcard" onclick="this.classList.toggle('open')">
+    <div class="q">What problem does HTTP/2 multiplexing solve?</div>
+    <div class="a">Head-of-line blocking at the application layer — multiple requests share one TCP connection without waiting for each other in sequence.</div>
+  </div>
+  <div class="flashcard" onclick="this.classList.toggle('open')">
+    <div class="q">Why does QUIC run over UDP instead of TCP?</div>
+    <div class="a">TCP's in-order delivery guarantee means one lost packet blocks all streams on the connection. QUIC implements its own reliability per-stream over UDP, so a lost packet only blocks the stream it belongs to.</div>
+  </div>
+
+  <h3>Interview &amp; quiz</h3>
+  <details class="quiz">
+    <summary>Explain what happens between typing a URL and seeing a page <span class="trick"></span></summary>
+    <div class="answer">DNS resolution → TCP handshake → TLS handshake → HTTP request sent → server processes and responds → browser parses HTML/CSS/JS and renders. Mentioning caching at each stage (DNS cache, TLS session resumption, HTTP cache headers) signals depth.</div>
+  </details>
+  <details class="quiz">
+    <summary>Is HTTP stateless? If so, how do sessions work? <span class="trick">Trick</span></summary>
+    <div class="answer">Yes, HTTP itself carries no memory between requests — state is bolted on via cookies, tokens, or server-side session stores keyed by an identifier the client resends. The trick is candidates often say "HTTP has sessions" when really the application layer simulates them.</div>
+  </details>
+  <details class="quiz">
+    <summary>Why might reducing TLS handshakes matter more than reducing payload size? <span class="trick"></span></summary>
+    <div class="answer">For small, frequent requests, round-trip latency from repeated handshakes can dominate total time far more than a few extra kilobytes of payload — this is why keep-alive and session resumption are high-leverage optimizations.</div>
+  </details>
+</section>
+
+<section class="chapter-opener" id="ch2">
+  <div class="chapter-eyebrow">Part I · Foundations</div>
+  <div class="chapter-num">02</div>
+  <h2 class="chapter-title">Meet Nginx &amp; the C10K Problem</h2>
+
+  <div class="chapter-motif">
+    <svg class="diagram" viewBox="0 0 720 180" xmlns="http://www.w3.org/2000/svg">
+      <text x="140" y="30" text-anchor="middle" font-size="13" fill="#8B8577" font-family="Georgia,serif">Apache (thread-per-connection)</text>
+      <g>
+        <rect x="20" y="45" width="30" height="100" fill="none" stroke="#8B8577"/>
+        <rect x="60" y="45" width="30" height="100" fill="none" stroke="#8B8577"/>
+        <rect x="100" y="45" width="30" height="100" fill="none" stroke="#8B8577"/>
+        <rect x="140" y="45" width="30" height="100" fill="none" stroke="#8B8577"/>
+        <rect x="180" y="45" width="30" height="100" fill="none" stroke="#8B8577"/>
+        <rect x="220" y="45" width="30" height="100" fill="none" stroke="#8B8577"/>
+      </g>
+      <text x="140" y="165" text-anchor="middle" font-size="11" fill="#8B8577">1 thread : 1 connection — memory scales linearly</text>
+
+      <line x1="380" y1="20" x2="380" y2="170" stroke="#DAD4C4" stroke-width="1"/>
+
+      <text x="560" y="30" text-anchor="middle" font-size="13" fill="#2E9E5B" font-family="Georgia,serif">Nginx (event-driven)</text>
+      <rect x="480" y="60" width="160" height="60" rx="8" fill="none" stroke="#2E9E5B" stroke-width="2"/>
+      <text x="560" y="95" text-anchor="middle" font-size="12" fill="#2E9E5B">1 worker</text>
+      <path d="M500,75 h5 M500,85 h5 M500,95 h5 M500,105 h5" stroke="#2E9E5B" stroke-width="6"/>
+      <text x="560" y="150" text-anchor="middle" font-size="11" fill="#8B8577">thousands of connections, non-blocking I/O</text>
+    </svg>
+    <div class="diagram-caption">Fig 2.1 — Thread-per-connection vs. event-driven concurrency</div>
+  </div>
+
+  <div class="objectives">
+    <h4>Learning objectives</h4>
+    <ul>
+      <li>State what the C10K problem was and why it mattered</li>
+      <li>Explain why Nginx's architecture answered it differently than Apache</li>
+      <li>List Nginx's core roles: web server, reverse proxy, load balancer, TLS terminator, cache</li>
+      <li>Distinguish forward proxies from reverse proxies</li>
+    </ul>
+  </div>
+
+  <h3>Definition</h3>
+  <p>Nginx (pronounced "engine-x") is an event-driven web server, reverse proxy, and load balancer. Rather than dedicating an OS thread or process to each connection, a small number of worker processes handle many thousands of connections concurrently using non-blocking I/O.</p>
+
+  <h3>History: Igor Sysoev and the C10K problem</h3>
+  <p>By the early 2000s, popular servers like Apache handled each connection with a dedicated process or thread. That model works fine at hundreds of concurrent connections, but as the web grew, engineers ran into what Dan Kegel named the <strong>C10K problem</strong>: how does a single server handle ten thousand concurrent connections? Thread-per-connection designs hit hard walls — context-switching overhead and per-thread memory (stacks, kernel structures) made scaling past a few thousand connections expensive or impossible on commodity hardware.</p>
+  <p>Igor Sysoev, a Russian systems engineer working at Rambler (a large Russian portal), began writing Nginx in 2002 specifically to solve this, releasing it publicly in 2004. Instead of one thread per connection, Nginx used the operating system's asynchronous event notification mechanisms directly, letting one process handle enormous numbers of connections with a small, fixed memory footprint.</p>
+
+  <h3>Nginx's core roles</h3>
+  <table>
+    <tr><th>Role</th><th>What it means</th></tr>
+    <tr><td>Web server</td><td>Serves static files (HTML, images, CSS) directly from disk very efficiently</td></tr>
+    <tr><td>Reverse proxy</td><td>Sits in front of application servers, forwarding client requests to them</td></tr>
+    <tr><td>Load balancer</td><td>Distributes requests across multiple backend servers</td></tr>
+    <tr><td>TLS terminator</td><td>Handles HTTPS encryption/decryption so backend apps don't have to</td></tr>
+    <tr><td>Cache</td><td>Stores responses to avoid repeating expensive backend work</td></tr>
+  </table>
+
+  <h4>Forward proxy vs. reverse proxy</h4>
+  <div class="chapter-motif">
+    <svg class="diagram" viewBox="0 0 720 140" xmlns="http://www.w3.org/2000/svg">
+      <text x="150" y="20" text-anchor="middle" font-size="12" fill="#8B8577">Forward proxy — hides the client</text>
+      <circle cx="40" cy="70" r="18" fill="none" stroke="#8B8577"/>
+      <text x="40" y="74" text-anchor="middle" font-size="9" fill="#8B8577">Client</text>
+      <path d="M60,70 H120" stroke="#8B8577" marker-end="url(#a2)"/>
+      <rect x="120" y="50" width="70" height="40" rx="6" fill="none" stroke="#2E9E5B" stroke-width="2"/>
+      <text x="155" y="74" text-anchor="middle" font-size="10" fill="#2E9E5B">Proxy</text>
+      <path d="M190,70 H250" stroke="#8B8577" marker-end="url(#a2)"/>
+      <text x="220" y="105" text-anchor="middle" font-size="9" fill="#8B8577">"anonymous" to server</text>
+      <circle cx="280" cy="70" r="18" fill="none" stroke="#8B8577"/>
+      <text x="280" y="74" text-anchor="middle" font-size="9" fill="#8B8577">Server</text>
+
+      <text x="530" y="20" text-anchor="middle" font-size="12" fill="#8B8577">Reverse proxy — hides the backend</text>
+      <circle cx="400" cy="70" r="18" fill="none" stroke="#8B8577"/>
+      <text x="400" y="74" text-anchor="middle" font-size="9" fill="#8B8577">Client</text>
+      <path d="M420,70 H480" stroke="#8B8577" marker-end="url(#a2)"/>
+      <text x="450" y="105" text-anchor="middle" font-size="9" fill="#8B8577">thinks this is the server</text>
+      <rect x="480" y="50" width="70" height="40" rx="6" fill="none" stroke="#C9432D" stroke-width="2"/>
+      <text x="515" y="74" text-anchor="middle" font-size="10" fill="#C9432D">Nginx</text>
+      <path d="M550,70 H610" stroke="#8B8577" marker-end="url(#a2)"/>
+      <circle cx="640" cy="70" r="18" fill="none" stroke="#8B8577"/>
+      <text x="640" y="74" text-anchor="middle" font-size="9" fill="#8B8577">App</text>
+      <defs><marker id="a2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#8B8577"/></marker></defs>
+    </svg>
+    <div class="diagram-caption">Fig 2.2 — A forward proxy protects the client's identity; a reverse proxy protects the backend's</div>
+  </div>
+
+  <div class="box box-eli5">
+    <div class="label">ELI5 — The Hospital</div>
+    <p>Imagine a hospital where every patient got assigned a dedicated nurse who does nothing else all day, even while the patient is asleep — that's thread-per-connection. Nginx works more like a triage desk: a handful of staff efficiently check on many patients in rotation, only spending active attention where it's needed right now. That's the event loop.</p>
+  </div>
+
+  <h4>Level 1</h4><p>Nginx handles massive numbers of connections with few processes by using non-blocking I/O instead of one thread per connection.</p>
+  <h4>Level 2</h4><p>Built by Igor Sysoev starting in 2002 to solve the C10K problem, Nginx uses an event-driven architecture, which lets it serve as a web server, reverse proxy, load balancer, TLS terminator, and cache — all while using far less memory per connection than thread-based servers like classic Apache.</p>
+  <h4>Level 3</h4><p>The event-driven model shines particularly for I/O-bound workloads (waiting on network or disk) since a worker isn't blocked while waiting — it services other connections' events in the meantime. CPU-bound work is a different story, which is why Nginx keeps its worker count close to the CPU core count rather than scaling workers with connection count.</p>
+  <h4>Level 4</h4><p>Be ready to explain that modern Apache (via <code class="inline">mpm_event</code>) narrowed this gap significantly, so the thread-vs-event distinction is more historical than a strict "Nginx always wins" claim — the real differentiator today is often Nginx's proxy/load-balancing feature set and configuration model, not raw connection handling alone.</p>
+
+  <div class="box box-mistake">
+    <div class="label">Common mistake</div>
+    <p>Saying "Nginx is faster than Apache" as a blanket statement. It's more accurate to say Nginx's architecture handles high concurrency with lower memory overhead — for CPU-bound or module-heavy workloads the comparison is more nuanced.</p>
+  </div>
+
+  <div class="box box-mnemonic">
+    <div class="label">Mnemonic</div>
+    <p><strong>"WRLTC"</strong> — Web server, Reverse proxy, Load balancer, TLS terminator, Cache: the five hats Nginx wears.</p>
+  </div>
+
+  <div class="revision">
+    <div><h4>30-second revision</h4><p>C10K = the challenge of 10,000 concurrent connections. Nginx (Sysoev, 2004) solved it with an event-driven, non-blocking architecture instead of thread-per-connection.</p></div>
+    <div><h4>5-minute revision</h4><p>Explain the memory/context-switch cost of thread-per-connection at scale. Name Nginx's five core roles. Draw the forward vs. reverse proxy distinction from memory.</p></div>
+  </div>
+
+  <div class="flashcard" onclick="this.classList.toggle('open')"><div class="q">What is the C10K problem?</div><div class="a">The challenge of a single server handling ten thousand concurrent connections efficiently, named by Dan Kegel, which thread-per-connection architectures struggled with.</div></div>
+  <div class="flashcard" onclick="this.classList.toggle('open')"><div class="q">Who created Nginx and why?</div><div class="a">Igor Sysoev, starting in 2002 while working at Rambler, specifically to solve the C10K problem with an event-driven architecture.</div></div>
+
+  <h3>Interview &amp; quiz</h3>
+  <details class="quiz"><summary>What's the difference between a forward and reverse proxy?</summary><div class="answer">A forward proxy sits in front of clients and hides their identity from servers (e.g., corporate proxies, VPNs). A reverse proxy sits in front of servers and hides backend topology from clients — Nginx is typically deployed as the latter.</div></details>
+  <details class="quiz"><summary>Would Nginx's architecture help a CPU-bound video transcoding service? <span class="trick">Trick</span></summary><div class="answer">Not inherently — event-driven concurrency helps I/O-bound waiting, not CPU-bound computation. A transcoding service is usually better served by process pools sized to CPU cores, which Nginx itself does for its own worker count.</div></details>
+</section>
+
+<section class="chapter-opener" id="ch3">
+  <div class="chapter-eyebrow">Part II · Under the Hood</div>
+  <div class="chapter-num">03</div>
+  <h2 class="chapter-title">Master/Worker &amp; the Event Loop</h2>
+
+  <div class="chapter-motif">
+    <svg class="diagram" viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg">
+      <rect x="300" y="10" width="120" height="40" rx="6" fill="none" stroke="#C9432D" stroke-width="2"/>
+      <text x="360" y="35" text-anchor="middle" font-size="12" fill="#C9432D">master</text>
+      <path d="M330,50 V80 M360,50 V80 M390,50 V80" stroke="#8B8577" stroke-width="1.5"/>
+      <rect x="220" y="80" width="90" height="36" rx="6" fill="none" stroke="#2E9E5B" stroke-width="2"/>
+      <text x="265" y="103" text-anchor="middle" font-size="11" fill="#2E9E5B">worker 1</text>
+      <rect x="315" y="80" width="90" height="36" rx="6" fill="none" stroke="#2E9E5B" stroke-width="2"/>
+      <text x="360" y="103" text-anchor="middle" font-size="11" fill="#2E9E5B">worker 2</text>
+      <rect x="410" y="80" width="90" height="36" rx="6" fill="none" stroke="#2E9E5B" stroke-width="2"/>
+      <text x="455" y="103" text-anchor="middle" font-size="11" fill="#2E9E5B">worker N</text>
+
+      <circle cx="265" cy="165" r="34" fill="none" stroke="#8B8577" stroke-dasharray="3 4"/>
+      <text x="265" y="169" text-anchor="middle" font-size="9" fill="#8B8577">epoll_wait</text>
+      <circle cx="360" cy="165" r="34" fill="none" stroke="#8B8577" stroke-dasharray="3 4"/>
+      <text x="360" y="169" text-anchor="middle" font-size="9" fill="#8B8577">epoll_wait</text>
+      <circle cx="455" cy="165" r="34" fill="none" stroke="#8B8577" stroke-dasharray="3 4"/>
+      <text x="455" y="169" text-anchor="middle" font-size="9" fill="#8B8577">epoll_wait</text>
+    </svg>
+    <div class="diagram-caption">Fig 3.1 — One master, N worker processes, each running its own event loop</div>
+  </div>
+
+  <div class="objectives">
+    <h4>Learning objectives</h4>
+    <ul>
+      <li>Describe the master process's responsibilities vs. workers'</li>
+      <li>Explain epoll/kqueue and why they beat naive polling</li>
+      <li>Trace one iteration of the event loop for a real request</li>
+      <li>Explain graceful reloads and zero-downtime binary upgrades</li>
+    </ul>
+  </div>
+
+  <h3>Definition</h3>
+  <p>Nginx runs as one privileged <strong>master process</strong> plus a configurable number of unprivileged <strong>worker processes</strong>. The master reads configuration, binds listening sockets, and manages workers; the workers do all the actual request handling, each running an independent event loop.</p>
+
+  <h3>Why this split exists</h3>
+  <p>Separating privilege from work is a security and stability pattern: the master can run as root (needed to bind port 80/443) while workers run as an unprivileged user, so a compromised worker doesn't automatically compromise the whole host. It also enables zero-downtime reloads — the master can start new workers with new configuration while old workers finish existing connections, then exit.</p>
+
+  <h3>Internal working: the event loop</h3>
+  <p>Each worker registers all its open sockets with the kernel's event notification interface — <strong>epoll</strong> on Linux, <strong>kqueue</strong> on BSD/macOS — instead of checking each socket in a loop (the old, slow <code class="inline">select</code>/<code class="inline">poll</code> approach that scales linearly with connection count). The worker then blocks on a single call (<code class="inline">epoll_wait</code>) that returns only the sockets that actually have activity. This is what makes handling thousands of idle-but-open connections nearly free.</p>
+  <p>A simplified loop, one iteration:</p>
+  <ol>
+    <li>Call <code class="inline">epoll_wait()</code> — sleep until the kernel reports ready file descriptors</li>
+    <li>For each ready descriptor, run its associated state machine (e.g., "read more of the HTTP header," "write buffered response bytes")</li>
+    <li>If a step would block (e.g., disk read not ready), register interest and move to the next ready descriptor rather than waiting</li>
+    <li>Repeat</li>
+  </ol>
+  <p>This is why Nginx modules must avoid blocking calls — a single blocking operation stalls every connection that worker is handling.</p>
+
+  <h3>Master process responsibilities</h3>
+  <table>
+    <tr><th>Task</th><th>Detail</th></tr>
+    <tr><td>Read &amp; validate config</td><td>Parses <code class="inline">nginx.conf</code>, exits with an error before disrupting running workers if invalid</td></tr>
+    <tr><td>Bind sockets</td><td>Opens listening ports, which requires root for ports below 1024</td></tr>
+    <tr><td>Spawn/monitor workers</td><td>Forks worker processes and restarts them if they crash</td></tr>
+    <tr><td>Handle signals</td><td>e.g. <code class="inline">SIGHUP</code> for graceful reload, <code class="inline">SIGQUIT</code> for graceful shutdown</td></tr>
+    <tr><td>Cache loader/manager</td><td>Spawns short-lived helper processes that load and prune the on-disk cache</td></tr>
+  </table>
+
+  <h4>Graceful reload</h4>
+  <p>Running <code class="inline">nginx -s reload</code> sends <code class="inline">SIGHUP</code> to the master. The master re-reads configuration, and if valid, starts a fresh set of workers using the new config while telling old workers to finish their current connections and exit — no dropped connections, no listening-socket downtime.</p>
+
+  <pre><code><span class="code-line"># Reload without downtime</span><span class="code-line">sudo nginx -t          # test config syntax first</span><span class="code-line">sudo nginx -s reload   # sends SIGHUP to master</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+
+  <div class="box box-eli5">
+    <div class="label">ELI5 — The Bank</div>
+    <p>The master process is the bank manager: opens the doors (binds sockets), hires tellers (workers), and can bring in a fresh shift without ever closing the branch (graceful reload). Each teller (worker) doesn't wait around staring at one customer — they glance at a board showing which windows have a customer ready (epoll), and serve whoever's ready next.</p>
+  </div>
+
+  <h4>Level 1</h4><p>One master manages configuration and processes; many workers each run an efficient event loop to handle connections.</p>
+  <h4>Level 2</h4><p>The master binds sockets and spawns workers, which use epoll/kqueue to be notified only about sockets with actual activity, avoiding the cost of checking every connection on every loop iteration. This lets a handful of workers handle tens of thousands of connections.</p>
+  <h4>Level 3</h4><p>Workers are single-threaded by default (though thread pools can be enabled for specific blocking operations like file I/O), and each runs a state machine per connection so no single client can occupy a worker exclusively. The <code class="inline">worker_connections</code> directive caps how many simultaneous connections one worker will track.</p>
+  <h4>Level 4</h4><p>Discuss the thread pool mechanism added in Nginx 1.7.11+, which offloads genuinely blocking operations (e.g., reading a file from slow disk) to a separate thread pool so it doesn't stall the whole event loop — a nuance that shows you understand event loops aren't magically immune to blocking I/O, just resistant to it by design.</p>
+
+  <div class="box box-mistake">
+    <div class="label">Common mistake</div>
+    <p>Setting <code class="inline">worker_processes</code> far higher than the CPU core count "to handle more traffic." Since workers are largely I/O-bound and non-blocking, more workers than cores usually just adds context-switching overhead without adding throughput — <code class="inml class=inline">auto</code> (matching core count) is the standard recommendation.</p>
+  </div>
+
+  <div class="box box-mnemonic">
+    <div class="label">Mnemonic</div>
+    <p><strong>"One Manager, Many Tellers, One Ledger Each"</strong> — one master, many workers, each running its own independent event loop (ledger).</p>
+  </div>
+
+  <div class="revision">
+    <div><h4>30-second revision</h4><p>Master binds sockets and manages workers; workers run non-blocking event loops via epoll/kqueue. Graceful reload starts new workers with new config while old ones drain.</p></div>
+    <div><h4>5-minute revision</h4><p>Walk through one epoll_wait iteration end to end. Explain why blocking calls are dangerous inside a worker. Explain what SIGHUP does and why it enables zero-downtime reloads.</p></div>
+  </div>
+
+  <div class="flashcard" onclick="this.classList.toggle('open')"><div class="q">Why does Nginx use epoll instead of select/poll?</div><div class="a">select/poll require scanning every registered socket each iteration (O(n)); epoll lets the kernel notify only about sockets with actual activity, which scales far better with high connection counts.</div></div>
+  <div class="flashcard" onclick="this.classList.toggle('open')"><div class="q">What happens to in-flight connections during a reload?</div><div class="a">Old workers keep serving their existing connections until they naturally complete, while new workers (with new config) handle new connections — nothing is dropped.</div></div>
+
+  <h3>Interview &amp; quiz</h3>
+  <details class="quiz"><summary>Why does a single slow blocking call hurt Nginx more than it would hurt a thread-per-connection server? <span class="trick">Trick</span></summary><div class="answer">Because one worker's event loop is shared across potentially thousands of connections — blocking it stalls all of them, whereas in a thread-per-connection model a slow call only blocks that one thread/connection. This is exactly why Nginx offloads genuinely blocking work to thread pools rather than doing it inline.</div></details>
+  <details class="quiz"><summary>What signal triggers a graceful reload, and what's the difference from a full restart?</summary><div class="answer">SIGHUP triggers a graceful reload — new workers spin up with new config while old ones drain, with no dropped connections or socket downtime. A full restart tears down the master entirely, briefly closing listening sockets.</div></details>
+</section>
+
+<section class="chapter-opener" id="ch4">
+  <div class="chapter-eyebrow">Part II · Under the Hood</div>
+  <div class="chapter-num">04</div>
+  <h2 class="chapter-title">Configuration &amp; Location Matching</h2>
+
+  <div class="chapter-motif">
+    <svg class="diagram" viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg">
+      <rect x="20" y="10" width="680" height="180" rx="8" fill="none" stroke="#8B8577" stroke-dasharray="3 4"/>
+      <text x="40" y="30" font-size="12" fill="#8B8577">http { }</text>
+      <rect x="50" y="45" width="600" height="130" rx="6" fill="none" stroke="#2E9E5B" stroke-dasharray="3 4"/>
+      <text x="70" y="65" font-size="12" fill="#2E9E5B">server { listen 443; server_name example.com; }</text>
+      <rect x="90" y="80" width="540" height="80" rx="6" fill="none" stroke="#C9432D"/>
+      <text x="110" y="100" font-size="12" fill="#C9432D">location /api/ { proxy_pass ...; }</text>
+      <text x="110" y="122" font-size="12" fill="#C9432D">location = /health { return 200; }</text>
+      <text x="110" y="144" font-size="12" fill="#C9432D">location ~* \.(jpg|png)$ { expires 30d; }</text>
+    </svg>
+    <div class="diagram-caption">Fig 4.1 — The context tree: http → server → location</div>
+  </div>
+
+  <div class="objectives">
+    <h4>Learning objectives</h4>
+    <ul>
+      <li>Explain Nginx's nested context model: http, server, location</li>
+      <li>Rank all location matching types by priority and give an example of each</li>
+      <li>Explain directive inheritance and where it breaks (e.g. array-like directives)</li>
+      <li>Read and reason about a full working nginx.conf</li>
+    </ul>
+  </div>
+
+  <h3>Definition</h3>
+  <p>Nginx configuration is a nested, declarative tree of contexts. The outermost is the main context (global settings), inside it sits <code class="inline">http</code> (HTTP-wide settings), inside that one or more <code class="inline">server</code> blocks (virtual hosts), and inside those, <code class="inline">location</code> blocks that match specific request paths.</p>
+
+  <h3>Why it's structured this way</h3>
+  <p>Real deployments serve many domains and many distinct URL patterns from one machine — static assets, an API, a health check, a websocket endpoint — each needing different handling. Nesting lets shared settings live once at a high level (e.g., gzip settings in <code class="inline">http</code>) while specific overrides live close to what they affect (e.g., caching rules only for <code class="inline">/images/</code>).</p>
+
+  <h3>Location matching — priority order</h3>
+  <p>This is one of the most interview-tested details in all of Nginx. When multiple <code class="inline">location</code> blocks could match a URL, Nginx doesn't use the order they appear in the file — it follows a strict priority:</p>
+  <table>
+    <tr><th>Priority</th><th>Syntax</th><th>Meaning</th></tr>
+    <tr><td>1 (highest)</td><td><code class="inline">location = /path</code></td><td>Exact match — stops searching immediately if matched</td></tr>
+    <tr><td>2</td><td><code class="inline">location ^~ /path</code></td><td>Preferential prefix — if it's the longest matching prefix, regex checks are skipped</td></tr>
+    <tr><td>3</td><td><code class="inline">location ~ /pattern</code></td><td>Case-sensitive regex, checked in file order, first match wins</td></tr>
+    <tr><td>3</td><td><code class="inline">location ~* /pattern</code></td><td>Case-insensitive regex, same rules as above</td></tr>
+    <tr><td>4 (lowest)</td><td><code class="inline">location /path</code></td><td>Plain prefix match — longest matching prefix wins if no regex matched</td></tr>
+  </table>
+
+  <pre><code><span class="code-line">location = /health {          # 1. exact match, checked first</span><span class="code-line">    return 200 "ok";</span><span class="code-line">}</span><span class="code-line"></span><span class="code-line">location ^~ /static/ {        # 2. skips regex checks if this prefix matches</span><span class="code-line">    root /var/www;</span><span class="code-line">}</span><span class="code-line"></span><span class="code-line">location ~* \.(css|js)$ {     # 3. case-insensitive regex</span><span class="code-line">    expires 7d;</span><span class="code-line">}</span><span class="code-line"></span><span class="code-line">location /api/ {              # 4. plain prefix, lowest priority</span><span class="code-line">    proxy_pass http://backend;</span><span class="code-line">}</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+
+  <div class="box box-eli5">
+    <div class="label">ELI5 — The Airport</div>
+    <p>Think of location matching like airport signage priority. A gate agent calling your exact name (<code class="inline">=</code>) beats a general boarding-zone sign (<code class="inline">^~</code>), which beats a sign matching a pattern like "all Zone B tickets" (regex), which beats a generic "this way to gates" arrow (plain prefix). Nginx always follows the most specific instruction available, not just the first one it sees.</p>
+  </div>
+
+  <h4>Level 1</h4><p>Nginx config nests http → server → location, and location blocks are matched by specificity, not file order.</p>
+  <h4>Level 2</h4><p>Exact matches (<code class="inline">=</code>) win outright; preferential prefixes (<code class="inline">^~</code>) skip regex evaluation if they're the longest matching prefix; regex matches are evaluated in file order; plain prefixes fall back to whichever is longest.</p>
+  <h4>Level 3</h4><p>Directive inheritance flows downward — a directive set in <code class="inline">http</code> applies to every <code class="inline">server</code> and <code class="inline">location</code> below unless overridden — but some directives (like <code class="inline">add_header</code> in older Nginx versions) don't merge additively; setting one in a child context can silently drop ones set in the parent, a classic gotcha.</p>
+  <h4>Level 4</h4><p>Be ready to trace a concrete ambiguous case live: given three overlapping location blocks, state out loud which one wins and why, citing the exact rule — this is one of the highest-frequency live-coding-style interview questions for Nginx roles.</p>
+
+  <div class="box box-mistake">
+    <div class="label">Common mistake</div>
+    <p>Assuming location blocks are matched top-to-bottom like a switch statement. They're matched by specificity rules above — a regex location later in the file can override a prefix location declared earlier.</p>
+  </div>
+
+  <div class="box box-mnemonic">
+    <div class="label">Mnemonic</div>
+    <p><strong>"Exactly Preferred Regex Prefix"</strong> — Exact match, then ^~ Preferred prefix, then Regex, then plain Prefix: the location priority order, highest to lowest.</p>
+  </div>
+
+  <div class="revision">
+    <div><h4>30-second revision</h4><p>Config nests http → server → location. Location match priority: exact (=) &gt; preferential prefix (^~) &gt; regex (~ / ~*, file order) &gt; longest plain prefix.</p></div>
+    <div><h4>5-minute revision</h4><p>Write three overlapping location blocks from memory and state which wins for a given URL. Explain one directive-inheritance gotcha (e.g. add_header not merging).</p></div>
+  </div>
+
+  <div class="flashcard" onclick="this.classList.toggle('open')"><div class="q">Which wins: location ^~ /images/ or location ~* \.png$ ?</div><div class="a">location ^~ /images/ wins if it's the longest matching prefix — the caret-tilde modifier causes Nginx to skip regex evaluation entirely once it matches.</div></div>
+  <div class="flashcard" onclick="this.classList.toggle('open')"><div class="q">Are location blocks matched in the order they're written?</div><div class="a">No — only regex locations of equal specificity are compared in file order; overall matching is governed by the exact &gt; preferential-prefix &gt; regex &gt; prefix priority hierarchy.</div></div>
+
+  <h3>Interview &amp; quiz</h3>
+  <details class="quiz"><summary>Given `location /` and `location /images/`, which handles a request for `/images/logo.png`? <span class="trick">Trick</span></summary><div class="answer">`location /images/` wins because it's the longer matching prefix — plain prefix matches are resolved by longest match, not declaration order.</div></details>
+  <details class="quiz"><summary>Why can `add_header` in a location block silently remove one set in the parent server block?</summary><div class="answer">In many Nginx versions, `add_header` doesn't merge across nesting levels — if a child context defines its own `add_header`, it can replace rather than append to the parent's, unless the child re-declares everything needed. It's a well-known configuration trap.</div></details>
+</section>
+
+<section class="chapter-opener" id="ch5">
+  <div class="chapter-eyebrow">Part III · In Production</div>
+  <div class="chapter-num">05</div>
+  <h2 class="chapter-title">Static Files &amp; Caching</h2>
+
+  <div class="chapter-motif">
+    <svg class="diagram" viewBox="0 0 720 180" xmlns="http://www.w3.org/2000/svg">
+      <text x="80" y="25" text-anchor="middle" font-size="12" fill="#8B8577">Browser cache</text>
+      <rect x="20" y="35" width="120" height="50" rx="6" fill="none" stroke="#2E9E5B" stroke-width="2"/>
+      <text x="80" y="65" text-anchor="middle" font-size="10" fill="#2E9E5B">ETag / max-age</text>
+      <path d="M140,60 H210" stroke="#8B8577" marker-end="url(#a3)"/>
+      <text x="250" y="25" text-anchor="middle" font-size="12" fill="#8B8577">Nginx cache</text>
+      <rect x="210" y="35" width="120" height="50" rx="6" fill="none" stroke="#2E9E5B" stroke-width="2"/>
+      <text x="270" y="65" text-anchor="middle" font-size="10" fill="#2E9E5B">proxy_cache</text>
+      <path d="M330,60 H400" stroke="#8B8577" marker-end="url(#a3)"/>
+      <text x="440" y="25" text-anchor="middle" font-size="12" fill="#8B8577">Disk</text>
+      <rect x="400" y="35" width="120" height="50" rx="6" fill="none" stroke="#C9432D" stroke-width="2"/>
+      <text x="460" y="65" text-anchor="middle" font-size="10" fill="#C9432D">sendfile()</text>
+      <path d="M520,60 H590" stroke="#8B8577" marker-end="url(#a3)"/>
+      <rect x="590" y="35" width="110" height="50" rx="6" fill="none" stroke="#8B8577"/>
+      <text x="645" y="65" text-anchor="middle" font-size="10" fill="#8B8577">Origin / App</text>
+      <text x="360" y="130" text-anchor="middle" font-size="11" fill="#8B8577">Each layer exists to avoid work the layer to its right would have to do</text>
+      <defs><marker id="a3" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#8B8577"/></marker></defs>
+    </svg>
+    <div class="diagram-caption">Fig 5.1 — The cache hierarchy, from browser to origin</div>
+  </div>
+
+  <div class="objectives">
+    <h4>Learning objectives</h4>
+    <ul>
+      <li>Explain sendfile() and why it avoids unnecessary copying</li>
+      <li>Configure gzip compression correctly, including common pitfalls</li>
+      <li>Distinguish Cache-Control, ETag, and Last-Modified and when each matters</li>
+      <li>Set up Nginx's own proxy cache for upstream responses</li>
+    </ul>
+  </div>
+
+  <h3>Definition</h3>
+  <p>Static file serving is Nginx's original core competency: reading a file from disk and streaming it to a client as efficiently as possible, ideally without unnecessary memory copies, plus a layered set of caching mechanisms — browser-side, Nginx-side, and origin-side — that avoid redoing work.</p>
+
+  <h3>sendfile() and why it matters</h3>
+  <p>Without <code class="inline">sendfile</code>, serving a file naively means: read the file into userspace memory, then write that memory back out to the socket — two copies and two context switches between kernel and userspace. The <code class="inline">sendfile()</code> system call lets the kernel copy data directly from a file descriptor to a socket, skipping the userspace round-trip. Nginx enables this by default for static files.</p>
+
+  <pre><code><span class="code-line">server {</span><span class="code-line">    sendfile on;</span><span class="code-line">    tcp_nopush on;      # send headers and body together in one packet</span><span class="code-line">    gzip on;</span><span class="code-line">    gzip_types text/css application/javascript application/json;</span><span class="code-line">    gzip_min_length 1024;</span><span class="code-line">}</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+
+  <h3>Gzip: what to compress and what not to</h3>
+  <p>Compressing already-compressed formats (JPEG, MP4, most binary formats) wastes CPU for negligible size reduction. Gzip earns its keep on text formats: HTML, CSS, JavaScript, JSON, SVG. <code class="inline">gzip_min_length</code> avoids compressing tiny files where the compression overhead exceeds the savings.</p>
+
+  <h3>Browser caching: three mechanisms</h3>
+  <table>
+    <tr><th>Header</th><th>Behavior</th></tr>
+    <tr><td><code class="inline">Cache-Control: max-age=N</code></td><td>Browser reuses the cached copy for N seconds with zero network requests</td></tr>
+    <tr><td><code class="inline">ETag</code></td><td>A fingerprint of content; browser sends it back via <code class="inline">If-None-Match</code>, server replies 304 if unchanged, avoiding a full re-download</td></tr>
+    <tr><td><code class="inline">Last-Modified</code></td><td>A timestamp-based, coarser-grained cousin of ETag, used the same way via <code class="inline">If-Modified-Since</code></td></tr>
+  </table>
+
+  <h3>Nginx as a cache: proxy_cache</h3>
+  <p>Beyond serving its own static files, Nginx can cache responses from an upstream application, so repeated identical requests never reach the backend at all.</p>
+  <pre><code><span class="code-line">proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=my_cache:10m max_size=1g;</span><span class="code-line"></span><span class="code-line">server {</span><span class="code-line">    location /api/ {</span><span class="code-line">        proxy_cache my_cache;</span><span class="code-line">        proxy_cache_valid 200 10m;</span><span class="code-line">        proxy_pass http://backend;</span><span class="code-line">    }</span><span class="code-line">}</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+
+  <div class="box box-eli5">
+    <div class="label">ELI5 — The Library</div>
+    <p>Your browser's cache is like keeping a photocopy of a book at home — no trip needed at all. Nginx's cache is the local library branch keeping a copy so you don't have to go to the central archive across town. sendfile is the librarian handing you the book directly off the shelf instead of first photocopying it in the back room, then handing you the copy.</p>
+  </div>
+
+  <h4>Level 1</h4><p>Serve static files efficiently with sendfile, compress text with gzip, and let cache headers or Nginx's own proxy cache avoid repeating work.</p>
+  <h4>Level 2</h4><p>sendfile avoids userspace copies for file serving; gzip trades CPU for bandwidth on compressible text formats; Cache-Control/ETag/Last-Modified let browsers skip re-fetching unchanged content; proxy_cache lets Nginx itself absorb repeated upstream requests.</p>
+  <h4>Level 3</h4><p>ETag validation still requires a round trip (a conditional GET), it just avoids re-transferring the body — that's different from max-age, which avoids the network round trip entirely. Choosing between them is a tradeoff between freshness guarantees and request volume.</p>
+  <h4>Level 4</h4><p>Discuss cache stampede/thundering herd risk when a popular cached object expires — <code class="inline">proxy_cache_lock</code> in Nginx serializes concurrent regeneration requests to the same key so only one request repopulates the cache while others wait, rather than all hammering the backend simultaneously.</p>
+
+  <div class="box box-mistake">
+    <div class="label">Common mistake</div>
+    <p>Enabling gzip for all MIME types indiscriminately, including images and video, which burns CPU compressing data that's already compressed and gains almost nothing in size.</p>
+  </div>
+
+  <div class="box box-mnemonic">
+    <div class="label">Mnemonic</div>
+    <p><strong>"Send it, Zip it, Tag it, Cache it"</strong> — sendfile, gzip, ETag, proxy_cache: the four static-serving levers in order of where they act.</p>
+  </div>
+
+  <div class="revision">
+    <div><h4>30-second revision</h4><p>sendfile avoids userspace copies; gzip compresses text formats only; ETag/Last-Modified enable conditional requests; proxy_cache lets Nginx cache upstream responses directly.</p></div>
+    <div><h4>5-minute revision</h4><p>Explain the difference between max-age and ETag-based caching in terms of network round trips. Explain what proxy_cache_lock prevents and why.</p></div>
+  </div>
+
+  <div class="flashcard" onclick="this.classList.toggle('open')"><div class="q">Why shouldn't you gzip JPEG images?</div><div class="a">JPEG is already a compressed format — running gzip on it burns CPU for negligible or even negative size savings.</div></div>
+  <div class="flashcard" onclick="this.classList.toggle('open')"><div class="q">What does proxy_cache_lock prevent?</div><div class="a">A thundering herd / cache stampede — when a cached entry expires, it ensures only one request regenerates it while concurrent requests for the same key wait, rather than all hitting the backend simultaneously.</div></div>
+
+  <h3>Interview &amp; quiz</h3>
+  <details class="quiz"><summary>What's the practical difference between Cache-Control: max-age and ETag? <span class="trick">Trick</span></summary><div class="answer">max-age avoids a network request entirely until it expires; ETag still requires a round trip (a conditional GET) but avoids re-downloading the body if unchanged. They're often used together — max-age for the common case, ETag as a fallback validator once max-age expires.</div></details>
+  <details class="quiz"><summary>Why might sendfile need to be disabled in some proxy configurations?</summary><div class="answer">sendfile serves files directly from disk to socket — it's not relevant when Nginx is proxying to an upstream rather than serving a local file, and in some SSL/streaming edge cases it can be disabled to allow other processing on the data in transit.</div></details>
+</section>
+
+<section class="chapter-opener" id="ch6">
+  <div class="chapter-eyebrow">Part III · In Production</div>
+  <div class="chapter-num">06</div>
+  <h2 class="chapter-title">Reverse Proxy &amp; Load Balancing</h2>
+
+  <div class="chapter-motif">
+    <svg class="diagram" viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="60" cy="100" r="24" fill="none" stroke="#8B8577" stroke-width="1.5"/>
+      <text x="60" y="104" text-anchor="middle" font-size="10" fill="#8B8577">Client</text>
+      <path d="M84,100 H180" stroke="#8B8577" marker-end="url(#a4)"/>
+      <rect x="180" y="70" width="110" height="60" rx="8" fill="none" stroke="#C9432D" stroke-width="2"/>
+      <text x="235" y="105" text-anchor="middle" font-size="12" fill="#C9432D">Nginx LB</text>
+      <path d="M290,85 H400" stroke="#2E9E5B" marker-end="url(#a4)"/>
+      <path d="M290,100 H400" stroke="#2E9E5B" marker-end="url(#a4)"/>
+      <path d="M290,115 H400" stroke="#2E9E5B" marker-end="url(#a4)"/>
+      <rect x="400" y="45" width="90" height="30" rx="5" fill="none" stroke="#2E9E5B"/>
+      <text x="445" y="64" text-anchor="middle" font-size="10" fill="#2E9E5B">app-1</text>
+      <rect x="400" y="85" width="90" height="30" rx="5" fill="none" stroke="#2E9E5B"/>
+      <text x="445" y="104" text-anchor="middle" font-size="10" fill="#2E9E5B">app-2</text>
+      <rect x="400" y="125" width="90" height="30" rx="5" fill="none" stroke="#2E9E5B"/>
+      <text x="445" y="144" text-anchor="middle" font-size="10" fill="#2E9E5B">app-3</text>
+      <defs><marker id="a4" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#8B8577"/></marker></defs>
+    </svg>
+    <div class="diagram-caption">Fig 6.1 — Nginx distributing requests across a backend pool</div>
+  </div>
+
+  <div class="objectives">
+    <h4>Learning objectives</h4>
+    <ul>
+      <li>Configure proxy_pass and know which headers must be forwarded manually</li>
+      <li>Compare load balancing algorithms: round robin, least connections, ip_hash, weighted</li>
+      <li>Explain health checks (passive vs. active) and failover behavior</li>
+      <li>Understand session persistence and when it's actually needed</li>
+    </ul>
+  </div>
+
+  <h3>Definition</h3>
+  <p>As a reverse proxy, Nginx accepts client requests and forwards them to one or more backend servers (the "upstream"), returning the backend's response to the client as if Nginx had produced it itself. Load balancing is the policy Nginx uses to pick which backend gets each request when there's more than one.</p>
+
+  <h3>The basics: proxy_pass and forwarded headers</h3>
+  <p>By default, the backend sees the connection as coming from Nginx, not the original client — so Nginx must explicitly forward useful context via headers.</p>
+  <pre><code><span class="code-line">upstream backend {</span><span class="code-line">    server 10.0.0.1:8080;</span><span class="code-line">    server 10.0.0.2:8080;</span><span class="code-line">}</span><span class="code-line"></span><span class="code-line">server {</span><span class="code-line">    location / {</span><span class="code-line">        proxy_pass http://backend;</span><span class="code-line">        proxy_set_header Host $host;</span><span class="code-line">        proxy_set_header X-Real-IP $remote_addr;</span><span class="code-line">        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;</span><span class="code-line">        proxy_set_header X-Forwarded-Proto $scheme;</span><span class="code-line">    }</span><span class="code-line">}</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+
+  <h3>Load balancing algorithms</h3>
+  <table>
+    <tr><th>Algorithm</th><th>Directive</th><th>Best for</th></tr>
+    <tr><td>Round robin</td><td>(default)</td><td>Uniform backends, roughly equal request cost</td></tr>
+    <tr><td>Least connections</td><td><code class="inline">least_conn;</code></td><td>Requests with variable processing time</td></tr>
+    <tr><td>IP hash</td><td><code class="inline">ip_hash;</code></td><td>Simple session persistence without shared session storage</td></tr>
+    <tr><td>Weighted</td><td><code class="inline">server ... weight=3;</code></td><td>Heterogeneous backend capacity</td></tr>
+  </table>
+
+  <h3>Health checks and failover</h3>
+  <p>Open-source Nginx does <strong>passive</strong> health checks by default: it marks a backend as unavailable after a configured number of failed requests within a time window, then periodically retries it.</p>
+  <pre><code><span class="code-line">upstream backend {</span><span class="code-line">    server 10.0.0.1:8080 max_fails=3 fail_timeout=30s;</span><span class="code-line">    server 10.0.0.2:8080 max_fails=3 fail_timeout=30s;</span><span class="code-line">    server 10.0.0.3:8080 backup;   # only used if all primaries are down</span><span class="code-line">}</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+  <p><strong>Active</strong> health checks — where Nginx proactively probes a health endpoint on a timer regardless of live traffic — require Nginx Plus or third-party modules; this is a real, common gap that trips people up when they assume open-source Nginx does this out of the box.</p>
+
+  <div class="box box-eli5">
+    <div class="label">ELI5 — The Bank, Revisited</div>
+    <p>Load balancing is the "next available teller" rope-line system. Round robin cycles through tellers in order; least-connections sends you to whichever teller currently has the shortest line; ip_hash always sends the same customer to the same teller (useful if that teller kept notes about you that no one else can see).</p>
+  </div>
+
+  <h4>Level 1</h4><p>Nginx forwards requests to backend servers and picks among them using an algorithm like round robin, least connections, or ip_hash.</p>
+  <h4>Level 2</h4><p>proxy_pass forwards the request; proxy_set_header preserves client context the backend would otherwise lose; load balancing algorithms trade off simplicity, fairness under variable load, and session affinity needs.</p>
+  <h4>Level 3</h4><p>ip_hash-based session persistence breaks down behind another layer of NAT or a corporate proxy where many clients share one IP — all of them get pinned to the same backend, defeating the point of load balancing. Cookie-based session persistence (via Nginx Plus or app-level solutions) avoids this.</p>
+  <h4>Level 4</h4><p>Be ready to discuss why "stateless backends behind a stateless load balancer" is the preferred production pattern over session persistence altogether — pushing session state to a shared store (Redis, a database) removes the load balancer's need to care about affinity at all, which is more robust and lets you freely add/remove backend capacity.</p>
+
+  <div class="box box-mistake">
+    <div class="label">Common mistake</div>
+    <p>Forgetting <code class="inline">proxy_set_header X-Forwarded-For</code>, then being surprised when application logs show every request coming from Nginx's own IP address instead of real client IPs.</p>
+  </div>
+
+  <div class="box box-mnemonic">
+    <div class="label">Mnemonic</div>
+    <p><strong>"Round, Least, Hash, Weight"</strong> — the four load balancing algorithms in the order most engineers learn them.</p>
+  </div>
+
+  <div class="revision">
+    <div><h4>30-second revision</h4><p>proxy_pass forwards requests; proxy_set_header preserves client context; load balancing algorithms are round robin, least_conn, ip_hash, and weighted. Passive health checks are built in; active checks need Nginx Plus.</p></div>
+    <div><h4>5-minute revision</h4><p>Write an upstream block with three servers and a backup. Explain why ip_hash can create uneven load behind shared-NAT clients. Explain why stateless backends are the preferred pattern over session persistence.</p></div>
+  </div>
+
+  <div class="flashcard" onclick="this.classList.toggle('open')"><div class="q">What header tells the backend the client's real IP?</div><div class="a">X-Forwarded-For (and often X-Real-IP), set explicitly via proxy_set_header since the backend otherwise only sees Nginx's IP.</div></div>
+  <div class="flashcard" onclick="this.classList.toggle('open')"><div class="q">Does open-source Nginx support active health checks out of the box?</div><div class="a">No — only passive health checks (based on real request failures) are built into open-source Nginx; active probing requires Nginx Plus or third-party modules.</div></div>
+
+  <h3>Interview &amp; quiz</h3>
+  <details class="quiz"><summary>Why might ip_hash produce uneven load in practice? <span class="trick">Trick</span></summary><div class="answer">If many clients share a single public IP (corporate NAT, mobile carrier NAT), they all hash to the same backend, defeating the balancing goal — a common gotcha interviewers probe for.</div></details>
+  <details class="quiz"><summary>What's the production-preferred alternative to session persistence at the load balancer?</summary><div class="answer">Making backends stateless and storing session data in a shared external store (e.g. Redis), so any backend can serve any request — removing the load balancer's need for affinity entirely.</div></details>
+</section>
+
+<section class="chapter-opener" id="ch7">
+  <div class="chapter-eyebrow">Part III · In Production</div>
+  <div class="chapter-num">07</div>
+  <h2 class="chapter-title">TLS &amp; Security</h2>
+
+  <div class="chapter-motif">
+    <svg class="diagram" viewBox="0 0 720 160" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="70" cy="80" r="24" fill="none" stroke="#8B8577"/>
+      <text x="70" y="84" text-anchor="middle" font-size="10" fill="#8B8577">Client</text>
+      <path d="M94,70 H250" stroke="#2E9E5B" marker-end="url(#a5)"/>
+      <text x="172" y="60" text-anchor="middle" font-size="9" fill="#2E9E5B">encrypted (HTTPS)</text>
+      <rect x="250" y="45" width="120" height="70" rx="8" fill="none" stroke="#C9432D" stroke-width="2"/>
+      <text x="310" y="75" text-anchor="middle" font-size="11" fill="#C9432D">Nginx</text>
+      <text x="310" y="93" text-anchor="middle" font-size="9" fill="#C9432D">TLS terminates here</text>
+      <path d="M370,80 H480" stroke="#8B8577" stroke-dasharray="3 4" marker-end="url(#a5)"/>
+      <text x="425" y="70" text-anchor="middle" font-size="9" fill="#8B8577">plain HTTP (internal)</text>
+      <rect x="480" y="60" width="100" height="40" rx="6" fill="none" stroke="#8B8577"/>
+      <text x="530" y="84" text-anchor="middle" font-size="10" fill="#8B8577">App server</text>
+      <defs><marker id="a5" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#8B8577"/></marker></defs>
+    </svg>
+    <div class="diagram-caption">Fig 7.1 — TLS termination: encryption ends at Nginx, internal traffic can be plain HTTP on a trusted network</div>
+  </div>
+
+  <div class="objectives">
+    <h4>Learning objectives</h4>
+    <ul>
+      <li>Configure TLS termination and understand certificate chain basics</li>
+      <li>Explain rate limiting with limit_req and limit_conn</li>
+      <li>Harden headers against common attacks (clickjacking, MIME sniffing)</li>
+      <li>Understand why re-encrypting to the backend is sometimes still necessary</li>
+    </ul>
+  </div>
+
+  <h3>TLS termination</h3>
+  <p>Nginx commonly acts as the TLS termination point: it holds the certificate, handles the handshake, decrypts incoming traffic, and forwards plain HTTP internally over a trusted private network — sparing every backend instance from managing certificates itself.</p>
+  <pre><code><span class="code-line">server {</span><span class="code-line">    listen 443 ssl;</span><span class="code-line">    server_name example.com;</span><span class="code-line">    ssl_certificate     /etc/ssl/certs/example.com.pem;</span><span class="code-line">    ssl_certificate_key /etc/ssl/private/example.com.key;</span><span class="code-line">    ssl_protocols TLSv1.2 TLSv1.3;</span><span class="code-line">    ssl_prefer_server_ciphers on;</span><span class="code-line">}</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+  <p>In regulated or zero-trust environments, traffic may be re-encrypted from Nginx to the backend too (TLS re-encryption, sometimes called "double SSL"), trading some performance for defense-in-depth against anyone who gains access to the internal network.</p>
+
+  <h3>Rate limiting</h3>
+  <p>Nginx can throttle abusive or runaway clients using a shared-memory zone that tracks request rate per key (usually client IP).</p>
+  <pre><code><span class="code-line">http {</span><span class="code-line">    limit_req_zone $binary_remote_addr zone=api_limit:10m rate=10r/s;</span><span class="code-line"></span><span class="code-line">    server {</span><span class="code-line">        location /api/ {</span><span class="code-line">            limit_req zone=api_limit burst=20 nodelay;</span><span class="code-line">        }</span><span class="code-line">    }</span><span class="code-line">}</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+  <div class="box box-mistake">
+    <div class="label">Common mistake — worth memorizing</div>
+    <p><code class="inline">limit_req_zone</code> must be declared in the <code class="inline">http</code> block — it defines a shared memory zone, which is a global resource. Declaring it inside a <code class="inline">server</code> block is invalid and will fail config validation; only the usage directive, <code class="inline">limit_req</code>, belongs inside <code class="inline">server</code>/<code class="inline">location</code>.</p>
+  </div>
+
+  <h3>Security headers</h3>
+  <table>
+    <tr><th>Header</th><th>Defends against</th></tr>
+    <tr><td><code class="inline">X-Frame-Options: DENY</code></td><td>Clickjacking via iframe embedding</td></tr>
+    <tr><td><code class="inline">X-Content-Type-Options: nosniff</code></td><td>MIME-sniffing based attacks</td></tr>
+    <tr><td><code class="inline">Strict-Transport-Security</code></td><td>Downgrade/SSL-stripping attacks by forcing HTTPS on future visits</td></tr>
+    <tr><td><code class="inline">Content-Security-Policy</code></td><td>Cross-site scripting by restricting allowed content sources</td></tr>
+  </table>
+
+  <div class="box box-eli5">
+    <div class="label">ELI5 — The Mall Security Desk</div>
+    <p>TLS termination is like a mall having one secure entrance with a metal detector (Nginx) instead of requiring every single store inside to run its own airport-style screening. Rate limiting is the fire-code capacity limit on how many people can enter through that door per minute.</p>
+  </div>
+
+  <h4>Level 1</h4><p>Nginx terminates TLS so backends don't each need certificates, and can throttle abusive traffic with rate limiting.</p>
+  <h4>Level 2</h4><p>TLS termination centralizes certificate management and handshake cost at the edge; rate limiting via a shared memory zone protects backends from being overwhelmed; security headers close common browser-side attack vectors cheaply.</p>
+  <h4>Level 3</h4><p>The <code class="inline">burst</code> and <code class="inline">nodelay</code> parameters on <code class="inline">limit_req</code> matter: without <code class="inline">nodelay</code>, burst requests are queued and delayed rather than rejected, which can be the wrong choice for latency-sensitive APIs versus a strict reject-over-quota approach.</p>
+  <h4>Level 4</h4><p>Discuss OCSP stapling (letting Nginx include certificate revocation status in the handshake itself, saving the client an extra round trip to the CA) and mutual TLS (mTLS) for service-to-service authentication in zero-trust architectures — both are realistic senior-level follow-up questions.</p>
+
+  <div class="box box-mnemonic">
+    <div class="label">Mnemonic</div>
+    <p><strong>"Zone in the House, Limit at the Door"</strong> — limit_req_zone belongs in http (the house/global scope); limit_req is applied at the door (server/location).</p>
+  </div>
+
+  <div class="revision">
+    <div><h4>30-second revision</h4><p>Nginx terminates TLS at the edge, optionally re-encrypting to backends in zero-trust setups. limit_req_zone (in http) + limit_req (in server/location) rate-limit clients. Security headers close common browser attack vectors.</p></div>
+    <div><h4>5-minute revision</h4><p>Write a valid limit_req_zone + limit_req pair from memory, correctly scoped. List three security headers and what each defends against. Explain what nodelay changes about rate limiting behavior.</p></div>
+  </div>
+
+  <div class="flashcard" onclick="this.classList.toggle('open')"><div class="q">Where must limit_req_zone be declared?</div><div class="a">In the http block — it's a global shared-memory-zone declaration, not a per-server or per-location directive.</div></div>
+  <div class="flashcard" onclick="this.classList.toggle('open')"><div class="q">What does Strict-Transport-Security (HSTS) prevent?</div><div class="a">Downgrade and SSL-stripping attacks, by telling the browser to only ever connect via HTTPS for a specified duration, even if a user types or clicks an http:// link.</div></div>
+
+  <h3>Interview &amp; quiz</h3>
+  <details class="quiz"><summary>Spot the bug: `limit_req_zone` is placed inside a `server` block. What happens? <span class="trick">Trick</span></summary><div class="answer">Config validation fails — `limit_req_zone` defines a shared memory zone and must live in the `http` context; only `limit_req` (which references the zone by name) is valid inside `server`/`location`.</div></details>
+  <details class="quiz"><summary>Why would a zero-trust environment still encrypt traffic between Nginx and backend servers on the same private network?</summary><div class="answer">Defense-in-depth — if an attacker gains a foothold inside the internal network, unencrypted internal traffic becomes trivially interceptable; re-encrypting assumes the internal network itself isn't fully trusted.</div></details>
+</section>
+
+<section class="chapter-opener" id="ch8">
+  <div class="chapter-eyebrow">Part III · In Production</div>
+  <div class="chapter-num">08</div>
+  <h2 class="chapter-title">Performance Tuning &amp; the Full HA Reference Architecture</h2>
+
+  <div class="chapter-motif">
+    <svg class="diagram" viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg">
+      <text x="360" y="20" text-anchor="middle" font-size="12" fill="#8B8577">DNS (round robin or GeoDNS)</text>
+      <path d="M300,28 L200,55 M420,28 L520,55" stroke="#8B8577" stroke-width="1.2"/>
+      <rect x="140" y="55" width="120" height="36" rx="6" fill="none" stroke="#C9432D" stroke-width="2"/>
+      <text x="200" y="78" text-anchor="middle" font-size="10" fill="#C9432D">Nginx LB (VIP)</text>
+      <rect x="460" y="55" width="120" height="36" rx="6" fill="none" stroke="#C9432D" stroke-width="2" stroke-dasharray="3 4"/>
+      <text x="520" y="78" text-anchor="middle" font-size="10" fill="#C9432D">Nginx LB (standby)</text>
+      <text x="360" y="70" text-anchor="middle" font-size="9" fill="#8B8577">keepalived / VRRP</text>
+      <path d="M200,91 V120 M520,91 V120" stroke="#8B8577" stroke-dasharray="3 4"/>
+      <path d="M200,120 H520" stroke="#8B8577" stroke-dasharray="3 4"/>
+
+      <path d="M260,73 H310" stroke="#8B8577" marker-end="url(#a6)"/>
+      <rect x="310" y="120" width="90" height="30" rx="5" fill="none" stroke="#2E9E5B"/>
+      <text x="355" y="140" text-anchor="middle" font-size="9" fill="#2E9E5B">app-1</text>
+      <rect x="410" y="120" width="90" height="30" rx="5" fill="none" stroke="#2E9E5B"/>
+      <text x="455" y="140" text-anchor="middle" font-size="9" fill="#2E9E5B">app-2</text>
+      <path d="M200,91 V120" stroke="#2E9E5B" marker-end="url(#a6)"/>
+
+      <rect x="240" y="180" width="170" height="34" rx="6" fill="none" stroke="#8B8577"/>
+      <text x="325" y="201" text-anchor="middle" font-size="9" fill="#8B8577">Shared cache / session store</text>
+      <path d="M355,150 V180 M455,150 V180" stroke="#8B8577" stroke-dasharray="2 3"/>
+
+      <defs><marker id="a6" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#8B8577"/></marker></defs>
+    </svg>
+    <div class="diagram-caption">Fig 8.1 — A reference HA architecture: active/standby load balancers, a backend pool, shared state</div>
+  </div>
+
+  <div class="objectives">
+    <h4>Learning objectives</h4>
+    <ul>
+      <li>Tune worker_processes, worker_connections, and keepalive settings deliberately</li>
+      <li>Identify and fix the most common real-world Nginx bottlenecks</li>
+      <li>Design a highly available Nginx layer, not just a highly available backend</li>
+      <li>Synthesize every prior chapter into one coherent production architecture</li>
+    </ul>
+  </div>
+
+  <h3>Core tuning knobs</h3>
+  <table>
+    <tr><th>Directive</th><th>What it controls</th><th>Guidance</th></tr>
+    <tr><td><code class="inline">worker_processes</code></td><td>Number of worker processes</td><td><code class="inline">auto</code> — match CPU core count</td></tr>
+    <tr><td><code class="inline">worker_connections</code></td><td>Max simultaneous connections per worker</td><td>Tune with expected concurrency; watch <code class="inline">ulimit -n</code></td></tr>
+    <tr><td><code class="inline">keepalive_timeout</code></td><td>How long idle client connections stay open</td><td>Balance connection reuse against tying up workers</td></tr>
+    <tr><td><code class="inline">keepalive</code> (upstream)</td><td>Idle connections kept open to backends</td><td>Reduces repeated TCP/TLS handshake cost to upstreams</td></tr>
+  </table>
+
+  <pre><code><span class="code-line">worker_processes auto;</span><span class="code-line">events {</span><span class="code-line">    worker_connections 4096;</span><span class="code-line">    use epoll;</span><span class="code-line">}</span><span class="code-line"></span><span class="code-line">upstream backend {</span><span class="code-line">    server 10.0.0.1:8080;</span><span class="code-line">    server 10.0.0.2:8080;</span><span class="code-line">    keepalive 32;   # reuse connections to backends</span><span class="code-line">}</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+
+  <h3>Common real-world bottlenecks</h3>
+  <ol>
+    <li><strong>File descriptor limits</strong> — the OS-level <code class="inline">ulimit</code> capping connections well below <code class="inline">worker_connections</code></li>
+    <li><strong>No upstream keepalive</strong> — re-handshaking TCP/TLS to backends on every request</li>
+    <li><strong>Oversized worker_processes</strong> — more workers than cores, adding context-switch overhead with no throughput gain</li>
+    <li><strong>Buffering misconfiguration</strong> — proxy buffers too small for response sizes, causing excessive disk temp-file writes</li>
+  </ol>
+
+  <h3>The full reference architecture</h3>
+  <p>Bringing every chapter together: DNS or a cloud load balancer distributes traffic across an <strong>active/standby pair</strong> of Nginx instances (using something like <strong>keepalived</strong> and VRRP to share a virtual IP, so a failed primary doesn't take the whole edge down). Each Nginx instance terminates TLS, applies rate limiting and security headers, and load-balances across a pool of stateless application servers using least-connections or round robin. A shared cache/session store (Redis or similar) means any backend can serve any request, and Nginx's own <code class="inline">proxy_cache</code> absorbs repeated read-heavy traffic before it ever reaches that backend pool.</p>
+
+  <div class="box box-eli5">
+    <div class="label">ELI5 — Putting It All Together</div>
+    <p>The whole system is a relay: a directory service points you to the right building (DNS), a backup security desk exists in case the main one calls in sick (active/standby LB), the front desk checks IDs once so nobody inside has to (TLS termination), a "next available" queue distributes visitors fairly (load balancing), and a shared notice board means any staff member can help any visitor without needing personal history (shared session store).</p>
+  </div>
+
+  <h4>Level 1</h4><p>Tune worker counts and connection limits to match hardware, then make the whole Nginx layer itself redundant, not just the backend.</p>
+  <h4>Level 2</h4><p>worker_processes should generally match core count; worker_connections should be sized against realistic concurrency and OS file descriptor limits; keepalive to upstreams avoids repeated handshake costs; and a single Nginx instance is a single point of failure unless paired with a failover mechanism like keepalived/VRRP.</p>
+  <h4>Level 3</h4><p>Explain why the architecture pushes state out of both the load balancer (no session persistence needed) and increasingly out of the application servers themselves (shared external session store) — this is what allows horizontal scaling of the backend pool without touching the Nginx layer's configuration.</p>
+  <h4>Level 4</h4><p>Be ready to discuss trade-offs at the edge: active/standby (simpler, wastes standby capacity) versus active/active with anycast or ECMP (better utilization, more operational complexity) — a senior-level question tests whether you can articulate why a design decision was made, not just recite the final diagram.</p>
+
+  <div class="box box-mistake">
+    <div class="label">Common mistake</div>
+    <p>Treating "we have multiple app servers" as sufficient high availability while running a single Nginx instance in front of them — the load balancer itself is now the single point of failure the architecture forgot to remove.</p>
+  </div>
+
+  <div class="box box-mnemonic">
+    <div class="label">Mnemonic</div>
+    <p><strong>"Balance the Balancer"</strong> — high availability isn't done until the load balancer itself has a failover partner, not just the backends behind it.</p>
+  </div>
+
+  <div class="revision">
+    <div><h4>30-second revision</h4><p>Tune worker_processes to core count, size worker_connections against real concurrency and OS limits, keep connections alive to upstreams, and make the Nginx layer itself redundant via active/standby with a shared virtual IP.</p></div>
+    <div><h4>5-minute revision</h4><p>Draw the full reference architecture from memory: DNS/LB entry → active/standby Nginx pair → TLS termination + rate limiting → load-balanced stateless app pool → shared cache/session store. Explain what single point of failure it removes at each layer.</p></div>
+  </div>
+
+  <div class="flashcard" onclick="this.classList.toggle('open')"><div class="q">Why pair Nginx with keepalived in a production edge design?</div><div class="a">A single Nginx instance is a single point of failure; keepalived (via VRRP) lets a standby instance take over a shared virtual IP if the primary fails, removing that SPOF.</div></div>
+  <div class="flashcard" onclick="this.classList.toggle('open')"><div class="q">What's the throughput cost of not using upstream keepalive?</div><div class="a">Every request to a backend re-does a full TCP (and possibly TLS) handshake instead of reusing an existing connection, adding latency and CPU overhead that compounds under high request rates.</div></div>
+
+  <h3>Interview &amp; quiz</h3>
+  <details class="quiz"><summary>Your app servers are horizontally scaled and healthy, but the site still goes down during a traffic spike. What's a likely architectural gap? <span class="trick">Trick</span></summary><div class="answer">A single, non-redundant Nginx/load-balancer instance in front of the scaled app tier — the backend scaling was solved but the edge itself remains a single point of failure, which is exactly the trap this chapter targets.</div></details>
+  <details class="quiz"><summary>Why does moving session state out of the application server matter for horizontal scaling, not just for the load balancer?</summary><div class="answer">If session state lives on a specific app server, that server becomes a soft dependency for that user's future requests even without explicit load-balancer affinity — externalizing state to a shared store makes every app server instance truly interchangeable, which is what horizontal scaling actually requires.</div></details>
+</section>
+
+<section class="chapter-opener" id="glossary">
+  <div class="chapter-eyebrow">Back Matter</div>
+  <h2 class="chapter-title">Glossary</h2>
+  <table>
+    <tr><th>Term</th><th>Definition</th></tr>
+    <tr><td>C10K problem</td><td>The challenge of a single server handling 10,000 concurrent connections efficiently</td></tr>
+    <tr><td>epoll / kqueue</td><td>OS-level APIs for efficient event notification on many file descriptors (Linux / BSD-macOS)</td></tr>
+    <tr><td>Event loop</td><td>A single-threaded control loop that processes events (I/O readiness) as they occur, rather than blocking per-connection</td></tr>
+    <tr><td>Master process</td><td>Nginx's privileged parent process; manages config, sockets, and worker lifecycle</td></tr>
+    <tr><td>Worker process</td><td>An unprivileged Nginx process that handles actual client connections via its own event loop</td></tr>
+    <tr><td>Reverse proxy</td><td>A server that forwards client requests to backend servers, hiding backend topology</td></tr>
+    <tr><td>Forward proxy</td><td>A server that forwards client requests to the internet, hiding client identity</td></tr>
+    <tr><td>Upstream</td><td>Nginx's term for a backend server or pool of servers it proxies to</td></tr>
+    <tr><td>sendfile()</td><td>A syscall that copies data from a file descriptor directly to a socket, avoiding userspace copies</td></tr>
+    <tr><td>TLS termination</td><td>Decrypting HTTPS traffic at a proxy so backend servers can receive plain HTTP</td></tr>
+    <tr><td>ip_hash</td><td>A load balancing algorithm that consistently maps a client IP to the same backend</td></tr>
+    <tr><td>proxy_cache</td><td>Nginx's mechanism for caching upstream responses to avoid repeated backend work</td></tr>
+    <tr><td>Cache stampede</td><td>Many concurrent requests regenerating the same expired cache entry simultaneously</td></tr>
+    <tr><td>VRRP / keepalived</td><td>A protocol/tool pair used to share a virtual IP between an active and standby server for failover</td></tr>
+  </table>
+</section>
+
+<section class="chapter-opener" id="cheatsheet">
+  <div class="chapter-eyebrow">Back Matter</div>
+  <h2 class="chapter-title">Config Cheat Sheet</h2>
+  <pre><code><span class="code-line"># Minimal but production-sane server block</span><span class="code-line">server {</span><span class="code-line">    listen 443 ssl;</span><span class="code-line">    server_name example.com;</span><span class="code-line"></span><span class="code-line">    ssl_certificate     /etc/ssl/certs/example.com.pem;</span><span class="code-line">    ssl_certificate_key /etc/ssl/private/example.com.key;</span><span class="code-line">    ssl_protocols TLSv1.2 TLSv1.3;</span><span class="code-line"></span><span class="code-line">    add_header X-Frame-Options DENY;</span><span class="code-line">    add_header X-Content-Type-Options nosniff;</span><span class="code-line"></span><span class="code-line">    location = /health {</span><span class="code-line">        return 200 "ok";</span><span class="code-line">    }</span><span class="code-line"></span><span class="code-line">    location ^~ /static/ {</span><span class="code-line">        root /var/www;</span><span class="code-line">        expires 7d;</span><span class="code-line">    }</span><span class="code-line"></span><span class="code-line">    location / {</span><span class="code-line">        proxy_pass http://backend;</span><span class="code-line">        proxy_set_header Host $host;</span><span class="code-line">        proxy_set_header X-Real-IP $remote_addr;</span><span class="code-line">        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;</span><span class="code-line">        proxy_set_header X-Forwarded-Proto $scheme;</span><span class="code-line">    }</span><span class="code-line">}</span></code><button class="copy-btn" onclick="copyCode(this)">Copy</button></pre>
+  <table>
+    <tr><th>Command</th><th>Effect</th></tr>
+    <tr><td><code class="inline">nginx -t</code></td><td>Test configuration syntax without applying it</td></tr>
+    <tr><td><code class="inline">nginx -s reload</code></td><td>Graceful reload (SIGHUP) — zero downtime</td></tr>
+    <tr><td><code class="inline">nginx -s quit</code></td><td>Graceful shutdown — finish in-flight requests, then exit</td></tr>
+    <tr><td><code class="inline">nginx -V</code></td><td>Show compiled-in modules and build options</td></tr>
+  </table>
+</section>
+
+<section class="chapter-opener" id="interview-cheatsheet">
+  <div class="chapter-eyebrow">Back Matter</div>
+  <h2 class="chapter-title">Interview Cheat Sheet</h2>
+  <div class="objectives">
+    <h4>If you only remember five things</h4>
+    <ul>
+      <li>Nginx solved the C10K problem with an event-driven, non-blocking architecture instead of thread-per-connection</li>
+      <li>Location matching priority: exact (=) &gt; preferential prefix (^~) &gt; regex (~/~*) &gt; longest plain prefix</li>
+      <li>Master process manages config/sockets/workers; each worker runs an independent epoll/kqueue event loop</li>
+      <li><code class="inline">limit_req_zone</code> lives in <code class="inline">http</code>; <code class="inline">limit_req</code> lives in <code class="inline">server</code>/<code class="inline">location</code></li>
+      <li>High availability means the Nginx layer itself needs a failover partner, not just the backends behind it</li>
+    </ul>
+  </div>
+  <p>Every quiz box across all eight chapters is collapsible and marked where it's a known "trick" question — re-open this document, hit Print, and every answer expands automatically for a compact study sheet.</p>
+</section>
+
+<section class="chapter-opener" id="checklist">
+  <div class="chapter-eyebrow">Back Matter</div>
+  <h2 class="chapter-title">Revision Checklist</h2>
+  <div class="flashcard" onclick="this.classList.toggle('open')"><div class="q">Can you explain the full request lifecycle from URL to rendered page?</div><div class="a">DNS → TCP/QUIC → TLS → HTTP request/response → render. (Ch. 1)</div></div>
+  <div class="flashcard" onclick="this.classList.toggle('open')"><div class="q">Can you state Nginx's five core roles from memory?</div><div class="a">Web server, reverse proxy, load balancer, TLS terminator, cache. (Ch. 2)</div></div>
+  <div class="flashcard" onclick="this.classList.toggle('open')"><div class="q">Can you trace one epoll_wait iteration end to end?</div><div class="a">Wait for ready descriptors → process each via its state machine → re-register anything that would block → repeat. (Ch. 3)</div></div>
+  <div class="flashcard" onclick="this.classList.toggle('open')"><div class="q">Can you rank all four location-matching types by priority?</div><div class="a">Exact (=) &gt; preferential prefix (^~) &gt; regex (~/~*) &gt; longest plain prefix. (Ch. 4)</div></div>
+  <div class="flashcard" onclick="this.classList.toggle('open')"><div class="q">Can you explain sendfile() and when gzip helps vs. hurts?</div><div class="a">sendfile avoids userspace copies; gzip helps on compressible text formats, hurts (wastes CPU) on already-compressed binary formats. (Ch. 5)</div></div>
+  <div class="flashcard" onclick="this.classList.toggle('open')"><div class="q">Can you name all four load balancing algorithms and their tradeoffs?</div><div class="a">Round robin (uniform), least_conn (variable cost requests), ip_hash (simple affinity, breaks under shared NAT), weighted (heterogeneous capacity). (Ch. 6)</div></div>
+  <div class="flashcard" onclick="this.classList.toggle('open')"><div class="q">Do you know where limit_req_zone must be declared, and why?</div><div class="a">In the http block — it defines a global shared memory zone; only limit_req itself is scoped inside server/location. (Ch. 7)</div></div>
+  <div class="flashcard" onclick="this.classList.toggle('open')"><div class="q">Can you draw the full HA reference architecture from memory?</div><div class="a">DNS/LB entry → active/standby Nginx pair (keepalived/VRRP) → TLS termination + rate limiting → load-balanced stateless app pool → shared cache/session store. (Ch. 8)</div></div>
+</section>
+
+<footer class="book-footer">
+  Nginx from First Principles — The Engineer's Field Book · Built one chapter at a time
+</footer>
+
+</div>
+</main>
+</div>
+
+<script>
+// Progress bar
+function updateProgress(){
+  var el = document.documentElement;
+  var scrolled = el.scrollTop;
+  var height = el.scrollHeight - el.clientHeight;
+  var pct = height > 0 ? (scrolled / height) * 100 : 0;
+  document.getElementById('progress').style.width = pct + '%';
+}
+window.addEventListener('scroll', updateProgress);
+updateProgress();
+
+// Theme toggle
+(function(){
+  var root = document.documentElement;
+  var btn = document.getElementById('theme-toggle');
+  var label = document.getElementById('theme-label');
+  function applyTheme(t){
+    if(t === 'dark'){ root.classList.add('dark'); label.textContent = 'Light mode'; }
+    else { root.classList.remove('dark'); label.textContent = 'Dark mode'; }
+  }
+  var current = 'light';
+  applyTheme(current);
+  btn.addEventListener('click', function(){
+    current = root.classList.contains('dark') ? 'light' : 'dark';
+    applyTheme(current);
+  });
+})();
+
+// Scrollspy: highlight active TOC link
+(function(){
+  var sections = document.querySelectorAll('main section[id]');
+  var links = document.querySelectorAll('.toc-link');
+  function onScroll(){
+    var scrollPos = window.scrollY + 120;
+    var currentId = null;
+    sections.forEach(function(sec){
+      if(sec.offsetTop <= scrollPos){ currentId = sec.id; }
+    });
+    links.forEach(function(link){
+      link.classList.toggle('active', link.getAttribute('href') === '#' + currentId);
+    });
+  }
+  window.addEventListener('scroll', onScroll);
+  onScroll();
+})();
+
+// Copy buttons on code blocks
+function copyCode(btn){
+  var pre = btn.closest('pre');
+  var codeEl = pre.querySelector('code');
+  var lines = codeEl.querySelectorAll('.code-line');
+  var text;
+  if(lines.length){
+    text = Array.prototype.map.call(lines, function(l){ return l.textContent; }).join('\n');
+  } else {
+    text = codeEl.textContent;
+  }
+  navigator.clipboard.writeText(text).then(function(){
+    var original = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(function(){ btn.textContent = original; }, 1500);
+  }).catch(function(){
+    btn.textContent = 'Failed';
+  });
+}
+
+// Auto-expand quiz + flashcards on print
+window.addEventListener('beforeprint', function(){
+  document.querySelectorAll('details.quiz').forEach(function(d){ d.setAttribute('open', ''); });
+  document.querySelectorAll('.flashcard').forEach(function(f){ f.classList.add('open'); });
+});
+</script>
+</body>
+</html>

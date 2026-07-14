@@ -37,7 +37,7 @@
         return fetchJSON(COURSES_ROOT + slug + "/course.json")
           .then(function (course) {
             course.slug = slug;
-            course.chapters = course.chapters || [];
+            normalizeCourse(course);
             return course;
           })
           .catch(function (err) {
@@ -53,9 +53,62 @@
     });
   }
 
+  /* ---- course normalization (nested-folder support) --------------------- */
+
+  // Join a folder prefix and a file into one course-relative path.
+  // "M prashant" + "V1.html" -> "M prashant/V1.html". Tolerates missing/extra
+  // slashes and an empty folder (root-level chapter).
+  function joinPath(folder, file) {
+    folder = String(folder || "").replace(/^\/+|\/+$/g, "");
+    file = String(file || "").replace(/^\/+/, "");
+    return folder ? folder + "/" + file : file;
+  }
+
+  // Copy a chapter and resolve its `file` against an optional folder prefix.
+  function resolveChapter(ch, folder) {
+    var out = {};
+    for (var k in ch) { if (ch.hasOwnProperty(k)) out[k] = ch[k]; }
+    out.file = joinPath(folder, ch.file);
+    return out;
+  }
+
+  // A course may declare chapters two ways, freely mixed:
+  //   1. "chapters": [...]                      (flat, files at course root)
+  //   2. "sections": [{ title, folder, chapters:[...] }, ...]  (nested folders)
+  // We flatten both into course.chapters (used by indexing, progress, search,
+  // counts) AND keep course.sections (grouped, for rendering the course page).
+  // Chapter files inside a section are relative to that section's folder.
+  function normalizeCourse(course) {
+    var flat = [];
+    var sections = [];
+
+    var rootChapters = (course.chapters || []).map(function (ch) {
+      return resolveChapter(ch, "");
+    });
+    if (rootChapters.length) {
+      sections.push({ title: null, folder: "", chapters: rootChapters });
+      flat = flat.concat(rootChapters);
+    }
+
+    (course.sections || []).forEach(function (sec) {
+      var chs = (sec.chapters || []).map(function (ch) {
+        return resolveChapter(ch, sec.folder);
+      });
+      if (!chs.length) return;
+      sections.push({ title: sec.title || null, folder: sec.folder || "", chapters: chs });
+      flat = flat.concat(chs);
+    });
+
+    course.chapters = flat;
+    course.sections = sections;
+  }
+
   function chapterId(slug, file) { return slug + "/" + file; }
   function chapterHref(slug, file) {
-    return COURSES_ROOT + slug + "/" + file;
+    // Encode each path segment so folders/files with spaces (e.g. "M prashant")
+    // resolve correctly, without corrupting the "/" separators.
+    var path = (slug + "/" + file).split("/").map(encodeURIComponent).join("/");
+    return COURSES_ROOT + path;
   }
 
   function indexChapters() {
@@ -264,19 +317,37 @@
     list.style.gridTemplateColumns = "1fr";
     list.setAttribute("role", "list");
 
-    course.chapters.forEach(function (ch, i) {
-      var id = chapterId(course.slug, ch.file);
-      var row = window.UI.chapterRow({
-        course: course, chapter: ch, index: i, chapterId: id,
-        href: chapterHref(course.slug, ch.file),
-        isFavorite: window.Storage.isFavorite(id),
-        isCompleted: window.Storage.isCompleted(id),
-        lastReadLabel: relativeTime(window.Storage.getLastRead(id)),
-        onFavorite: function () { return window.Storage.toggleFavorite(id); },
-        onCompleted: function (done) { window.Storage.setCompleted(id, done); }
+    // Named sections render as collapsible accordions; root (untitled) chapters
+    // render inline as before. A plain flat course looks exactly as it used to.
+    var counter = 0;
+
+    course.sections.forEach(function (sec) {
+      if (!sec.chapters.length) return;
+
+      // Where this section's rows go: an accordion body if it has a title,
+      // otherwise straight into the flat list.
+      var target = list;
+      if (sec.title) {
+        var group = window.UI.chapterGroup(sec.title, sec.chapters.length);
+        list.appendChild(group.group);
+        target = group.body;
+      }
+
+      sec.chapters.forEach(function (ch) {
+        var i = counter++;
+        var id = chapterId(course.slug, ch.file);
+        var row = window.UI.chapterRow({
+          course: course, chapter: ch, index: i, chapterId: id,
+          href: chapterHref(course.slug, ch.file),
+          isFavorite: window.Storage.isFavorite(id),
+          isCompleted: window.Storage.isCompleted(id),
+          lastReadLabel: relativeTime(window.Storage.getLastRead(id)),
+          onFavorite: function () { return window.Storage.toggleFavorite(id); },
+          onCompleted: function (done) { window.Storage.setCompleted(id, done); }
+        });
+        attachReadTracking(row, id);
+        target.appendChild(row);
       });
-      attachReadTracking(row, id);
-      list.appendChild(row);
     });
     view.appendChild(list);
   }

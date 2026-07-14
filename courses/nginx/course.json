@@ -3,5 +3,12 @@
   "description": "Serve, proxy, and load-balance with Nginx — configuration, reverse proxying, and TLS.",
   "icon": "🌐",
   "difficulty": "Intermediate",
-  "chapters": []
+  "chapters": [
+    {
+      "title": "Nginx Introduction",
+      "file": "Nginx.html",
+      "duration": "20 mins",
+      "tags": ["nginx", "intermediate", "server"]
+    }
+  ]
 }

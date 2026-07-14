@@ -35,7 +35,7 @@
           type: "chapter",
           course: course,
           chapter: ch,
-          href: "courses/" + course.slug + "/" + ch.file,
+          href: "courses/" + (course.slug + "/" + ch.file).split("/").map(encodeURIComponent).join("/"),
           id: course.slug + "/" + ch.file,
           haystack: [
             ch.title, course.title, (ch.tags || []).join(" ")
