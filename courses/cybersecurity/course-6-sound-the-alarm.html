@@ -1,0 +1,2245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course VI · Sound the Alarm — Detection and Response — Complete Course (Modules 1–4)</title>
+<style>
+/* ============================================================
+   DESIGN SYSTEM — "CASE FILE" — SOC Reference Book
+   Palette: ink #0B1120, paper #F7F5F0, panel #131C2E, signal teal #2E9E5B,
+            warning amber #C97A2E, critical red #C9432D, wire blue #4A7FB5
+   Type: display = geometric sans, body = humanist serif, mono = code/log
+   ============================================================ */
+:root{
+  --ink:#0B1120;
+  --paper:#F7F5F0;
+  --paper-dim:#EFEBE2;
+  --panel:#131C2E;
+  --panel-2:#1A2332;
+  --line:#DAD4C4;
+  --line-dark:#26314A;
+  --signal:#1F7A44;
+  --signal-bright:#2E9E5B;
+  --warn:#9A5A1F;
+  --warn-bright:#C97A2E;
+  --crit:#A5301D;
+  --crit-bright:#C9432D;
+  --wire:#2E5C8A;
+  --wire-bright:#4A7FB5;
+  --ink-soft:#3A4456;
+  --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
+  --sans: -apple-system, 'Segoe UI', 'Inter', Avenir, Helvetica, Arial, sans-serif;
+  --mono: 'SF Mono', 'JetBrains Mono', Consolas, 'Courier New', monospace;
+  --maxw: 780px;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:17px;
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+
+::selection{background:var(--signal-bright); color:var(--ink);}
+
+/* ---------- progress bar (signal-strength style) ---------- */
+#progress-track{
+  position:fixed; top:0; left:0; right:0; height:4px; z-index:500;
+  background:var(--paper-dim);
+  border-bottom:1px solid var(--line);
+}
+#progress-fill{
+  height:100%; width:0%;
+  background:repeating-linear-gradient(90deg, var(--signal) 0 6px, var(--signal-bright) 6px 12px);
+  transition:width .1s linear;
+}
+
+/* ---------- spine rail (left nav) ---------- */
+#spine{
+  position:fixed; top:0; left:0; bottom:0; width:64px; z-index:400;
+  background:var(--ink);
+  border-right:1px solid var(--line-dark);
+  display:flex; flex-direction:column; align-items:center;
+  padding-top:24px; gap:4px;
+  font-family:var(--mono);
+}
+#spine .spine-mark{
+  writing-mode:vertical-rl; text-orientation:mixed;
+  color:var(--signal-bright); font-size:11px; letter-spacing:.15em;
+  margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid var(--line-dark);
+  text-transform:uppercase;
+}
+#spine .spine-tab{
+  width:40px; height:40px; border-radius:3px;
+  display:flex; align-items:center; justify-content:center;
+  color:#6B7A85; font-size:13px; font-weight:700;
+  border:1px solid transparent; cursor:pointer; text-decoration:none;
+  transition:all .15s ease;
+}
+#spine .spine-tab:hover{border-color:var(--line-dark); color:var(--paper);}
+#spine .spine-tab.active{background:var(--panel-2); color:var(--signal-bright); border-color:var(--signal);}
+#toc-toggle{
+  margin-top:auto; margin-bottom:20px; width:40px; height:40px;
+  border-radius:3px; border:1px solid var(--line-dark); background:none;
+  color:#6B7A85; cursor:pointer; font-size:16px;
+}
+#toc-toggle:hover{color:var(--signal-bright); border-color:var(--signal);}
+
+@media (max-width: 860px){
+  #spine{width:44px; padding-top:16px;}
+  #spine .spine-mark{display:none;}
+  #spine .spine-tab{width:30px; height:30px; font-size:11px;}
+}
+
+/* ---------- TOC drawer ---------- */
+#toc-drawer{
+  position:fixed; top:0; left:-380px; bottom:0; width:340px; z-index:450;
+  background:var(--panel); color:var(--paper);
+  padding:32px 28px; overflow-y:auto;
+  transition:left .25s ease;
+  box-shadow:8px 0 30px rgba(0,0,0,.35);
+  font-family:var(--sans);
+}
+#toc-drawer.open{left:64px;}
+@media (max-width:860px){ #toc-drawer.open{left:44px;} }
+#toc-drawer h3{
+  font-family:var(--mono); text-transform:uppercase; letter-spacing:.12em;
+  font-size:12px; color:var(--signal-bright); margin:0 0 18px;
+  border-bottom:1px solid var(--line-dark); padding-bottom:12px;
+}
+#toc-drawer .toc-course{font-size:13px; font-weight:700; margin:18px 0 6px; color:#9FB1BE;}
+#toc-drawer ol{list-style:none; margin:0 0 8px; padding:0;}
+#toc-drawer li a{
+  display:block; padding:7px 8px; border-radius:4px; color:#C9D3DA;
+  text-decoration:none; font-size:13.5px; line-height:1.4;
+  border-left:2px solid transparent;
+}
+#toc-drawer li a:hover{background:var(--panel-2); border-left-color:var(--signal-bright); color:#fff;}
+#toc-drawer li a.current{border-left-color:var(--signal-bright); color:var(--signal-bright); background:var(--panel-2);}
+#toc-close{
+  position:absolute; top:28px; right:24px; background:none; border:none;
+  color:#9FB1BE; font-size:20px; cursor:pointer;
+}
+#scrim{position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:440; display:none;}
+#scrim.show{display:block;}
+
+/* ---------- layout ---------- */
+main{margin-left:64px; padding:0 24px 120px;}
+@media (max-width:860px){ main{margin-left:44px; padding:0 16px 100px;} }
+.page{max-width:var(--maxw); margin:0 auto; padding-top:56px;}
+
+/* ---------- cover ---------- */
+.cover{
+  min-height:92vh; display:flex; flex-direction:column; justify-content:center;
+  border-bottom:3px solid var(--ink); padding-bottom:48px; margin-bottom:56px;
+}
+.cover-eyebrow{
+  font-family:var(--mono); font-size:12.5px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--signal); margin-bottom:18px; display:flex; align-items:center; gap:10px;
+}
+.cover-eyebrow::before{content:"";width:28px;height:2px;background:var(--signal-bright);display:inline-block;}
+.cover h1{
+  font-family:var(--sans); font-size:clamp(2.4rem, 6vw, 4rem); font-weight:800;
+  line-height:1.05; margin:0 0 14px; letter-spacing:-.02em; color:var(--ink);
+}
+.cover .subtitle{
+  font-family:var(--serif); font-style:italic; font-size:1.35rem; color:var(--ink-soft);
+  margin:0 0 36px; max-width:640px;
+}
+.cover-svg-wrap{margin:8px 0 40px;}
+.cover-meta{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:0;
+  border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+}
+.cover-meta div{padding:16px 18px; border-right:1px solid var(--line);}
+.cover-meta div:last-child{border-right:none;}
+.cover-meta .k{font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.1em; color:#8A8272; margin-bottom:5px;}
+.cover-meta .v{font-family:var(--sans); font-size:14.5px; font-weight:700; color:var(--ink);}
+
+.cover-block{margin-top:36px;}
+.cover-block h4{
+  font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.12em;
+  color:var(--signal); margin:0 0 10px;
+}
+.cover-block ul{margin:0; padding-left:20px;}
+.cover-block li{margin-bottom:6px; font-size:15.5px;}
+
+/* ---------- headings ---------- */
+h2.module-head{
+  font-family:var(--sans); font-size:2.1rem; font-weight:800; letter-spacing:-.01em;
+  margin:64px 0 6px; padding-top:40px; border-top:3px solid var(--ink);
+  page-break-before:always;
+}
+h2.module-head .tag{
+  display:block; font-family:var(--mono); font-size:12px; letter-spacing:.15em;
+  text-transform:uppercase; color:var(--signal); font-weight:700; margin-bottom:10px;
+}
+h3{
+  font-family:var(--sans); font-size:1.42rem; font-weight:800; margin:42px 0 14px;
+  color:var(--ink); letter-spacing:-.005em;
+  display:flex; align-items:baseline; gap:10px;
+}
+h3::before{
+  content:attr(data-n); font-family:var(--mono); font-size:.65em; color:var(--signal);
+  font-weight:700;
+}
+h4{font-family:var(--sans); font-weight:700; font-size:1.08rem; margin:28px 0 10px; color:var(--ink);}
+p{margin:0 0 16px;}
+strong{color:var(--ink); font-weight:700;}
+a{color:var(--wire);}
+
+/* ---------- objectives box ---------- */
+.objectives{
+  background:var(--ink); color:var(--paper); border-radius:6px; padding:28px 30px;
+  margin:24px 0 40px; font-family:var(--sans);
+}
+.objectives h4{
+  font-family:var(--mono); color:var(--signal-bright); text-transform:uppercase;
+  letter-spacing:.12em; font-size:12px; margin:0 0 16px;
+}
+.objectives ul{margin:0; padding-left:0; list-style:none;}
+.objectives li{
+  position:relative; padding-left:26px; margin-bottom:10px; font-size:15px; color:#DCE3E8;
+}
+.objectives li::before{content:"▸"; position:absolute; left:0; color:var(--signal-bright);}
+
+/* ---------- callouts: "case-file ticket" signature element ---------- */
+.ticket{
+  border:1.5px solid var(--ink); border-radius:4px; margin:26px 0; position:relative;
+  background:#fff; overflow:hidden; font-family:var(--sans);
+}
+.ticket-head{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:9px 16px; font-family:var(--mono); font-size:11px; letter-spacing:.08em;
+  text-transform:uppercase; font-weight:700; color:#fff;
+}
+.ticket-id{opacity:.85; font-weight:400;}
+.ticket-body{padding:16px 18px; font-size:15px; line-height:1.6;}
+.ticket-body p:last-child{margin-bottom:0;}
+.ticket.def .ticket-head{background:var(--wire);}
+.ticket.important .ticket-head{background:var(--ink);}
+.ticket.remember .ticket-head{background:#6B4FBB;}
+.ticket.interview .ticket-head{background:var(--signal);}
+.ticket.warning .ticket-head{background:var(--warn);}
+.ticket.alert .ticket-head{background:var(--crit);}
+.ticket.industry .ticket-head{background:#8A5A2B;}
+.ticket.bestpractice .ticket-head{background:#1E7A4C;}
+.ticket.compliance .ticket-head{background:#3A5A78;}
+.ticket.examtip .ticket-head{background:#B0862B;}
+.ticket.soc .ticket-head{background:#0F5E6B;}
+.ticket.threatintel .ticket-head{background:#7A1F3D;}
+.ticket.blueteam .ticket-head{background:#1D4E89;}
+.ticket.redteam .ticket-head{background:#8C1C1C;}
+.ticket.quickrev .ticket-head{background:#4C6444;}
+.ticket.deepdive .ticket-head{background:#2C2C54;}
+.ticket.expert .ticket-head{background:#5C4033;}
+.ticket.incident .ticket-head{background:#7A1F3D;}
+.ticket .icon{margin-right:6px;}
+
+/* ---------- ELI5 ---------- */
+.eli5{
+  border-left:4px solid var(--warn-bright); background:#FFF8ED; border-radius:0 6px 6px 0;
+  padding:18px 22px; margin:22px 0; font-family:var(--serif);
+}
+.eli5 .eli5-tag{
+  font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.1em;
+  color:var(--warn); font-weight:700; margin-bottom:8px; display:block;
+}
+
+/* ---------- multi-level explanation ---------- */
+.levels{margin:26px 0; border:1px solid var(--line); border-radius:6px; overflow:hidden;}
+.level{padding:16px 20px; border-bottom:1px solid var(--line);}
+.level:last-child{border-bottom:none;}
+.level .lv-tag{
+  font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.1em;
+  font-weight:700; margin-bottom:6px; display:inline-block; padding:2px 8px; border-radius:3px;
+}
+.level.l1{background:#FFF8ED;} .level.l1 .lv-tag{background:var(--warn-bright); color:#3A2A00;}
+.level.l2{background:#F2F7FF;} .level.l2 .lv-tag{background:var(--wire-bright); color:#0A1A3A;}
+.level.l3{background:#EFFAF8;} .level.l3 .lv-tag{background:var(--signal-bright); color:#00302B;}
+.level.l4{background:#F7F0FA;} .level.l4 .lv-tag{background:#B27FE0; color:#2A0A3A;}
+.level p{margin:0; font-size:15px;}
+
+/* ---------- tables ---------- */
+.table-wrap{overflow-x:auto; margin:24px 0;}
+table{width:100%; border-collapse:collapse; font-family:var(--sans); font-size:14px;}
+caption{
+  caption-side:top; text-align:left; font-family:var(--mono); font-size:11px;
+  text-transform:uppercase; letter-spacing:.1em; color:var(--signal); margin-bottom:8px; font-weight:700;
+}
+th{
+  background:var(--ink); color:var(--paper); text-align:left; padding:10px 14px;
+  font-weight:700; font-size:12.5px; text-transform:uppercase; letter-spacing:.04em;
+}
+td{padding:10px 14px; border-bottom:1px solid var(--line); vertical-align:top;}
+tr:nth-child(even) td{background:var(--paper-dim);}
+
+/* ---------- code blocks ---------- */
+.code-block{margin:22px 0; border-radius:6px; overflow:hidden; border:1px solid var(--line-dark);}
+.code-head{
+  background:var(--panel); color:#9FB1BE; font-family:var(--mono); font-size:11.5px;
+  padding:8px 14px; display:flex; justify-content:space-between; align-items:center;
+  border-bottom:1px solid var(--line-dark);
+}
+.code-head .lang{color:var(--signal-bright); text-transform:uppercase; letter-spacing:.08em;}
+.copy-btn{
+  background:var(--panel-2); border:1px solid var(--line-dark); color:#C9D3DA;
+  font-family:var(--mono); font-size:11px; padding:3px 10px; border-radius:3px; cursor:pointer;
+}
+.copy-btn:hover{border-color:var(--signal-bright); color:var(--signal-bright);}
+pre{
+  margin:0; background:var(--ink); color:#D9E4EA; padding:16px 18px; overflow-x:auto;
+  font-family:var(--mono); font-size:13.5px; line-height:1.6;
+}
+pre code{counter-reset:line;}
+.code-note{
+  background:var(--paper-dim); border-top:1px solid var(--line); padding:10px 16px;
+  font-family:var(--sans); font-size:13px; color:var(--ink-soft);
+}
+
+/* ---------- svg figure ---------- */
+figure{margin:28px 0; text-align:center;}
+figure svg{max-width:100%; height:auto;}
+figcaption{
+  font-family:var(--mono); font-size:11.5px; color:var(--ink-soft); margin-top:10px;
+  text-transform:uppercase; letter-spacing:.06em;
+}
+
+/* ---------- flashcards ---------- */
+.flash-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin:24px 0;}
+.flash{
+  border:1px solid var(--line); border-radius:6px; padding:16px; cursor:pointer;
+  background:#fff; min-height:96px; position:relative; font-family:var(--sans);
+  transition:box-shadow .15s;
+}
+.flash:hover{box-shadow:0 4px 14px rgba(0,0,0,.08);}
+.flash .front{font-weight:700; font-size:14.5px;}
+.flash .back{
+  display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);
+  font-family:var(--serif); font-size:14px; color:var(--ink-soft);
+}
+.flash.flipped .back{display:block;}
+.flash .hint{
+  position:absolute; top:12px; right:12px; font-family:var(--mono); font-size:9.5px;
+  color:#B0A996; text-transform:uppercase;
+}
+
+/* ---------- accordion ---------- */
+details.acc{border:1px solid var(--line); border-radius:6px; margin:12px 0; overflow:hidden;}
+details.acc summary{
+  padding:13px 18px; cursor:pointer; font-family:var(--sans); font-weight:700; font-size:14.5px;
+  background:var(--paper-dim); list-style:none; display:flex; justify-content:space-between;
+}
+details.acc summary::-webkit-details-marker{display:none;}
+details.acc summary::after{content:"+"; color:var(--signal); font-size:18px;}
+details.acc[open] summary::after{content:"–";}
+details.acc .acc-body{padding:16px 18px; font-size:15px;}
+
+/* ---------- MCQ / practice ---------- */
+.quiz{border:1px solid var(--line); border-radius:6px; padding:18px 20px; margin:16px 0; background:#fff;}
+.quiz .q{font-weight:700; font-family:var(--sans); margin-bottom:10px; font-size:14.5px;}
+.quiz .opt{
+  display:block; width:100%; text-align:left; padding:9px 12px; margin-bottom:6px;
+  border:1px solid var(--line); border-radius:4px; background:var(--paper); cursor:pointer;
+  font-family:var(--sans); font-size:14px;
+}
+.quiz .opt:hover{border-color:var(--wire);}
+.quiz .opt.correct{background:#E6F7EE; border-color:var(--signal); font-weight:700;}
+.quiz .opt.wrong{background:#FBEAEA; border-color:var(--crit);}
+.quiz .fb{margin-top:8px; font-size:13.5px; font-family:var(--sans); color:var(--ink-soft); display:none;}
+.quiz .fb.show{display:block;}
+
+/* ---------- summary / takeaway blocks ---------- */
+.summary-block{
+  background:var(--panel); color:var(--paper); border-radius:8px; padding:30px 32px; margin:36px 0;
+  font-family:var(--sans);
+}
+.summary-block h4{color:var(--signal-bright); font-family:var(--mono); text-transform:uppercase; letter-spacing:.1em; font-size:12px;}
+.summary-block ul{padding-left:20px; margin:12px 0 0;}
+.summary-block li{margin-bottom:8px; font-size:14.5px; color:#DCE3E8;}
+
+/* footer nav */
+.module-nav{
+  display:flex; justify-content:space-between; margin-top:60px; padding-top:24px;
+  border-top:1px solid var(--line); font-family:var(--sans); font-size:13.5px;
+}
+.module-nav a{text-decoration:none; color:var(--ink); font-weight:700;}
+.endmark{
+  text-align:center; font-family:var(--mono); font-size:11px; color:#B0A996;
+  letter-spacing:.15em; text-transform:uppercase; margin:80px 0 20px;
+}
+
+/* print */
+@media print{
+  #spine, #toc-drawer, #progress-track, #scrim, .copy-btn{display:none !important;}
+  main{margin-left:0;}
+  body{font-size:12pt;}
+  .ticket, .levels, .objectives, .summary-block{break-inside:avoid;}
+  h2.module-head{page-break-before:always;}
+  a{color:inherit; text-decoration:none;}
+}
+
+/* accessibility */
+:focus-visible{outline:3px solid var(--signal); outline-offset:2px;}
+.skip-link{
+  position:absolute; left:-999px; top:0; background:var(--ink); color:#fff; padding:10px 16px; z-index:900;
+}
+.skip-link:focus{left:70px; top:8px;}
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main-content">Skip to content</a>
+
+<div id="progress-track"><div id="progress-fill"></div></div>
+
+<nav id="spine" aria-label="Course navigation">
+  <div class="spine-mark">COURSE VI</div>
+  <a class="spine-tab" href="#module-1" title="Module 1 · Incident Response Lifecycle">M1</a>
+  <a class="spine-tab" href="#module-2" title="Module 2 · Network Traffic &amp; Packet Analysis">M2</a>
+  <a class="spine-tab" href="#module-3" title="Module 3 · Detection, Documentation &amp; Recovery">M3</a>
+  <a class="spine-tab" href="#module-4" title="Module 4 · Logs, IDS &amp; SIEM">M4</a>
+  <button id="toc-toggle" aria-label="Open table of contents" aria-expanded="false">☰</button>
+</nav>
+
+<div id="scrim"></div>
+<aside id="toc-drawer" aria-label="Table of contents">
+  <button id="toc-close" aria-label="Close table of contents">✕</button>
+  <h3>Course VI — Sound the Alarm</h3>
+  <div class="toc-course">Module 1 · Incident Response Lifecycle</div>
+  <ol>
+    <li><a href="#module-1" class="current">Cover &amp; Module 1 start</a></li>
+    <li><a href="#sec-1">1.1 Events vs. Incidents &amp; the NIST Lifecycle</a></li>
+    <li><a href="#sec-2">1.2 Applying the Lifecycle: A Vishing Scenario</a></li>
+    <li><a href="#sec-3">1.3 Incident Response Teams: CSIRT &amp; SOC</a></li>
+    <li><a href="#sec-4">1.4 Incident Response Plans</a></li>
+    <li><a href="#sec-5">1.5 The Security Analyst's Toolbox</a></li>
+    <li><a href="#sec-6">1.6 IDS, IPS &amp; EDR Compared</a></li>
+    <li><a href="#sec-7">1.7 SIEM &amp; SOAR: Alert Management</a></li>
+    <li><a href="#labs">Labs &amp; Exercises</a></li>
+    <li><a href="#interview">Interview Prep</a></li>
+    <li><a href="#practice">Practice Section</a></li>
+    <li><a href="#revision">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Module 2 · Network Traffic &amp; Packet Analysis</div>
+  <ol>
+    <li><a href="#module-2">Module 2 start</a></li>
+    <li><a href="#sec-2-1">2.1 Network Traffic Flows &amp; Baselines</a></li>
+    <li><a href="#sec-2-2">2.2 Data Exfiltration Attacks</a></li>
+    <li><a href="#sec-2-3">2.3 Packets, Headers &amp; Packet Captures</a></li>
+    <li><a href="#sec-2-4">2.4 Network Protocol Analyzers &amp; P-cap Formats</a></li>
+    <li><a href="#sec-2-5">2.5 IPv4 vs. IPv6 Headers, Revisited</a></li>
+    <li><a href="#sec-2-6">2.6 Wireshark Display Filters</a></li>
+    <li><a href="#sec-2-7">2.7 tcpdump Deep Dive</a></li>
+    <li><a href="#labs-2">Labs &amp; Exercises</a></li>
+    <li><a href="#interview-2">Interview Prep</a></li>
+    <li><a href="#practice-2">Practice Section</a></li>
+    <li><a href="#revision-2">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary-2">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Module 3 · Detection, Documentation &amp; Recovery</div>
+  <ol>
+    <li><a href="#module-3">Module 3 start</a></li>
+    <li><a href="#sec-3-1">3.1 Detection Challenges &amp; Threat Hunting</a></li>
+    <li><a href="#sec-3-2">3.2 Zero Trust &amp; Indicators of Compromise</a></li>
+    <li><a href="#sec-3-3">3.3 The Pyramid of Pain</a></li>
+    <li><a href="#sec-3-4">3.4 Crowdsourcing &amp; VirusTotal</a></li>
+    <li><a href="#sec-3-5">3.5 Documentation &amp; Chain of Custody</a></li>
+    <li><a href="#sec-3-6">3.6 Playbook Types Revisited</a></li>
+    <li><a href="#sec-3-7">3.7 Triage &amp; the Containment/Eradication/Recovery Phase</a></li>
+    <li><a href="#sec-3-8">3.8 Business Continuity &amp; Site Resilience</a></li>
+    <li><a href="#sec-3-9">3.9 Post-Incident Activity &amp; Final Reports</a></li>
+    <li><a href="#labs-3">Labs &amp; Exercises</a></li>
+    <li><a href="#interview-3">Interview Prep</a></li>
+    <li><a href="#practice-3">Practice Section</a></li>
+    <li><a href="#revision-3">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary-3">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Module 4 · Logs, IDS &amp; SIEM</div>
+  <ol>
+    <li><a href="#module-4">Module 4 start</a></li>
+    <li><a href="#sec-4-1">4.1 Logs, Log Management &amp; Retention</a></li>
+    <li><a href="#sec-4-2">4.2 Log Formats: Syslog, JSON, XML, CSV, CEF</a></li>
+    <li><a href="#sec-4-3">4.3 HIDS vs. NIDS</a></li>
+    <li><a href="#sec-4-4">4.4 Signature-Based vs. Anomaly-Based Detection</a></li>
+    <li><a href="#sec-4-5">4.5 Suricata Rules &amp; Logs</a></li>
+    <li><a href="#sec-4-6">4.6 SIEM Log Ingestion</a></li>
+    <li><a href="#sec-4-7">4.7 Querying with Splunk (SPL) &amp; Chronicle (YARA-L/UDM)</a></li>
+    <li><a href="#labs-4">Labs &amp; Exercises</a></li>
+    <li><a href="#interview-4">Interview Prep</a></li>
+    <li><a href="#practice-4">Practice Section</a></li>
+    <li><a href="#revision-4">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary-4">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Course Reference</div>
+  <ol>
+    <li><a href="#course-summary">Course Summary</a></li>
+    <li><a href="#course-glossary">Full Glossary (Weeks 1–4)</a></li>
+    <li><a href="#course-cheatsheet">Master Cheat Sheet</a></li>
+  </ol>
+</aside>
+
+<main id="main-content">
+<div class="page" id="course-page">
+
+<!-- ================= COVER ================= -->
+<section class="cover">
+  <div class="cover-eyebrow">Google Cybersecurity Certificate · Premium Edition</div>
+  <h1>Course VI<br>Sound the Alarm: Detection and Response</h1>
+  <p class="subtitle">The alert just fired. This is the book that walks you through exactly what happens next — packet by packet, log line by log line, phase by phase.</p>
+
+  <div class="cover-svg-wrap">
+    <svg viewBox="0 0 700 220" width="100%" role="img" aria-label="Illustration of an alarm bell with sound waves radiating outward, connected to a dashboard displaying alert data, representing detection and response">
+      <rect x="0" y="0" width="700" height="220" fill="#F7F5F0"/>
+      <!-- alarm bell -->
+      <circle cx="160" cy="110" r="55" fill="#A5301D"/>
+      <rect x="145" y="160" width="30" height="18" rx="3" fill="#0B1120"/>
+      <circle cx="160" cy="100" r="10" fill="#F7F5F0"/>
+      <!-- sound waves -->
+      <path d="M225 80 Q250 110 225 140" fill="none" stroke="#C97A2E" stroke-width="4" stroke-linecap="round"/>
+      <path d="M250 65 Q285 110 250 155" fill="none" stroke="#C97A2E" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+      <path d="M275 50 Q320 110 275 170" fill="none" stroke="#C97A2E" stroke-width="4" stroke-linecap="round" opacity="0.4"/>
+      <!-- dashboard -->
+      <rect x="380" y="50" width="280" height="130" rx="8" fill="#131C2E"/>
+      <text x="400" y="72" font-family="sans-serif" font-size="11" font-weight="700" fill="#2E9E5B">ALERT DASHBOARD</text>
+      <polyline points="400,140 430,120 460,130 490,95 520,110 550,75 580,105 610,90" fill="none" stroke="#2E9E5B" stroke-width="2"/>
+      <circle cx="610" cy="90" r="4" fill="#C9432D"/>
+      <text x="400" y="160" font-family="monospace" font-size="10" fill="#9FB1BE">3 CRITICAL · 12 HIGH · 214 TOTAL</text>
+    </svg>
+  </div>
+
+  <div class="cover-meta">
+    <div><div class="k">Reading Time</div><div class="v">~5 hrs / module</div></div>
+    <div><div class="k">Difficulty</div><div class="v">Intermediate–Advanced</div></div>
+    <div><div class="k">Prerequisites</div><div class="v">Courses I–V</div></div>
+    <div><div class="k">Modules</div><div class="v">4 (Weeks 1–4)</div></div>
+  </div>
+
+  <div class="cover-block">
+    <h4>Learning Objectives — Whole Course</h4>
+    <ul>
+      <li>Apply the NIST incident response lifecycle to real scenarios from preparation through post-incident review.</li>
+      <li>Capture and analyze network traffic using tcpdump and Wireshark, down to the IPv4/IPv6 header field.</li>
+      <li>Use the Pyramid of Pain, threat intelligence, and tools like VirusTotal to investigate indicators of compromise.</li>
+      <li>Document incidents properly, including chain of custody, and understand triage and business continuity.</li>
+      <li>Read and interpret Syslog, JSON, XML, CSV, and CEF log formats.</li>
+      <li>Distinguish HIDS from NIDS and signature-based from anomaly-based detection, and write basic Suricata rules.</li>
+      <li>Query security data using Splunk's SPL and Chronicle's YARA-L/UDM search.</li>
+    </ul>
+  </div>
+
+  <div class="cover-block">
+    <h4>Skills Gained</h4>
+    <ul>
+      <li>Incident response team structure fluency: CSIRT roles, SOC tiers 1–3</li>
+      <li>Live packet capture and filtering with tcpdump and Wireshark</li>
+      <li>IoC investigation using the Pyramid of Pain and OSINT tools</li>
+      <li>Log format literacy across 5 major formats</li>
+      <li>Suricata signature writing and SPL/YARA-L query construction</li>
+    </ul>
+  </div>
+
+  <div class="cover-block">
+    <h4>Career Relevance</h4>
+    <p>This course is the closest thing in the certificate to an actual SOC Analyst I job simulation. Nearly every skills-based interview exercise — reading a packet capture, writing a Splunk query, explaining the incident response lifecycle under a scenario — draws directly from this material.</p>
+  </div>
+</section>
+
+<!-- ================= PREFACE ================= -->
+<h2 class="module-head"><span class="tag">Preface</span>How to Use This Course</h2>
+
+<p>Everything in this certificate has been building toward this moment: the alert just fired, and now you have to do something about it. This course is deliberately hands-on and tool-heavy — tcpdump syntax, Wireshark filters, Suricata rules, SPL queries. Treat every code block as something to actually type, not just read.</p>
+
+<div class="ticket deepdive">
+  <div class="ticket-head"><span><span class="icon">🧭</span>Deep Dive</span><span class="ticket-id">DD-500</span></div>
+  <div class="ticket-body">
+    <p><strong>Recommended study strategy:</strong> Module 2's packet analysis material rewards genuine practice — if you have Wireshark installed, capture traffic from your own home network while reading this module. Module 4's log format section is dense; keep a real example of each format open side-by-side as you read.</p>
+    <p><strong>Lab recommendation:</strong> If you can access a Suricata instance or a Splunk/Chronicle sandbox environment, this is the course to actually use it. The specific syntax here (Suricata rule components, SPL pipes, YARA-L UDM fields) only becomes intuitive with repetition.</p>
+    <p><strong>Interview preparation:</strong> Be ready to walk through all four phases of the NIST incident response lifecycle using a specific example, and to explain the difference between a false positive and a false negative without hesitation — both come up constantly.</p>
+    <p><strong>Certification preparation:</strong> This course aligns closely with CompTIA Security+ Domain 4 (Security Operations) in full depth, and touches Domain 2 (Threats, Vulnerabilities, and Mitigations) through its detection-technique coverage.</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODULE 1 · WEEK 1 — INCIDENT RESPONSE LIFECYCLE
+     ============================================================ -->
+<h2 class="module-head" id="module-1"><span class="tag">Module 1 · Week 1</span>The Incident Response Lifecycle</h2>
+
+<div class="objectives" id="objectives">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Distinguish events from incidents according to NIST's formal definition.</li>
+    <li>Recite the four phases of the NIST incident response lifecycle and apply them to a vishing scenario.</li>
+    <li>Describe CSIRT structure and roles: security analyst, technical lead, incident coordinator.</li>
+    <li>Describe SOC organization: Tier 1/2/3 analysts, SOC leads, SOC managers, forensic investigators, threat hunters.</li>
+    <li>Explain the purpose and common elements of an incident response plan.</li>
+    <li>Categorize a security analyst's toolbox: detection/management, documentation, and investigative tools.</li>
+    <li>Compare IDS, IPS, and EDR detection tools and the four detection categories (true/false positive/negative).</li>
+    <li>Explain the SIEM process and introduce SOAR for alert and event management.</li>
+  </ul>
+</div>
+
+<h3 id="sec-1" data-n="1.1">Events vs. Incidents &amp; the NIST Lifecycle</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-501</span></div>
+  <div class="ticket-body">
+    <p><strong>Incident (NIST definition):</strong> An occurrence that actually or imminently jeopardizes, without lawful authority, the confidentiality, integrity, or availability of information or an information system, or that constitutes a violation or imminent threat of violation of security policies, procedures, or acceptable use policies.</p>
+    <p><strong>Event:</strong> An observable occurrence in a system or network — not inherently malicious.</p>
+  </div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Password Reset</span>
+  <p>A password reset is an <strong>event</strong> — it happens all the time, and it's completely normal. But if someone requests a hundred password resets for accounts they don't own, in the middle of the night, from an unfamiliar country — that pattern of events becomes a <strong>security incident</strong>, because now it threatens the confidentiality of those accounts.</p>
+</div>
+
+<figure>
+<svg viewBox="0 0 640 220" width="100%" role="img" aria-label="Diagram of the four phases of the NIST incident response lifecycle in a cycle: Preparation, Detection and Analysis, Containment Eradication and Recovery, Post-Incident Activity">
+  <rect x="0" y="0" width="640" height="220" fill="#F7F5F0"/>
+  <text x="320" y="24" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#0B1120">NIST Incident Response Lifecycle</text>
+  <g font-family="sans-serif" font-size="11" font-weight="700" fill="#fff">
+    <rect x="20" y="60" width="270" height="50" rx="6" fill="#2E5C8A"/><text x="155" y="90" text-anchor="middle">1. Preparation</text>
+    <rect x="350" y="60" width="270" height="50" rx="6" fill="#1F7A44"/><text x="485" y="90" text-anchor="middle">2. Detection &amp; Analysis</text>
+    <rect x="350" y="140" width="270" height="50" rx="6" fill="#9A5A1F"/><text x="485" y="163" text-anchor="middle">3. Containment, Eradication</text><text x="485" y="178" text-anchor="middle" font-weight="400" font-size="9">&amp; Recovery</text>
+    <rect x="20" y="140" width="270" height="50" rx="6" fill="#6B4FBB"/><text x="155" y="170" text-anchor="middle">4. Post-Incident Activity</text>
+  </g>
+  <path d="M290 85 L350 85" stroke="#0B1120" stroke-width="2" marker-end="url(#a6a)"/>
+  <path d="M485 110 L485 140" stroke="#0B1120" stroke-width="2" marker-end="url(#a6a)"/>
+  <path d="M350 165 L290 165" stroke="#0B1120" stroke-width="2" marker-end="url(#a6a)"/>
+  <path d="M155 140 L155 110" stroke="#0B1120" stroke-width="2" marker-end="url(#a6a)"/>
+  <defs><marker id="a6a" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#0B1120"/></marker></defs>
+</svg>
+<figcaption>Figure 1.1 — The NIST incident response lifecycle's four phases, cyclical by design</figcaption>
+</figure>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-501</span></div>
+  <div class="ticket-body"><p>This lifecycle is <strong>cyclical</strong>, allowing overlapping steps as new information emerges — it is not a strict, one-directional checklist. A team might return to Detection and Analysis mid-containment if new evidence surfaces. It also directly implements the last three of the NIST CSF's five core functions (Course V): Detect, Respond, Recover.</p></div>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-502</span></div>
+  <div class="ticket-body"><p><strong>Incident Handler's Journal:</strong> A tool for organized documentation of incident details, recording vital information during response and investigation — one of the first tools in a security analyst's toolbox.</p></div>
+</div>
+
+<p>An incident investigation aims to determine the same five questions a detective would ask: <strong>who</strong> triggered the incident, <strong>what</strong> happened, <strong>when</strong> it took place, <strong>where</strong> it took place, and <strong>why</strong> it occurred.</p>
+
+<h3 id="sec-2" data-n="1.2">Applying the Lifecycle: A Vishing Scenario</h3>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>SOC Example — Vishing Response Walkthrough</span><span class="ticket-id">SOC-501</span></div>
+  <div class="ticket-body">
+    <p><strong>Preparation —</strong> The organization sets up uniform email conventions, creates a collaborative environment where employees feel comfortable asking questions, and provides quarterly cybersecurity training.</p>
+    <p><strong>Detection &amp; Analysis —</strong> Security professionals filter external emails to flag attachments like voicemails, and reference an incident response plan when a suspicious voice message arrives.</p>
+    <p><strong>Containment, Eradication &amp; Recovery —</strong> The team communicates with the alleged sender to confirm origin, and provides employees an easy way to report and contain suspicious messages.</p>
+    <p><strong>Post-Incident Activity —</strong> The playbook gets updated to highlight new red flags, and permission oversight processes are reviewed and adjusted.</p>
+  </div>
+</div>
+
+<h3 id="sec-3" data-n="1.3">Incident Response Teams: CSIRT &amp; SOC</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-503</span></div>
+  <div class="ticket-body">
+    <p><strong>Computer Security Incident Response Team (CSIRT):</strong> A specialized group of security professionals trained in incident management and response — sometimes called an Incident Handling Team (IHT) or Security Incident Response Team (SIRT) depending on the organization.</p>
+    <p><strong>Command, Control, Communication:</strong> Command is having appropriate leadership overseeing the response. Control is the ability to manage technical aspects — coordinating resources, assigning tasks. Communication is keeping stakeholders informed.</p>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Three Core CSIRT Roles</caption>
+<thead><tr><th>Role</th><th>Responsibilities</th></tr></thead>
+<tbody>
+<tr><td><strong>Security Analyst</strong></td><td>Continuously monitors the environment; analyzes/triages alerts; performs root-cause investigations; escalates or resolves</td></tr>
+<tr><td><strong>Technical Lead</strong></td><td>Manages all technical aspects of response; determines root cause; creates/implements containment-eradication-recovery strategy; aligns priorities with business needs</td></tr>
+<tr><td><strong>Incident Coordinator</strong></td><td>Coordinates with external departments (legal, PR, HR); keeps lines of communication open across all involved teams</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-504</span></div>
+  <div class="ticket-body"><p><strong>Security Operations Center (SOC):</strong> An organizational unit dedicated to monitoring networks, systems, and devices for security threats — often called "the blue team" for its defensive role. May exist as its own unit or within a CSIRT.</p></div>
+</div>
+
+<figure>
+<svg viewBox="0 0 640 220" width="100%" role="img" aria-label="Pyramid diagram of SOC organization from bottom to top: Tier 1 SOC analyst, Tier 2 SOC analyst, Tier 3 SOC lead, SOC manager at the apex">
+  <rect x="0" y="0" width="640" height="220" fill="#F7F5F0"/>
+  <text x="320" y="22" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#0B1120">SOC Organization</text>
+  <polygon points="320,35 220,90 420,90" fill="#7A1F3D"/>
+  <text x="320" y="70" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="700" fill="#fff">Manager</text>
+  <polygon points="220,90 420,90 460,140 180,140" fill="#9A5A1F"/>
+  <text x="320" y="120" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="700" fill="#fff">Tier 3 (L3) Lead</text>
+  <polygon points="180,140 460,140 500,180 140,180" fill="#1F7A44"/>
+  <text x="320" y="165" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="700" fill="#fff">Tier 2 (L2) Analyst</text>
+  <polygon points="140,180 500,180 540,210 100,210" fill="#2E5C8A"/>
+  <text x="320" y="200" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="700" fill="#fff">Tier 1 (L1) Analyst</text>
+</svg>
+<figcaption>Figure 1.2 — SOC organizational pyramid, from Tier 1 to manager</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<caption>SOC Tiers &amp; Specialized Roles</caption>
+<thead><tr><th>Role</th><th>Responsibilities</th></tr></thead>
+<tbody>
+<tr><td><strong>Tier 1 (L1) Analyst</strong></td><td>Monitors, reviews, and prioritizes alerts by severity; creates/closes tickets; escalates to Tier 2/3</td></tr>
+<tr><td><strong>Tier 2 (L2) Analyst</strong></td><td>Receives escalated tickets; conducts deeper investigations; configures/refines security tools; reports to SOC Lead</td></tr>
+<tr><td><strong>Tier 3 (L3) SOC Lead</strong></td><td>Manages team operations; performs advanced detection (malware/forensics analysis); reports to SOC Manager</td></tr>
+<tr><td><strong>SOC Manager</strong></td><td>Hires/trains/evaluates the team; sets performance metrics; develops incident/compliance/audit reports; communicates to executives</td></tr>
+<tr><td><strong>Forensic Investigators</strong></td><td>Usually L2/L3; collect, preserve, and analyze digital evidence to determine what happened</td></tr>
+<tr><td><strong>Threat Hunters</strong></td><td>Typically L3; proactively detect, analyze, and defend against new/advanced threats using threat intelligence</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-4" data-n="1.4">Incident Response Plans</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-505</span></div>
+  <div class="ticket-body"><p><strong>Incident Response Plan:</strong> A document outlining the procedures to take in each step of incident response, built from three basic elements — policies, standards, and procedures (recall Course V, Module 1).</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Common Elements of an Incident Response Plan</caption>
+<thead><tr><th>Element</th><th>Contains</th></tr></thead>
+<tbody>
+<tr><td><strong>Incident Response Procedures</strong></td><td>Detailed instructions on how to respond to incidents</td></tr>
+<tr><td><strong>System Information</strong></td><td>Network diagrams, data flow diagrams, logging, asset inventory details</td></tr>
+<tr><td><strong>Other Documents</strong></td><td>Contact lists, forms, and templates facilitating response</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-501</span></div>
+  <div class="ticket-body"><p>Incident response plans are not static. Regular review and testing — tabletop exercises, simulations — help familiarize teams with the plan and identify gaps. Some organizations are required to conduct specific exercises for regulatory compliance, not just internal readiness.</p></div>
+</div>
+
+<h3 id="sec-5" data-n="1.5">The Security Analyst's Toolbox</h3>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Carpenter's Toolbox</span>
+  <p>Just as a carpenter relies on a tape measure, a saw, and sandpaper to build furniture, a security analyst uses a combination of different tools to monitor, detect, and analyze security events — no single tool covers everything.</p>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Three Tool Categories in a Security Analyst's Toolbox</caption>
+<thead><tr><th>Category</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><strong>Detection and Management Tools</strong></td><td>Monitor system activity and identify events requiring investigation</td></tr>
+<tr><td><strong>Documentation Tools</strong></td><td>Collect and compile evidence during an investigation</td></tr>
+<tr><td><strong>Investigative Tools</strong></td><td>Analyze security events directly, e.g., packet sniffers</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-6" data-n="1.6">IDS, IPS &amp; EDR Compared</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Comparison — IDS vs. IPS vs. EDR</caption>
+<thead><tr><th>Capability</th><th>IDS</th><th>IPS</th><th>EDR</th></tr></thead>
+<tbody>
+<tr><td>Detects malicious activity</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>Prevents intrusions</td><td>✗</td><td>✓</td><td>✓</td></tr>
+<tr><td>Logs activity</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>Generates alerts</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>Performs behavioral analysis</td><td>✗</td><td>✗</td><td>✓</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-506</span></div>
+  <div class="ticket-body"><p><strong>Endpoint Detection and Response (EDR):</strong> An application installed on endpoints that monitors, records, and analyzes activity to identify, alert, and respond to suspicious behavior — using machine learning/AI-powered behavioral analysis and automation to stop attacks without manual intervention.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Four Detection Categories</caption>
+<thead><tr><th>Category</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><strong>True positive</strong></td><td>An alert correctly detecting a real attack</td></tr>
+<tr><td><strong>True negative</strong></td><td>No malicious activity exists, and no alert is triggered — correct</td></tr>
+<tr><td><strong>False positive</strong></td><td>An alert incorrectly flags something as malicious that isn't — wastes analyst time/resources</td></tr>
+<tr><td><strong>False negative</strong></td><td>Malicious activity happens but goes undetected — dangerous, since the team remains unaware and vulnerable</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket examtip">
+  <div class="ticket-head"><span><span class="icon">🎯</span>Exam Tip</span><span class="ticket-id">EXM-501</span></div>
+  <div class="ticket-body"><p>Between the two errors, <strong>false negatives are generally considered more dangerous</strong> than false positives — a false positive costs time; a false negative leaves a real attack completely unaddressed. When tuning detection systems, security teams often accept somewhat more false positives to reduce false negatives.</p></div>
+</div>
+
+<h3 id="sec-7" data-n="1.7">SIEM &amp; SOAR: Alert and Event Management</h3>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Car Dashboard</span>
+  <p>A SIEM tool is like a car's dashboard — it doesn't show you every single mechanical detail of the engine, but it gives you a high-level, at-a-glance view of speed, fuel, and warning lights so you know exactly when something needs your attention.</p>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>The Three-Step SIEM Process</caption>
+<thead><tr><th>Step</th><th>What Happens</th></tr></thead>
+<tbody>
+<tr><td><strong>1. Collect and aggregate data</strong></td><td>Data pulled from IDS/IPS, databases, firewalls, applications into one centralized location</td></tr>
+<tr><td><strong>2. Normalize data</strong></td><td>Removes non-essential attributes, creates consistency across log records from different sources</td></tr>
+<tr><td><strong>3. Analyze data</strong></td><td>Compares data against configured rules; matches are categorized and reported as alerts</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-507</span></div>
+  <div class="ticket-body"><p><strong>SOAR (Security Orchestration, Automation, and Response):</strong> A collection of applications, tools, and workflows using automation to respond to security events and incidents — can also track and manage <strong>cases</strong>, where multiple related incidents are centrally managed together.</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 1.1 — Event or Incident?</summary>
+  <div class="acc-body">
+    <p>Classify each as an event or an incident: (1) a user resets their own forgotten password, (2) a hundred failed login attempts against a single admin account within one minute, (3) an employee logs into their email from a new laptop they just purchased.</p>
+    <p><strong>Answer key:</strong> 1 — Event (normal, expected). 2 — Incident (threatens confidentiality/integrity, violates expected patterns). 3 — Event, most likely, though it may warrant a closer look if unusual for that user.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 1.2 — Detection Category Drill</summary>
+  <div class="acc-body">
+    <p>Classify each scenario: (1) an IDS alerts on a legitimate software update mistaken for malware; (2) a sophisticated attacker evades detection entirely and exfiltrates data undetected; (3) an IDS correctly flags an active SQL injection attempt.</p>
+    <p><strong>Answer key:</strong> 1 — False positive. 2 — False negative. 3 — True positive.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Scenario Challenge 1.1 — CSIRT Role Assignment</summary>
+  <div class="acc-body">
+    <p>A critical ransomware incident requires deep technical remediation work and close coordination with the legal and PR departments. Which two CSIRT roles are most central here, and why?</p>
+    <p><strong>Answer:</strong> The Technical Lead (managing containment/eradication/recovery strategy and root-cause determination) and the Incident Coordinator (keeping legal, PR, and other departments informed and aligned) — both roles are essential for a critical incident of this scope.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Beginner Question</span><span class="ticket-id">INT-501</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Walk me through the four phases of the NIST incident response lifecycle.</strong></p>
+    <p><strong>Ideal answer:</strong> "Preparation, Detection and Analysis, Containment/Eradication/Recovery, and Post-Incident Activity. It's important to note the lifecycle is cyclical — teams can revisit earlier phases as new information emerges, and lessons learned in Post-Incident Activity feed directly back into Preparation for next time."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>SOC Analyst Question</span><span class="ticket-id">INT-502</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: You're a Tier 1 analyst and receive an alert that doesn't clearly fit your playbook. What do you do?</strong></p>
+    <p><strong>Ideal answer:</strong> "I'd first verify whether it's a known false positive pattern by checking history and severity. If it's genuinely ambiguous or high-severity, I'd escalate to a Tier 2 analyst rather than guess — that's exactly what the tiered structure is designed for, and escalating appropriately is a sign of good judgment, not a failure to resolve it myself."</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which detection category describes malicious activity that occurs but is never detected?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">False positive</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False negative</button>
+  <button class="opt" onclick="checkAnswer(this,false)">True negative</button>
+  <div class="fb">Correct — a false negative is undetected malicious activity, considered more dangerous than a false positive.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: The NIST incident response lifecycle is strictly linear, with no revisiting of earlier phases.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — the lifecycle is cyclical, allowing overlapping steps as new information emerges.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. Which SOC role typically performs advanced malware and forensics analysis?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Tier 1 analyst</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Tier 2 analyst</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Tier 3 SOC lead</button>
+  <div class="fb">Correct — Tier 3 SOC leads perform advanced detection techniques like malware and forensics analysis.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-501</span></div>
+  <div class="ticket-body"><p>NIST IR lifecycle: Preparation → Detection &amp; Analysis → Containment/Eradication/Recovery → Post-Incident Activity (cyclical). CSIRT roles: security analyst, technical lead, incident coordinator. SOC tiers: L1 (triage) → L2 (deep investigation) → L3 (advanced detection) → manager. IDS detects only; IPS detects+blocks; EDR adds behavioral analysis+automation. 4 detection categories: true/false positive/negative — false negatives are more dangerous. SIEM: collect→normalize→analyze; SOAR automates response on top.</p></div>
+</div>
+
+<div class="summary-block" id="summary">
+  <h4>Module Summary</h4>
+  <p>This module established the structural backbone of Course VI: the cyclical NIST incident response lifecycle, the teams and roles that carry it out, and the tools (IDS/IPS/EDR, SIEM/SOAR) that make detection and response possible at scale.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>Events are normal occurrences; incidents specifically threaten confidentiality, integrity, or availability.</li>
+    <li>The NIST lifecycle's four phases are cyclical, not linear — overlap and revisiting earlier phases is normal.</li>
+    <li>CSIRTs and SOCs have distinct but complementary structures, each with clearly defined roles.</li>
+    <li>IDS, IPS, and EDR form a capability spectrum: detect-only, detect-and-block, and detect-block-plus-behavioral-analysis.</li>
+    <li>False negatives are generally more dangerous than false positives — undetected threats cause the most damage.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives">◂ Back to Module 1 Objectives</a>
+  <a href="#module-2">Module 2 · Network Traffic &amp; Packet Analysis ▸</a>
+</div>
+
+<div class="endmark">— End of Module 1 —</div>
+<!-- ============================================================
+     MODULE 2 · WEEK 2 — NETWORK TRAFFIC & PACKET ANALYSIS
+     ============================================================ -->
+<h2 class="module-head" id="module-2"><span class="tag">Module 2 · Week 2</span>Network Traffic &amp; Packet Analysis</h2>
+
+<div class="objectives" id="objectives-2">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Explain network traffic, network data, and baselines for detecting abnormal behavior.</li>
+    <li>Describe data exfiltration attacks from both the attacker's and defender's perspective.</li>
+    <li>Explain the three components of a network packet: header, payload, footer.</li>
+    <li>Describe network protocol analyzers and packet capture file formats: Libpcap, WinPcap, Npcap, PCAPng.</li>
+    <li>Re-examine IPv4 and IPv6 header fields in full detail.</li>
+    <li>Use Wireshark's display filters, comparison operators, and stream-following features.</li>
+    <li>Use tcpdump's syntax, options, and expressions to capture and interpret network traffic.</li>
+  </ul>
+</div>
+
+<h3 id="sec-2-1" data-n="2.1">Network Traffic Flows &amp; Baselines</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-508</span></div>
+  <div class="ticket-body">
+    <p><strong>Network traffic:</strong> The amount of data moving across a network, including the type of data transferred (e.g., HTTP).</p>
+    <p><strong>Network data:</strong> The actual data transmitted between devices on a network.</p>
+    <p><strong>Baseline:</strong> A reference point used for comparison, establishing a standard of expected/normal behavior for systems, devices, and networks.</p>
+  </div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Traffic Jam</span>
+  <p>Just as commuters learn their city's normal rush-hour patterns and immediately notice when traffic looks wrong for the time of day, security professionals learn a network's normal traffic baseline so abnormal activity — like a sudden 3 a.m. surge — jumps out immediately.</p>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Three Network Components to Monitor</caption>
+<thead><tr><th>Component</th><th>What It Reveals</th></tr></thead>
+<tbody>
+<tr><td><strong>Flow analysis</strong></td><td>Movement of packets, protocols, and ports — malicious actors sometimes use uncommon port/protocol pairings for command and control (C2)</td></tr>
+<tr><td><strong>Packet payload information</strong></td><td>The actual transmitted data (often encrypted) — reveals possible data exfiltration if sensitive data leaves the network unexpectedly</td></tr>
+<tr><td><strong>Temporal patterns</strong></td><td>Time-based baselines — traffic spikes outside normal business hours are "off baseline" and warrant investigation</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-509</span></div>
+  <div class="ticket-body"><p><strong>Command and Control (C2):</strong> Techniques malicious actors use to maintain communications with compromised systems — for example, using HTTPS over port 8088 instead of its standard port 443 specifically to evade simple port-based monitoring.</p></div>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-502</span></div>
+  <div class="ticket-body"><p>A <strong>network operations center (NOC)</strong> maintains network <em>performance</em>, availability, and uptime — distinct from a SOC, which maintains network <em>security</em>. The two units often work side by side but serve fundamentally different missions; don't conflate them.</p></div>
+</div>
+
+<h3 id="sec-2-2" data-n="2.2">Data Exfiltration Attacks</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-510</span></div>
+  <div class="ticket-body"><p><strong>Data exfiltration:</strong> The unauthorized transmission of data from a system — detectable through anomalies like large volumes of outbound traffic leaving a host.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Data Exfiltration — Attacker's Playbook vs. Organization's Defense</caption>
+<thead><tr><th>Attacker's Steps</th><th>Organization's Defense</th></tr></thead>
+<tbody>
+<tr><td>1. Gain initial access (e.g., phishing)</td><td>Require MFA to prevent phishing-based access</td></tr>
+<tr><td>2. Maintain access via lateral movement (pivoting)</td><td>Monitor for suspicious behavior — multiple logins from outside IPs</td></tr>
+<tr><td>3. Identify valuable assets (PII, IP, financial records)</td><td>Maintain asset inventory with appropriate security controls</td></tr>
+<tr><td>4. Prepare data (compress to bypass controls)</td><td>Detect unusual data collection via SIEM monitoring</td></tr>
+<tr><td>5. Exfiltrate data to chosen destination</td><td>Block IP addresses associated with the attacker via firewall rules</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-511</span></div>
+  <div class="ticket-body"><p><strong>Lateral movement (pivoting):</strong> An attacker's technique for exploring a network and accessing other systems after gaining initial access, in search of valuable assets.</p></div>
+</div>
+
+<h3 id="sec-2-3" data-n="2.3">Packets, Headers &amp; Packet Captures, Revisited</h3>
+
+<p>Course III introduced packet structure at a conceptual level. This module goes deeper into every field, because packet-level detail is where real investigations actually happen.</p>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-512</span></div>
+  <div class="ticket-body">
+    <p><strong>Header:</strong> Contains routing information — source/destination IP addresses, packet length, protocol, identification numbers. Packets can have several headers (Ethernet, IP, TCP) depending on protocols used.</p>
+    <p><strong>Payload:</strong> The actual data being delivered — like the content of a letter inside an envelope.</p>
+    <p><strong>Footer (trailer):</strong> Located at the end of a packet, used by Ethernet for error-checking. Most protocols, including IP, do not use footers.</p>
+  </div>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-513</span></div>
+  <div class="ticket-body"><p><strong>Packet capture (p-cap):</strong> A file containing data packets intercepted from an interface or network — an invaluable artifact during incident investigations, letting analysts build a storyline of events after the fact.</p></div>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning</span><span class="ticket-id">WRN-501</span></div>
+  <div class="ticket-body"><p>Using network protocol analyzers to intercept and examine private network communications <strong>without permission is illegal</strong> in many places. This is a professional and legal boundary, not just an ethical guideline — always operate within documented authorization.</p></div>
+</div>
+
+<h3 id="sec-2-4" data-n="2.4">Network Protocol Analyzers &amp; P-cap Formats</h3>
+
+<div class="table-wrap">
+<table>
+<caption>How Network Protocol Analyzers Work — Two Steps</caption>
+<thead><tr><th>Step</th><th>Mechanism</th></tr></thead>
+<tbody>
+<tr><td><strong>1. Collect via NIC</strong></td><td>The Network Interface Card must be switched to <strong>promiscuous mode</strong> (or "monitoring mode" wirelessly) to access all visible packets, not just those addressed to it</td></tr>
+<tr><td><strong>2. Convert to human-readable format</strong></td><td>Raw binary traffic is translated into readable output for analysts to interpret</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Packet Capture Library &amp; File Formats</caption>
+<thead><tr><th>Format</th><th>Platform</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><strong>Libpcap</strong></td><td>Unix-like (Linux, macOS)</td><td>Default format for tools like tcpdump</td></tr>
+<tr><td><strong>WinPcap</strong></td><td>Windows</td><td>Older, open-source; not predominantly used today</td></tr>
+<tr><td><strong>Npcap</strong></td><td>Windows</td><td>Designed by the Nmap port-scanning tool; commonly used on Windows</td></tr>
+<tr><td><strong>PCAPng</strong></td><td>Cross-platform</td><td>Modern "next generation" format; can capture packets and store data simultaneously</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-2-5" data-n="2.5">IPv4 vs. IPv6 Headers, Revisited in Full</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Complete IPv4 Header Fields (13 Total)</caption>
+<thead><tr><th>Field</th><th>Function</th></tr></thead>
+<tbody>
+<tr><td><strong>Version</strong></td><td>Indicates the IP version (here, IPv4)</td></tr>
+<tr><td><strong>Internet Header Length (IHL)</strong></td><td>Length of the header including any Options</td></tr>
+<tr><td><strong>Type of Service (ToS)</strong></td><td>Packet priority for delivery</td></tr>
+<tr><td><strong>Total Length</strong></td><td>Length of the entire IP packet (header + data)</td></tr>
+<tr><td><strong>Identification</strong></td><td>Unique identifier for reassembling fragmented packets</td></tr>
+<tr><td><strong>Flags</strong></td><td>Whether the packet has been fragmented and if more fragments follow</td></tr>
+<tr><td><strong>Fragment Offset</strong></td><td>Identifies correct sequence of fragments</td></tr>
+<tr><td><strong>Time to Live (TTL)</strong></td><td>Limits how long a packet can circulate before being dropped</td></tr>
+<tr><td><strong>Protocol</strong></td><td>Specifies the protocol used for the data portion</td></tr>
+<tr><td><strong>Header Checksum</strong></td><td>Error-checking value for the header</td></tr>
+<tr><td><strong>Source Address</strong></td><td>Sender's IP address</td></tr>
+<tr><td><strong>Destination Address</strong></td><td>Receiver's IP address</td></tr>
+<tr><td><strong>Options</strong></td><td>Optional field, sometimes used for security settings</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Complete IPv6 Header Fields (8 Total)</caption>
+<thead><tr><th>Field</th><th>Function</th></tr></thead>
+<tbody>
+<tr><td><strong>Version</strong></td><td>Indicates the IP version (here, IPv6)</td></tr>
+<tr><td><strong>Traffic Class</strong></td><td>Equivalent to IPv4's ToS — packet priority/class</td></tr>
+<tr><td><strong>Flow Label</strong></td><td>Identifies packets belonging to the same flow (sequence from one source)</td></tr>
+<tr><td><strong>Payload Length</strong></td><td>Length of the data portion of the packet</td></tr>
+<tr><td><strong>Next Header</strong></td><td>Indicates the type of header that follows (e.g., TCP)</td></tr>
+<tr><td><strong>Hop Limit</strong></td><td>Equivalent to IPv4's TTL — limits travel before being discarded</td></tr>
+<tr><td><strong>Source Address</strong></td><td>Sender's IP address</td></tr>
+<tr><td><strong>Destination Address</strong></td><td>Receiver's IP address</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket examtip">
+  <div class="ticket-head"><span><span class="icon">🎯</span>Exam Tip</span><span class="ticket-id">EXM-502</span></div>
+  <div class="ticket-body"><p>Notice the direct equivalences: IPv4's <strong>ToS</strong> ≈ IPv6's <strong>Traffic Class</strong>, and IPv4's <strong>TTL</strong> ≈ IPv6's <strong>Hop Limit</strong>. IPv6 simplified and renamed several fields rather than inventing entirely new concepts — recognizing these pairs makes memorizing both headers much easier.</p></div>
+</div>
+
+<h3 id="sec-2-6" data-n="2.6">Wireshark Display Filters</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-514</span></div>
+  <div class="ticket-body"><p><strong>Wireshark:</strong> An open-source network protocol analyzer with a graphical user interface, making it easier to visualize network communications than command-line-only tools.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Wireshark Comparison Operators</caption>
+<thead><tr><th>Operator Type</th><th>Symbol</th><th>Abbreviation</th></tr></thead>
+<tbody>
+<tr><td>Equal</td><td>==</td><td>eq</td></tr>
+<tr><td>Not Equal</td><td>!=</td><td>ne</td></tr>
+<tr><td>Greater Than</td><td>&gt;</td><td>gt</td></tr>
+<tr><td>Less Than</td><td>&lt;</td><td>lt</td></tr>
+<tr><td>Greater Than or Equal To</td><td>&gt;=</td><td>ge</td></tr>
+<tr><td>Less Than or Equal To</td><td>&lt;=</td><td>le</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Wireshark Display Filter</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>ip.addr == 172.21.224.2
+ip.src == 10.10.10.10
+ip.dst == 4.4.4.4
+eth.addr == 00:70:f4:23:18:c4
+udp.port == 53
+tcp.port == 25</code></pre>
+  <div class="code-note"><strong>What each does:</strong> Filters by any IP address involved, source IP only, destination IP only, MAC address, a specific UDP port (DNS), and a specific TCP port (SMTP), respectively.<br><strong>Real SOC usage:</strong> Combining these with Boolean operators (<code>and</code>, <code>or</code>) and parentheses lets analysts build precise, complex filters to isolate exactly the traffic relevant to an investigation.</div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Additional Wireshark Filter Operators</caption>
+<thead><tr><th>Operator</th><th>Function</th></tr></thead>
+<tbody>
+<tr><td><code>contains</code></td><td>Filters packets containing an exact match of a specified text string</td></tr>
+<tr><td><code>matches</code></td><td>Filters packets based on a regular expression (regex) pattern</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-515</span></div>
+  <div class="ticket-body"><p><strong>Stream (conversation):</strong> The exchange of data between devices using a protocol. Wireshark's "Follow Stream" feature reassembles the transferred data into an easy-to-read format — useful for reviewing the full content of an HTTP request/response exchange.</p></div>
+</div>
+
+<h3 id="sec-2-7" data-n="2.7">tcpdump Deep Dive</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-516</span></div>
+  <div class="ticket-body"><p><strong>tcpdump:</strong> A command-line network protocol analyzer, pre-installed on many Linux distributions, used to capture and view network traffic including TCP, IP, and ICMP.</p></div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Bash — tcpdump Syntax</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>sudo tcpdump [-i interface] [option(s)] [expression(s)]</code></pre>
+  <div class="code-note"><strong>What this does:</strong> <code>sudo</code> runs with elevated permissions (required for packet capture). <code>-i</code> specifies the network interface (<code>-i any</code> captures from all interfaces). Options alter execution; expressions further filter traffic.</div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Essential tcpdump Options</caption>
+<thead><tr><th>Option</th><th>Function</th></tr></thead>
+<tbody>
+<tr><td><code>-w [file]</code></td><td>Write/save captured packets to a p-cap file for later analysis</td></tr>
+<tr><td><code>-r [file]</code></td><td>Read a specified packet capture file</td></tr>
+<tr><td><code>-v</code> / <code>-vv</code> / <code>-vvv</code></td><td>Verbose mode — increasing levels of detail with each added "v"</td></tr>
+<tr><td><code>-c [number]</code></td><td>Count — limits the number of packets captured</td></tr>
+<tr><td><code>-n</code> / <code>-nn</code></td><td>Disables name resolution (hostnames / hostnames + ports) — best practice for accuracy and stealth</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning</span><span class="ticket-id">WRN-502</span></div>
+  <div class="ticket-body"><p>Default name resolution uses a <strong>reverse DNS lookup</strong> — a query looking up the domain name associated with an IP address. If you perform this against an attacker's own system during an investigation, it can alert them that they're being investigated through their own DNS records. Using <code>-n</code>/<code>-nn</code> avoids this risk and is considered best practice.</p></div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Bash — tcpdump Examples</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>sudo tcpdump -i any -w packetcapture.pcap
+sudo tcpdump -r packetcapture.pcap -v -n
+sudo tcpdump -r packetcapture.pcap -n 'ip and port 80'
+sudo tcpdump -i any -c 3</code></pre>
+  <div class="code-note"><strong>What each does:</strong> Line 1 captures all traffic and saves to a file. Line 2 reads that file verbosely without name resolution. Line 3 reads the file, filtering for IPv4 traffic on port 80, combined with the <code>and</code> boolean operator. Line 4 captures only the first 3 packets seen on any interface.<br><strong>Pro tip:</strong> Combine short options without a value directly (<code>-vn</code>), but options taking a parameter (<code>-c 3</code>, <code>-r file</code>) can't be combined with others in the same cluster.</div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Interpreting tcpdump Output — Key Fields</caption>
+<thead><tr><th>Field</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><strong>Timestamp</strong></td><td>Hours, minutes, seconds, fractions of a second</td></tr>
+<tr><td><strong>Source IP / Port</strong></td><td>The packet's origin address and port</td></tr>
+<tr><td><strong>Destination IP / Port</strong></td><td>Where the packet is being transmitted to</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket blueteam">
+  <div class="ticket-head"><span><span class="icon">🛡️</span>Blue Team Tip</span><span class="ticket-id">BT-501</span></div>
+  <div class="ticket-body"><p>Boolean operators (<code>and</code>, <code>or</code>, <code>not</code>) combined with parentheses let you construct precise, grouped filter expressions — e.g., <code>ip and (port 80 or port 443)</code> prioritizes evaluating the parenthetical group before applying the IPv4 filter. This grouping logic mirrors what you already know from SQL's <code>WHERE</code> clauses (Course IV).</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs-2">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 2.1 — Wireshark Filter Construction</summary>
+  <div class="acc-body">
+    <p>Write a Wireshark display filter that finds all traffic to or from IP address 192.168.1.50 on TCP port 443, and no other traffic.</p>
+    <div class="code-block">
+      <div class="code-head"><span class="lang">Wireshark Display Filter</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+      <pre><code>ip.addr == 192.168.1.50 and tcp.port == 443</code></pre>
+    </div>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 2.2 — tcpdump Command Construction</summary>
+  <div class="acc-body">
+    <p>Write a tcpdump command that captures traffic on any interface, saves it to a file called <code>investigation.pcap</code>, disables both hostname and port name resolution, and captures only the first 50 packets.</p>
+    <div class="code-block">
+      <div class="code-head"><span class="lang">Bash</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+      <pre><code>sudo tcpdump -i any -w investigation.pcap -nn -c 50</code></pre>
+    </div>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Scenario Challenge 2.1 — Data Exfiltration Detection</summary>
+  <div class="acc-body">
+    <p>You notice a workstation sending an unusually large volume of outbound traffic to an unfamiliar external IP address at 2 a.m., well outside normal business hours. Walk through which network components you'd examine and why.</p>
+    <p><strong>Answer guidance:</strong> Check flow analysis (unusual port/protocol pairing possibly indicating C2), packet payload information (what's actually being sent — is it encrypted, and does the volume match known sensitive data size), and temporal patterns (2 a.m. is off-baseline for expected business hours) — all three components covered in this module apply directly to this scenario.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview-2">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Intermediate Question</span><span class="ticket-id">INT-503</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Why would you disable name resolution when using tcpdump during an investigation?</strong></p>
+    <p><strong>Ideal answer:</strong> "Two reasons: accuracy and stealth. Name resolution can mislead you — tcpdump might label port 80 traffic as HTTP by default, but it's not always accurate. More importantly, resolving an attacker's IP address performs a reverse DNS lookup, which can alert them that they're under investigation through their own DNS records. Using -n or -nn avoids both problems."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Live Analysis Question</span><span class="ticket-id">INT-504</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: You're given a packet capture and asked to find all DNS traffic from a specific IP address. How would you approach this in Wireshark?</strong></p>
+    <p><strong>Ideal answer:</strong> "I'd combine a protocol filter with an IP filter using the and operator: <code>dns and ip.src == [address]</code>. This narrows the massive capture down to exactly the relevant traffic. I might also follow the stream if I need to see the full DNS query/response exchange in context."</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice-2">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which packet capture format is the default for Unix-like systems and tools like tcpdump?</div>
+  <button class="opt" onclick="checkAnswer(this,true)">Libpcap</button>
+  <button class="opt" onclick="checkAnswer(this,false)">WinPcap</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Npcap</button>
+  <div class="fb">Correct — Libpcap is the default packet capture library on Unix-like systems.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: IPv6's Hop Limit field serves the same purpose as IPv4's Time to Live field.</div>
+  <button class="opt" onclick="checkAnswer(this,true)">True</button>
+  <button class="opt" onclick="checkAnswer(this,false)">False</button>
+  <div class="fb">True — both fields limit how long a packet can travel before being discarded.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. Which tcpdump flag writes captured packets to a file instead of printing them to the terminal?</div>
+  <button class="opt" onclick="checkAnswer(this,true)">-w</button>
+  <button class="opt" onclick="checkAnswer(this,false)">-r</button>
+  <button class="opt" onclick="checkAnswer(this,false)">-c</button>
+  <div class="fb">Correct — the -w flag writes/saves captured packets to a p-cap file.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision-2">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-502</span></div>
+  <div class="ticket-body"><p>Baselines define normal traffic; flow/payload/temporal analysis detect deviations. Data exfiltration follows a 5-step attacker chain, matched by a 5-step defense. Packets: header/payload/footer. P-cap formats: Libpcap/WinPcap/Npcap/PCAPng. IPv4 has 13 header fields; IPv6 has 8, with direct equivalences (ToS↔Traffic Class, TTL↔Hop Limit). Wireshark uses comparison operators plus contains/matches; tcpdump uses -w/-r/-v/-c/-n options plus boolean expressions.</p></div>
+</div>
+
+<div class="summary-block" id="summary-2">
+  <h4>Module Summary</h4>
+  <p>This module gave you the deepest technical skill in the certificate so far: reading and filtering actual network traffic, field by field, using both a GUI tool (Wireshark) and a command-line tool (tcpdump) — the two most common ways a real analyst investigates what's actually happening on the wire.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>Baselines make abnormal traffic visible — flow, payload, and temporal analysis are the three lenses for spotting deviations.</li>
+    <li>Data exfiltration follows a predictable attacker chain, which maps directly onto a matching defensive chain.</li>
+    <li>IPv4 and IPv6 headers share conceptual equivalences despite different field names and counts.</li>
+    <li>Wireshark's display filters and tcpdump's command-line options both accomplish the same core task — precise traffic isolation — through different interfaces.</li>
+    <li>Disabling name resolution (-n/-nn) is a small detail with real investigative and operational-security consequences.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives-2">◂ Back to Module 2 Objectives</a>
+  <a href="#module-3">Module 3 · Detection, Documentation &amp; Recovery ▸</a>
+</div>
+
+<div class="endmark">— End of Module 2 —</div>
+<!-- ============================================================
+     MODULE 3 · WEEK 3 — DETECTION, DOCUMENTATION & RECOVERY
+     ============================================================ -->
+<h2 class="module-head" id="module-3"><span class="tag">Module 3 · Week 3</span>Incident Detection, Documentation, Response &amp; Recovery</h2>
+
+<div class="objectives" id="objectives-3">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Explain the challenges of the Detection and Analysis phase and describe threat hunting, threat intelligence, and cyber deception.</li>
+    <li>Explain Zero Trust and distinguish indicators of compromise (IoC) from indicators of attack (IoA).</li>
+    <li>Apply the Pyramid of Pain to prioritize indicators of compromise.</li>
+    <li>Explain crowdsourcing in threat intelligence and use VirusTotal to analyze IoCs.</li>
+    <li>Explain documentation's three benefits (transparency, standardization, clarity) and chain of custody.</li>
+    <li>Distinguish non-automated, automated, and semi-automated playbooks.</li>
+    <li>Explain the triage process and the containment/eradication/recovery phase.</li>
+    <li>Explain business continuity planning and the three types of recovery sites.</li>
+    <li>Explain post-incident activity: lessons learned meetings and final reports.</li>
+  </ul>
+</div>
+
+<h3 id="sec-3-1" data-n="3.1">Detection Challenges &amp; Threat Hunting</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Two Core Challenges in Detection &amp; Analysis</caption>
+<thead><tr><th>Challenge</th><th>Why It Happens</th></tr></thead>
+<tbody>
+<tr><td><strong>Impossible to detect everything</strong></td><td>Even excellent detection tools have limitations; automated tools may not be fully deployed due to resource constraints</td></tr>
+<tr><td><strong>High volumes of alerts</strong></td><td>Sometimes thousands per shift, due to misconfigured/overly broad rules or genuine exploitation attempts</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-517</span></div>
+  <div class="ticket-body"><p><strong>Threat hunting:</strong> The proactive search for threats on a network, combining human analysis with technology to uncover malicious activity that detection tools alone missed — including sophisticated evasion techniques like fileless malware hiding in memory.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Sources of Threat Intelligence</caption>
+<thead><tr><th>Source</th><th>Provides</th></tr></thead>
+<tbody>
+<tr><td><strong>Industry reports</strong></td><td>Details about attackers' tactics, techniques, and procedures (TTPs)</td></tr>
+<tr><td><strong>Government advisories</strong></td><td>Similar TTP details from official government sources</td></tr>
+<tr><td><strong>Threat data feeds</strong></td><td>Streams of indicators (IP addresses, domains, file hashes) — especially useful against APTs</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-518</span></div>
+  <div class="ticket-body">
+    <p><strong>Threat Intelligence Platform (TIP):</strong> An application that collects, centralizes, and analyzes threat intelligence from multiple sources.</p>
+    <p><strong>Honeypot:</strong> A cyber deception technique — a decoy system or resource deliberately made to look vulnerable/valuable, designed to attract and alert on intruders.</p>
+  </div>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-503</span></div>
+  <div class="ticket-body"><p>Threat intelligence data feeds are best used to <strong>add context</strong> to detections — they should not drive detection entirely on their own, and should always be assessed before being applied to a specific organization's environment.</p></div>
+</div>
+
+<h3 id="sec-3-2" data-n="3.2">Zero Trust &amp; Indicators of Compromise</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-519</span></div>
+  <div class="ticket-body"><p><strong>Zero Trust:</strong> A security model built on "never trust, always verify" — trust is never automatically granted to any user or device, even inside the network. It combines least privilege, continuous monitoring, and micro-segmentation to reduce the "blast radius" of any breach.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Zero Trust's Five Principles</caption>
+<thead><tr><th>Principle</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><strong>No implicit trust</strong></td><td>Every user, device, or application is treated as untrusted until proven otherwise</td></tr>
+<tr><td><strong>Verification</strong></td><td>Strong authentication and security checks required to access resources</td></tr>
+<tr><td><strong>Least privilege</strong></td><td>Minimum access needed to perform tasks, nothing more</td></tr>
+<tr><td><strong>Continuous monitoring</strong></td><td>Ongoing observation to catch unusual behavior quickly</td></tr>
+<tr><td><strong>Micro-segmentation</strong></td><td>Smaller network segments, each with its own access controls, limiting breach impact</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-520</span></div>
+  <div class="ticket-body">
+    <p><strong>Indicators of Compromise (IoCs):</strong> Observable evidence suggesting a potential security incident has already happened — like noticing a valuable was stolen from a car.</p>
+    <p><strong>Indicators of Attack (IoAs):</strong> Observed events indicating a real-time incident in progress, focused on behavioral evidence — an attacker's methods and intentions.</p>
+  </div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — Who/What vs. Why/How</span>
+  <p>IoCs answer <em>who</em> and <em>what</em> after the fact. IoAs answer <em>why</em> and <em>how</em> while it's happening. If a process makes a network connection right now, that's an IoA. The filename of that process and the IP address it contacted are the associated IoCs.</p>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning</span><span class="ticket-id">WRN-503</span></div>
+  <div class="ticket-body"><p>An indicator of compromise is not automatically confirmation that a security incident occurred — IoCs can also result from human error or system malfunction. Context and further investigation are always required before drawing a conclusion.</p></div>
+</div>
+
+<h3 id="sec-3-3" data-n="3.3">The Pyramid of Pain</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-521</span></div>
+  <div class="ticket-body"><p><strong>Pyramid of Pain</strong> (David J. Bianco): A model capturing the relationship between types of IoCs and the level of difficulty attackers face when each type is blocked — the higher up the pyramid, the more "pain" caused to the attacker.</p></div>
+</div>
+
+<figure>
+<svg viewBox="0 0 640 300" width="100%" role="img" aria-label="Pyramid diagram showing the seven levels of the Pyramid of Pain from bottom to top: hash values, IP addresses, domain names, network artifacts, host artifacts, tools, and tactics techniques and procedures">
+  <rect x="0" y="0" width="640" height="300" fill="#F7F5F0"/>
+  <text x="320" y="22" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#0B1120">Pyramid of Pain — Easy (bottom) to Hard (top) for Attackers</text>
+  <polygon points="320,35 275,75 365,75" fill="#7A1F3D"/><text x="320" y="60" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="700" fill="#fff">TTPs</text>
+  <polygon points="275,75 365,75 390,110 250,110" fill="#8C1C1C"/><text x="320" y="98" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="700" fill="#fff">Tools</text>
+  <polygon points="250,110 390,110 410,145 230,145" fill="#9A5A1F"/><text x="320" y="132" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="700" fill="#fff">Host Artifacts</text>
+  <polygon points="230,145 410,145 430,180 210,180" fill="#1F7A44"/><text x="320" y="167" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="700" fill="#fff">Network Artifacts</text>
+  <polygon points="210,180 430,180 450,215 190,215" fill="#2E5C8A"/><text x="320" y="202" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="700" fill="#fff">Domain Names</text>
+  <polygon points="190,215 450,215 470,250 170,250" fill="#6B4FBB"/><text x="320" y="237" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="700" fill="#fff">IP Addresses</text>
+  <polygon points="170,250 470,250 490,285 150,285" fill="#0B1120"/><text x="320" y="272" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="700" fill="#fff">Hash Values</text>
+</svg>
+<figcaption>Figure 3.1 — The Pyramid of Pain, from trivial-to-change (bottom) to hardest-to-change (top)</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<caption>The Seven Levels Explained</caption>
+<thead><tr><th>Level</th><th>Example</th><th>Attacker's Effort to Evade</th></tr></thead>
+<tbody>
+<tr><td><strong>Hash values</strong></td><td>A hash matching a known malicious file</td><td>Trivial — change one byte, hash changes entirely</td></tr>
+<tr><td><strong>IP addresses</strong></td><td>192.168.1.1</td><td>Easy — switch to a different IP</td></tr>
+<tr><td><strong>Domain names</strong></td><td>www.malicious-example.com</td><td>Simple — register a new domain</td></tr>
+<tr><td><strong>Network artifacts</strong></td><td>A suspicious User-Agent string</td><td>Moderate — requires tooling changes</td></tr>
+<tr><td><strong>Host artifacts</strong></td><td>A malware-created filename</td><td>Annoying — requires rebuilding malware components</td></tr>
+<tr><td><strong>Tools</strong></td><td>John the Ripper password cracker</td><td>Challenging — requires finding/building new tools</td></tr>
+<tr><td><strong>TTPs (Tactics, Techniques, Procedures)</strong></td><td>An attacker's entire behavioral playbook</td><td>Hardest — requires fundamentally changing how they operate</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-522</span></div>
+  <div class="ticket-body">
+    <p><strong>Tactics:</strong> High-level overview of attacker behavior. <strong>Techniques:</strong> Detailed descriptions of behavior relating to a tactic. <strong>Procedures:</strong> Highly detailed descriptions of a technique — together, TTPs are the hardest indicators to detect and defend against.</p>
+  </div>
+</div>
+
+<h3 id="sec-3-4" data-n="3.4">Crowdsourcing &amp; VirusTotal</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-523</span></div>
+  <div class="ticket-body"><p><strong>Crowdsourcing:</strong> Gathering information using public input and collaboration — threat intelligence platforms use it to pool knowledge from the global cybersecurity community, so attacks against one organization can inform defenses everywhere else.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>VirusTotal Report Tabs</caption>
+<thead><tr><th>Tab</th><th>Provides</th></tr></thead>
+<tbody>
+<tr><td><strong>Detection</strong></td><td>Third-party vendor verdicts (malicious, suspicious, unsafe, etc.)</td></tr>
+<tr><td><strong>Details</strong></td><td>Static analysis info: hashes, file type/size, headers, submission timestamps</td></tr>
+<tr><td><strong>Relations</strong></td><td>Related IoCs — contacted URLs, domains, IPs, dropped files</td></tr>
+<tr><td><strong>Behavior</strong></td><td>Sandboxed execution behavior: TTPs, network communications, file/registry actions</td></tr>
+<tr><td><strong>Community</strong></td><td>Comments and insights from security professionals/researchers</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning</span><span class="ticket-id">WRN-504</span></div>
+  <div class="ticket-body"><p>Data uploaded to VirusTotal is <strong>publicly shared</strong> with the entire community. Never upload files containing personal information or sensitive organizational data — treat every submission as permanently public.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Other Investigative Tools</caption>
+<thead><tr><th>Tool</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><strong>Jotti's malware scan</strong></td><td>Scans suspicious files with multiple antivirus programs</td></tr>
+<tr><td><strong>Urlscan.io</strong></td><td>Scans and analyzes URLs, providing a detailed report</td></tr>
+<tr><td><strong>CAPE Sandbox</strong></td><td>Automates analysis of suspicious files in an isolated environment</td></tr>
+<tr><td><strong>MalwareBazaar</strong></td><td>A free repository of malware samples for research</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-3-5" data-n="3.5">Documentation &amp; Chain of Custody</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Three Benefits of Effective Documentation</caption>
+<thead><tr><th>Benefit</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><strong>Transparency</strong></td><td>Creates a record valuable for insurance claims, regulatory investigations, legal proceedings</td></tr>
+<tr><td><strong>Standardization</strong></td><td>Establishes guidelines ensuring consistent quality — e.g., incident response plans</td></tr>
+<tr><td><strong>Clarity</strong></td><td>Gives team members clear understanding of roles, responsibilities, and instructions</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-524</span></div>
+  <div class="ticket-body"><p><strong>Broken chain of custody:</strong> Inconsistencies in evidence collection/logging that impact the trustworthiness of evidence — potentially affecting its admissibility in legal proceedings.</p></div>
+</div>
+
+<div class="ticket compliance">
+  <div class="ticket-head"><span><span class="icon">⚖️</span>Compliance Note</span><span class="ticket-id">CMP-501</span></div>
+  <div class="ticket-body"><p>Chain of custody forms establish proof of three properties for evidence: <strong>integrity</strong>, <strong>reliability</strong>, and <strong>accuracy</strong> — all three are essential if evidence needs to hold up in a legal proceeding against a malicious actor.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Documentation Best Practice</th><th>Guidance</th></tr></thead>
+<tbody>
+<tr><td><strong>Know your audience</strong></td><td>An incident summary for a SOC manager reads differently than one for a CEO</td></tr>
+<tr><td><strong>Be concise</strong></td><td>Establish purpose immediately — e.g., a brief executive summary at the top of a final report</td></tr>
+<tr><td><strong>Update regularly</strong></td><td>New vulnerabilities constantly emerge; documentation must evolve with the threat landscape</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-3-6" data-n="3.6">Playbook Types Revisited</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Three Types of Playbooks by Automation Level</caption>
+<thead><tr><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><strong>Non-automated</strong></td><td>Analysts follow step-by-step actions entirely manually</td></tr>
+<tr><td><strong>Automated</strong></td><td>SOAR/SIEM tools automate specific tasks — e.g., categorizing severity, gathering evidence</td></tr>
+<tr><td><strong>Semi-automated</strong></td><td>Combines automated and human tasks — automating tedious/error-prone steps while analysts focus on judgment calls</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-3-7" data-n="3.7">Triage &amp; the Containment, Eradication, and Recovery Phase</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-525</span></div>
+  <div class="ticket-body"><p><strong>Triage:</strong> Prioritizing incidents according to their level of importance or urgency — just as a hospital emergency department prioritizes life-threatening conditions first.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>The Three-Step Triage Process</caption>
+<thead><tr><th>Step</th><th>Key Questions</th></tr></thead>
+<tbody>
+<tr><td><strong>1. Receive and assess</strong></td><td>Is it a false positive? Has it triggered before? Is it tied to a known vulnerability? What's the severity?</td></tr>
+<tr><td><strong>2. Assign priority</strong></td><td>Weigh functional impact, information impact, and recoverability</td></tr>
+<tr><td><strong>3. Collect and analyze</strong></td><td>Gather evidence, conduct research, document the investigative process; escalate if needed</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Three Priority-Assignment Factors</caption>
+<thead><tr><th>Factor</th><th>Consideration</th></tr></thead>
+<tbody>
+<tr><td><strong>Functional impact</strong></td><td>How the incident affects existing business functionality of the affected system</td></tr>
+<tr><td><strong>Information impact</strong></td><td>Effects on confidentiality/integrity/availability of data, including third parties</td></tr>
+<tr><td><strong>Recoverability</strong></td><td>Whether recovery is even possible, and whether it's worth the time/cost to attempt</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>The Containment, Eradication &amp; Recovery Phase</caption>
+<thead><tr><th>Step</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td><strong>Containment</strong></td><td>Limit/prevent additional damage — e.g., isolating an infected machine from the network</td></tr>
+<tr><td><strong>Eradication</strong></td><td>Completely remove incident elements — vulnerability tests, patching, verifying no traces remain</td></tr>
+<tr><td><strong>Recovery</strong></td><td>Return affected systems to normal operation — reimaging, resetting passwords, adjusting firewall rules</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-3-8" data-n="3.8">Business Continuity &amp; Site Resilience</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-526</span></div>
+  <div class="ticket-body">
+    <p><strong>Business Continuity Plan (BCP):</strong> A document outlining procedures to sustain business operations during and after a significant disruption.</p>
+    <p><strong>Disaster recovery plan:</strong> A distinct document used to recover information systems after a major disaster (hardware failure, natural disaster) — not the same as a BCP, though related.</p>
+    <p><strong>Site resilience:</strong> Ensuring availability of networks, data centers, or infrastructure during a disruption.</p>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Three Types of Recovery Sites</caption>
+<thead><tr><th>Site Type</th><th>Readiness</th></tr></thead>
+<tbody>
+<tr><td><strong>Hot site</strong></td><td>Fully operational duplicate — can activate immediately upon primary site failure</td></tr>
+<tr><td><strong>Warm site</strong></td><td>Fully updated/configured but not immediately operational — quick to activate</td></tr>
+<tr><td><strong>Cold site</strong></td><td>Basic infrastructure only — needs significant additional work before use</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-3-9" data-n="3.9">Post-Incident Activity &amp; Final Reports</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-527</span></div>
+  <div class="ticket-body"><p><strong>Lessons learned meeting (post-mortem):</strong> A meeting including all involved parties after a major incident, held no later than two weeks after successful remediation, focused on learning and improving — never assigning blame.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Final Report Common Elements</caption>
+<thead><tr><th>Element</th><th>Contains</th></tr></thead>
+<tbody>
+<tr><td><strong>Executive summary</strong></td><td>High-level summary of key findings and essential facts</td></tr>
+<tr><td><strong>Timeline</strong></td><td>Detailed chronological sequence of events</td></tr>
+<tr><td><strong>Investigation</strong></td><td>Compilation of detection/analysis actions taken</td></tr>
+<tr><td><strong>Recommendations</strong></td><td>Suggested actions for future prevention</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-502</span></div>
+  <div class="ticket-body"><p>Approach every post-incident review without a blame-oriented mindset. Human errors are learning opportunities, not grounds for punishment — this cultural stance is what actually gets people to report honestly next time, which is far more valuable than assigning blame this time.</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs-3">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 3.1 — Pyramid of Pain Ranking</summary>
+  <div class="acc-body">
+    <p>Rank these IoCs from easiest to hardest for an attacker to change: TTPs, IP address, hash value, tool.</p>
+    <p><strong>Answer:</strong> Hash value (easiest to change) → IP address → Tool → TTPs (hardest to change).</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 3.2 — IoC or IoA?</summary>
+  <div class="acc-body">
+    <p>Classify each: (1) a process making an unexpected network connection right now; (2) the specific malicious IP address that process contacted; (3) the filename of the process itself.</p>
+    <p><strong>Answer key:</strong> 1 — IoA (behavioral, real-time). 2 and 3 — IoCs (specific, static evidence).</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Scenario Challenge 3.1 — Recovery Site Selection</summary>
+  <div class="acc-body">
+    <p>A financial services company needs its trading platform back online within minutes of any primary data center failure, no exceptions. Which recovery site type do they need, and why?</p>
+    <p><strong>Answer:</strong> A hot site — it's the only option that's fully operational and can activate immediately, matching the near-zero-downtime requirement.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview-3">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Intermediate Question</span><span class="ticket-id">INT-505</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Explain the Pyramid of Pain and why it matters for prioritizing detection efforts.</strong></p>
+    <p><strong>Ideal answer:</strong> "It ranks indicators of compromise by how much difficulty they cause an attacker when blocked. Blocking a hash or IP address is trivial for an attacker to work around — they just change one byte or switch IPs. But detecting and disrupting their actual tactics, techniques, and procedures forces them to fundamentally change how they operate, which is far more disruptive. It helps security teams prioritize detection investments toward the top of the pyramid when possible."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Scenario Question</span><span class="ticket-id">INT-506</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Walk me through how you'd triage two simultaneous alerts: one for ransomware on a single workstation, one for a phishing email reported by an employee who didn't click anything.</strong></p>
+    <p><strong>Ideal answer:</strong> "I'd prioritize the ransomware alert first — its functional impact (systems potentially encrypted), information impact (data at risk), and lower recoverability make it far more urgent than a reported-but-unclicked phishing email, which has essentially zero impact since the employee didn't interact with it. I'd still document and eventually address the phishing report, just not ahead of active ransomware."</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice-3">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which Pyramid of Pain level is hardest for an attacker to change?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Hash values</button>
+  <button class="opt" onclick="checkAnswer(this,false)">IP addresses</button>
+  <button class="opt" onclick="checkAnswer(this,true)">TTPs</button>
+  <div class="fb">Correct — TTPs represent an attacker's entire behavioral approach, the hardest thing to change.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: A lessons learned meeting should focus on assigning blame to responsible individuals.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — the focus should be on learning and improvement, not blame.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. Which recovery site type requires the most additional work before it's operational?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Hot site</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Warm site</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Cold site</button>
+  <div class="fb">Correct — cold sites have only basic infrastructure and need significant work to become operational.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision-3">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-503</span></div>
+  <div class="ticket-body"><p>Threat hunting + threat intelligence + cyber deception (honeypots) supplement automated detection. Zero Trust: never trust, always verify, least privilege, micro-segmentation. IoC (after the fact) vs. IoA (real-time behavior). Pyramid of Pain: hash values (easy) → IPs → domains → network artifacts → host artifacts → tools → TTPs (hard). Documentation benefits: transparency, standardization, clarity. Playbooks: non-automated/automated/semi-automated. Triage: receive&amp;assess → assign priority → collect&amp;analyze. CER phase: Containment → Eradication → Recovery. BCP ≠ disaster recovery plan. Recovery sites: hot/warm/cold. Post-incident: lessons learned meeting + final report, no blame.</p></div>
+</div>
+
+<div class="summary-block" id="summary-3">
+  <h4>Module Summary</h4>
+  <p>This module covered the full operational middle of incident response: better detection through threat hunting and the Pyramid of Pain, rigorous documentation and chain of custody, disciplined triage, and the containment-eradication-recovery sequence — closing with how organizations formally learn from every incident.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>Threat hunting and threat intelligence supplement automated detection tools, which can never catch everything.</li>
+    <li>The Pyramid of Pain helps teams prioritize detection efforts toward indicators that cost attackers the most to change.</li>
+    <li>Documentation and chain of custody aren't bureaucratic overhead — they determine whether evidence holds up legally.</li>
+    <li>Triage's three-step process ensures limited resources go to the most urgent incidents first.</li>
+    <li>Post-incident review works only when it's blame-free — that's what makes honest reporting possible next time.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives-3">◂ Back to Module 3 Objectives</a>
+  <a href="#module-4">Module 4 · Logs, IDS &amp; SIEM ▸</a>
+</div>
+
+<div class="endmark">— End of Module 3 —</div>
+<!-- ============================================================
+     MODULE 4 · WEEK 4 — LOGS, IDS & SIEM
+     ============================================================ -->
+<h2 class="module-head" id="module-4"><span class="tag">Module 4 · Week 4</span>Logs, Intrusion Detection Systems &amp; SIEM Tools</h2>
+
+<div class="objectives" id="objectives-4">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Explain logs, log management, and the trade-offs of log retention.</li>
+    <li>Read and interpret five major log formats: Syslog, JSON, XML, CSV, CEF.</li>
+    <li>Distinguish host-based (HIDS) from network-based (NIDS) intrusion detection systems.</li>
+    <li>Distinguish signature-based from anomaly-based detection methods.</li>
+    <li>Read and write basic Suricata rules, and interpret Suricata's alert logs.</li>
+    <li>Explain how SIEM tools ingest and normalize logs from multiple sources.</li>
+    <li>Write basic queries in Splunk's SPL and Chronicle's YARA-L/UDM search.</li>
+  </ul>
+</div>
+
+<h3 id="sec-4-1" data-n="4.1">Logs, Log Management &amp; Retention</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-528</span></div>
+  <div class="ticket-body">
+    <p><strong>Log:</strong> A record of events occurring within an organization's systems, used to identify vulnerabilities and potential security breaches.</p>
+    <p><strong>Log management:</strong> The ongoing process of collecting, storing, analyzing, and disposing of log data appropriately.</p>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Common Log Sources</caption>
+<thead><tr><th>Source</th><th>Records</th></tr></thead>
+<tbody>
+<tr><td><strong>Firewall logs</strong></td><td>Attempted/established/denied connections</td></tr>
+<tr><td><strong>Network logs</strong></td><td>Devices entering/leaving the network</td></tr>
+<tr><td><strong>Server logs</strong></td><td>Service events (web, email, file shares)</td></tr>
+<tr><td><strong>Application logs</strong></td><td>Events related to a specific software application</td></tr>
+<tr><td><strong>Endpoint logs</strong></td><td>Events occurring on a laptop, phone, tablet, or IoT device</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important — Log Retention Trade-offs</span><span class="ticket-id">IMP-504</span></div>
+  <div class="ticket-body"><p>Longer retention supports deeper historical investigation and regulatory compliance, but costs more in storage. Organizations must balance <strong>compliance requirements</strong> (some regulations mandate minimum retention periods), <strong>storage costs</strong>, and <strong>investigative usefulness</strong> when setting retention policy — there's no universal "correct" duration.</p></div>
+</div>
+
+<h3 id="sec-4-2" data-n="4.2">Log Formats: Syslog, JSON, XML, CSV &amp; CEF</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-529</span></div>
+  <div class="ticket-body"><p><strong>Syslog:</strong> Both a standard for message logging and a protocol enabling systems to send event messages across a network to a designated syslog server, widely used for consolidating logs from multiple sources.</p></div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Syslog Format</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>&lt;34&gt;1 2024-03-11T14:22:03Z host-01 sshd 1234 - Failed password for root from 203.0.113.9</code></pre>
+  <div class="code-note"><strong>Fields, in order:</strong> Priority value (facility + severity), version, timestamp, hostname, application name, process ID, message ID, and the structured message itself.</div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">JSON Log Format</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>{
+  "timestamp": "2024-03-11T14:22:03Z",
+  "host": "host-01",
+  "event": "auth_failure",
+  "user": "root",
+  "src_ip": "203.0.113.9"
+}</code></pre>
+  <div class="code-note"><strong>What this is:</strong> JavaScript Object Notation — human-readable, uses key-value pairs, and is widely used by web applications and APIs due to its flexibility and easy parsing by nearly every programming language.</div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">XML Log Format</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>&lt;event&gt;
+  &lt;timestamp&gt;2024-03-11T14:22:03Z&lt;/timestamp&gt;
+  &lt;host&gt;host-01&lt;/host&gt;
+  &lt;user&gt;root&lt;/user&gt;
+&lt;/event&gt;</code></pre>
+  <div class="code-note"><strong>What this is:</strong> Extensible Markup Language — uses nested tags to structure data, common in enterprise systems and older SIEM integrations, more verbose than JSON but strictly hierarchical.</div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">CSV Log Format</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>timestamp,host,user,src_ip
+2024-03-11T14:22:03Z,host-01,root,203.0.113.9</code></pre>
+  <div class="code-note"><strong>What this is:</strong> Comma-Separated Values — simple tabular format, easy to import into spreadsheets and SQL databases, but lacks native support for nested/complex data structures.</div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">CEF Log Format</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>CEF:0|Acme|Firewall|1.0|100|Failed Login|5|src=203.0.113.9 duser=root</code></pre>
+  <div class="code-note"><strong>What this is:</strong> Common Event Format — a standardized format specifically designed for security devices, used widely across SIEM platforms. Fields: CEF version, vendor, product, version, signature ID, name, severity, then extension key-value pairs.</div>
+</div>
+
+<div class="ticket examtip">
+  <div class="ticket-head"><span><span class="icon">🎯</span>Exam Tip</span><span class="ticket-id">EXM-503</span></div>
+  <div class="ticket-body"><p>Recognize each format by its shape even without labels: Syslog starts with a bracketed priority value; JSON uses curly braces and key-value pairs; XML uses nested angle-bracket tags; CSV is flat and comma-delimited; CEF always begins with the literal string "CEF:" followed by a pipe-delimited header.</p></div>
+</div>
+
+<h3 id="sec-4-3" data-n="4.3">HIDS vs. NIDS</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Comparison — Host-Based vs. Network-Based IDS</caption>
+<thead><tr><th>Type</th><th>Monitors</th><th>Deployment</th></tr></thead>
+<tbody>
+<tr><td><strong>HIDS (Host-based IDS)</strong></td><td>A single host/device — file integrity, system calls, local logs</td><td>Installed directly on the endpoint</td></tr>
+<tr><td><strong>NIDS (Network-based IDS)</strong></td><td>Network traffic across multiple hosts</td><td>Deployed at strategic network points (e.g., just inside a firewall)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket blueteam">
+  <div class="ticket-head"><span><span class="icon">🛡️</span>Blue Team Tip</span><span class="ticket-id">BT-502</span></div>
+  <div class="ticket-body"><p>HIDS and NIDS are complementary, not competing — a NIDS placed at the network perimeter won't see malicious activity happening entirely within an already-compromised host's local file system, and a HIDS on one machine can't see network-wide traffic patterns. Mature security programs deploy both.</p></div>
+</div>
+
+<h3 id="sec-4-4" data-n="4.4">Signature-Based vs. Anomaly-Based Detection</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Comparison — Signature-Based vs. Anomaly-Based Detection</caption>
+<thead><tr><th>Method</th><th>Mechanism</th><th>Strength</th><th>Weakness</th></tr></thead>
+<tbody>
+<tr><td><strong>Signature-based</strong></td><td>Matches traffic/files against a database of known malicious patterns</td><td>Low false positive rate for known threats</td><td>Cannot detect novel/zero-day threats without an existing signature</td></tr>
+<tr><td><strong>Anomaly-based</strong></td><td>Compares activity against an established baseline of normal behavior</td><td>Can detect novel, previously unseen threats</td><td>Higher false positive rate, since legitimate but unusual behavior can trigger alerts</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-4-5" data-n="4.5">Suricata Rules &amp; Logs</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-530</span></div>
+  <div class="ticket-body"><p><strong>Suricata:</strong> A free and open-source, signature-based NIDS/NIPS engine that inspects network traffic using externally developed rulesets, and can also function as an IPS by actively blocking matched traffic.</p></div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Suricata Rule Syntax</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>alert tcp any any -> $HOME_NET 22 (msg:"Possible SSH brute force"; flow:to_server; threshold:type both, track by_src, count 5, seconds 60; sid:1000001; rev:1;)</code></pre>
+  <div class="code-note"><strong>Breaking this down, left to right:</strong> <code>alert</code> is the action; <code>tcp</code> is the protocol; <code>any any</code> is the source IP/port; <code>-&gt;</code> indicates direction; <code>$HOME_NET 22</code> is the destination network variable and port; everything in parentheses is the rule options block, containing the message, flow direction, a threshold to reduce noisy repeated alerts, a unique signature ID (sid), and a revision number.</div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Core Suricata Rule Components</caption>
+<thead><tr><th>Component</th><th>Function</th></tr></thead>
+<tbody>
+<tr><td><strong>Action</strong></td><td>What happens on a match: alert, drop, pass, reject</td></tr>
+<tr><td><strong>Header</strong></td><td>Protocol, source/destination IP and port, direction operator</td></tr>
+<tr><td><strong>Rule options</strong></td><td>Everything in parentheses — msg, sid, rev, flow, threshold, and content matching</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Suricata Alert Log (EVE JSON)</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>{
+  "timestamp": "2024-03-11T14:22:03.112",
+  "src_ip": "203.0.113.9",
+  "dest_ip": "10.0.4.12",
+  "dest_port": 22,
+  "alert": {
+    "signature": "Possible SSH brute force",
+    "severity": 2
+  }
+}</code></pre>
+  <div class="code-note"><strong>What this shows:</strong> Suricata's EVE JSON output format logs matched alerts with full context — source/destination, the matched signature's message, and severity — directly consumable by a downstream SIEM tool.</div>
+</div>
+
+<h3 id="sec-4-6" data-n="4.6">SIEM Log Ingestion</h3>
+
+<p>Recall the three-step SIEM process from Module 1: collect, normalize, analyze. Normalization is precisely what allows a SIEM tool to compare a Syslog entry from a firewall against a JSON entry from a cloud application — translating both into one consistent internal schema.</p>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>SOC Insight</span><span class="ticket-id">SOC-502</span></div>
+  <div class="ticket-body"><p>A SIEM ingesting Suricata's EVE JSON alerts alongside Syslog firewall logs and CEF-formatted endpoint logs is a completely typical real-world setup — the whole point of the SIEM is to make these differently-shaped data sources queryable together in one place.</p></div>
+</div>
+
+<h3 id="sec-4-7" data-n="4.7">Querying with Splunk (SPL) &amp; Chronicle (YARA-L/UDM)</h3>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Splunk Query (SPL)</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>index=security_logs sourcetype=suricata alert.severity<=2
+| stats count by src_ip, alert.signature
+| sort -count</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Searches Suricata alerts with severity 2 or lower (higher priority), counts occurrences grouped by source IP and signature, sorted by frequency.<br><strong>Real SOC usage:</strong> This kind of query quickly surfaces which sources are triggering the most high-priority alerts — a natural starting point for daily triage.</div>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-531</span></div>
+  <div class="ticket-body">
+    <p><strong>Unified Data Model (UDM):</strong> Chronicle's standardized schema that all ingested logs are normalized into, regardless of original source format — enabling consistent searching across every log type.</p>
+    <p><strong>YARA-L:</strong> Chronicle's rule-writing language for detection logic, inspired by the YARA pattern-matching tool used widely in malware research.</p>
+  </div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Chronicle Search (UDM)</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>metadata.event_type = "NETWORK_CONNECTION"
+AND target.port = 22
+AND security_result.severity = "HIGH"</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Searches Chronicle's normalized UDM fields for high-severity network connection events targeting port 22 (SSH) — functionally similar to the Splunk query above, but expressed through Chronicle's UDM field naming convention rather than raw source fields.</div>
+</div>
+
+<div class="ticket examtip">
+  <div class="ticket-head"><span><span class="icon">🎯</span>Exam Tip</span><span class="ticket-id">EXM-504</span></div>
+  <div class="ticket-body"><p>Both queries above answer a nearly identical question — "show me high-priority SSH-related alerts" — using two different platforms' native syntax. Interviewers sometimes ask you to translate a plain-English request into whichever platform's syntax they use; understanding the shared underlying logic (filter → aggregate → sort) matters more than memorizing exact syntax for a specific vendor.</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs-4">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 4.1 — Log Format Identification</summary>
+  <div class="acc-body">
+    <div class="code-block">
+      <div class="code-head"><span class="lang">Unknown Log Format</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+      <pre><code>CEF:0|Acme|IDS|2.1|4001|Port Scan Detected|7|src=198.51.100.4 dst=10.0.0.5</code></pre>
+    </div>
+    <p><strong>Task:</strong> Identify this log format and name at least two of its structured fields.</p>
+    <p><strong>Answer:</strong> This is CEF (Common Event Format) — identifiable by the leading "CEF:" prefix. Structured fields include vendor (Acme), product (IDS), version (2.1), signature ID (4001), name (Port Scan Detected), and severity (7), followed by extension key-value pairs (src, dst).</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 4.2 — Suricata Rule Interpretation</summary>
+  <div class="acc-body">
+    <div class="code-block">
+      <div class="code-head"><span class="lang">Suricata Rule</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+      <pre><code>drop tcp $EXTERNAL_NET any -> $HOME_NET 3389 (msg:"Blocked external RDP attempt"; sid:1000002; rev:1;)</code></pre>
+    </div>
+    <p><strong>Task:</strong> What action does this rule take, and what is it protecting against?</p>
+    <p><strong>Answer:</strong> The action is <code>drop</code> — this rule actively blocks (not just alerts on) any traffic from outside the network attempting to reach port 3389 (RDP) inside the home network, functioning as an IPS rule rather than a passive IDS rule.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Portfolio Project 4.1 — Build a Detection-to-Response Chain</summary>
+  <div class="acc-body">
+    <p>Choose one named attack from earlier in this certificate (e.g., a SYN flood from Course III, or SQL injection from Course V). Write a one-page chain showing: (1) what log format would likely capture evidence of it, (2) a sample Suricata rule concept that could detect it, and (3) a sample SPL or UDM query that could surface it in a SIEM. Save this to your portfolio as a strong, technically deep capstone artifact.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview-4">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Beginner Question</span><span class="ticket-id">INT-507</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: What's the difference between signature-based and anomaly-based detection?</strong></p>
+    <p><strong>Ideal answer:</strong> "Signature-based detection matches traffic against a database of known malicious patterns — it's precise for known threats but blind to anything new. Anomaly-based detection compares activity against an established baseline of normal behavior, so it can catch novel or zero-day threats, but tends to generate more false positives since legitimate unusual behavior can also trigger it. Mature detection strategies use both together."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Technical Screening Question</span><span class="ticket-id">INT-508</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: You're given a Suricata rule and asked to explain what it does. Walk me through your process.</strong></p>
+    <p><strong>Ideal answer:</strong> "I'd break it into its three components: the action (alert, drop, pass, or reject) tells me what happens on a match; the header tells me the protocol, source/destination, and direction; and the rule options in parentheses give me the specific matching logic, message, and metadata like the signature ID. Reading left to right through those three pieces in order makes even an unfamiliar rule interpretable."</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice-4">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which log format is specifically designed for security devices and used widely across SIEM platforms?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">JSON</button>
+  <button class="opt" onclick="checkAnswer(this,true)">CEF</button>
+  <button class="opt" onclick="checkAnswer(this,false)">CSV</button>
+  <div class="fb">Correct — CEF (Common Event Format) was purpose-built for security devices.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: A HIDS can fully replace the need for a NIDS in an organization's network.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — they monitor different scopes (single host vs. network-wide) and are complementary, not interchangeable.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. In a Suricata rule, which component specifies what happens when traffic matches (e.g., alert, drop, pass)?</div>
+  <button class="opt" onclick="checkAnswer(this,true)">Action</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Header</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Rule options</button>
+  <div class="fb">Correct — the action is the first word of a Suricata rule, determining what happens on a match.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision-4">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-504</span></div>
+  <div class="ticket-body"><p>Log retention balances compliance, cost, and investigative value. 5 log formats: Syslog (bracketed priority), JSON (key-value), XML (nested tags), CSV (flat/comma), CEF (security-device standard, starts with "CEF:"). HIDS (single host) vs. NIDS (network-wide) are complementary. Signature-based (precise, known threats only) vs. anomaly-based (catches novel threats, more false positives) detection. Suricata rules: action + header + options (msg/sid/rev). SIEM normalizes all formats into one schema; Splunk uses SPL, Chronicle uses YARA-L/UDM.</p></div>
+</div>
+
+<div class="summary-block" id="summary-4">
+  <h4>Module Summary</h4>
+  <p>This module closed Course VI with the final technical layer: reading raw logs in five distinct formats, understanding HIDS/NIDS and signature/anomaly detection, writing and interpreting real Suricata rules, and querying normalized SIEM data with both Splunk's SPL and Chronicle's YARA-L/UDM.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>Log retention policy is a genuine trade-off between compliance, cost, and investigative usefulness — not a fixed rule.</li>
+    <li>Five log formats (Syslog, JSON, XML, CSV, CEF) each have a recognizable shape worth identifying on sight.</li>
+    <li>HIDS and NIDS, and signature-based and anomaly-based detection, are complementary pairs, not competing choices.</li>
+    <li>Suricata rules break cleanly into action, header, and options — a structure that makes even unfamiliar rules readable.</li>
+    <li>SIEM normalization is what makes cross-format querying possible; Splunk's SPL and Chronicle's YARA-L/UDM both express the same filter-aggregate-sort logic differently.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives-4">◂ Back to Module 4 Objectives</a>
+  <a href="#course-summary">Course Summary ▸</a>
+</div>
+
+<div class="endmark">— End of Module 4 —</div>
+
+<!-- ============================================================
+     COURSE SUMMARY
+     ============================================================ -->
+<h2 class="module-head" id="course-summary"><span class="tag">Course Summary</span>Sound the Alarm: Detection and Response — Complete</h2>
+
+<p>Course VI turned every concept from Courses I through V into operational practice: a structured incident response lifecycle, deep packet-level network analysis, disciplined detection and documentation, and the log formats and platform queries that make real SOC work possible day to day.</p>
+
+<div class="table-wrap">
+<table>
+<caption>Course VI — Module-by-Module Recap</caption>
+<thead><tr><th>Module</th><th>Core Theme</th><th>Signature Concepts</th></tr></thead>
+<tbody>
+<tr><td><strong>1. Incident Response Lifecycle</strong></td><td>The structural backbone of every response</td><td>NIST 4-phase lifecycle, CSIRT/SOC roles, IDS/IPS/EDR, true/false positive/negative, SIEM/SOAR</td></tr>
+<tr><td><strong>2. Network Traffic &amp; Packet Analysis</strong></td><td>Reading the wire directly</td><td>Baselines, data exfiltration chain, full IPv4/IPv6 headers, Wireshark filters, tcpdump syntax</td></tr>
+<tr><td><strong>3. Detection, Documentation &amp; Recovery</strong></td><td>Disciplined process end to end</td><td>Zero Trust, IoC/IoA, Pyramid of Pain, VirusTotal, chain of custody, triage, CER phase, recovery sites</td></tr>
+<tr><td><strong>4. Logs, IDS &amp; SIEM</strong></td><td>The technical toolchain in practice</td><td>5 log formats, HIDS/NIDS, signature/anomaly detection, Suricata rules, SPL/YARA-L queries</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket expert">
+  <div class="ticket-head"><span><span class="icon">🎓</span>Expert Note</span><span class="ticket-id">EXP-501</span></div>
+  <div class="ticket-body"><p>If you remember only five things from Course VI going into an interview: (1) the four-phase NIST lifecycle, cold, with the ability to apply it to any scenario given; (2) the difference between a false positive and false negative, and why the latter is more dangerous; (3) the Pyramid of Pain and why TTPs matter more than IP addresses; (4) how to read a basic Suricata rule's three components; (5) that SIEM normalization is what makes cross-format log querying possible at all. This course is the most interview-tested material in the entire certificate.</p></div>
+</div>
+
+<!-- ============================================================
+     FULL COURSE GLOSSARY
+     ============================================================ -->
+<h2 class="module-head" id="course-glossary"><span class="tag">Reference</span>Full Glossary — Weeks 1–4</h2>
+
+<div class="table-wrap">
+<table>
+<caption>Complete Course VI Glossary</caption>
+<thead><tr><th>Term</th><th>Definition</th></tr></thead>
+<tbody>
+<tr><td><strong>Baseline</strong></td><td>A reference point for expected/normal system, device, or network behavior</td></tr>
+<tr><td><strong>CEF (Common Event Format)</strong></td><td>A standardized log format for security devices, widely used across SIEM platforms</td></tr>
+<tr><td><strong>Chain of custody</strong></td><td>Documentation of evidence possession/control, establishing integrity, reliability, and accuracy</td></tr>
+<tr><td><strong>Command and Control (C2)</strong></td><td>Techniques used to maintain communication with compromised systems</td></tr>
+<tr><td><strong>Crowdsourcing</strong></td><td>Gathering information using public input and collaboration</td></tr>
+<tr><td><strong>CSIRT</strong></td><td>Computer Security Incident Response Team — specialized incident management professionals</td></tr>
+<tr><td><strong>Data exfiltration</strong></td><td>Unauthorized transmission of data from a system</td></tr>
+<tr><td><strong>EDR (Endpoint Detection and Response)</strong></td><td>An application monitoring/analyzing endpoint activity with behavioral analysis and automated response</td></tr>
+<tr><td><strong>Event</strong></td><td>An observable occurrence in a system/network, not inherently malicious</td></tr>
+<tr><td><strong>False negative</strong></td><td>Malicious activity that goes undetected — generally more dangerous than a false positive</td></tr>
+<tr><td><strong>False positive</strong></td><td>An alert incorrectly flagging benign activity as malicious</td></tr>
+<tr><td><strong>Honeypot</strong></td><td>A decoy system designed to attract and alert on intruders</td></tr>
+<tr><td><strong>Incident</strong></td><td>An occurrence jeopardizing CIA of information/systems, per NIST's formal definition</td></tr>
+<tr><td><strong>Incident Handler's Journal</strong></td><td>A tool for organized documentation during incident response and investigation</td></tr>
+<tr><td><strong>Indicators of Attack (IoA)</strong></td><td>Real-time behavioral evidence an incident is in progress</td></tr>
+<tr><td><strong>Indicators of Compromise (IoC)</strong></td><td>Observable evidence a security incident has already occurred</td></tr>
+<tr><td><strong>Lateral movement (pivoting)</strong></td><td>Exploring a network after initial access to find valuable assets</td></tr>
+<tr><td><strong>Lessons learned meeting</strong></td><td>A blame-free post-incident meeting focused on learning and improvement</td></tr>
+<tr><td><strong>Micro-segmentation</strong></td><td>Dividing a network into smaller segments, each with independent access controls</td></tr>
+<tr><td><strong>Network operations center (NOC)</strong></td><td>A unit maintaining network performance/availability, distinct from a SOC's security focus</td></tr>
+<tr><td><strong>Packet capture (p-cap)</strong></td><td>A file containing intercepted data packets from an interface or network</td></tr>
+<tr><td><strong>Promiscuous mode</strong></td><td>A NIC setting accepting all visible network traffic, not just traffic addressed to it</td></tr>
+<tr><td><strong>Pyramid of Pain</strong></td><td>A model ranking IoC types by how much difficulty blocking them causes attackers</td></tr>
+<tr><td><strong>Reverse DNS lookup</strong></td><td>Looking up a domain name associated with an IP address</td></tr>
+<tr><td><strong>Site resilience</strong></td><td>Ensuring availability of infrastructure during a disruption</td></tr>
+<tr><td><strong>SOAR</strong></td><td>Security Orchestration, Automation, and Response — automates response actions and can manage cases</td></tr>
+<tr><td><strong>Suricata</strong></td><td>A free, open-source signature-based NIDS/NIPS engine</td></tr>
+<tr><td><strong>Syslog</strong></td><td>A logging standard and protocol for sending event messages to a designated server</td></tr>
+<tr><td><strong>Threat hunting</strong></td><td>Proactively searching a network for threats detection tools may have missed</td></tr>
+<tr><td><strong>Threat Intelligence Platform (TIP)</strong></td><td>An application collecting/centralizing/analyzing threat intelligence from multiple sources</td></tr>
+<tr><td><strong>Triage</strong></td><td>Prioritizing incidents by importance or urgency</td></tr>
+<tr><td><strong>TTPs</strong></td><td>Tactics, Techniques, and Procedures — an attacker's full behavioral approach</td></tr>
+<tr><td><strong>UDM (Unified Data Model)</strong></td><td>Chronicle's standardized schema normalizing all ingested logs</td></tr>
+<tr><td><strong>Wireshark</strong></td><td>An open-source network protocol analyzer with a graphical user interface</td></tr>
+<tr><td><strong>YARA-L</strong></td><td>Chronicle's rule-writing language for detection logic</td></tr>
+<tr><td><strong>Zero Trust</strong></td><td>A security model built on "never trust, always verify," combining least privilege and micro-segmentation</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ============================================================
+     MASTER CHEAT SHEET
+     ============================================================ -->
+<h2 class="module-head" id="course-cheatsheet"><span class="tag">Reference</span>Master Cheat Sheet &amp; Revision Checklist</h2>
+
+<h4>Revision Checklist</h4>
+<div class="quiz" style="background:var(--paper-dim);">
+  <p>Before moving to Course VII, confirm you can do all of the following from memory:</p>
+  <ul>
+    <li>☐ Recite the 4-phase NIST incident response lifecycle and explain why it's cyclical</li>
+    <li>☐ Explain the difference between IDS, IPS, and EDR</li>
+    <li>☐ Explain why false negatives are more dangerous than false positives</li>
+    <li>☐ Write a basic Wireshark display filter and a basic tcpdump command</li>
+    <li>☐ Name all IPv4 and IPv6 header fields and their equivalences</li>
+    <li>☐ Explain the Pyramid of Pain and rank its 7 levels</li>
+    <li>☐ Distinguish IoC from IoA with an example of each</li>
+    <li>☐ Explain the triage process and the containment/eradication/recovery phase</li>
+    <li>☐ Identify all 5 log formats by their structural shape</li>
+    <li>☐ Explain the difference between signature-based and anomaly-based detection</li>
+  </ul>
+</div>
+
+<h4>Cybersecurity Terms Cheat Sheet — By Category</h4>
+<div class="table-wrap">
+<table>
+<tbody>
+<tr><td><strong>IR Lifecycle (4 Phases)</strong></td><td>Preparation, Detection &amp; Analysis, Containment/Eradication/Recovery, Post-Incident Activity</td></tr>
+<tr><td><strong>CSIRT Roles</strong></td><td>Security Analyst, Technical Lead, Incident Coordinator</td></tr>
+<tr><td><strong>SOC Tiers</strong></td><td>Tier 1 (triage), Tier 2 (investigation), Tier 3 (advanced/lead), Manager</td></tr>
+<tr><td><strong>Detection Tools</strong></td><td>IDS (detect), IPS (detect+block), EDR (detect+block+behavioral analysis)</td></tr>
+<tr><td><strong>Detection Categories</strong></td><td>True Positive, True Negative, False Positive, False Negative</td></tr>
+<tr><td><strong>Packet Structure</strong></td><td>Header, Payload, Footer</td></tr>
+<tr><td><strong>P-cap Formats</strong></td><td>Libpcap, WinPcap, Npcap, PCAPng</td></tr>
+<tr><td><strong>Wireshark Operators</strong></td><td>==, !=, &gt;, &lt;, &gt;=, &lt;=, contains, matches</td></tr>
+<tr><td><strong>tcpdump Options</strong></td><td>-i, -w, -r, -v/vv/vvv, -c, -n/nn</td></tr>
+<tr><td><strong>Pyramid of Pain (bottom→top)</strong></td><td>Hash Values, IP Addresses, Domain Names, Network Artifacts, Host Artifacts, Tools, TTPs</td></tr>
+<tr><td><strong>Zero Trust Principles</strong></td><td>No implicit trust, Verification, Least privilege, Continuous monitoring, Micro-segmentation</td></tr>
+<tr><td><strong>Recovery Sites</strong></td><td>Hot (immediate), Warm (quick), Cold (basic infrastructure only)</td></tr>
+<tr><td><strong>Log Formats</strong></td><td>Syslog, JSON, XML, CSV, CEF</td></tr>
+<tr><td><strong>IDS Types</strong></td><td>HIDS (host), NIDS (network)</td></tr>
+<tr><td><strong>Detection Methods</strong></td><td>Signature-based (known threats), Anomaly-based (novel threats)</td></tr>
+<tr><td><strong>SIEM Platforms</strong></td><td>Splunk (SPL), Chronicle (YARA-L/UDM)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="summary-block">
+  <h4>Where to Go Next</h4>
+  <ul>
+    <li><strong>Course VII — Automate Cybersecurity Tasks with Python</strong> takes the manual investigative skills from this course — filtering logs, checking IoCs, writing queries — and teaches you to automate them at scale using Python.</li>
+    <li>Add your Course VI portfolio artifacts (detection-to-response chain) to your growing collection — this is likely your most technically impressive artifact yet.</li>
+    <li>Revisit the NIST lifecycle and the Pyramid of Pain one week from now using spaced repetition — both are foundational to nearly every remaining interview scenario you'll encounter.</li>
+  </ul>
+</div>
+
+<div class="endmark">— End of Course VI: Sound the Alarm — Detection and Response —</div>
+</div>
+</main>
+<script>
+// progress bar
+window.addEventListener('scroll', function(){
+  var h = document.documentElement;
+  var scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+  document.getElementById('progress-fill').style.width = scrolled + '%';
+});
+
+// TOC drawer
+var drawer = document.getElementById('toc-drawer');
+var scrim = document.getElementById('scrim');
+document.getElementById('toc-toggle').addEventListener('click', function(){
+  drawer.classList.add('open'); scrim.classList.add('show');
+  this.setAttribute('aria-expanded','true');
+});
+document.getElementById('toc-close').addEventListener('click', closeDrawer);
+scrim.addEventListener('click', closeDrawer);
+function closeDrawer(){
+  drawer.classList.remove('open'); scrim.classList.remove('show');
+  document.getElementById('toc-toggle').setAttribute('aria-expanded','false');
+}
+
+// flashcards
+document.querySelectorAll('.flash').forEach(function(card){
+  function flip(){
+    card.classList.toggle('flipped');
+    card.setAttribute('aria-pressed', card.classList.contains('flipped'));
+  }
+  card.addEventListener('click', flip);
+  card.addEventListener('keypress', function(e){ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); flip(); } });
+});
+
+// quiz
+function checkAnswer(btn, isCorrect){
+  var quiz = btn.closest('.quiz');
+  var opts = quiz.querySelectorAll('.opt');
+  opts.forEach(function(o){ o.disabled = true; });
+  if(isCorrect){ btn.classList.add('correct'); }
+  else { btn.classList.add('wrong'); }
+  quiz.querySelector('.fb').classList.add('show');
+}
+
+// copy code
+function copyCode(btn){
+  var code = btn.closest('.code-block').querySelector('pre').innerText;
+  navigator.clipboard.writeText(code).then(function(){
+    var old = btn.innerText; btn.innerText = 'Copied!';
+    setTimeout(function(){ btn.innerText = old; }, 1500);
+  });
+}
+
+// scroll-spy for TOC + spine
+var spySections = document.querySelectorAll('[id]');
+var tocLinks = document.querySelectorAll('#toc-drawer a[href^="#"]');
+var spineTabs = document.querySelectorAll('#spine .spine-tab');
+var moduleIds = ['module-1','module-2','module-3','module-4'];
+window.addEventListener('scroll', function(){
+  var current = '';
+  spySections.forEach(function(sec){
+    var rect = sec.getBoundingClientRect();
+    if(rect.top < 150) current = sec.id;
+  });
+  tocLinks.forEach(function(link){
+    link.classList.remove('current');
+    if(link.getAttribute('href') === '#' + current) link.classList.add('current');
+  });
+  // determine which module we're currently in for the spine rail
+  var currentModule = 'module-1';
+  moduleIds.forEach(function(mid){
+    var el = document.getElementById(mid);
+    if(el && el.getBoundingClientRect().top < 150) currentModule = mid;
+  });
+  spineTabs.forEach(function(tab){
+    tab.classList.remove('active');
+    if(tab.getAttribute('href') === '#' + currentModule) tab.classList.add('active');
+  });
+});
+</script>
+
+  <script src="../../js/storage.js" defer></script>
+  <script src="../../js/reader.js" defer></script>
+</body>
+</html>

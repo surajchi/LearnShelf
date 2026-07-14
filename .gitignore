@@ -1,0 +1,21 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*~
+
+# Logs / temp
+*.log
+.tmp/
+scratchpad/
+
+# Local dev servers may write these
+.cache/
+
+# Note: this project has NO build step and NO node_modules by design.

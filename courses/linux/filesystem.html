@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Linux Filesystem — LearnShelf</title>
+  <meta name="description" content="How the Linux filesystem is organised and how to navigate it from the shell." />
+  <meta name="color-scheme" content="light dark" />
+
+  <link rel="stylesheet" href="../../css/main.css" />
+  <link rel="stylesheet" href="../../css/components.css" />
+
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("learnshelf:theme")
+          || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="../../index.html" aria-label="LearnShelf home">
+        <span class="brand__mark" aria-hidden="true">📚</span>
+        <span class="brand__name">LearnShelf</span>
+      </a>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="../../index.html">Home</a>
+      <span class="breadcrumb__sep" aria-hidden="true">/</span>
+      <a href="../../index.html?course=linux">Linux</a>
+      <span class="breadcrumb__sep" aria-hidden="true">/</span>
+      <span>The Linux Filesystem</span>
+    </nav>
+
+    <article class="reading">
+      <h1>The Linux Filesystem</h1>
+
+      <p>
+        In Linux, <strong>everything is a file</strong> — documents, devices,
+        even directories. All files live in a single tree that starts at the
+        <strong>root</strong>, written as <code>/</code>. There are no drive
+        letters like <code>C:</code>; every disk is mounted somewhere inside
+        that one tree.
+      </p>
+
+      <h2>Key directories</h2>
+      <ul>
+        <li><code>/</code> — the root of everything.</li>
+        <li><code>/home</code> — user home folders (<code>/home/alice</code>).</li>
+        <li><code>/etc</code> — system configuration files.</li>
+        <li><code>/bin</code>, <code>/usr/bin</code> — installed programs.</li>
+        <li><code>/var</code> — logs and changing data.</li>
+        <li><code>/tmp</code> — temporary files, cleared on reboot.</li>
+      </ul>
+
+      <h2>Where am I?</h2>
+      <p>
+        Your <em>current directory</em> is where the shell is "standing".
+        Print it with:
+      </p>
+
+      <pre><code>pwd        # e.g. /home/alice</code></pre>
+
+      <h2>Moving around</h2>
+      <p>Use <code>cd</code> (change directory):</p>
+
+      <pre><code>cd /etc        # go to an absolute path
+cd Documents   # go into a subfolder (relative)
+cd ..          # go up one level
+cd ~           # go to your home folder
+cd -           # go back to the previous folder</code></pre>
+
+      <h2>Absolute vs relative paths</h2>
+      <ul>
+        <li>
+          <strong>Absolute</strong> paths start at root:
+          <code>/home/alice/notes.txt</code>. Same meaning everywhere.
+        </li>
+        <li>
+          <strong>Relative</strong> paths start from where you are:
+          <code>notes.txt</code> or <code>../photos</code>.
+        </li>
+      </ul>
+
+      <h2>Listing and inspecting</h2>
+      <pre><code>ls          # list files
+ls -a       # include hidden files (start with .)
+ls -l       # long format: permissions, owner, size, date
+ls -lh      # sizes in human-readable units (KB, MB)</code></pre>
+
+      <h2>Creating and removing</h2>
+      <pre><code>mkdir projects        # make a directory
+touch notes.txt       # make an empty file
+cp a.txt b.txt        # copy
+mv a.txt archive/     # move or rename
+rm notes.txt          # remove a file
+rm -r projects        # remove a directory and its contents</code></pre>
+
+      <p>
+        <strong>Careful:</strong> <code>rm</code> does not use a recycle bin.
+        Deleted means gone.
+      </p>
+
+      <h2>Summary</h2>
+      <ul>
+        <li>One tree, rooted at <code>/</code> — no drive letters.</li>
+        <li><code>pwd</code> shows where you are; <code>cd</code> moves you.</li>
+        <li>Absolute paths start at <code>/</code>; relative paths do not.</li>
+        <li><code>ls</code>, <code>mkdir</code>, <code>cp</code>, <code>mv</code>, <code>rm</code> manage files.</li>
+      </ul>
+
+      <p>
+        <a href="introduction.html">← Linux Introduction</a>
+      </p>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <span>📚 LearnShelf</span>
+      <a href="../../index.html?course=linux">← Back to Linux</a>
+    </div>
+  </footer>
+
+  <script src="../../js/storage.js" defer></script>
+  <script src="../../js/reader.js" defer></script>
+</body>
+</html>

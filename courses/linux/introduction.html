@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Linux Introduction — LearnShelf</title>
+  <meta name="description" content="What Linux is, why it matters, and how to open and use the shell." />
+  <meta name="color-scheme" content="light dark" />
+
+  <link rel="stylesheet" href="../../css/main.css" />
+  <link rel="stylesheet" href="../../css/components.css" />
+
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("learnshelf:theme")
+          || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="../../index.html" aria-label="LearnShelf home">
+        <span class="brand__mark" aria-hidden="true">📚</span>
+        <span class="brand__name">LearnShelf</span>
+      </a>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="../../index.html">Home</a>
+      <span class="breadcrumb__sep" aria-hidden="true">/</span>
+      <a href="../../index.html?course=linux">Linux</a>
+      <span class="breadcrumb__sep" aria-hidden="true">/</span>
+      <span>Introduction</span>
+    </nav>
+
+    <article class="reading">
+      <h1>Linux Introduction</h1>
+
+      <p>
+        <strong>Linux</strong> is a free, open-source operating system kernel
+        first released by Linus Torvalds in 1991. Paired with system tools it
+        becomes a full operating system — a <em>distribution</em> — such as
+        Ubuntu, Debian, Fedora, or Arch. It runs most of the world's servers,
+        Android phones, routers, and supercomputers.
+      </p>
+
+      <h2>Why learn Linux?</h2>
+      <ul>
+        <li>It powers the servers you will deploy code to.</li>
+        <li>The command line is fast, scriptable, and repeatable.</li>
+        <li>Skills transfer across every distribution and cloud provider.</li>
+      </ul>
+
+      <h2>The shell</h2>
+      <p>
+        You talk to Linux through a <strong>shell</strong> — a program that
+        reads commands and runs them. The most common shell is
+        <code>bash</code>. When you open a terminal you see a
+        <em>prompt</em>, waiting for input:
+      </p>
+
+      <pre><code>user@machine:~$ </code></pre>
+
+      <p>Type a command and press Enter. Try these first three:</p>
+
+      <pre><code>whoami     # print your username
+pwd        # print working directory (where you are)
+ls         # list files in the current directory</code></pre>
+
+      <h2>Anatomy of a command</h2>
+      <p>Most commands follow the same shape:</p>
+
+      <pre><code>command  -options  arguments</code></pre>
+
+      <p>For example:</p>
+
+      <pre><code>ls -l /home</code></pre>
+
+      <ul>
+        <li><code>ls</code> — the command (list).</li>
+        <li><code>-l</code> — an option (long, detailed format).</li>
+        <li><code>/home</code> — an argument (which directory to list).</li>
+      </ul>
+
+      <h2>Getting help</h2>
+      <p>
+        Every command documents itself. Use <code>man</code> (manual) or
+        <code>--help</code>:
+      </p>
+
+      <pre><code>man ls
+ls --help</code></pre>
+
+      <h2>Summary</h2>
+      <ul>
+        <li>Linux is an open-source OS running most servers and devices.</li>
+        <li>You control it through a shell such as <code>bash</code>.</li>
+        <li>Commands take the form: <code>command -options arguments</code>.</li>
+        <li>Use <code>man</code> or <code>--help</code> when stuck.</li>
+      </ul>
+
+      <p>
+        Next: <a href="filesystem.html">The Linux Filesystem →</a>
+      </p>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <span>📚 LearnShelf</span>
+      <a href="../../index.html?course=linux">← Back to Linux</a>
+    </div>
+  </footer>
+
+  <script src="../../js/storage.js" defer></script>
+  <script src="../../js/reader.js" defer></script>
+</body>
+</html>

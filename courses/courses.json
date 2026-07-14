@@ -1,0 +1,11 @@
+{
+  "$comment": "Course discovery manifest. A static host cannot list directories, so app.js reads this first to learn which course folders exist, then fetches each courses/<slug>/course.json. To add a course: create the folder + its course.json, then add its slug to this array.",
+  "courses": [
+    "cybersecurity",
+    "linux",
+    "docker",
+    "kubernetes",
+    "nginx",
+    "django"
+  ]
+}

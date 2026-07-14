@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LearnShelf — Learn CS from YouTube, beautifully</title>
+  <meta name="description" content="A personal, offline-friendly documentation platform for learning Computer Science from YouTube transcripts." />
+  <meta name="color-scheme" content="light dark" />
+
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+
+  <!--
+    Anti-FOUC theme init. Runs before first paint so the correct theme is set
+    immediately. Kept inline and tiny on purpose; the full storage API lives in
+    js/storage.js. Falls back to the OS preference when nothing is saved.
+  -->
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem("learnshelf:theme");
+        var theme = saved
+          || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", theme);
+      } catch (e) {
+        /* localStorage unavailable (e.g. file://, privacy mode) — keep default */
+      }
+    })();
+  </script>
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ===================== Header ===================== -->
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="index.html" aria-label="LearnShelf home">
+        <span class="brand__mark" aria-hidden="true">📚</span>
+        <span class="brand__name">LearnShelf</span>
+      </a>
+
+      <div class="header-spacer"></div>
+
+      <button
+        id="theme-toggle"
+        class="icon-btn"
+        type="button"
+        aria-label="Toggle dark mode"
+        title="Toggle dark mode"
+      >
+        <span aria-hidden="true">🌓</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ===================== Hero + search ===================== -->
+    <section class="hero container">
+      <h1 class="hero__title">Learn Computer Science, beautifully.</h1>
+      <p class="hero__subtitle">
+        Clean, searchable documentation built from YouTube playlists.
+        Read at your own pace — your progress stays with you.
+      </p>
+
+      <div class="hero__search">
+        <div class="search">
+          <span class="search__icon" aria-hidden="true">🔍</span>
+          <label class="visually-hidden" for="search-input">Search courses and chapters</label>
+          <input
+            id="search-input"
+            class="search__input"
+            type="search"
+            placeholder="Search courses, chapters, or tags…"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!--
+      Dynamic sections. Each is populated by js/app.js from the course manifest
+      and user state; each hides itself when it has nothing to show. The markup
+      here is only the scaffold — never hardcode cards.
+    -->
+
+    <!-- Search results (hidden until the user types) -->
+    <section id="search-results-section" class="section container is-hidden" aria-live="polite">
+      <div class="section__header">
+        <h2 class="section__title">Search results</h2>
+        <span class="section__hint" id="search-results-count"></span>
+      </div>
+      <div id="search-results" class="grid"></div>
+    </section>
+
+    <!-- Continue learning -->
+    <section id="continue-section" class="section container is-hidden">
+      <div class="section__header">
+        <h2 class="section__title">Continue learning</h2>
+      </div>
+      <div id="continue-grid" class="grid"></div>
+    </section>
+
+    <!-- Favorites -->
+    <section id="favorites-section" class="section container is-hidden">
+      <div class="section__header">
+        <h2 class="section__title">Favorites</h2>
+      </div>
+      <div id="favorites-grid" class="grid"></div>
+    </section>
+
+    <!-- All courses -->
+    <section id="courses-section" class="section container">
+      <div class="section__header">
+        <h2 class="section__title">All courses</h2>
+        <span class="section__hint" id="courses-count"></span>
+      </div>
+      <div id="courses-grid" class="grid" aria-busy="true">
+        <!-- app.js renders course cards here. Fallback message if it never does: -->
+        <p class="empty-state" id="courses-loading">Loading courses…</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== Footer ===================== -->
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <span>📚 LearnShelf — built with plain HTML, CSS &amp; JavaScript.</span>
+      <span>Content generated from YouTube transcripts · Hosted on GitHub Pages</span>
+    </div>
+  </footer>
+
+  <!--
+    Scripts load in dependency order and defer so parsing isn't blocked:
+    storage (state) → ui (render) → search (filter) → app (orchestrator).
+  -->
+  <script src="js/storage.js" defer></script>
+  <script src="js/ui.js" defer></script>
+  <script src="js/search.js" defer></script>
+  <script src="js/app.js" defer></script>
+</body>
+</html>

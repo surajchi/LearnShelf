@@ -1,0 +1,20 @@
+{
+  "title": "Linux",
+  "description": "Linux fundamentals and administration — from first login to managing the filesystem, users, and processes with confidence.",
+  "icon": "🐧",
+  "difficulty": "Beginner",
+  "chapters": [
+    {
+      "title": "Linux Introduction",
+      "file": "introduction.html",
+      "duration": "20 mins",
+      "tags": ["linux", "beginner", "shell"]
+    },
+    {
+      "title": "The Linux Filesystem",
+      "file": "filesystem.html",
+      "duration": "25 mins",
+      "tags": ["linux", "filesystem", "navigation"]
+    }
+  ]
+}

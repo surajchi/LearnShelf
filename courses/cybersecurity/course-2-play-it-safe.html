@@ -1,0 +1,2116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course II · Play It Safe — Manage Security Risks — Complete Course (Modules 1–4)</title>
+<style>
+/* ============================================================
+   DESIGN SYSTEM — "CASE FILE" — SOC Reference Book
+   Palette: ink #0B0F14, paper #F7F5F0, panel #16202B, signal teal #2DD4BF,
+            warning amber #F59E0B, critical red #EF4444, wire blue #5B8DEF
+   Type: display = geometric sans, body = humanist serif, mono = code/log
+   ============================================================ */
+:root{
+  --ink:#0B0F14;
+  --paper:#F7F5F0;
+  --paper-dim:#EDE9E0;
+  --panel:#16202B;
+  --panel-2:#1E2B38;
+  --line:#D8D2C4;
+  --line-dark:#2A3A48;
+  --signal:#0F9E93;
+  --signal-bright:#2DD4BF;
+  --warn:#B4700A;
+  --warn-bright:#F59E0B;
+  --crit:#C4342A;
+  --crit-bright:#EF4444;
+  --wire:#3457B2;
+  --wire-bright:#5B8DEF;
+  --ink-soft:#3A4650;
+  --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
+  --sans: -apple-system, 'Segoe UI', 'Inter', Avenir, Helvetica, Arial, sans-serif;
+  --mono: 'SF Mono', 'JetBrains Mono', Consolas, 'Courier New', monospace;
+  --maxw: 780px;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:17px;
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+
+::selection{background:var(--signal-bright); color:var(--ink);}
+
+/* ---------- progress bar (signal-strength style) ---------- */
+#progress-track{
+  position:fixed; top:0; left:0; right:0; height:4px; z-index:500;
+  background:var(--paper-dim);
+  border-bottom:1px solid var(--line);
+}
+#progress-fill{
+  height:100%; width:0%;
+  background:repeating-linear-gradient(90deg, var(--signal) 0 6px, var(--signal-bright) 6px 12px);
+  transition:width .1s linear;
+}
+
+/* ---------- spine rail (left nav) ---------- */
+#spine{
+  position:fixed; top:0; left:0; bottom:0; width:64px; z-index:400;
+  background:var(--ink);
+  border-right:1px solid var(--line-dark);
+  display:flex; flex-direction:column; align-items:center;
+  padding-top:24px; gap:4px;
+  font-family:var(--mono);
+}
+#spine .spine-mark{
+  writing-mode:vertical-rl; text-orientation:mixed;
+  color:var(--signal-bright); font-size:11px; letter-spacing:.15em;
+  margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid var(--line-dark);
+  text-transform:uppercase;
+}
+#spine .spine-tab{
+  width:40px; height:40px; border-radius:3px;
+  display:flex; align-items:center; justify-content:center;
+  color:#6B7A85; font-size:13px; font-weight:700;
+  border:1px solid transparent; cursor:pointer; text-decoration:none;
+  transition:all .15s ease;
+}
+#spine .spine-tab:hover{border-color:var(--line-dark); color:var(--paper);}
+#spine .spine-tab.active{background:var(--panel-2); color:var(--signal-bright); border-color:var(--signal);}
+#toc-toggle{
+  margin-top:auto; margin-bottom:20px; width:40px; height:40px;
+  border-radius:3px; border:1px solid var(--line-dark); background:none;
+  color:#6B7A85; cursor:pointer; font-size:16px;
+}
+#toc-toggle:hover{color:var(--signal-bright); border-color:var(--signal);}
+
+@media (max-width: 860px){
+  #spine{width:44px; padding-top:16px;}
+  #spine .spine-mark{display:none;}
+  #spine .spine-tab{width:30px; height:30px; font-size:11px;}
+}
+
+/* ---------- TOC drawer ---------- */
+#toc-drawer{
+  position:fixed; top:0; left:-380px; bottom:0; width:340px; z-index:450;
+  background:var(--panel); color:var(--paper);
+  padding:32px 28px; overflow-y:auto;
+  transition:left .25s ease;
+  box-shadow:8px 0 30px rgba(0,0,0,.35);
+  font-family:var(--sans);
+}
+#toc-drawer.open{left:64px;}
+@media (max-width:860px){ #toc-drawer.open{left:44px;} }
+#toc-drawer h3{
+  font-family:var(--mono); text-transform:uppercase; letter-spacing:.12em;
+  font-size:12px; color:var(--signal-bright); margin:0 0 18px;
+  border-bottom:1px solid var(--line-dark); padding-bottom:12px;
+}
+#toc-drawer .toc-course{font-size:13px; font-weight:700; margin:18px 0 6px; color:#9FB1BE;}
+#toc-drawer ol{list-style:none; margin:0 0 8px; padding:0;}
+#toc-drawer li a{
+  display:block; padding:7px 8px; border-radius:4px; color:#C9D3DA;
+  text-decoration:none; font-size:13.5px; line-height:1.4;
+  border-left:2px solid transparent;
+}
+#toc-drawer li a:hover{background:var(--panel-2); border-left-color:var(--signal-bright); color:#fff;}
+#toc-drawer li a.current{border-left-color:var(--signal-bright); color:var(--signal-bright); background:var(--panel-2);}
+#toc-close{
+  position:absolute; top:28px; right:24px; background:none; border:none;
+  color:#9FB1BE; font-size:20px; cursor:pointer;
+}
+#scrim{position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:440; display:none;}
+#scrim.show{display:block;}
+
+/* ---------- layout ---------- */
+main{margin-left:64px; padding:0 24px 120px;}
+@media (max-width:860px){ main{margin-left:44px; padding:0 16px 100px;} }
+.page{max-width:var(--maxw); margin:0 auto; padding-top:56px;}
+
+/* ---------- cover ---------- */
+.cover{
+  min-height:92vh; display:flex; flex-direction:column; justify-content:center;
+  border-bottom:3px solid var(--ink); padding-bottom:48px; margin-bottom:56px;
+}
+.cover-eyebrow{
+  font-family:var(--mono); font-size:12.5px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--signal); margin-bottom:18px; display:flex; align-items:center; gap:10px;
+}
+.cover-eyebrow::before{content:"";width:28px;height:2px;background:var(--signal-bright);display:inline-block;}
+.cover h1{
+  font-family:var(--sans); font-size:clamp(2.4rem, 6vw, 4rem); font-weight:800;
+  line-height:1.05; margin:0 0 14px; letter-spacing:-.02em; color:var(--ink);
+}
+.cover .subtitle{
+  font-family:var(--serif); font-style:italic; font-size:1.35rem; color:var(--ink-soft);
+  margin:0 0 36px; max-width:640px;
+}
+.cover-svg-wrap{margin:8px 0 40px;}
+.cover-meta{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:0;
+  border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+}
+.cover-meta div{padding:16px 18px; border-right:1px solid var(--line);}
+.cover-meta div:last-child{border-right:none;}
+.cover-meta .k{font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.1em; color:#8A8272; margin-bottom:5px;}
+.cover-meta .v{font-family:var(--sans); font-size:14.5px; font-weight:700; color:var(--ink);}
+
+.cover-block{margin-top:36px;}
+.cover-block h4{
+  font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.12em;
+  color:var(--signal); margin:0 0 10px;
+}
+.cover-block ul{margin:0; padding-left:20px;}
+.cover-block li{margin-bottom:6px; font-size:15.5px;}
+
+/* ---------- headings ---------- */
+h2.module-head{
+  font-family:var(--sans); font-size:2.1rem; font-weight:800; letter-spacing:-.01em;
+  margin:64px 0 6px; padding-top:40px; border-top:3px solid var(--ink);
+  page-break-before:always;
+}
+h2.module-head .tag{
+  display:block; font-family:var(--mono); font-size:12px; letter-spacing:.15em;
+  text-transform:uppercase; color:var(--signal); font-weight:700; margin-bottom:10px;
+}
+h3{
+  font-family:var(--sans); font-size:1.42rem; font-weight:800; margin:42px 0 14px;
+  color:var(--ink); letter-spacing:-.005em;
+  display:flex; align-items:baseline; gap:10px;
+}
+h3::before{
+  content:attr(data-n); font-family:var(--mono); font-size:.65em; color:var(--signal);
+  font-weight:700;
+}
+h4{font-family:var(--sans); font-weight:700; font-size:1.08rem; margin:28px 0 10px; color:var(--ink);}
+p{margin:0 0 16px;}
+strong{color:var(--ink); font-weight:700;}
+a{color:var(--wire);}
+
+/* ---------- objectives box ---------- */
+.objectives{
+  background:var(--ink); color:var(--paper); border-radius:6px; padding:28px 30px;
+  margin:24px 0 40px; font-family:var(--sans);
+}
+.objectives h4{
+  font-family:var(--mono); color:var(--signal-bright); text-transform:uppercase;
+  letter-spacing:.12em; font-size:12px; margin:0 0 16px;
+}
+.objectives ul{margin:0; padding-left:0; list-style:none;}
+.objectives li{
+  position:relative; padding-left:26px; margin-bottom:10px; font-size:15px; color:#DCE3E8;
+}
+.objectives li::before{content:"▸"; position:absolute; left:0; color:var(--signal-bright);}
+
+/* ---------- callouts: "case-file ticket" signature element ---------- */
+.ticket{
+  border:1.5px solid var(--ink); border-radius:4px; margin:26px 0; position:relative;
+  background:#fff; overflow:hidden; font-family:var(--sans);
+}
+.ticket-head{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:9px 16px; font-family:var(--mono); font-size:11px; letter-spacing:.08em;
+  text-transform:uppercase; font-weight:700; color:#fff;
+}
+.ticket-id{opacity:.85; font-weight:400;}
+.ticket-body{padding:16px 18px; font-size:15px; line-height:1.6;}
+.ticket-body p:last-child{margin-bottom:0;}
+.ticket.def .ticket-head{background:var(--wire);}
+.ticket.important .ticket-head{background:var(--ink);}
+.ticket.remember .ticket-head{background:#6B4FBB;}
+.ticket.interview .ticket-head{background:var(--signal);}
+.ticket.warning .ticket-head{background:var(--warn);}
+.ticket.alert .ticket-head{background:var(--crit);}
+.ticket.industry .ticket-head{background:#8A5A2B;}
+.ticket.bestpractice .ticket-head{background:#1E7A4C;}
+.ticket.compliance .ticket-head{background:#3A5A78;}
+.ticket.examtip .ticket-head{background:#B0862B;}
+.ticket.soc .ticket-head{background:#0F5E6B;}
+.ticket.threatintel .ticket-head{background:#7A1F3D;}
+.ticket.blueteam .ticket-head{background:#1D4E89;}
+.ticket.redteam .ticket-head{background:#8C1C1C;}
+.ticket.quickrev .ticket-head{background:#4C6444;}
+.ticket.deepdive .ticket-head{background:#2C2C54;}
+.ticket.expert .ticket-head{background:#5C4033;}
+.ticket.incident .ticket-head{background:#7A1F3D;}
+.ticket .icon{margin-right:6px;}
+
+/* ---------- ELI5 ---------- */
+.eli5{
+  border-left:4px solid var(--warn-bright); background:#FFF8ED; border-radius:0 6px 6px 0;
+  padding:18px 22px; margin:22px 0; font-family:var(--serif);
+}
+.eli5 .eli5-tag{
+  font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.1em;
+  color:var(--warn); font-weight:700; margin-bottom:8px; display:block;
+}
+
+/* ---------- multi-level explanation ---------- */
+.levels{margin:26px 0; border:1px solid var(--line); border-radius:6px; overflow:hidden;}
+.level{padding:16px 20px; border-bottom:1px solid var(--line);}
+.level:last-child{border-bottom:none;}
+.level .lv-tag{
+  font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.1em;
+  font-weight:700; margin-bottom:6px; display:inline-block; padding:2px 8px; border-radius:3px;
+}
+.level.l1{background:#FFF8ED;} .level.l1 .lv-tag{background:var(--warn-bright); color:#3A2A00;}
+.level.l2{background:#F2F7FF;} .level.l2 .lv-tag{background:var(--wire-bright); color:#0A1A3A;}
+.level.l3{background:#EFFAF8;} .level.l3 .lv-tag{background:var(--signal-bright); color:#00302B;}
+.level.l4{background:#F7F0FA;} .level.l4 .lv-tag{background:#B27FE0; color:#2A0A3A;}
+.level p{margin:0; font-size:15px;}
+
+/* ---------- tables ---------- */
+.table-wrap{overflow-x:auto; margin:24px 0;}
+table{width:100%; border-collapse:collapse; font-family:var(--sans); font-size:14px;}
+caption{
+  caption-side:top; text-align:left; font-family:var(--mono); font-size:11px;
+  text-transform:uppercase; letter-spacing:.1em; color:var(--signal); margin-bottom:8px; font-weight:700;
+}
+th{
+  background:var(--ink); color:var(--paper); text-align:left; padding:10px 14px;
+  font-weight:700; font-size:12.5px; text-transform:uppercase; letter-spacing:.04em;
+}
+td{padding:10px 14px; border-bottom:1px solid var(--line); vertical-align:top;}
+tr:nth-child(even) td{background:var(--paper-dim);}
+
+/* ---------- code blocks ---------- */
+.code-block{margin:22px 0; border-radius:6px; overflow:hidden; border:1px solid var(--line-dark);}
+.code-head{
+  background:var(--panel); color:#9FB1BE; font-family:var(--mono); font-size:11.5px;
+  padding:8px 14px; display:flex; justify-content:space-between; align-items:center;
+  border-bottom:1px solid var(--line-dark);
+}
+.code-head .lang{color:var(--signal-bright); text-transform:uppercase; letter-spacing:.08em;}
+.copy-btn{
+  background:var(--panel-2); border:1px solid var(--line-dark); color:#C9D3DA;
+  font-family:var(--mono); font-size:11px; padding:3px 10px; border-radius:3px; cursor:pointer;
+}
+.copy-btn:hover{border-color:var(--signal-bright); color:var(--signal-bright);}
+pre{
+  margin:0; background:var(--ink); color:#D9E4EA; padding:16px 18px; overflow-x:auto;
+  font-family:var(--mono); font-size:13.5px; line-height:1.6;
+}
+pre code{counter-reset:line;}
+.code-note{
+  background:var(--paper-dim); border-top:1px solid var(--line); padding:10px 16px;
+  font-family:var(--sans); font-size:13px; color:var(--ink-soft);
+}
+
+/* ---------- svg figure ---------- */
+figure{margin:28px 0; text-align:center;}
+figure svg{max-width:100%; height:auto;}
+figcaption{
+  font-family:var(--mono); font-size:11.5px; color:var(--ink-soft); margin-top:10px;
+  text-transform:uppercase; letter-spacing:.06em;
+}
+
+/* ---------- flashcards ---------- */
+.flash-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin:24px 0;}
+.flash{
+  border:1px solid var(--line); border-radius:6px; padding:16px; cursor:pointer;
+  background:#fff; min-height:96px; position:relative; font-family:var(--sans);
+  transition:box-shadow .15s;
+}
+.flash:hover{box-shadow:0 4px 14px rgba(0,0,0,.08);}
+.flash .front{font-weight:700; font-size:14.5px;}
+.flash .back{
+  display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);
+  font-family:var(--serif); font-size:14px; color:var(--ink-soft);
+}
+.flash.flipped .back{display:block;}
+.flash .hint{
+  position:absolute; top:12px; right:12px; font-family:var(--mono); font-size:9.5px;
+  color:#B0A996; text-transform:uppercase;
+}
+
+/* ---------- accordion ---------- */
+details.acc{border:1px solid var(--line); border-radius:6px; margin:12px 0; overflow:hidden;}
+details.acc summary{
+  padding:13px 18px; cursor:pointer; font-family:var(--sans); font-weight:700; font-size:14.5px;
+  background:var(--paper-dim); list-style:none; display:flex; justify-content:space-between;
+}
+details.acc summary::-webkit-details-marker{display:none;}
+details.acc summary::after{content:"+"; color:var(--signal); font-size:18px;}
+details.acc[open] summary::after{content:"–";}
+details.acc .acc-body{padding:16px 18px; font-size:15px;}
+
+/* ---------- MCQ / practice ---------- */
+.quiz{border:1px solid var(--line); border-radius:6px; padding:18px 20px; margin:16px 0; background:#fff;}
+.quiz .q{font-weight:700; font-family:var(--sans); margin-bottom:10px; font-size:14.5px;}
+.quiz .opt{
+  display:block; width:100%; text-align:left; padding:9px 12px; margin-bottom:6px;
+  border:1px solid var(--line); border-radius:4px; background:var(--paper); cursor:pointer;
+  font-family:var(--sans); font-size:14px;
+}
+.quiz .opt:hover{border-color:var(--wire);}
+.quiz .opt.correct{background:#E6F7EE; border-color:var(--signal); font-weight:700;}
+.quiz .opt.wrong{background:#FBEAEA; border-color:var(--crit);}
+.quiz .fb{margin-top:8px; font-size:13.5px; font-family:var(--sans); color:var(--ink-soft); display:none;}
+.quiz .fb.show{display:block;}
+
+/* ---------- summary / takeaway blocks ---------- */
+.summary-block{
+  background:var(--panel); color:var(--paper); border-radius:8px; padding:30px 32px; margin:36px 0;
+  font-family:var(--sans);
+}
+.summary-block h4{color:var(--signal-bright); font-family:var(--mono); text-transform:uppercase; letter-spacing:.1em; font-size:12px;}
+.summary-block ul{padding-left:20px; margin:12px 0 0;}
+.summary-block li{margin-bottom:8px; font-size:14.5px; color:#DCE3E8;}
+
+/* footer nav */
+.module-nav{
+  display:flex; justify-content:space-between; margin-top:60px; padding-top:24px;
+  border-top:1px solid var(--line); font-family:var(--sans); font-size:13.5px;
+}
+.module-nav a{text-decoration:none; color:var(--ink); font-weight:700;}
+.endmark{
+  text-align:center; font-family:var(--mono); font-size:11px; color:#B0A996;
+  letter-spacing:.15em; text-transform:uppercase; margin:80px 0 20px;
+}
+
+/* print */
+@media print{
+  #spine, #toc-drawer, #progress-track, #scrim, .copy-btn{display:none !important;}
+  main{margin-left:0;}
+  body{font-size:12pt;}
+  .ticket, .levels, .objectives, .summary-block{break-inside:avoid;}
+  h2.module-head{page-break-before:always;}
+  a{color:inherit; text-decoration:none;}
+}
+
+/* accessibility */
+:focus-visible{outline:3px solid var(--signal); outline-offset:2px;}
+.skip-link{
+  position:absolute; left:-999px; top:0; background:var(--ink); color:#fff; padding:10px 16px; z-index:900;
+}
+.skip-link:focus{left:70px; top:8px;}
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main-content">Skip to content</a>
+
+<div id="progress-track"><div id="progress-fill"></div></div>
+
+<nav id="spine" aria-label="Course navigation">
+  <div class="spine-mark">COURSE II</div>
+  <a class="spine-tab" href="#module-1" title="Module 1 · Threats, Risks &amp; Vulnerabilities">M1</a>
+  <a class="spine-tab" href="#module-2" title="Module 2 · Frameworks, Controls &amp; Audits">M2</a>
+  <a class="spine-tab" href="#module-3" title="Module 3 · SIEM Tools &amp; Dashboards">M3</a>
+  <a class="spine-tab" href="#module-4" title="Module 4 · Incident Response Playbooks">M4</a>
+  <button id="toc-toggle" aria-label="Open table of contents" aria-expanded="false">☰</button>
+</nav>
+
+<div id="scrim"></div>
+<aside id="toc-drawer" aria-label="Table of contents">
+  <button id="toc-close" aria-label="Close table of contents">✕</button>
+  <h3>Course II — Play It Safe: Manage Security Risks</h3>
+  <div class="toc-course">Module 1 · Threats, Risks &amp; Vulnerabilities</div>
+  <ol>
+    <li><a href="#module-1" class="current">Cover &amp; Module 1 start</a></li>
+    <li><a href="#sec-1">1.1 CISSP Domains Revisited: Risk, Asset &amp; IAM</a></li>
+    <li><a href="#sec-2">1.2 Threat, Risk &amp; Vulnerability Formally Defined</a></li>
+    <li><a href="#sec-3">1.3 Asset Risk Levels: Low, Medium, High</a></li>
+    <li><a href="#sec-4">1.4 The Three Layers of the Web</a></li>
+    <li><a href="#sec-5">1.5 Key Impacts: Financial, Identity Theft, Reputation</a></li>
+    <li><a href="#sec-6">1.6 NIST Risk Management Framework (7 Steps)</a></li>
+    <li><a href="#sec-7">1.7 Risk Management Strategies</a></li>
+    <li><a href="#sec-8">1.8 Common Threats, Risks &amp; Named Vulnerabilities</a></li>
+    <li><a href="#labs">Labs &amp; Exercises</a></li>
+    <li><a href="#interview">Interview Prep</a></li>
+    <li><a href="#practice">Practice Section</a></li>
+    <li><a href="#revision">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Module 2 · Frameworks, Controls &amp; Audits</div>
+  <ol>
+    <li><a href="#module-2">Module 2 start</a></li>
+    <li><a href="#sec-2-1">2.1 Frameworks &amp; Controls Revisited</a></li>
+    <li><a href="#sec-2-2">2.2 Encryption, Authentication &amp; Authorization</a></li>
+    <li><a href="#sec-2-3">2.3 CTF &amp; ISO/IEC 27001</a></li>
+    <li><a href="#sec-2-4">2.4 Physical, Technical &amp; Administrative Controls</a></li>
+    <li><a href="#sec-2-5">2.5 CIA Triad in the Workplace</a></li>
+    <li><a href="#sec-2-6">2.6 NIST CSF's Five Core Functions</a></li>
+    <li><a href="#sec-2-7">2.7 OWASP Security Principles</a></li>
+    <li><a href="#sec-2-8">2.8 Planning &amp; Conducting a Security Audit</a></li>
+    <li><a href="#labs-2">Labs &amp; Exercises</a></li>
+    <li><a href="#interview-2">Interview Prep</a></li>
+    <li><a href="#practice-2">Practice Section</a></li>
+    <li><a href="#revision-2">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary-2">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Module 3 · SIEM Tools &amp; Dashboards</div>
+  <ol>
+    <li><a href="#module-3">Module 3 start</a></li>
+    <li><a href="#sec-3-1">3.1 Logs: Firewall, Network &amp; Server</a></li>
+    <li><a href="#sec-3-2">3.2 SIEM Tools Deep Dive</a></li>
+    <li><a href="#sec-3-3">3.3 SIEM Dashboards &amp; Metrics</a></li>
+    <li><a href="#sec-3-4">3.4 The Future of SIEM: Cloud, IoT &amp; SOAR</a></li>
+    <li><a href="#sec-3-5">3.5 Self-Hosted vs. Cloud-Hosted vs. Hybrid SIEM</a></li>
+    <li><a href="#sec-3-6">3.6 Open-Source vs. Proprietary Tools</a></li>
+    <li><a href="#sec-3-7">3.7 Splunk Dashboards</a></li>
+    <li><a href="#sec-3-8">3.8 Chronicle Dashboards</a></li>
+    <li><a href="#labs-3">Labs &amp; Exercises</a></li>
+    <li><a href="#interview-3">Interview Prep</a></li>
+    <li><a href="#practice-3">Practice Section</a></li>
+    <li><a href="#revision-3">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary-3">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Module 4 · Incident Response Playbooks</div>
+  <ol>
+    <li><a href="#module-4">Module 4 start</a></li>
+    <li><a href="#sec-4-1">4.1 What Playbooks Are &amp; Why They Exist</a></li>
+    <li><a href="#sec-4-2">4.2 Four Types of Playbooks</a></li>
+    <li><a href="#sec-4-3">4.3 The Six-Phase Incident Response Lifecycle</a></li>
+    <li><a href="#sec-4-4">4.4 Playbooks as Living Documents</a></li>
+    <li><a href="#sec-4-5">4.5 Worked Example: Malware Alert Walkthrough</a></li>
+    <li><a href="#sec-4-6">4.6 Playbooks + SIEM + SOAR</a></li>
+    <li><a href="#labs-4">Labs &amp; Exercises</a></li>
+    <li><a href="#interview-4">Interview Prep</a></li>
+    <li><a href="#practice-4">Practice Section</a></li>
+    <li><a href="#revision-4">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary-4">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Course Reference</div>
+  <ol>
+    <li><a href="#course-summary">Course Summary</a></li>
+    <li><a href="#course-glossary">Full Glossary (Weeks 1–4)</a></li>
+    <li><a href="#course-cheatsheet">Master Cheat Sheet</a></li>
+  </ol>
+</aside>
+
+<main id="main-content">
+<div class="page" id="course-page">
+
+<!-- ================= COVER ================= -->
+<section class="cover">
+  <div class="cover-eyebrow">Google Cybersecurity Certificate · Premium Edition</div>
+  <h1>Course II<br>Play It Safe: Manage Security Risks</h1>
+  <p class="subtitle">Risk isn't a feeling — it's a formula. This is the book that teaches you to calculate it, control it, and respond when it goes wrong anyway.</p>
+
+  <div class="cover-svg-wrap">
+    <svg viewBox="0 0 700 220" width="100%" role="img" aria-label="Illustration of a balance scale weighing a threat icon against a shield icon, representing risk management">
+      <rect x="0" y="0" width="700" height="220" fill="#F7F5F0"/>
+      <!-- scale stand -->
+      <line x1="350" y1="40" x2="350" y2="170" stroke="#0B0F14" stroke-width="4"/>
+      <line x1="270" y1="170" x2="430" y2="170" stroke="#0B0F14" stroke-width="4"/>
+      <line x1="120" y1="70" x2="580" y2="70" stroke="#0B0F14" stroke-width="3"/>
+      <circle cx="350" cy="70" r="6" fill="#0B0F14"/>
+      <!-- left pan: risk/threat -->
+      <line x1="120" y1="70" x2="120" y2="120" stroke="#8A8272" stroke-width="1.5"/>
+      <line x1="120" y1="120" x2="80" y2="140" stroke="#8A8272" stroke-width="1.5"/>
+      <line x1="120" y1="120" x2="160" y2="140" stroke="#8A8272" stroke-width="1.5"/>
+      <path d="M70 140 Q120 165 170 140 L160 148 Q120 168 80 148 Z" fill="#C4342A"/>
+      <text x="120" y="190" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700" fill="#0B0F14">Threat</text>
+      <!-- right pan: control/shield -->
+      <line x1="580" y1="70" x2="580" y2="110" stroke="#8A8272" stroke-width="1.5"/>
+      <line x1="580" y1="110" x2="540" y2="130" stroke="#8A8272" stroke-width="1.5"/>
+      <line x1="580" y1="110" x2="620" y2="130" stroke="#8A8272" stroke-width="1.5"/>
+      <path d="M530 130 Q580 152 630 130 L620 138 Q580 156 540 138 Z" fill="#0F9E93"/>
+      <text x="580" y="180" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700" fill="#0B0F14">Control</text>
+      <text x="350" y="25" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="700" fill="#0B0F14">Risk = Likelihood × Impact</text>
+    </svg>
+  </div>
+
+  <div class="cover-meta">
+    <div><div class="k">Reading Time</div><div class="v">~4 hrs / module</div></div>
+    <div><div class="k">Difficulty</div><div class="v">Beginner–Intermediate</div></div>
+    <div><div class="k">Prerequisites</div><div class="v">Course I</div></div>
+    <div><div class="k">Modules</div><div class="v">4 (Weeks 1–4)</div></div>
+  </div>
+
+  <div class="cover-block">
+    <h4>Learning Objectives — Whole Course</h4>
+    <ul>
+      <li>Apply the eight CISSP domains to real risk-management scenarios.</li>
+      <li>Distinguish threat, risk, and vulnerability precisely, and classify assets by risk level.</li>
+      <li>Apply the NIST Risk Management Framework's seven steps and the NIST CSF's five core functions.</li>
+      <li>Explain how frameworks, controls, and compliance combine in a real internal security audit.</li>
+      <li>Read and interpret SIEM dashboards (Splunk and Chronicle) to identify security-relevant patterns.</li>
+      <li>Walk through all six phases of an incident response playbook from preparation to coordination.</li>
+    </ul>
+  </div>
+
+  <div class="cover-block">
+    <h4>Skills Gained</h4>
+    <ul>
+      <li>Risk classification and asset valuation (low/medium/high risk)</li>
+      <li>OWASP security principles applied to daily analyst tasks</li>
+      <li>Security audit planning: scope, goals, controls assessment, compliance check</li>
+      <li>SIEM dashboard literacy across two major platforms (Splunk, Chronicle)</li>
+      <li>Incident response playbook execution, phase by phase</li>
+    </ul>
+  </div>
+
+  <div class="cover-block">
+    <h4>Career Relevance</h4>
+    <p>This is the course where "SOC Analyst" starts to feel real. Interviewers routinely ask candidates to walk through NIST CSF's five functions or the six phases of incident response from memory — both are core material here. The named vulnerabilities (Log4Shell, ZeroLogon, ProxyLogon) also show up frequently as "have you heard of..." screening questions.</p>
+  </div>
+</section>
+
+<!-- ================= PREFACE ================= -->
+<h2 class="module-head"><span class="tag">Preface</span>How to Use This Course</h2>
+
+<p>Course I gave you vocabulary. Course II gives you a way to <em>think</em>: every security decision, from a firewall rule to a password policy, is ultimately a bet about likelihood and impact. This course teaches you to make that bet consciously instead of by instinct — and to have a playbook ready for when the bet doesn't pay off.</p>
+
+<div class="ticket deepdive">
+  <div class="ticket-head"><span><span class="icon">🧭</span>Deep Dive</span><span class="ticket-id">DD-100</span></div>
+  <div class="ticket-body">
+    <p><strong>Recommended study strategy:</strong> Module 1's risk vocabulary (threat/risk/vulnerability, low/medium/high asset risk) is the foundation every later module builds on — don't rush it. Modules 3 and 4 are the most "hands-on-feeling" of the certificate so far; read them with a specific SIEM dashboard screenshot or example in mind if you can find one.</p>
+    <p><strong>Lab recommendation:</strong> Start thinking now about setting up a personal lab environment (a free-tier cloud VM or a local VM running Linux) — you'll need it starting in Course IV, and having it ready makes Course III's networking material much easier to absorb.</p>
+    <p><strong>Interview preparation:</strong> Be ready to recite the NIST CSF's five functions (Identify, Protect, Detect, Respond, Recover) and the six incident response phases (Preparation, Detection and Analysis, Containment, Eradication and Recovery, Post-Incident Activity, Coordination) without hesitation — these are the two most commonly tested memorized sequences in this entire certificate.</p>
+    <p><strong>Certification preparation:</strong> This course aligns closely with CompTIA Security+ Domain 4 (Security Operations) and Domain 5 (Security Program Management and Oversight).</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODULE 1 · WEEK 1 — THREATS, RISKS & VULNERABILITIES
+     ============================================================ -->
+<h2 class="module-head" id="module-1"><span class="tag">Module 1 · Week 1</span>Navigate Threats, Risks &amp; Vulnerabilities</h2>
+
+<div class="objectives" id="objectives">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Explain the risk-management, asset security, and IAM domains in applied, scenario-based terms.</li>
+    <li>Precisely distinguish threat, risk, and vulnerability, and explain why both a threat and a vulnerability must exist for risk to exist.</li>
+    <li>Classify assets as low-risk, medium-risk, or high-risk.</li>
+    <li>Describe the surface web, deep web, and dark web and their relevance to security work.</li>
+    <li>Identify the three key impacts of threats, risks, and vulnerabilities on organizations.</li>
+    <li>Recite and apply the seven steps of the NIST Risk Management Framework.</li>
+    <li>Name the four risk management strategies and explain when each applies.</li>
+    <li>Identify at least four named real-world vulnerabilities (ProxyLogon, ZeroLogon, Log4Shell, PetitPotam).</li>
+  </ul>
+</div>
+
+<h3 id="sec-1" data-n="1.1">Revisiting the CISSP Domains: Risk, Asset &amp; Identity Management</h3>
+
+<p>Course I introduced all eight CISSP domains at a glance. This module goes deeper into three that anchor day-to-day risk management work: Security and Risk Management, Asset Security, and Identity and Access Management (IAM).</p>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-101</span></div>
+  <div class="ticket-body">
+    <p><strong>Risk management (domain):</strong> Focuses on defining security goals and objectives, risk mitigation, compliance, business continuity, and legal regulations.</p>
+    <p><strong>Risk mitigation:</strong> Having the right procedures and rules in place to quickly reduce the impact of a risk, such as a breach.</p>
+    <p><strong>Business continuity:</strong> An organization's ability to maintain everyday productivity by establishing risk disaster recovery plans.</p>
+  </div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Airport</span>
+  <p>Think of an airport's risk-management team: they don't just react when a storm grounds flights — they have a written plan for exactly that scenario, worked out in advance, so passengers get rebooked smoothly instead of chaos breaking out at the gate. Business continuity is that pre-written plan, for organizations instead of airports.</p>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-102</span></div>
+  <div class="ticket-body">
+    <p><strong>Information Security (InfoSec):</strong> A set of processes established to secure information, including incident response, vulnerability management, application security, cloud security, and infrastructure security.</p>
+    <p><strong>Shared responsibility:</strong> All individuals within an organization take an active role in lowering risk and maintaining physical and virtual security — not just the security team.</p>
+  </div>
+</div>
+
+<p>Asset Security governs the full lifecycle of data and physical assets — storage, maintenance, retention, and destruction. A concrete entry-level task here might be overseeing the destruction of old hard drives so private data can't be recovered by a threat actor after disposal.</p>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-103</span></div>
+  <div class="ticket-body">
+    <p><strong>Identity and Access Management (IAM):</strong> Focuses on keeping data secure by ensuring user identities are trusted and authenticated, and that access to physical and logical assets is properly authorized.</p>
+  </div>
+</div>
+
+<p>IAM breaks into four components, worth memorizing precisely because interviewers frequently ask you to define each separately:</p>
+
+<div class="table-wrap">
+<table>
+<caption>The Four Components of IAM</caption>
+<thead><tr><th>Component</th><th>Definition</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td><strong>Identification</strong></td><td>A user verifies who they are by providing a username, access card, or biometric data</td><td>Swiping an employee badge</td></tr>
+<tr><td><strong>Authentication</strong></td><td>The verification process to prove a person's identity</td><td>Entering a password or PIN</td></tr>
+<tr><td><strong>Authorization</strong></td><td>Determines the user's level of access after identity is confirmed</td><td>A finance employee can view payroll data; an intern cannot</td></tr>
+<tr><td><strong>Accountability</strong></td><td>Monitoring and recording user actions to prove proper system/data use</td><td>Reviewing login-attempt logs after an incident</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning</span><span class="ticket-id">WRN-101</span></div>
+  <div class="ticket-body"><p>If everyone at a company shares the same administrator login, accountability collapses entirely — in the event of a breach, it becomes impossible to separate valid user activity from a threat actor's activity. This single anti-pattern shows up constantly in real breach postmortems.</p></div>
+</div>
+
+<h4>Memory Trick</h4>
+<p><strong>"I Am Authorized to Account"</strong> → <strong>I</strong>dentification, <strong>A</strong>uthentication, <strong>A</strong>uthorization, <strong>A</strong>ccountability — in that exact order, because each step depends on the one before it.</p>
+
+<h3 id="sec-2" data-n="1.2">Threat, Risk &amp; Vulnerability — Formally Defined</h3>
+
+<p>Course I used these terms informally. Here they get precise, testable definitions that show up constantly in interviews.</p>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-104</span></div>
+  <div class="ticket-body">
+    <p><strong>Threat:</strong> Any circumstance or event that can negatively impact assets.</p>
+    <p><strong>Risk:</strong> Anything that can impact the confidentiality, integrity, or availability of an asset — think of risk as the <em>likelihood</em> of a threat occurring.</p>
+    <p><strong>Vulnerability:</strong> A weakness that can be exploited by a threat.</p>
+  </div>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-101</span></div>
+  <div class="ticket-body"><p>Both a vulnerability <em>and</em> a threat must be present for there to be a risk. A locked door with no burglars nearby carries little risk; a neighborhood full of burglars is not risky to a house with no doors at all (a strange example, but the logic holds) — risk only materializes where the two intersect.</p></div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — Being Late to Work</span>
+  <p>Google's own course materials use this analogy, and it's a good one: think of <strong>risk</strong> as being late to work, and <strong>threats</strong> as traffic, an accident, or a flat tire. The threats exist independently — traffic happens whether or not you're driving through it — but your <em>risk</em> of being late depends on the likelihood any of those threats actually affects your commute today.</p>
+</div>
+
+<figure>
+<svg viewBox="0 0 640 220" width="100%" role="img" aria-label="Venn diagram showing Threat and Vulnerability overlapping to create Risk">
+  <rect x="0" y="0" width="640" height="220" fill="#F7F5F0"/>
+  <circle cx="260" cy="110" r="90" fill="#3457B2" opacity="0.75"/>
+  <circle cx="380" cy="110" r="90" fill="#0F9E93" opacity="0.75"/>
+  <text x="200" y="115" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="700" fill="#fff">Threat</text>
+  <text x="440" y="115" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="700" fill="#fff">Vulnerability</text>
+  <text x="320" y="118" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#fff">RISK</text>
+  <text x="320" y="200" text-anchor="middle" font-family="monospace" font-size="11" fill="#3A4650">Risk exists only in the overlap — where a real threat meets an exploitable weakness</text>
+</svg>
+<figcaption>Figure 1.1 — Risk as the intersection of threat and vulnerability</figcaption>
+</figure>
+
+<h3 id="sec-3" data-n="1.3">Asset Risk Levels: Low, Medium, High</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Asset Risk Classification</caption>
+<thead><tr><th>Level</th><th>Definition</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td><strong>Low-Risk Asset</strong></td><td>Information that would not harm reputation or operations, and would not cause financial damage if compromised</td><td>Public website content, published research data</td></tr>
+<tr><td><strong>Medium-Risk Asset</strong></td><td>Non-public information that may cause some damage to finances, reputation, or operations</td><td>Early release of quarterly earnings, internal memos</td></tr>
+<tr><td><strong>High-Risk Asset</strong></td><td>Information protected by regulations or laws; compromise would severely harm finances, operations, or reputation</td><td>Leaked SPII, PII, or intellectual property</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>SOC Insight</span><span class="ticket-id">SOC-101</span></div>
+  <div class="ticket-body"><p>Asset classification directly drives triage priority. When a SIEM fires two simultaneous alerts — one touching a public marketing page, one touching a customer SSN database — the risk tier tells you instantly which one gets your attention first, independent of how "loud" either alert looks on the dashboard.</p></div>
+</div>
+
+<h3 id="sec-4" data-n="1.4">The Three Layers of the Web</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Surface Web vs. Deep Web vs. Dark Web</caption>
+<thead><tr><th>Layer</th><th>Access Method</th><th>Example</th><th>Security Relevance</th></tr></thead>
+<tbody>
+<tr><td><strong>Surface Web</strong></td><td>Standard web browser</td><td>Public websites, news sites</td><td>Where most phishing lures and public reconnaissance happen</td></tr>
+<tr><td><strong>Deep Web</strong></td><td>Requires authorization</td><td>An organization's intranet</td><td>Where legitimate internal business data lives, behind access controls</td></tr>
+<tr><td><strong>Dark Web</strong></td><td>Requires special software (e.g., Tor)</td><td>Hidden marketplaces</td><td>Where stolen data, ransomware negotiations, and criminal forums operate</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Library, One More Time</span>
+  <p>The <strong>surface web</strong> is the library's public reading room — anyone can walk in. The <strong>deep web</strong> is the staff-only back office — you need a badge. The <strong>dark web</strong> is like a hidden room accessible only through a secret door that regular visitors don't even know exists — and it has a reputation for being where less scrupulous business gets done.</p>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-102</span></div>
+  <div class="ticket-body"><p>Don't assume "deep web" and "dark web" are synonyms — this is one of the most common mix-ups outside the security field. The deep web is enormous and mostly mundane (any password-protected page qualifies); the dark web is a small, specially-accessed subset associated with anonymity and, frequently, criminal activity.</p></div>
+</div>
+
+<h3 id="sec-5" data-n="1.5">Key Impacts of Threats, Risks &amp; Vulnerabilities</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-105</span></div>
+  <div class="ticket-body"><p><strong>Ransomware</strong> (revisited): A malicious attack where threat actors encrypt an organization's data and demand payment to restore access — freezing systems and locking confidential data until a decryption key is provided. Ransom negotiations and data leaks often occur through the dark web.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Three Key Impacts on Organizations</caption>
+<thead><tr><th>Impact</th><th>What It Involves</th></tr></thead>
+<tbody>
+<tr><td><strong>Financial Impact</strong></td><td>Interrupted production/services, remediation cost, and regulatory fines for non-compliance</td></tr>
+<tr><td><strong>Identity Theft</strong></td><td>Stolen PII sold or leaked via the dark web, exploiting its secrecy to avoid legal consequences</td></tr>
+<tr><td><strong>Damage to Reputation</strong></td><td>Customers moving to competitors, negative press, and potential legal penalties on top of the reputational harm itself</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-6" data-n="1.6">NIST's Risk Management Framework — Seven Steps</h3>
+
+<p>This sequence recurs constantly across the certificate and in real job interviews — commit it to memory in order.</p>
+
+<figure>
+<svg viewBox="0 0 640 340" width="100%" role="img" aria-label="Diagram of the seven steps of the NIST Risk Management Framework in sequence: Prepare, Categorize, Select, Implement, Assess, Authorize, Monitor">
+  <rect x="0" y="0" width="640" height="340" fill="#F7F5F0"/>
+  <text x="320" y="26" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="700" fill="#0B0F14">NIST Risk Management Framework — 7 Steps</text>
+  <g font-family="sans-serif" font-size="12" font-weight="700" fill="#fff">
+    <rect x="30" y="50" width="150" height="42" rx="5" fill="#3457B2"/><text x="105" y="76" text-anchor="middle">1. Prepare</text>
+    <rect x="30" y="105" width="150" height="42" rx="5" fill="#0F9E93"/><text x="105" y="131" text-anchor="middle">2. Categorize</text>
+    <rect x="30" y="160" width="150" height="42" rx="5" fill="#B4700A"/><text x="105" y="186" text-anchor="middle">3. Select</text>
+    <rect x="245" y="50" width="150" height="42" rx="5" fill="#0B0F14"/><text x="320" y="76" text-anchor="middle">4. Implement</text>
+    <rect x="245" y="105" width="150" height="42" rx="5" fill="#6B4FBB"/><text x="320" y="131" text-anchor="middle">5. Assess</text>
+    <rect x="245" y="160" width="150" height="42" rx="5" fill="#7A1F3D"/><text x="320" y="186" text-anchor="middle">6. Authorize</text>
+    <rect x="460" y="105" width="150" height="42" rx="5" fill="#1E7A4C"/><text x="535" y="131" text-anchor="middle">7. Monitor</text>
+  </g>
+  <path d="M180 71 L245 71" stroke="#0B0F14" stroke-width="2" marker-end="url(#a2b)"/>
+  <path d="M180 126 L245 126" stroke="#0B0F14" stroke-width="2" marker-end="url(#a2b)"/>
+  <path d="M180 181 L245 181" stroke="#0B0F14" stroke-width="2" marker-end="url(#a2b)"/>
+  <path d="M395 181 L460 181 L460 147" stroke="#0B0F14" stroke-width="2" marker-end="url(#a2b)"/>
+  <defs><marker id="a2b" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#0B0F14"/></marker></defs>
+  <text x="320" y="310" text-anchor="middle" font-family="monospace" font-size="11" fill="#3A4650">Monitor feeds back into Prepare — the cycle never truly ends</text>
+</svg>
+<figcaption>Figure 1.2 — NIST RMF's seven steps</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<caption>NIST RMF — Seven Steps Explained</caption>
+<thead><tr><th>Step</th><th>Meaning</th><th>Entry-Level Example</th></tr></thead>
+<tbody>
+<tr><td><strong>1. Prepare</strong></td><td>Activities necessary to manage risk before a breach occurs</td><td>Monitoring for risks, identifying applicable controls</td></tr>
+<tr><td><strong>2. Categorize</strong></td><td>Develop risk management processes/tasks based on CIA impact</td><td>Following established org processes to reduce risk to customer data</td></tr>
+<tr><td><strong>3. Select</strong></td><td>Choose, customize, and document controls</td><td>Keeping a playbook up to date</td></tr>
+<tr><td><strong>4. Implement</strong></td><td>Put security/privacy plans into action</td><td>Changing password requirements after noticing frequent reset requests</td></tr>
+<tr><td><strong>5. Assess</strong></td><td>Determine if controls are implemented correctly</td><td>Identifying weaknesses in current tools/procedures</td></tr>
+<tr><td><strong>6. Authorize</strong></td><td>Be accountable for remaining security/privacy risks</td><td>Generating reports, developing action plans and milestones</td></tr>
+<tr><td><strong>7. Monitor</strong></td><td>Stay aware of ongoing system operations</td><td>Daily assessment of whether systems still meet security goals</td></tr>
+</tbody>
+</table>
+</div>
+
+<h4>Memory Trick</h4>
+<p><strong>"Please Categorize Security Items After Authorizing Monitoring"</strong> → <strong>P</strong>repare, <strong>C</strong>ategorize, <strong>S</strong>elect, <strong>I</strong>mplement, <strong>A</strong>ssess, <strong>A</strong>uthorize, <strong>M</strong>onitor.</p>
+
+<h3 id="sec-7" data-n="1.7">Risk Management Strategies</h3>
+
+<div class="flash-grid">
+  <div class="flash" tabindex="0" role="button" aria-pressed="false"><span class="hint">tap to flip</span>
+    <div class="front">Acceptance</div>
+    <div class="back">Accepting a risk to avoid disrupting business continuity — used when the cost of mitigation exceeds the potential impact.</div>
+  </div>
+  <div class="flash" tabindex="0" role="button" aria-pressed="false"><span class="hint">tap to flip</span>
+    <div class="front">Avoidance</div>
+    <div class="back">Creating a plan to avoid the risk altogether — e.g., not offering a feature that would introduce unacceptable exposure.</div>
+  </div>
+  <div class="flash" tabindex="0" role="button" aria-pressed="false"><span class="hint">tap to flip</span>
+    <div class="front">Transference</div>
+    <div class="back">Transferring risk to a third party to manage — the classic example is purchasing cybersecurity insurance.</div>
+  </div>
+  <div class="flash" tabindex="0" role="button" aria-pressed="false"><span class="hint">tap to flip</span>
+    <div class="front">Mitigation</div>
+    <div class="back">Lessening the impact of a known risk — the most common day-to-day strategy: patching, training, access control.</div>
+  </div>
+</div>
+
+<div class="ticket examtip">
+  <div class="ticket-head"><span><span class="icon">🎯</span>Exam Tip</span><span class="ticket-id">EXM-101</span></div>
+  <div class="ticket-body"><p>Mnemonic: <strong>"A-A-T-M"</strong> — Acceptance, Avoidance, Transference, Mitigation. If a scenario mentions buying insurance, that's transference, not mitigation — a frequently tested distinction.</p></div>
+</div>
+
+<h3 id="sec-8" data-n="1.8">Common Threats, Risks &amp; Named Vulnerabilities</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Risk Factors — External, Internal, Legacy, Multiparty, Compliance</caption>
+<thead><tr><th>Factor</th><th>Definition</th></tr></thead>
+<tbody>
+<tr><td><strong>External Risk</strong></td><td>Anything outside the organization with potential to harm assets, like a threat actor attempting access</td></tr>
+<tr><td><strong>Internal Risk</strong></td><td>A current/former employee, vendor, or trusted partner posing a security risk</td></tr>
+<tr><td><strong>Legacy Systems</strong></td><td>Old, possibly unaccounted-for or unpatched systems (e.g., an old vending machine still processing card payments)</td></tr>
+<tr><td><strong>Multiparty Risk</strong></td><td>Outsourcing work to third-party vendors, giving them access to trade secrets or other intellectual property</td></tr>
+<tr><td><strong>Software Compliance/Licensing</strong></td><td>Software that's out of date, non-compliant, or missing timely patches</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket redteam">
+  <div class="ticket-head"><span><span class="icon">🗡️</span>Threat Intelligence</span><span class="ticket-id">TI-101</span></div>
+  <div class="ticket-body"><p>OWASP's list of top web application risks has evolved to include three newer categories between 2017 and 2021: <strong>insecure design</strong>, <strong>software and data integrity failures</strong>, and <strong>server-side request forgery</strong>. This shift is itself a useful talking point — it demonstrates that security is a constantly evolving field, not a fixed checklist.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Named Real-World Vulnerabilities</caption>
+<thead><tr><th>Name</th><th>Affects</th><th>What It Does</th></tr></thead>
+<tbody>
+<tr><td><strong>ProxyLogon</strong></td><td>Microsoft Exchange Server</td><td>Pre-authenticated vulnerability letting a threat actor complete authentication remotely and deploy malicious code</td></tr>
+<tr><td><strong>ZeroLogon</strong></td><td>Microsoft Netlogon authentication protocol</td><td>Exploits the protocol that verifies user identity before granting access</td></tr>
+<tr><td><strong>Log4Shell</strong></td><td>Java applications using Log4j</td><td>Lets a remote attacker run Java code or leak sensitive info by taking control of connected devices</td></tr>
+<tr><td><strong>PetitPotam</strong></td><td>Windows NTLM (NT LAN Manager)</td><td>Theft technique letting a LAN-based attacker initiate an authentication request</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-106</span></div>
+  <div class="ticket-body">
+    <p><strong>Security Logging and Monitoring Failures:</strong> Insufficient logging/monitoring capabilities that let attackers exploit vulnerabilities without the organization noticing.</p>
+    <p><strong>Server-Side Request Forgery (SSRF):</strong> Lets attackers manipulate a server-side application into accessing/updating backend resources, potentially stealing data.</p>
+  </div>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-101</span></div>
+  <div class="ticket-body"><p>The sooner a vulnerability is identified and patched or updated, the sooner it's mitigated and the less exposure the organization carries. Constant monitoring matters because a patch that exists but isn't applied provides zero protection — vulnerability management is monitoring, not just patching.</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 1.1 — Threat, Risk, or Vulnerability?</summary>
+  <div class="acc-body">
+    <p>Classify each item as a threat, a risk, or a vulnerability: (a) an outdated, unpatched firewall; (b) a phishing campaign targeting your industry; (c) the 15% chance that a targeted phishing campaign succeeds against your unpatched firewall this quarter.</p>
+    <p><strong>Answer key:</strong> (a) Vulnerability, (b) Threat, (c) Risk — note how (c) only exists because (a) and (b) are both present.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 1.2 — Asset Risk Classification Drill</summary>
+  <div class="acc-body">
+    <p>Classify each as low, medium, or high risk: (1) a public blog post, (2) unreleased quarterly earnings, (3) a customer database with SSNs, (4) an internal team meeting agenda.</p>
+    <p><strong>Answer key:</strong> 1 — Low, 2 — Medium, 3 — High, 4 — Low/Medium depending on content sensitivity (a good discussion point: risk classification sometimes requires judgment, not just a lookup table).</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Scenario Challenge 1.1 — Choose the Risk Strategy</summary>
+  <div class="acc-body">
+    <p>Your organization identifies a low-probability, low-impact risk that would cost more to mitigate than the risk itself is worth. Which risk management strategy applies, and why?</p>
+    <p><strong>Answer:</strong> Acceptance — when mitigation cost exceeds the risk's potential impact, and the risk is unlikely to disrupt business continuity, accepting it is the economically rational choice.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Beginner Question</span><span class="ticket-id">INT-101</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Can risk exist without a vulnerability?</strong></p>
+    <p><strong>Ideal answer:</strong> "No — risk requires both a threat and a vulnerability to be present. A threat with no exploitable weakness poses no real risk, and a vulnerability with no active threat targeting it also carries minimal risk. Risk lives specifically at their intersection."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Scenario Question</span><span class="ticket-id">INT-102</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: You discover a legacy system still running in production that nobody has patched in two years. How do you approach this?</strong></p>
+    <p><strong>Ideal answer:</strong> "I'd first classify the asset's risk level based on what data or functions it touches, then assess whether it's exposed to any external-facing threats. If it's high-risk, I'd escalate for immediate patching or isolation; if genuinely low-risk and isolated, the organization might reasonably choose acceptance or mitigation through network segmentation rather than an urgent, disruptive patch cycle."</p>
+    <p><strong>Follow-up:</strong> "What if patching would break a critical business process?" (Good answer: consider mitigation via compensating controls — e.g., network isolation — rather than leaving it fully exposed.)</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which NIST RMF step involves determining if controls are implemented correctly?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Select</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Assess</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Authorize</button>
+  <div class="fb">Correct — Assess is specifically about verifying controls work as intended.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: A vulnerability alone is sufficient to constitute a risk.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — a risk requires both a vulnerability and a threat capable of exploiting it.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. Purchasing cybersecurity insurance is an example of which risk management strategy?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Mitigation</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Transference</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Avoidance</button>
+  <div class="fb">Correct — transference shifts the risk's financial burden to a third party (the insurer).</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-101</span></div>
+  <div class="ticket-body"><p>Risk = Threat × Vulnerability (both must be present). Assets are low/medium/high risk. The web has three layers: surface, deep, dark. NIST RMF has 7 steps (Prepare, Categorize, Select, Implement, Assess, Authorize, Monitor). Risk strategies: Accept, Avoid, Transfer, Mitigate. Named vulnerabilities to recognize: ProxyLogon, ZeroLogon, Log4Shell, PetitPotam.</p></div>
+</div>
+
+<div class="summary-block" id="summary">
+  <h4>Module Summary</h4>
+  <p>This module turned "risk" from a vague word into a precise, calculable concept: the intersection of threat and vulnerability, classified by asset value, managed through a repeatable seven-step NIST framework, and addressed through one of four deliberate strategies.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>Risk only exists where a threat and a vulnerability intersect — neither alone is sufficient.</li>
+    <li>Assets are classified low/medium/high risk based on potential harm if compromised.</li>
+    <li>The dark web's secrecy makes it the preferred venue for selling stolen data and negotiating ransomware payments.</li>
+    <li>NIST RMF's seven steps form a repeating cycle, not a one-time checklist.</li>
+    <li>Choosing between acceptance, avoidance, transference, and mitigation is a deliberate business decision, not a default.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives">◂ Back to Module 1 Objectives</a>
+  <a href="#module-2">Module 2 · Frameworks, Controls &amp; Audits ▸</a>
+</div>
+
+<div class="endmark">— End of Module 1 —</div>
+<!-- ============================================================
+     MODULE 2 · WEEK 2 — FRAMEWORKS, CONTROLS & AUDITS
+     ============================================================ -->
+<h2 class="module-head" id="module-2"><span class="tag">Module 2 · Week 2</span>Frameworks, Controls, CIA Triad &amp; Security Audits</h2>
+
+<div class="objectives" id="objectives-2">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Explain the relationship between security frameworks and security controls with concrete examples.</li>
+    <li>Define encryption, authentication, and authorization as applied security controls.</li>
+    <li>Describe the Cyber Threat Framework (CTF) and ISO/IEC 27001 and what each is used for.</li>
+    <li>Classify controls as physical, technical, or administrative, and by function (preventative, corrective, detective, deterrent).</li>
+    <li>Apply the CIA triad to specific workplace scenarios.</li>
+    <li>Recite and apply the NIST CSF's five core functions with a worked example.</li>
+    <li>List all ten OWASP security principles and explain each in plain language.</li>
+    <li>Plan an internal security audit: scope, goals, risk assessment, controls assessment, compliance check, and communication.</li>
+  </ul>
+</div>
+
+<h3 id="sec-2-1" data-n="2.1">Frameworks &amp; Controls, Revisited in Depth</h3>
+
+<p>Course I introduced frameworks and controls as a "blueprint vs. brick-and-mortar" relationship. This module makes that relationship concrete with named examples and real controls you'll encounter on the job.</p>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-107</span></div>
+  <div class="ticket-body">
+    <p><strong>Security frameworks:</strong> Guidelines used for building plans to help mitigate risks and threats to data and privacy, such as social engineering attacks and ransomware.</p>
+    <p><strong>Security controls:</strong> Safeguards designed to reduce specific security risks, used alongside frameworks to build a strong posture.</p>
+  </div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The School</span>
+  <p>A school's safety framework might say "protect students from unauthorized visitors." The actual controls that carry out that guideline are the specific things you can point to: a locked front door, a sign-in sheet at the front office, and a badge system for staff. The framework is the goal; the controls are the physical things that make the goal real.</p>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning</span><span class="ticket-id">WRN-102</span></div>
+  <div class="ticket-body"><p>Security isn't only virtual. Without proper physical controls, an organization can face real financial and reputational damage from trespassing, fake employee accounts, or people fraudulently claiming employee benefits — physical and digital security failures often have identical downstream consequences.</p></div>
+</div>
+
+<h3 id="sec-2-2" data-n="2.2">Encryption, Authentication &amp; Authorization as Controls</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-108</span></div>
+  <div class="ticket-body">
+    <p><strong>Encryption:</strong> The process of converting data from a readable format (plaintext) to an encoded format (ciphertext).</p>
+    <p><strong>Ciphertext:</strong> The raw, encoded message that's unreadable to humans and computers until decrypted back to plaintext.</p>
+    <p><strong>Authentication:</strong> The process of verifying who someone or something is — e.g., logging in with a username and password.</p>
+    <p><strong>Multi-factor authentication (MFA):</strong> Challenges a user to prove identity with both a password and an additional factor, such as a security code or biometric scan.</p>
+    <p><strong>Biometrics:</strong> Unique physical characteristics used to verify identity — a fingerprint, eye scan, or palm scan.</p>
+    <p><strong>Authorization:</strong> Granting access to specific resources within a system once identity is confirmed.</p>
+  </div>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning</span><span class="ticket-id">WRN-103</span></div>
+  <div class="ticket-body"><p>Biometrics aren't immune to social engineering. <strong>Vishing</strong> — exploiting electronic voice communication to obtain information or impersonate a known source — can be used to mimic a person's voice and steal their identity, potentially undermining voice-based biometric authentication. No control is unconditionally safe; every control has an associated attack surface.</p></div>
+</div>
+
+<h3 id="sec-2-3" data-n="2.3">Named Frameworks: Cyber Threat Framework &amp; ISO/IEC 27001</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Cyber Threat Framework vs. ISO/IEC 27001</caption>
+<thead><tr><th>Framework</th><th>Origin</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><strong>Cyber Threat Framework (CTF)</strong></td><td>U.S. government (Office of the Director of National Intelligence)</td><td>Provides a common language for describing and communicating cyber threat activity, helping professionals analyze and share information efficiently</td></tr>
+<tr><td><strong>ISO/IEC 27001</strong></td><td>International Organization for Standardization</td><td>Enables organizations of any sector/size to manage security of assets like financial information, IP, employee data, and third-party-entrusted information; outlines requirements for an information security management system without mandating specific controls</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-2-4" data-n="2.4">Physical, Technical &amp; Administrative Controls</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Three Categories of Security Controls</caption>
+<thead><tr><th>Category</th><th>Examples</th></tr></thead>
+<tbody>
+<tr><td><strong>Physical controls</strong></td><td>Gates, fences, locks; security guards; CCTV/surveillance cameras and motion detectors; access cards/badges</td></tr>
+<tr><td><strong>Technical controls</strong></td><td>Firewalls; multi-factor authentication; antivirus software</td></tr>
+<tr><td><strong>Administrative controls</strong></td><td>Separation of duties; authorization policy; asset classification</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Controls are also classified by <em>function</em> — what they're designed to do when a threat appears:</p>
+
+<div class="table-wrap">
+<table>
+<caption>Control Types by Function</caption>
+<thead><tr><th>Type</th><th>Function</th></tr></thead>
+<tbody>
+<tr><td><strong>Preventative controls</strong></td><td>Designed to prevent an incident from occurring in the first place</td></tr>
+<tr><td><strong>Detective controls</strong></td><td>Implemented to determine whether an incident has occurred or is in progress</td></tr>
+<tr><td><strong>Corrective controls</strong></td><td>Used to restore an asset after an incident</td></tr>
+<tr><td><strong>Deterrent controls</strong></td><td>Designed to discourage attacks before they're attempted</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket examtip">
+  <div class="ticket-head"><span><span class="icon">🎯</span>Exam Tip</span><span class="ticket-id">EXM-102</span></div>
+  <div class="ticket-body"><p>A single control often serves double duty. A visible security camera is <strong>deterrent</strong> (its presence discourages an attempt) and <strong>detective</strong> (it records what actually happened) at the same time. Exam questions sometimes test whether you can name both functions of one control.</p></div>
+</div>
+
+<h3 id="sec-2-5" data-n="2.5">The CIA Triad Applied in the Workplace</h3>
+
+<p>Course I defined the CIA triad. Here it's applied to a single running example — a bank — to show how all three principles operate together in practice.</p>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>Enterprise Example — The Bank</span><span class="ticket-id">ENT-101</span></div>
+  <div class="ticket-body">
+    <p><strong>Confidentiality:</strong> The bank keeps personal and financial information safe, available only on a need-to-know basis, often enforced through the <strong>principle of least privilege</strong> — limiting users' access to only what they need for their tasks.</p>
+    <p><strong>Integrity:</strong> If a customer's spending pattern or purchase location changes dramatically, the bank disables account access until it verifies the account owner — not a threat actor — is actually making the purchases. This is integrity monitoring in action.</p>
+    <p><strong>Availability:</strong> The bank invests heavily in making account information easily accessible online, while using validation processes to minimize damage if an account is suspected compromised — balancing "always accessible" against "never compromised."</p>
+  </div>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-109</span></div>
+  <div class="ticket-body"><p><strong>Principle of Least Privilege:</strong> Limits users' access to only the information they need to complete work-related tasks — a direct enhancement of confidentiality.</p></div>
+</div>
+
+<p>Integrity is also frequently reinforced through <strong>cryptography</strong> (transforming data so unauthorized parties can't read or tamper with it) and encryption (e.g., protecting messages on an internal chat platform from tampering).</p>
+
+<h3 id="sec-2-6" data-n="2.6">NIST CSF's Five Core Functions</h3>
+
+<p>This is one of the two sequences flagged in the preface as essential to memorize cold.</p>
+
+<figure>
+<svg viewBox="0 0 640 200" width="100%" role="img" aria-label="Diagram of the NIST Cybersecurity Framework's five core functions in sequence: Identify, Protect, Detect, Respond, Recover">
+  <rect x="0" y="0" width="640" height="200" fill="#F7F5F0"/>
+  <text x="320" y="26" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="700" fill="#0B0F14">NIST CSF — 5 Core Functions</text>
+  <g font-family="sans-serif" font-size="12.5" font-weight="700" fill="#fff">
+    <rect x="15" y="70" width="110" height="60" rx="6" fill="#3457B2"/><text x="70" y="105" text-anchor="middle">Identify</text>
+    <rect x="140" y="70" width="110" height="60" rx="6" fill="#0F9E93"/><text x="195" y="105" text-anchor="middle">Protect</text>
+    <rect x="265" y="70" width="110" height="60" rx="6" fill="#B4700A"/><text x="320" y="105" text-anchor="middle">Detect</text>
+    <rect x="390" y="70" width="110" height="60" rx="6" fill="#6B4FBB"/><text x="445" y="105" text-anchor="middle">Respond</text>
+    <rect x="515" y="70" width="110" height="60" rx="6" fill="#1E7A4C"/><text x="570" y="105" text-anchor="middle">Recover</text>
+  </g>
+  <path d="M125 100 L140 100" stroke="#0B0F14" stroke-width="2" marker-end="url(#a2c)"/>
+  <path d="M250 100 L265 100" stroke="#0B0F14" stroke-width="2" marker-end="url(#a2c)"/>
+  <path d="M375 100 L390 100" stroke="#0B0F14" stroke-width="2" marker-end="url(#a2c)"/>
+  <path d="M500 100 L515 100" stroke="#0B0F14" stroke-width="2" marker-end="url(#a2c)"/>
+  <defs><marker id="a2c" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#0B0F14"/></marker></defs>
+  <text x="320" y="170" text-anchor="middle" font-family="monospace" font-size="11" fill="#3A4650">Every incident response maps onto this sequence, whether or not it's stated explicitly</text>
+</svg>
+<figcaption>Figure 2.1 — NIST CSF's five core functions</figcaption>
+</figure>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>SOC Example — Worked Walkthrough</span><span class="ticket-id">SOC-102</span></div>
+  <div class="ticket-body">
+    <p><strong>Scenario:</strong> You receive a high-risk notification that a workstation has been compromised.</p>
+    <p><strong>Identify —</strong> You identify the workstation and discover an unknown device plugged into it.</p>
+    <p><strong>Protect —</strong> You block the unknown device remotely to stop any potential threat.</p>
+    <p><strong>Detect —</strong> You remove the infected workstation to prevent damage spreading, and use tools to detect additional threat-actor behavior and identify the unknown device.</p>
+    <p><strong>Respond —</strong> You investigate to determine who used the device, how the threat occurred, what was affected, and where it originated. You discover an employee was charging an infected phone via the laptop's USB port.</p>
+    <p><strong>Recover —</strong> You restore any affected files/data and correct damage to the workstation.</p>
+  </div>
+</div>
+
+<div class="ticket compliance">
+  <div class="ticket-head"><span><span class="icon">⚖️</span>Compliance Note</span><span class="ticket-id">CMP-101</span></div>
+  <div class="ticket-body"><p>NIST CSF extends into U.S. federal government protection via <strong>NIST SP 800-53</strong> — a unified framework for protecting federal information systems, including systems built by private companies for government use. Its security controls maintain the CIA triad specifically for government systems. Knowing this publication number is useful if you're interested in federal-sector security work.</p></div>
+</div>
+
+<h3 id="sec-2-7" data-n="2.7">OWASP Security Principles — All Ten</h3>
+
+<p>OWASP (Open Worldwide Application Security Project) principles show up in daily analyst tasks — log analysis, SIEM dashboard monitoring, vulnerability scanning. All ten are worth knowing precisely.</p>
+
+<div class="table-wrap">
+<table>
+<caption>The Ten OWASP Security Principles</caption>
+<thead><tr><th>#</th><th>Principle</th><th>Plain-Language Meaning</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><strong>Minimize Attack Surface Area</strong></td><td>Reduce potential vulnerabilities (the attack surface) by disabling unneeded features, restricting access, or requiring stronger passwords</td></tr>
+<tr><td>2</td><td><strong>Principle of Least Privilege</strong></td><td>Give users only the access they need — limits damage if credentials are compromised</td></tr>
+<tr><td>3</td><td><strong>Defense in Depth</strong></td><td>Use multiple, varied security controls (MFA, firewalls, IDS, permissions) so a single failure doesn't cause total compromise</td></tr>
+<tr><td>4</td><td><strong>Separation of Duties</strong></td><td>No one person should hold enough privilege to misuse the system alone — e.g., the person who signs paychecks shouldn't also prepare them</td></tr>
+<tr><td>5</td><td><strong>Keep Security Simple</strong></td><td>Avoid unnecessarily complicated solutions — complexity makes systems unmanageable and harder to secure collaboratively</td></tr>
+<tr><td>6</td><td><strong>Fix Security Issues Correctly</strong></td><td>Identify the root cause quickly, correct vulnerabilities, and test to confirm the fix actually worked</td></tr>
+<tr><td>7</td><td><strong>Establish Secure Defaults</strong></td><td>The default state of an application should be its most secure state — it should take extra effort to make it insecure</td></tr>
+<tr><td>8</td><td><strong>Fail Securely</strong></td><td>When a control fails, it should default to its most secure option — e.g., a failed firewall should close all connections rather than allow everything</td></tr>
+<tr><td>9</td><td><strong>Don't Trust Services</strong></td><td>Don't assume a third-party partner's systems are secure just because they're a partner — verify independently</td></tr>
+<tr><td>10</td><td><strong>Avoid Security by Obscurity</strong></td><td>Security shouldn't rely on keeping source code or design secret — it should rely on sound password policy, defense in depth, and solid architecture</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Shopping Mall</span>
+  <p>"Fail securely" is like a mall's automatic doors: if the power goes out, well-designed doors default to <em>locked</em>, not <em>wide open</em>. A firewall should behave the same way — if it crashes, it should stop letting anything through, not suddenly let everything through.</p>
+</div>
+
+<div class="ticket redteam">
+  <div class="ticket-head"><span><span class="icon">🗡️</span>Blue Team Tip</span><span class="ticket-id">BT-101</span></div>
+  <div class="ticket-body"><p>"Avoid security by obscurity" doesn't mean secrecy is worthless — it means secrecy alone is <em>not a control</em>. Hiding a system's existence buys nothing if the underlying access controls, encryption, and architecture aren't independently sound.</p></div>
+</div>
+
+<h3 id="sec-2-8" data-n="2.8">Planning &amp; Conducting a Security Audit</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-110</span></div>
+  <div class="ticket-body">
+    <p><strong>Security audit:</strong> A review of an organization's security controls, policies, and procedures against a set of expectations.</p>
+    <p><strong>Internal criteria:</strong> Outlined policies, procedures, and best practices.</p>
+    <p><strong>External criteria:</strong> Regulatory compliance, laws, and federal regulations.</p>
+  </div>
+</div>
+
+<p>Internal security audits are typically conducted by a team including a compliance officer, security manager, and other security team members. Google's course materials identify five common elements:</p>
+
+<div class="table-wrap">
+<table>
+<caption>Common Elements of an Internal Security Audit</caption>
+<thead><tr><th>Element</th><th>What It Involves</th></tr></thead>
+<tbody>
+<tr><td><strong>1. Establishing Scope &amp; Goals</strong></td><td>Scope: the specific people, assets, policies, procedures, and technologies involved. Goals: what the org wants to achieve (e.g., implementing NIST CSF core functions, ensuring compliance, strengthening controls)</td></tr>
+<tr><td><strong>2. Conducting a Risk Assessment</strong></td><td>Determines what security measures should be implemented and monitored to protect assets — often completed by managers/stakeholders, with analysts assisting in analysis</td></tr>
+<tr><td><strong>3. Completing a Controls Assessment</strong></td><td>Reviewing existing assets and evaluating risks, then classifying controls as administrative, technical, or physical</td></tr>
+<tr><td><strong>4. Assessing Compliance</strong></td><td>Determining whether the organization adheres to necessary regulations (e.g., an org handling E.U. customers and credit card payments must adhere to GDPR and PCI DSS)</td></tr>
+<tr><td><strong>5. Communicating Results</strong></td><td>Summarizing scope/goals, listing existing risks with urgency levels, noting applicable compliance regulations, and recommending posture improvements</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket industry">
+  <div class="ticket-head"><span><span class="icon">🏢</span>Industry Insight</span><span class="ticket-id">IND-101</span></div>
+  <div class="ticket-body"><p>A recurring real-world audit finding: internal password audits routinely uncover widespread weak passwords across an organization. When that happens, compliance teams typically respond by enforcing stricter password policies — a small, concrete example of an audit directly driving a policy change.</p></div>
+</div>
+
+<h4>Audit Checklist</h4>
+<ul>
+  <li><strong>Identify the scope</strong> — list assets to assess, note how the audit supports organizational goals, indicate audit frequency, and evaluate whether policies/procedures are actually being followed.</li>
+  <li><strong>Complete a risk assessment</strong> — evaluate risks related to budget, controls, internal processes, and external standards.</li>
+  <li><strong>Conduct the audit</strong> — assess the security of all assets listed in scope.</li>
+  <li><strong>Create a mitigation plan</strong> — a strategy to lower risk level and potential costs/penalties.</li>
+  <li><strong>Communicate results to stakeholders</strong> — a detailed report of findings, recommended improvements, and applicable compliance obligations.</li>
+</ul>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-103</span></div>
+  <div class="ticket-body"><p>The frequency and type of audits an organization performs depends on multiple factors: industry type, organization size, applicable government regulations, geographic location, and voluntary business decisions to adhere to a specific compliance regime. There's no single universal audit schedule.</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs-2">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 2.1 — Control Classification Drill</summary>
+  <div class="acc-body">
+    <p>Classify each control as physical, technical, or administrative, AND by function (preventative, detective, corrective, deterrent): (a) a security guard at the entrance, (b) a firewall, (c) a mandatory password-rotation policy, (d) a visible CCTV camera.</p>
+    <p><strong>Answer key:</strong> (a) Physical, preventative/deterrent. (b) Technical, preventative. (c) Administrative, preventative. (d) Physical, deterrent/detective (records footage even as its visibility deters).</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 2.2 — NIST CSF Function Mapping</summary>
+  <div class="acc-body">
+    <p>For each action, name the correct NIST CSF function: (1) reviewing which systems handle customer data, (2) deploying MFA org-wide, (3) noticing an unusual spike in failed logins, (4) isolating a compromised server, (5) restoring a database from backup.</p>
+    <p><strong>Answer key:</strong> 1 — Identify, 2 — Protect, 3 — Detect, 4 — Respond, 5 — Recover.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Portfolio Project 2.1 — Draft a Mini Internal Audit</summary>
+  <div class="acc-body">
+    <p>Pick a small hypothetical organization (a five-person startup works well). Draft a one-page mini audit covering: scope, goals, one identified risk, one recommended control, and one applicable compliance consideration. Save this to your portfolio — it directly demonstrates the audit skills from this section.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview-2">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Intermediate Question</span><span class="ticket-id">INT-103</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Walk me through the NIST CSF's five core functions using a real example.</strong></p>
+    <p><strong>Ideal answer:</strong> Use the workstation-compromise walkthrough from this module: Identify the affected system, Protect by isolating it, Detect the root cause, Respond by investigating, Recover by restoring normal operation. Naming all five in order, with even a simple example, signals strong foundational knowledge.</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Security Engineer Question</span><span class="ticket-id">INT-104</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: What does "fail securely" mean, and why does it matter?</strong></p>
+    <p><strong>Ideal answer:</strong> "It means that when a security control fails, it should default to its most restrictive, most secure state rather than an open one. For example, a firewall that crashes should block all new connections rather than allow all traffic through. Designing for secure failure prevents an outage from silently becoming a security incident."</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice-2">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which OWASP principle is violated if a firewall, when it fails, allows all traffic through by default?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Keep Security Simple</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Fail Securely</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Avoid Security by Obscurity</button>
+  <div class="fb">Correct — a failed control should default to its most secure (restrictive) state.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: A visible CCTV camera can serve as both a deterrent and a detective control.</div>
+  <button class="opt" onclick="checkAnswer(this,true)">True</button>
+  <button class="opt" onclick="checkAnswer(this,false)">False</button>
+  <div class="fb">True — its visibility discourages attempts (deterrent) while its footage records what happened (detective).</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. Which internal audit element determines whether an organization adheres to GDPR or PCI DSS?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Establishing Scope &amp; Goals</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Assessing Compliance</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Communicating Results</button>
+  <div class="fb">Correct — Assessing Compliance checks adherence to relevant regulatory frameworks.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision-2">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-102</span></div>
+  <div class="ticket-body"><p>Controls are physical/technical/administrative, and functionally preventative/detective/corrective/deterrent. CTF gives a common threat-communication language; ISO/IEC 27001 gives an international security-management standard. NIST CSF's 5 functions: Identify, Protect, Detect, Respond, Recover. OWASP has 10 core principles, from minimizing attack surface to avoiding security by obscurity. Internal audits have 5 elements: scope/goals, risk assessment, controls assessment, compliance check, communication.</p></div>
+</div>
+
+<div class="summary-block" id="summary-2">
+  <h4>Module Summary</h4>
+  <p>This module connected abstract governance concepts to concrete, applied controls and processes — how encryption and authentication actually protect data, how OWASP's ten principles guide daily analyst decisions, and how a real internal audit is planned and executed end to end.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>Controls are classified two ways at once: by category (physical/technical/administrative) and by function (preventative/detective/corrective/deterrent).</li>
+    <li>The NIST CSF's five functions (Identify, Protect, Detect, Respond, Recover) map onto virtually every real incident response.</li>
+    <li>OWASP's ten principles are not abstract theory — they show up directly in log analysis, SIEM monitoring, and vulnerability scanning work.</li>
+    <li>A security audit has five core elements: scope/goals, risk assessment, controls assessment, compliance check, and stakeholder communication.</li>
+    <li>Audit frequency and scope depend on industry, size, geography, and applicable regulation — there's no universal template.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives-2">◂ Back to Module 2 Objectives</a>
+  <a href="#module-3">Module 3 · SIEM Tools &amp; Dashboards ▸</a>
+</div>
+
+<div class="endmark">— End of Module 2 —</div>
+<!-- ============================================================
+     MODULE 3 · WEEK 3 — SIEM TOOLS & DASHBOARDS
+     ============================================================ -->
+<h2 class="module-head" id="module-3"><span class="tag">Module 3 · Week 3</span>SIEM Tools &amp; Dashboards</h2>
+
+<div class="objectives" id="objectives-3">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Explain firewall, network, and server logs and what each records.</li>
+    <li>Describe how SIEM tools collect, normalize, and analyze log data at scale.</li>
+    <li>Read and interpret SIEM dashboards, including common metrics and visualization types.</li>
+    <li>Discuss the future of SIEM: cloud environments, IoT devices, and SOAR integration.</li>
+    <li>Compare self-hosted, cloud-hosted, and hybrid SIEM deployment models.</li>
+    <li>Compare open-source and proprietary security tools and the trade-offs of each.</li>
+    <li>Navigate example dashboards in both Splunk and Chronicle.</li>
+  </ul>
+</div>
+
+<h3 id="sec-3-1" data-n="3.1">Logs: Firewall, Network &amp; Server</h3>
+
+<p>Course I introduced the general concept of a log. This module breaks logs into the specific categories a SIEM tool actually ingests and correlates.</p>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-111</span></div>
+  <div class="ticket-body">
+    <p><strong>Firewall log:</strong> A record of attempted or established connections for incoming and outgoing traffic, and connections denied.</p>
+    <p><strong>Network log:</strong> A record of all devices entering and leaving an organization's network, capturing communication between authorized devices.</p>
+    <p><strong>Server log:</strong> A record of events related to services, such as websites, emails, or file shares — including which processes/services are running, and errors and warnings.</p>
+  </div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Airport, Again</span>
+  <p>A <strong>firewall log</strong> is like the customs desk's record of every traveler let through or turned away. A <strong>network log</strong> is the record of every plane taking off and landing. A <strong>server log</strong> is the airport's internal record of which gates, baggage systems, and check-in desks were actually running and whether any of them broke down that day.</p>
+</div>
+
+<h3 id="sec-3-2" data-n="3.2">SIEM Tools: The Deep Dive</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-112</span></div>
+  <div class="ticket-body"><p><strong>Security Information and Event Management (SIEM):</strong> An application that collects and analyzes log data to monitor critical activities within an organization. SIEM tools also provide features that address other core security functions.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>What a SIEM Tool Actually Does</caption>
+<thead><tr><th>Function</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><strong>Data Collection</strong></td><td>Aggregates log data from multiple sources: firewalls, servers, network devices, endpoints, applications</td></tr>
+<tr><td><strong>Data Normalization</strong></td><td>Converts logs from different formats into a consistent structure so they can be compared and correlated</td></tr>
+<tr><td><strong>Analysis &amp; Correlation</strong></td><td>Identifies patterns across normalized data that indicate potential threats</td></tr>
+<tr><td><strong>Alerting</strong></td><td>Notifies analysts when analysis surfaces activity matching a defined risk pattern</td></tr>
+<tr><td><strong>Reporting &amp; Dashboards</strong></td><td>Visualizes security posture and trends for both analysts and leadership</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket blueteam">
+  <div class="ticket-head"><span><span class="icon">🛡️</span>Blue Team Tip</span><span class="ticket-id">BT-102</span></div>
+  <div class="ticket-body"><p>Normalization is the unglamorous but essential step that makes SIEM tools valuable. Without it, comparing a Windows event log entry to a Linux syslog entry to a cloud provider's audit log would be like comparing three witnesses speaking three different languages — normalization is the translator that lets one analyst read all three at once.</p></div>
+</div>
+
+<h3 id="sec-3-3" data-n="3.3">SIEM Dashboards &amp; Metrics</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-113</span></div>
+  <div class="ticket-body"><p><strong>Dashboard:</strong> A visual, at-a-glance representation of a data set's key metrics, used to quickly assess security posture without reading raw logs line by line.</p></div>
+</div>
+
+<figure>
+<svg viewBox="0 0 640 280" width="100%" role="img" aria-label="Mockup of a SIEM dashboard showing a line chart of alert volume over time, a pie chart of alert categories, and a table of top source IP addresses">
+  <rect x="0" y="0" width="640" height="280" fill="#F7F5F0"/>
+  <rect x="15" y="15" width="610" height="250" rx="8" fill="#16202B"/>
+  <text x="30" y="42" font-family="sans-serif" font-size="13" font-weight="700" fill="#2DD4BF">SIEM DASHBOARD — LAST 24 HOURS</text>
+  <!-- line chart panel -->
+  <rect x="30" y="55" width="280" height="100" rx="4" fill="#1E2B38"/>
+  <text x="40" y="72" font-family="sans-serif" font-size="10" fill="#9FB1BE">Alert Volume Over Time</text>
+  <polyline points="40,140 80,120 120,130 160,90 200,110 240,60 280,95" fill="none" stroke="#2DD4BF" stroke-width="2"/>
+  <!-- pie-ish chart panel -->
+  <rect x="325" y="55" width="140" height="100" rx="4" fill="#1E2B38"/>
+  <text x="335" y="72" font-family="sans-serif" font-size="10" fill="#9FB1BE">Alert Categories</text>
+  <circle cx="395" cy="115" r="28" fill="#3457B2"/>
+  <path d="M395 115 L395 87 A28 28 0 0 1 418 130 Z" fill="#F59E0B"/>
+  <path d="M395 115 L418 130 A28 28 0 0 1 380 140 Z" fill="#EF4444"/>
+  <!-- table panel -->
+  <rect x="480" y="55" width="145" height="100" rx="4" fill="#1E2B38"/>
+  <text x="490" y="72" font-family="sans-serif" font-size="10" fill="#9FB1BE">Top Source IPs</text>
+  <text x="490" y="90" font-family="monospace" font-size="9" fill="#D9E4EA">10.0.4.12 — 214</text>
+  <text x="490" y="104" font-family="monospace" font-size="9" fill="#D9E4EA">10.0.9.87 — 98</text>
+  <text x="490" y="118" font-family="monospace" font-size="9" fill="#D9E4EA">10.0.2.51 — 61</text>
+  <!-- bottom summary bar -->
+  <rect x="30" y="170" width="595" height="80" rx="4" fill="#1E2B38"/>
+  <text x="40" y="190" font-family="sans-serif" font-size="10" fill="#9FB1BE">Key Metrics</text>
+  <text x="40" y="215" font-family="monospace" font-size="18" font-weight="700" fill="#2DD4BF">342</text>
+  <text x="40" y="232" font-family="sans-serif" font-size="9" fill="#9FB1BE">Total Alerts</text>
+  <text x="180" y="215" font-family="monospace" font-size="18" font-weight="700" fill="#F59E0B">12</text>
+  <text x="180" y="232" font-family="sans-serif" font-size="9" fill="#9FB1BE">High Priority</text>
+  <text x="320" y="215" font-family="monospace" font-size="18" font-weight="700" fill="#EF4444">3</text>
+  <text x="320" y="232" font-family="sans-serif" font-size="9" fill="#9FB1BE">Critical</text>
+  <text x="460" y="215" font-family="monospace" font-size="18" font-weight="700" fill="#fff">98.6%</text>
+  <text x="460" y="232" font-family="sans-serif" font-size="9" fill="#9FB1BE">Uptime</text>
+</svg>
+<figcaption>Figure 3.1 — A representative SIEM dashboard layout</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<caption>Common SIEM Dashboard Metrics</caption>
+<thead><tr><th>Metric</th><th>What It Tells You</th></tr></thead>
+<tbody>
+<tr><td><strong>Alert volume over time</strong></td><td>Whether activity is trending up, down, or spiking unusually at a particular time</td></tr>
+<tr><td><strong>Alert categories</strong></td><td>What kinds of threats are most common right now (malware, failed logins, policy violations)</td></tr>
+<tr><td><strong>Top source IPs / users</strong></td><td>Where the highest concentration of suspicious activity is originating</td></tr>
+<tr><td><strong>Mean time to detect/respond</strong></td><td>How quickly the team identifies and acts on threats — a core efficiency metric</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>SOC Insight</span><span class="ticket-id">SOC-103</span></div>
+  <div class="ticket-body"><p>A dashboard's real value is triage speed: instead of scrolling through thousands of raw log lines, a Tier 1 analyst glances at the "Critical" and "High Priority" counts first, then drills into the underlying alerts only for those categories — the dashboard is a funnel, not a replacement for investigation.</p></div>
+</div>
+
+<h3 id="sec-3-4" data-n="3.4">The Future of SIEM: Cloud, IoT &amp; SOAR</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-114</span></div>
+  <div class="ticket-body"><p><strong>Security Orchestration, Automation, and Response (SOAR):</strong> A collection of applications, tools, and workflows that use automation to respond to security events — reducing the manual workload on human analysts for repetitive, well-understood alert types.</p></div>
+</div>
+
+<p>Three trends are reshaping SIEM going forward:</p>
+
+<div class="table-wrap">
+<table>
+<caption>Forces Reshaping SIEM</caption>
+<thead><tr><th>Trend</th><th>Impact on SIEM</th></tr></thead>
+<tbody>
+<tr><td><strong>Cloud migration</strong></td><td>SIEM tools must ingest logs from cloud provider APIs, not just on-prem hardware, and scale elastically with usage</td></tr>
+<tr><td><strong>IoT device growth</strong></td><td>Vastly more endpoints generating logs, many with limited built-in security, increasing both data volume and attack surface</td></tr>
+<tr><td><strong>SOAR integration</strong></td><td>Well-understood, repetitive alerts get automatically triaged or remediated, freeing analysts for genuinely novel threats</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket deepdive">
+  <div class="ticket-head"><span><span class="icon">🧭</span>Deep Dive</span><span class="ticket-id">DD-101</span></div>
+  <div class="ticket-body"><p>SOAR and SIEM are complementary, not competing — a helpful way to remember it: SIEM tells you <em>what happened</em>; SOAR helps decide <em>what to do about it automatically</em>. Course VI revisits SOAR in the context of full incident response tooling.</p></div>
+</div>
+
+<h3 id="sec-3-5" data-n="3.5">Self-Hosted vs. Cloud-Hosted vs. Hybrid SIEM</h3>
+
+<div class="table-wrap">
+<table>
+<caption>SIEM Deployment Models Compared</caption>
+<thead><tr><th>Model</th><th>Who Manages Infrastructure</th><th>Trade-off</th></tr></thead>
+<tbody>
+<tr><td><strong>Self-hosted</strong></td><td>The organization's own IT/security team</td><td>Full control and customization; higher setup/maintenance burden and cost</td></tr>
+<tr><td><strong>Cloud-hosted</strong></td><td>The SIEM vendor</td><td>Faster setup, easier maintenance, scales automatically; less infrastructure control</td></tr>
+<tr><td><strong>Hybrid</strong></td><td>Split between organization and vendor</td><td>Balances control and convenience; adds architectural complexity</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>SOC Insight</span><span class="ticket-id">SOC-104</span></div>
+  <div class="ticket-body"><p>As noted in Course I, less experienced security teams often lean toward cloud-hosted SIEM specifically because it's faster to deploy and doesn't require in-house infrastructure expertise — a practical, not just financial, consideration.</p></div>
+</div>
+
+<h3 id="sec-3-6" data-n="3.6">Open-Source vs. Proprietary Tools</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Open-Source vs. Proprietary Security Tools</caption>
+<thead><tr><th>Type</th><th>Cost Model</th><th>Trade-off</th></tr></thead>
+<tbody>
+<tr><td><strong>Open-source</strong></td><td>Free to use; code publicly available</td><td>Highly customizable, community-supported; may require more in-house expertise to configure and maintain securely</td></tr>
+<tr><td><strong>Proprietary</strong></td><td>Paid license</td><td>Vendor support, polished UI, guaranteed updates; less customization freedom, ongoing licensing cost</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-104</span></div>
+  <div class="ticket-body"><p>"Open-source" is not synonymous with "less secure." Open-source tools benefit from public code review by a large community, which can surface vulnerabilities faster than closed proprietary code — but they also require the adopting organization to take on more responsibility for secure configuration and patching.</p></div>
+</div>
+
+<h3 id="sec-3-7" data-n="3.7">Splunk Dashboards</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-115</span></div>
+  <div class="ticket-body"><p><strong>Splunk Enterprise:</strong> A self-hosted data analysis platform used to retain, analyze, and search log data. <strong>Splunk Cloud</strong> is the cloud-hosted version of the same platform, managed by Splunk directly.</p></div>
+</div>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>SOC Example — Reading a Splunk Dashboard</span><span class="ticket-id">SOC-105</span></div>
+  <div class="ticket-body"><p>A typical Splunk security dashboard surfaces panels like "Notable Events," "Threat Activity," and "Risk Analysis," each built from underlying <strong>Search Processing Language (SPL)</strong> queries. An analyst's job is to interpret each panel's trend, then drill into the raw events behind any spike using SPL, rather than treating the dashboard number as the final answer.</p></div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Splunk Query (SPL)</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>index=security_logs sourcetype=firewall action=denied
+| stats count by src_ip
+| sort -count
+| head 10</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Searches firewall logs for denied connections, counts occurrences by source IP, sorts descending, and returns the top 10 offenders.<br><strong>Real SOC usage:</strong> This is a classic first-pass query for identifying potential scanning or brute-force activity from a single source.<br><strong>Common mistake:</strong> Forgetting the <code>sourcetype</code> filter, which can return irrelevant results mixed in from other log types sharing the same index.</div>
+</div>
+
+<h3 id="sec-3-8" data-n="3.8">Chronicle Dashboards</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-116</span></div>
+  <div class="ticket-body"><p><strong>Chronicle:</strong> Google's cloud-native SIEM tool, built to analyze security telemetry at scale with a cloud-first architecture that enables rapid feature delivery and generally simpler setup for teams without deep on-prem infrastructure experience.</p></div>
+</div>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>SOC Example — Reading a Chronicle Dashboard</span><span class="ticket-id">SOC-106</span></div>
+  <div class="ticket-body"><p>Chronicle's interface centers on <strong>rules</strong> (its detection logic) and <strong>IOC (Indicators of Compromise) matches</strong>, surfaced against a timeline view. An analyst reviewing a Chronicle dashboard focuses on which detection rule fired, how confident that rule is historically, and what related entities (IPs, domains, user accounts) appear across the matched events.</p></div>
+</div>
+
+<div class="ticket compliance">
+  <div class="ticket-head"><span><span class="icon">⚖️</span>Industry Insight</span><span class="ticket-id">IND-102</span></div>
+  <div class="ticket-body"><p>Because Chronicle is cloud-native by design, it's frequently the SIEM of choice for organizations already standardized on Google Cloud Platform, since ingestion pipelines from GCP-native logging integrate with less custom configuration than would be needed for a fully self-hosted alternative.</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs-3">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 3.1 — Log Type Identification</summary>
+  <div class="acc-body">
+    <div class="code-block">
+      <div class="code-head"><span class="lang">Log Analysis</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+      <pre><code>[FW] 2026-03-11 14:02:19 DENY TCP 203.0.113.9:44521 -> 10.0.4.12:22
+[SRV] 2026-03-11 14:02:20 web-01 service=nginx status=running mem=42%
+[NET] 2026-03-11 14:02:22 device_joined mac=AA:BB:CC:11:22:33 vlan=10</code></pre>
+      <div class="code-note"><strong>Task:</strong> Label each line as a firewall, server, or network log, and explain what each records.</div>
+    </div>
+    <p><strong>Answer:</strong> Line 1 [FW] — firewall log, a denied SSH (port 22) connection attempt. Line 2 [SRV] — server log, nginx service health status. Line 3 [NET] — network log, a device joining the network on VLAN 10.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 3.2 — Splunk Query Practice</summary>
+  <div class="acc-body">
+    <p>Write an SPL query (in plain English first, then in SPL syntax) that finds the top 5 usernames with the most failed login attempts in the last hour.</p>
+    <div class="code-block">
+      <div class="code-head"><span class="lang">Splunk Query (SPL)</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+      <pre><code>index=auth_logs action=failed earliest=-1h
+| stats count by user
+| sort -count
+| head 5</code></pre>
+    </div>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Scenario Challenge 3.1 — Choose the Deployment Model</summary>
+  <div class="acc-body">
+    <p>A five-person startup with no dedicated infrastructure team needs a SIEM tool up and running within a week, on a limited budget. Which deployment model — self-hosted, cloud-hosted, or hybrid — best fits, and why?</p>
+    <p><strong>Answer guidance:</strong> Cloud-hosted — fastest setup, lowest maintenance burden, no need for in-house infrastructure expertise, which matches every constraint in the scenario.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview-3">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Beginner Question</span><span class="ticket-id">INT-105</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: What's the difference between a SIEM tool and a SOAR tool?</strong></p>
+    <p><strong>Ideal answer:</strong> "A SIEM tool collects, normalizes, and analyzes log data to detect and alert on potential threats. A SOAR tool takes that further by automating response actions for well-understood alert types — so SIEM tells you what happened, and SOAR can help automatically decide and act on what to do next."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Scenario Question</span><span class="ticket-id">INT-106</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: You're looking at a SIEM dashboard and see a sudden spike in "critical" alerts from a single source IP. What's your first move?</strong></p>
+    <p><strong>Ideal answer:</strong> "I wouldn't act on the dashboard number alone — I'd drill into the underlying raw events behind that spike to understand what specifically triggered the critical classification, check whether the source IP is internal or external, and cross-reference against recent firewall and network logs before deciding on containment or escalation."</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice-3">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which log type records devices entering and leaving an organization's network?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Firewall log</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Network log</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Server log</button>
+  <div class="fb">Correct — network logs track devices joining/leaving and communication between authorized devices.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: Open-source tools are always less secure than proprietary tools.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — open-source code benefits from public review, though it requires more in-house configuration responsibility.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. Which SIEM deployment model is generally fastest to set up for a team with limited infrastructure expertise?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Self-hosted</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Cloud-hosted</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Hybrid</button>
+  <div class="fb">Correct — cloud-hosted SIEM is managed by the vendor, minimizing setup and maintenance burden.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision-3">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-103</span></div>
+  <div class="ticket-body"><p>Firewall/network/server logs feed SIEM tools, which collect, normalize, analyze, alert, and report via dashboards. SOAR automates response on top of SIEM detection. SIEM deployment models: self-hosted, cloud-hosted, hybrid — each trading control for convenience differently. Open-source vs. proprietary tools trade cost/customization for support/polish. Splunk (SPL queries) and Chronicle (rules + IOC matches) are the two named SIEM platforms to know.</p></div>
+</div>
+
+<div class="summary-block" id="summary-3">
+  <h4>Module Summary</h4>
+  <p>This module moved from raw log types into the tools that make sense of them at scale — how SIEM platforms collect, normalize, and visualize security data, how SOAR extends that with automation, and how two real platforms (Splunk and Chronicle) present that information to an analyst.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>Firewall, network, and server logs each capture a different slice of activity that SIEM tools correlate together.</li>
+    <li>A SIEM dashboard is a triage funnel, not a final verdict — always drill into raw events behind a metric before acting.</li>
+    <li>SOAR complements SIEM by automating response for well-understood, repetitive alerts.</li>
+    <li>Deployment model choice (self-hosted/cloud-hosted/hybrid) is a trade-off between control and convenience, not a security-quality ranking.</li>
+    <li>Splunk uses SPL queries; Chronicle uses detection rules and IOC matching — both achieve similar goals through different interfaces.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives-3">◂ Back to Module 3 Objectives</a>
+  <a href="#module-4">Module 4 · Incident Response Playbooks ▸</a>
+</div>
+
+<div class="endmark">— End of Module 3 —</div>
+<!-- ============================================================
+     MODULE 4 · WEEK 4 — INCIDENT RESPONSE PLAYBOOKS
+     ============================================================ -->
+<h2 class="module-head" id="module-4"><span class="tag">Module 4 · Week 4</span>Incident Response Playbooks</h2>
+
+<div class="objectives" id="objectives-4">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Define incident response playbooks and explain why organizations rely on them.</li>
+    <li>Identify and describe the four types of playbooks used across security operations.</li>
+    <li>Recite and apply the six phases of the incident response lifecycle.</li>
+    <li>Explain why playbooks are treated as living documents rather than fixed procedures.</li>
+    <li>Walk through a complete malware-alert scenario using playbook phases end to end.</li>
+    <li>Explain how playbooks, SIEM, and SOAR work together in a modern SOC.</li>
+  </ul>
+</div>
+
+<h3 id="sec-4-1" data-n="4.1">What Playbooks Are &amp; Why They Exist</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-117</span></div>
+  <div class="ticket-body"><p><strong>Playbook:</strong> A manual detailing operational actions—including step-by-step instructions—an organization follows to respond to a specific type of incident, such as a malware outbreak, DDoS attack, or unauthorized access attempt.</p></div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Hospital, Again</span>
+  <p>A hospital's emergency room doesn't improvise every time someone arrives with chest pain — there's a defined protocol: check vitals, run specific tests, alert specific specialists, in a specific order. That protocol is a playbook. It exists so that quality of response doesn't depend on which doctor happens to be on shift that day — the same is true for security incidents and which analyst happens to be on call.</p>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-105</span></div>
+  <div class="ticket-body"><p>Playbooks serve three purposes at once: they ensure a <strong>consistent</strong> response regardless of who's on shift, they help teams meet <strong>compliance</strong> requirements that mandate documented incident procedures, and they support <strong>faster</strong> response by removing decision paralysis during a high-stress event.</p></div>
+</div>
+
+<h3 id="sec-4-2" data-n="4.2">Four Types of Playbooks</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Playbook Types by Purpose</caption>
+<thead><tr><th>Type</th><th>Purpose</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td><strong>Incident Response Playbook</strong></td><td>Step-by-step response to a specific incident type</td><td>Ransomware response playbook, phishing response playbook</td></tr>
+<tr><td><strong>Vulnerability Management Playbook</strong></td><td>Identifying, assessing, and remediating vulnerabilities</td><td>Critical CVE patch-deployment procedure</td></tr>
+<tr><td><strong>Chain of Custody Playbook</strong></td><td>Documenting evidence handling to preserve legal admissibility</td><td>Digital forensics evidence-transfer log (see Course I, Module 4)</td></tr>
+<tr><td><strong>Risk Assessment Playbook</strong></td><td>Structured process for evaluating and prioritizing organizational risks</td><td>Quarterly third-party vendor risk review</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-4-3" data-n="4.3">The Six-Phase Incident Response Lifecycle</h3>
+
+<p>This is the second sequence flagged in the preface as essential to memorize cold — it appears constantly in interviews and forms the backbone of essentially every named incident response framework in the industry.</p>
+
+<figure>
+<svg viewBox="0 0 640 340" width="100%" role="img" aria-label="Diagram of the six-phase incident response lifecycle in sequence: Preparation, Detection and Analysis, Containment, Eradication and Recovery, Post-Incident Activity, Coordination">
+  <rect x="0" y="0" width="640" height="340" fill="#F7F5F0"/>
+  <text x="320" y="26" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="700" fill="#0B0F14">Incident Response Lifecycle — 6 Phases</text>
+  <g font-family="sans-serif" font-size="11.5" font-weight="700" fill="#fff">
+    <rect x="20" y="55" width="185" height="55" rx="6" fill="#3457B2"/><text x="112" y="87" text-anchor="middle">1. Preparation</text>
+    <rect x="228" y="55" width="185" height="55" rx="6" fill="#0F9E93"/><text x="320" y="80" text-anchor="middle">2. Detection</text><text x="320" y="95" text-anchor="middle" font-size="10" font-weight="400">&amp; Analysis</text>
+    <rect x="436" y="55" width="185" height="55" rx="6" fill="#B4700A"/><text x="528" y="87" text-anchor="middle">3. Containment</text>
+    <rect x="436" y="130" width="185" height="55" rx="6" fill="#0B0F14"/><text x="528" y="155" text-anchor="middle">4. Eradication</text><text x="528" y="170" text-anchor="middle" font-size="10" font-weight="400">&amp; Recovery</text>
+    <rect x="228" y="130" width="185" height="55" rx="6" fill="#6B4FBB"/><text x="320" y="155" text-anchor="middle">5. Post-Incident</text><text x="320" y="170" text-anchor="middle" font-size="10" font-weight="400">Activity</text>
+    <rect x="20" y="130" width="185" height="55" rx="6" fill="#7A1F3D"/><text x="112" y="162" text-anchor="middle">6. Coordination</text>
+  </g>
+  <path d="M205 82 L228 82" stroke="#0B0F14" stroke-width="2" marker-end="url(#a2d)"/>
+  <path d="M413 82 L436 82" stroke="#0B0F14" stroke-width="2" marker-end="url(#a2d)"/>
+  <path d="M528 110 L528 130" stroke="#0B0F14" stroke-width="2" marker-end="url(#a2d)"/>
+  <path d="M436 157 L413 157" stroke="#0B0F14" stroke-width="2" marker-end="url(#a2d)"/>
+  <path d="M228 157 L205 157" stroke="#0B0F14" stroke-width="2" marker-end="url(#a2d)"/>
+  <defs><marker id="a2d" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#0B0F14"/></marker></defs>
+  <text x="112" y="220" text-anchor="middle" font-family="monospace" font-size="10" fill="#3A4650">Coordination happens</text>
+  <text x="112" y="234" text-anchor="middle" font-family="monospace" font-size="10" fill="#3A4650">throughout, not just at the end</text>
+  <text x="320" y="300" text-anchor="middle" font-family="monospace" font-size="11" fill="#3A4650">Post-Incident Activity feeds lessons learned back into Preparation</text>
+</svg>
+<figcaption>Figure 4.1 — The six-phase incident response lifecycle</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<caption>Six Phases Explained</caption>
+<thead><tr><th>Phase</th><th>What Happens</th></tr></thead>
+<tbody>
+<tr><td><strong>1. Preparation</strong></td><td>Ensuring the organization has the tools, training, and documented procedures in place <em>before</em> an incident occurs — including keeping playbooks current</td></tr>
+<tr><td><strong>2. Detection &amp; Analysis</strong></td><td>Identifying that an incident is occurring and analyzing scope, severity, and root cause</td></tr>
+<tr><td><strong>3. Containment</strong></td><td>Limiting the spread and impact of the incident (recall Module 2's Equifax lesson: contain first, investigate second)</td></tr>
+<tr><td><strong>4. Eradication &amp; Recovery</strong></td><td>Removing the threat entirely and restoring affected systems to normal operation</td></tr>
+<tr><td><strong>5. Post-Incident Activity</strong></td><td>Documenting lessons learned and updating playbooks/controls to prevent recurrence</td></tr>
+<tr><td><strong>6. Coordination</strong></td><td>Communicating with stakeholders, legal, compliance, and sometimes law enforcement or affected customers — ongoing throughout, not a discrete final step</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket examtip">
+  <div class="ticket-head"><span><span class="icon">🎯</span>Exam Tip</span><span class="ticket-id">EXM-103</span></div>
+  <div class="ticket-body"><p>Mnemonic: <strong>"Please Detect Criminals Effectively, Practicing Coordination"</strong> → <strong>P</strong>reparation, <strong>D</strong>etection &amp; Analysis, <strong>C</strong>ontainment, <strong>E</strong>radication &amp; Recovery, <strong>P</strong>ost-Incident Activity, <strong>C</strong>oordination.</p></div>
+</div>
+
+<h3 id="sec-4-4" data-n="4.4">Playbooks as Living Documents</h3>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-102</span></div>
+  <div class="ticket-body"><p>Playbooks are never "finished." After every real incident, the Post-Incident Activity phase should feed directly back into revising the relevant playbook — new attacker techniques, new tooling, and new organizational structure all require playbook updates. A playbook that hasn't changed in two years is a warning sign, not a sign of stability.</p></div>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning</span><span class="ticket-id">WRN-104</span></div>
+  <div class="ticket-body"><p>An outdated playbook can actively slow down response — for example, listing an escalation contact who no longer works at the organization, or referencing a tool that's since been replaced. Treat playbook maintenance as part of the Preparation phase, not an afterthought.</p></div>
+</div>
+
+<h3 id="sec-4-5" data-n="4.5">Worked Example: Malware Alert Walkthrough</h3>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>SOC Example — Full Lifecycle Walkthrough</span><span class="ticket-id">SOC-107</span></div>
+  <div class="ticket-body">
+    <p><strong>Preparation —</strong> The SOC already has a documented malware-response playbook, EDR tooling deployed on all endpoints, and a tested backup system.</p>
+    <p><strong>Detection &amp; Analysis —</strong> The SIEM fires an alert: an endpoint is exhibiting behavior consistent with ransomware — rapid file renaming across a shared drive. The analyst confirms this isn't a false positive by checking the specific file-extension pattern against known ransomware signatures.</p>
+    <p><strong>Containment —</strong> The analyst isolates the affected endpoint from the network immediately, following the playbook's explicit containment step, preventing the ransomware from spreading to other shared drives.</p>
+    <p><strong>Eradication &amp; Recovery —</strong> The security team removes the malware from the isolated endpoint, verifies no other systems were affected, and restores the encrypted files from the tested backup rather than paying any ransom.</p>
+    <p><strong>Post-Incident Activity —</strong> The team documents how the malware entered (a phishing email opened by an employee), updates security awareness training accordingly, and revises the playbook to include a new detection rule for the specific file-extension pattern observed.</p>
+    <p><strong>Coordination —</strong> Throughout the incident, the SOC manager keeps IT leadership informed, and legal/compliance evaluates whether any regulatory notification obligations apply given the data potentially affected.</p>
+  </div>
+</div>
+
+<h3 id="sec-4-6" data-n="4.6">Playbooks + SIEM + SOAR</h3>
+
+<p>Modules 3 and 4 close the loop on how the entire toolchain works together in a real SOC.</p>
+
+<div class="table-wrap">
+<table>
+<caption>How Playbooks, SIEM, and SOAR Interact</caption>
+<thead><tr><th>Tool</th><th>Role in the Incident Lifecycle</th></tr></thead>
+<tbody>
+<tr><td><strong>SIEM</strong></td><td>Detects the incident (Detection &amp; Analysis phase) by correlating log data and firing an alert</td></tr>
+<tr><td><strong>Playbook</strong></td><td>Tells the analyst exactly what to do once the alert fires — the documented procedure across all six phases</td></tr>
+<tr><td><strong>SOAR</strong></td><td>Automates well-understood playbook steps — e.g., automatically isolating an endpoint the moment a high-confidence ransomware signature is detected, before a human analyst even opens the ticket</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket redteam">
+  <div class="ticket-head"><span><span class="icon">🗡️</span>Blue Team Tip</span><span class="ticket-id">BT-103</span></div>
+  <div class="ticket-body"><p>The most mature SOCs eventually encode entire playbooks as SOAR automation for the most common, lowest-ambiguity incident types — freeing human analysts to focus on novel or ambiguous incidents where judgment genuinely matters. This is the direction the entire industry is moving, and it's worth naming explicitly in interviews as evidence you understand where the field is heading.</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs-4">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 4.1 — Phase Identification Drill</summary>
+  <div class="acc-body">
+    <p>For each action, name the correct incident response phase: (1) updating the malware playbook after an incident, (2) isolating an infected laptop from the network, (3) restoring files from backup, (4) confirming a SIEM alert is a genuine ransomware signature and not a false positive, (5) notifying legal counsel about a possible breach.</p>
+    <p><strong>Answer key:</strong> 1 — Post-Incident Activity, 2 — Containment, 3 — Eradication &amp; Recovery, 4 — Detection &amp; Analysis, 5 — Coordination.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 4.2 — Draft a Mini Playbook</summary>
+  <div class="acc-body">
+    <p>Draft a short (six-step, one line each) incident response playbook for a "lost company laptop" scenario, mapping one action to each of the six lifecycle phases.</p>
+    <p><strong>Sample answer:</strong> Preparation — device encryption and remote-wipe capability pre-installed. Detection &amp; Analysis — employee reports the laptop missing; confirm what data it could access. Containment — remotely revoke the device's active session tokens. Eradication &amp; Recovery — remote-wipe the device; issue a replacement. Post-Incident Activity — review whether encryption/remote-wipe worked as intended; update policy if not. Coordination — notify IT, and legal/compliance if regulated data was on the device.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Portfolio Project 4.1 — Full Incident Report</summary>
+  <div class="acc-body">
+    <p>Using the malware walkthrough in this module as a model, write your own one-page incident report for a fictional scenario of your choosing (e.g., a phishing-triggered account compromise). Structure it explicitly around the six lifecycle phases. Save this in your portfolio as a strong, concrete artifact for interviews.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview-4">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Beginner Question</span><span class="ticket-id">INT-107</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Walk me through the six phases of incident response.</strong></p>
+    <p><strong>Ideal answer:</strong> "Preparation, Detection and Analysis, Containment, Eradication and Recovery, Post-Incident Activity, and Coordination. Coordination happens throughout the whole process, not just at the end, and Post-Incident Activity should feed lessons learned back into Preparation for next time — it's a cycle, not a one-way line."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>SOC Analyst Question</span><span class="ticket-id">INT-108</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Why is containment prioritized before full root-cause analysis in most playbooks?</strong></p>
+    <p><strong>Ideal answer:</strong> "Because an ongoing incident's damage keeps growing the longer it's active — every additional minute of spread increases scope and cost. Containing first stops the bleeding; you can perform a deeper root-cause analysis once the immediate threat is no longer actively spreading. This mirrors the Equifax lesson: contain first, investigate second."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Scenario Question</span><span class="ticket-id">INT-109</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: You discover during an incident that the playbook you're following references a security tool your organization retired six months ago. What do you do?</strong></p>
+    <p><strong>Ideal answer:</strong> "I'd adapt in the moment using the current equivalent tool and document the discrepancy, then flag the outdated playbook for an immediate update during Post-Incident Activity so the next analyst doesn't hit the same gap. Playbooks are living documents, and finding a gap during a real incident is exactly the kind of feedback that should update them."</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice-4">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which phase involves removing the threat and restoring systems to normal operation?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Containment</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Eradication &amp; Recovery</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Post-Incident Activity</button>
+  <div class="fb">Correct — Eradication removes the threat; Recovery restores normal operation.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: Coordination only happens at the very end of an incident.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — Coordination happens throughout the entire incident lifecycle, not just at the end.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. Which type of playbook specifically documents evidence handling for legal admissibility?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Vulnerability Management Playbook</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Chain of Custody Playbook</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Risk Assessment Playbook</button>
+  <div class="fb">Correct — the Chain of Custody Playbook governs evidence handling and legal admissibility.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision-4">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-104</span></div>
+  <div class="ticket-body"><p>Four playbook types: Incident Response, Vulnerability Management, Chain of Custody, Risk Assessment. Six IR lifecycle phases: Preparation, Detection &amp; Analysis, Containment, Eradication &amp; Recovery, Post-Incident Activity, Coordination — Coordination runs throughout; Post-Incident Activity feeds back into Preparation. Playbooks are living documents that must be updated after every real incident. SOAR automates the most repetitive playbook steps on top of SIEM detection.</p></div>
+</div>
+
+<div class="summary-block" id="summary-4">
+  <h4>Module Summary</h4>
+  <p>This module closed Course II by giving you the operational backbone that ties everything together: when a SIEM alert fires, a playbook tells you exactly what to do, structured around a six-phase lifecycle that begins before the incident and ends by feeding lessons learned back into future preparation.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>Playbooks exist to guarantee consistent, compliant, fast response regardless of who is on shift.</li>
+    <li>Four playbook types cover incident response, vulnerability management, chain of custody, and risk assessment.</li>
+    <li>The six-phase IR lifecycle (Preparation → Detection &amp; Analysis → Containment → Eradication &amp; Recovery → Post-Incident Activity → Coordination) is one of the most frequently tested sequences in the entire field.</li>
+    <li>Playbooks must be treated as living documents, revised after every real incident.</li>
+    <li>SIEM, playbooks, and SOAR form a complementary toolchain: detect, decide, and (increasingly) automate.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives-4">◂ Back to Module 4 Objectives</a>
+  <a href="#course-summary">Course Summary ▸</a>
+</div>
+
+<div class="endmark">— End of Module 4 —</div>
+
+<!-- ============================================================
+     COURSE SUMMARY
+     ============================================================ -->
+<h2 class="module-head" id="course-summary"><span class="tag">Course Summary</span>Play It Safe: Manage Security Risks — Complete</h2>
+
+<p>Course II took the vocabulary from Course I and turned it into a working method: classify risk precisely, apply named frameworks and controls to real decisions, read what a SIEM dashboard is actually telling you, and follow a documented, repeatable process the moment something goes wrong.</p>
+
+<div class="table-wrap">
+<table>
+<caption>Course II — Module-by-Module Recap</caption>
+<thead><tr><th>Module</th><th>Core Theme</th><th>Signature Concepts</th></tr></thead>
+<tbody>
+<tr><td><strong>1. Threats, Risks &amp; Vulnerabilities</strong></td><td>Precise risk vocabulary and classification</td><td>Threat/risk/vulnerability, asset risk levels, NIST RMF (7 steps), risk strategies, named vulnerabilities</td></tr>
+<tr><td><strong>2. Frameworks, Controls &amp; Audits</strong></td><td>Governance made concrete</td><td>CTF, ISO/IEC 27001, control types, NIST CSF (5 functions), OWASP's 10 principles, security audits</td></tr>
+<tr><td><strong>3. SIEM Tools &amp; Dashboards</strong></td><td>Reading and interpreting security telemetry</td><td>Log types, SIEM functions, dashboards, SOAR, deployment models, Splunk/Chronicle</td></tr>
+<tr><td><strong>4. Incident Response Playbooks</strong></td><td>Structured, repeatable response</td><td>Playbook types, 6-phase IR lifecycle, living documents, SIEM+playbook+SOAR integration</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket expert">
+  <div class="ticket-head"><span><span class="icon">🎓</span>Expert Note</span><span class="ticket-id">EXP-101</span></div>
+  <div class="ticket-body"><p>Two sequences from this course are the highest-value things to have cold before any interview: the <strong>NIST CSF's five functions</strong> (Identify, Protect, Detect, Respond, Recover) and the <strong>six-phase incident response lifecycle</strong> (Preparation, Detection &amp; Analysis, Containment, Eradication &amp; Recovery, Post-Incident Activity, Coordination). Nearly every scenario question in an entry-level interview can be answered by mapping the scenario onto one of these two sequences.</p></div>
+</div>
+
+<!-- ============================================================
+     FULL COURSE GLOSSARY
+     ============================================================ -->
+<h2 class="module-head" id="course-glossary"><span class="tag">Reference</span>Full Glossary — Weeks 1–4</h2>
+
+<div class="table-wrap">
+<table>
+<caption>Complete Course II Glossary</caption>
+<thead><tr><th>Term</th><th>Definition</th></tr></thead>
+<tbody>
+<tr><td><strong>Accountability</strong></td><td>Monitoring and recording user actions to prove proper use of systems/data</td></tr>
+<tr><td><strong>Authentication</strong></td><td>The process of verifying who someone or something is</td></tr>
+<tr><td><strong>Authorization</strong></td><td>Granting access to specific resources after identity is confirmed</td></tr>
+<tr><td><strong>Biometrics</strong></td><td>Unique physical characteristics used to verify identity</td></tr>
+<tr><td><strong>Business continuity</strong></td><td>An organization's ability to maintain everyday productivity via disaster-recovery planning</td></tr>
+<tr><td><strong>Chronicle</strong></td><td>Google's cloud-native SIEM tool</td></tr>
+<tr><td><strong>Ciphertext</strong></td><td>Raw, encoded, unreadable message before decryption</td></tr>
+<tr><td><strong>Cryptography</strong></td><td>Transforming data so unauthorized parties can't read or tamper with it</td></tr>
+<tr><td><strong>Cyber Threat Framework (CTF)</strong></td><td>A common language for describing and communicating cyber threat activity</td></tr>
+<tr><td><strong>Dark web</strong></td><td>Web layer requiring special software (e.g., Tor) to access; associated with anonymity and criminal marketplaces</td></tr>
+<tr><td><strong>Deep web</strong></td><td>Web layer requiring authorization to access, such as an intranet</td></tr>
+<tr><td><strong>Encryption</strong></td><td>Converting readable data (plaintext) into encoded, unreadable format (ciphertext)</td></tr>
+<tr><td><strong>External risk</strong></td><td>Anything outside the organization with potential to harm assets</td></tr>
+<tr><td><strong>Firewall log</strong></td><td>A record of attempted, established, and denied network connections</td></tr>
+<tr><td><strong>Identification</strong></td><td>A user verifying who they are (username, badge, biometric data)</td></tr>
+<tr><td><strong>Identity and Access Management (IAM)</strong></td><td>The domain ensuring trusted, authenticated identities and properly authorized access</td></tr>
+<tr><td><strong>Information Security (InfoSec)</strong></td><td>Processes securing information: incident response, vulnerability management, app/cloud/infrastructure security</td></tr>
+<tr><td><strong>Internal risk</strong></td><td>A current/former employee, vendor, or partner posing a security risk</td></tr>
+<tr><td><strong>ISO/IEC 27001</strong></td><td>International standard for managing information security assets across any sector/size</td></tr>
+<tr><td><strong>Legacy systems</strong></td><td>Old, possibly unaccounted-for or unpatched systems still in use</td></tr>
+<tr><td><strong>Log4Shell</strong></td><td>A named vulnerability in Java applications using Log4j</td></tr>
+<tr><td><strong>Multi-factor authentication (MFA)</strong></td><td>Requiring both a password and an additional identity-verification factor</td></tr>
+<tr><td><strong>Multiparty risk</strong></td><td>Risk from outsourcing work to third parties with access to sensitive assets</td></tr>
+<tr><td><strong>NIST CSF (5 functions)</strong></td><td>Identify, Protect, Detect, Respond, Recover — the framework's five core functions</td></tr>
+<tr><td><strong>NIST RMF (7 steps)</strong></td><td>Prepare, Categorize, Select, Implement, Assess, Authorize, Monitor</td></tr>
+<tr><td><strong>NIST SP 800-53</strong></td><td>Unified framework protecting U.S. federal information systems</td></tr>
+<tr><td><strong>OWASP</strong></td><td>Open Worldwide Application Security Project; publishes the 10 security principles and Top 10 risks list</td></tr>
+<tr><td><strong>PetitPotam</strong></td><td>A named vulnerability affecting Windows NTLM authentication</td></tr>
+<tr><td><strong>Playbook</strong></td><td>A manual detailing step-by-step response actions for a specific incident type</td></tr>
+<tr><td><strong>Principle of least privilege</strong></td><td>Limiting user access to only what's needed for their role</td></tr>
+<tr><td><strong>ProxyLogon</strong></td><td>A named vulnerability affecting Microsoft Exchange Server</td></tr>
+<tr><td><strong>Risk</strong></td><td>Anything that can impact the CIA of an asset; the likelihood of a threat occurring</td></tr>
+<tr><td><strong>Risk acceptance</strong></td><td>Accepting a risk to avoid disrupting business continuity</td></tr>
+<tr><td><strong>Risk avoidance</strong></td><td>Creating a plan to avoid a risk altogether</td></tr>
+<tr><td><strong>Risk management</strong></td><td>The CISSP domain focused on security goals, mitigation, compliance, and business continuity</td></tr>
+<tr><td><strong>Risk mitigation</strong></td><td>Procedures in place to quickly reduce a risk's impact</td></tr>
+<tr><td><strong>Risk transference</strong></td><td>Transferring risk to a third party (e.g., cybersecurity insurance)</td></tr>
+<tr><td><strong>Security audit</strong></td><td>A review of security controls, policies, and procedures against internal/external criteria</td></tr>
+<tr><td><strong>Security orchestration, automation, and response (SOAR)</strong></td><td>Tools/workflows using automation to respond to security events</td></tr>
+<tr><td><strong>Separation of duties</strong></td><td>Ensuring no single person holds enough privilege to misuse a system alone</td></tr>
+<tr><td><strong>Server log</strong></td><td>A record of events related to services (websites, email, file shares)</td></tr>
+<tr><td><strong>Server-side request forgery (SSRF)</strong></td><td>Manipulating a server-side app to access/update backend resources</td></tr>
+<tr><td><strong>Shared responsibility</strong></td><td>The principle that all individuals in an organization help maintain security, not just the security team</td></tr>
+<tr><td><strong>Software compliance/licensing</strong></td><td>Risk from out-of-date, non-compliant, or unpatched software</td></tr>
+<tr><td><strong>Splunk</strong></td><td>A self-hosted (Enterprise) or cloud-hosted (Cloud) SIEM data analysis platform</td></tr>
+<tr><td><strong>Surface web</strong></td><td>Web layer accessible via a standard browser without special access</td></tr>
+<tr><td><strong>Threat</strong></td><td>Any circumstance or event that can negatively impact assets</td></tr>
+<tr><td><strong>Vishing</strong></td><td>Exploiting electronic voice communication to extract info or impersonate a source</td></tr>
+<tr><td><strong>Vulnerability</strong></td><td>A weakness that can be exploited by a threat</td></tr>
+<tr><td><strong>ZeroLogon</strong></td><td>A named vulnerability affecting the Microsoft Netlogon authentication protocol</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ============================================================
+     MASTER CHEAT SHEET
+     ============================================================ -->
+<h2 class="module-head" id="course-cheatsheet"><span class="tag">Reference</span>Master Cheat Sheet &amp; Revision Checklist</h2>
+
+<h4>Revision Checklist</h4>
+<div class="quiz" style="background:var(--paper-dim);">
+  <p>Before moving to Course III, confirm you can do all of the following from memory:</p>
+  <ul>
+    <li>☐ Define threat, risk, and vulnerability, and explain why risk needs both a threat and a vulnerability</li>
+    <li>☐ Classify an asset as low/medium/high risk given a short description</li>
+    <li>☐ Recite the NIST RMF's seven steps in order</li>
+    <li>☐ Name all four risk management strategies (Accept, Avoid, Transfer, Mitigate)</li>
+    <li>☐ Recite the NIST CSF's five core functions in order and give an example of each</li>
+    <li>☐ List at least six of OWASP's ten security principles</li>
+    <li>☐ Describe the five elements of an internal security audit</li>
+    <li>☐ Explain what a SIEM tool does and name two real platforms</li>
+    <li>☐ Recite the six-phase incident response lifecycle in order</li>
+    <li>☐ Explain why playbooks are "living documents"</li>
+  </ul>
+</div>
+
+<h4>Cybersecurity Terms Cheat Sheet — By Category</h4>
+<div class="table-wrap">
+<table>
+<tbody>
+<tr><td><strong>Risk Vocabulary</strong></td><td>Threat, Risk, Vulnerability, Asset Risk Levels (Low/Medium/High)</td></tr>
+<tr><td><strong>Web Layers</strong></td><td>Surface Web, Deep Web, Dark Web</td></tr>
+<tr><td><strong>NIST RMF (7 Steps)</strong></td><td>Prepare, Categorize, Select, Implement, Assess, Authorize, Monitor</td></tr>
+<tr><td><strong>Risk Strategies</strong></td><td>Acceptance, Avoidance, Transference, Mitigation</td></tr>
+<tr><td><strong>Named Vulnerabilities</strong></td><td>ProxyLogon, ZeroLogon, Log4Shell, PetitPotam</td></tr>
+<tr><td><strong>IAM Components</strong></td><td>Identification, Authentication, Authorization, Accountability</td></tr>
+<tr><td><strong>Control Categories</strong></td><td>Physical, Technical, Administrative</td></tr>
+<tr><td><strong>Control Functions</strong></td><td>Preventative, Detective, Corrective, Deterrent</td></tr>
+<tr><td><strong>NIST CSF (5 Functions)</strong></td><td>Identify, Protect, Detect, Respond, Recover</td></tr>
+<tr><td><strong>OWASP Principles</strong></td><td>Minimize Attack Surface, Least Privilege, Defense in Depth, Separation of Duties, Keep Simple, Fix Correctly, Secure Defaults, Fail Securely, Don't Trust Services, Avoid Obscurity</td></tr>
+<tr><td><strong>Audit Elements</strong></td><td>Scope &amp; Goals, Risk Assessment, Controls Assessment, Compliance Check, Communication</td></tr>
+<tr><td><strong>SIEM Platforms</strong></td><td>Splunk (Enterprise/Cloud), Chronicle</td></tr>
+<tr><td><strong>SIEM Deployment</strong></td><td>Self-hosted, Cloud-hosted, Hybrid</td></tr>
+<tr><td><strong>Playbook Types</strong></td><td>Incident Response, Vulnerability Management, Chain of Custody, Risk Assessment</td></tr>
+<tr><td><strong>IR Lifecycle (6 Phases)</strong></td><td>Preparation, Detection &amp; Analysis, Containment, Eradication &amp; Recovery, Post-Incident Activity, Coordination</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="summary-block">
+  <h4>Where to Go Next</h4>
+  <ul>
+    <li><strong>Course III — Connect and Protect: Networks and Network Security</strong> builds directly on the log types and controls introduced here, going deep on network architecture, protocols, and the security devices that enforce these controls in practice.</li>
+    <li>Add your Course II portfolio artifacts (mini audit, incident report) alongside your Course I professional statement.</li>
+    <li>Revisit both memorized sequences — NIST CSF's five functions and the six-phase IR lifecycle — one week from now using spaced repetition.</li>
+  </ul>
+</div>
+
+<div class="endmark">— End of Course II: Play It Safe — Manage Security Risks —</div>
+</div>
+</main>
+<script>
+// progress bar
+window.addEventListener('scroll', function(){
+  var h = document.documentElement;
+  var scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+  document.getElementById('progress-fill').style.width = scrolled + '%';
+});
+
+// TOC drawer
+var drawer = document.getElementById('toc-drawer');
+var scrim = document.getElementById('scrim');
+document.getElementById('toc-toggle').addEventListener('click', function(){
+  drawer.classList.add('open'); scrim.classList.add('show');
+  this.setAttribute('aria-expanded','true');
+});
+document.getElementById('toc-close').addEventListener('click', closeDrawer);
+scrim.addEventListener('click', closeDrawer);
+function closeDrawer(){
+  drawer.classList.remove('open'); scrim.classList.remove('show');
+  document.getElementById('toc-toggle').setAttribute('aria-expanded','false');
+}
+
+// flashcards
+document.querySelectorAll('.flash').forEach(function(card){
+  function flip(){
+    card.classList.toggle('flipped');
+    card.setAttribute('aria-pressed', card.classList.contains('flipped'));
+  }
+  card.addEventListener('click', flip);
+  card.addEventListener('keypress', function(e){ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); flip(); } });
+});
+
+// quiz
+function checkAnswer(btn, isCorrect){
+  var quiz = btn.closest('.quiz');
+  var opts = quiz.querySelectorAll('.opt');
+  opts.forEach(function(o){ o.disabled = true; });
+  if(isCorrect){ btn.classList.add('correct'); }
+  else { btn.classList.add('wrong'); }
+  quiz.querySelector('.fb').classList.add('show');
+}
+
+// copy code
+function copyCode(btn){
+  var code = btn.closest('.code-block').querySelector('pre').innerText;
+  navigator.clipboard.writeText(code).then(function(){
+    var old = btn.innerText; btn.innerText = 'Copied!';
+    setTimeout(function(){ btn.innerText = old; }, 1500);
+  });
+}
+
+// scroll-spy for TOC + spine
+var spySections = document.querySelectorAll('[id]');
+var tocLinks = document.querySelectorAll('#toc-drawer a[href^="#"]');
+var spineTabs = document.querySelectorAll('#spine .spine-tab');
+var moduleIds = ['module-1','module-2','module-3','module-4'];
+window.addEventListener('scroll', function(){
+  var current = '';
+  spySections.forEach(function(sec){
+    var rect = sec.getBoundingClientRect();
+    if(rect.top < 150) current = sec.id;
+  });
+  tocLinks.forEach(function(link){
+    link.classList.remove('current');
+    if(link.getAttribute('href') === '#' + current) link.classList.add('current');
+  });
+  // determine which module we're currently in for the spine rail
+  var currentModule = 'module-1';
+  moduleIds.forEach(function(mid){
+    var el = document.getElementById(mid);
+    if(el && el.getBoundingClientRect().top < 150) currentModule = mid;
+  });
+  spineTabs.forEach(function(tab){
+    tab.classList.remove('active');
+    if(tab.getAttribute('href') === '#' + currentModule) tab.classList.add('active');
+  });
+});
+</script>
+
+  <script src="../../js/storage.js" defer></script>
+  <script src="../../js/reader.js" defer></script>
+</body>
+</html>

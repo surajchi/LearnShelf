@@ -1,0 +1,2343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course V · Assets, Threats, and Vulnerabilities — Complete Course (Modules 1–4)</title>
+<style>
+/* ============================================================
+   DESIGN SYSTEM — "CASE FILE" — SOC Reference Book
+   Palette: ink #0B0F14, paper #F7F5F0, panel #16202B, signal teal #2DD4BF,
+            warning amber #F59E0B, critical red #EF4444, wire blue #5B8DEF
+   Type: display = geometric sans, body = humanist serif, mono = code/log
+   ============================================================ */
+:root{
+  --ink:#0B0F14;
+  --paper:#F7F5F0;
+  --paper-dim:#EDE9E0;
+  --panel:#16202B;
+  --panel-2:#1E2B38;
+  --line:#D8D2C4;
+  --line-dark:#2A3A48;
+  --signal:#0F9E93;
+  --signal-bright:#2DD4BF;
+  --warn:#B4700A;
+  --warn-bright:#F59E0B;
+  --crit:#C4342A;
+  --crit-bright:#EF4444;
+  --wire:#3457B2;
+  --wire-bright:#5B8DEF;
+  --ink-soft:#3A4650;
+  --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
+  --sans: -apple-system, 'Segoe UI', 'Inter', Avenir, Helvetica, Arial, sans-serif;
+  --mono: 'SF Mono', 'JetBrains Mono', Consolas, 'Courier New', monospace;
+  --maxw: 780px;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:17px;
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+
+::selection{background:var(--signal-bright); color:var(--ink);}
+
+/* ---------- progress bar (signal-strength style) ---------- */
+#progress-track{
+  position:fixed; top:0; left:0; right:0; height:4px; z-index:500;
+  background:var(--paper-dim);
+  border-bottom:1px solid var(--line);
+}
+#progress-fill{
+  height:100%; width:0%;
+  background:repeating-linear-gradient(90deg, var(--signal) 0 6px, var(--signal-bright) 6px 12px);
+  transition:width .1s linear;
+}
+
+/* ---------- spine rail (left nav) ---------- */
+#spine{
+  position:fixed; top:0; left:0; bottom:0; width:64px; z-index:400;
+  background:var(--ink);
+  border-right:1px solid var(--line-dark);
+  display:flex; flex-direction:column; align-items:center;
+  padding-top:24px; gap:4px;
+  font-family:var(--mono);
+}
+#spine .spine-mark{
+  writing-mode:vertical-rl; text-orientation:mixed;
+  color:var(--signal-bright); font-size:11px; letter-spacing:.15em;
+  margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid var(--line-dark);
+  text-transform:uppercase;
+}
+#spine .spine-tab{
+  width:40px; height:40px; border-radius:3px;
+  display:flex; align-items:center; justify-content:center;
+  color:#6B7A85; font-size:13px; font-weight:700;
+  border:1px solid transparent; cursor:pointer; text-decoration:none;
+  transition:all .15s ease;
+}
+#spine .spine-tab:hover{border-color:var(--line-dark); color:var(--paper);}
+#spine .spine-tab.active{background:var(--panel-2); color:var(--signal-bright); border-color:var(--signal);}
+#toc-toggle{
+  margin-top:auto; margin-bottom:20px; width:40px; height:40px;
+  border-radius:3px; border:1px solid var(--line-dark); background:none;
+  color:#6B7A85; cursor:pointer; font-size:16px;
+}
+#toc-toggle:hover{color:var(--signal-bright); border-color:var(--signal);}
+
+@media (max-width: 860px){
+  #spine{width:44px; padding-top:16px;}
+  #spine .spine-mark{display:none;}
+  #spine .spine-tab{width:30px; height:30px; font-size:11px;}
+}
+
+/* ---------- TOC drawer ---------- */
+#toc-drawer{
+  position:fixed; top:0; left:-380px; bottom:0; width:340px; z-index:450;
+  background:var(--panel); color:var(--paper);
+  padding:32px 28px; overflow-y:auto;
+  transition:left .25s ease;
+  box-shadow:8px 0 30px rgba(0,0,0,.35);
+  font-family:var(--sans);
+}
+#toc-drawer.open{left:64px;}
+@media (max-width:860px){ #toc-drawer.open{left:44px;} }
+#toc-drawer h3{
+  font-family:var(--mono); text-transform:uppercase; letter-spacing:.12em;
+  font-size:12px; color:var(--signal-bright); margin:0 0 18px;
+  border-bottom:1px solid var(--line-dark); padding-bottom:12px;
+}
+#toc-drawer .toc-course{font-size:13px; font-weight:700; margin:18px 0 6px; color:#9FB1BE;}
+#toc-drawer ol{list-style:none; margin:0 0 8px; padding:0;}
+#toc-drawer li a{
+  display:block; padding:7px 8px; border-radius:4px; color:#C9D3DA;
+  text-decoration:none; font-size:13.5px; line-height:1.4;
+  border-left:2px solid transparent;
+}
+#toc-drawer li a:hover{background:var(--panel-2); border-left-color:var(--signal-bright); color:#fff;}
+#toc-drawer li a.current{border-left-color:var(--signal-bright); color:var(--signal-bright); background:var(--panel-2);}
+#toc-close{
+  position:absolute; top:28px; right:24px; background:none; border:none;
+  color:#9FB1BE; font-size:20px; cursor:pointer;
+}
+#scrim{position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:440; display:none;}
+#scrim.show{display:block;}
+
+/* ---------- layout ---------- */
+main{margin-left:64px; padding:0 24px 120px;}
+@media (max-width:860px){ main{margin-left:44px; padding:0 16px 100px;} }
+.page{max-width:var(--maxw); margin:0 auto; padding-top:56px;}
+
+/* ---------- cover ---------- */
+.cover{
+  min-height:92vh; display:flex; flex-direction:column; justify-content:center;
+  border-bottom:3px solid var(--ink); padding-bottom:48px; margin-bottom:56px;
+}
+.cover-eyebrow{
+  font-family:var(--mono); font-size:12.5px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--signal); margin-bottom:18px; display:flex; align-items:center; gap:10px;
+}
+.cover-eyebrow::before{content:"";width:28px;height:2px;background:var(--signal-bright);display:inline-block;}
+.cover h1{
+  font-family:var(--sans); font-size:clamp(2.4rem, 6vw, 4rem); font-weight:800;
+  line-height:1.05; margin:0 0 14px; letter-spacing:-.02em; color:var(--ink);
+}
+.cover .subtitle{
+  font-family:var(--serif); font-style:italic; font-size:1.35rem; color:var(--ink-soft);
+  margin:0 0 36px; max-width:640px;
+}
+.cover-svg-wrap{margin:8px 0 40px;}
+.cover-meta{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:0;
+  border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+}
+.cover-meta div{padding:16px 18px; border-right:1px solid var(--line);}
+.cover-meta div:last-child{border-right:none;}
+.cover-meta .k{font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.1em; color:#8A8272; margin-bottom:5px;}
+.cover-meta .v{font-family:var(--sans); font-size:14.5px; font-weight:700; color:var(--ink);}
+
+.cover-block{margin-top:36px;}
+.cover-block h4{
+  font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.12em;
+  color:var(--signal); margin:0 0 10px;
+}
+.cover-block ul{margin:0; padding-left:20px;}
+.cover-block li{margin-bottom:6px; font-size:15.5px;}
+
+/* ---------- headings ---------- */
+h2.module-head{
+  font-family:var(--sans); font-size:2.1rem; font-weight:800; letter-spacing:-.01em;
+  margin:64px 0 6px; padding-top:40px; border-top:3px solid var(--ink);
+  page-break-before:always;
+}
+h2.module-head .tag{
+  display:block; font-family:var(--mono); font-size:12px; letter-spacing:.15em;
+  text-transform:uppercase; color:var(--signal); font-weight:700; margin-bottom:10px;
+}
+h3{
+  font-family:var(--sans); font-size:1.42rem; font-weight:800; margin:42px 0 14px;
+  color:var(--ink); letter-spacing:-.005em;
+  display:flex; align-items:baseline; gap:10px;
+}
+h3::before{
+  content:attr(data-n); font-family:var(--mono); font-size:.65em; color:var(--signal);
+  font-weight:700;
+}
+h4{font-family:var(--sans); font-weight:700; font-size:1.08rem; margin:28px 0 10px; color:var(--ink);}
+p{margin:0 0 16px;}
+strong{color:var(--ink); font-weight:700;}
+a{color:var(--wire);}
+
+/* ---------- objectives box ---------- */
+.objectives{
+  background:var(--ink); color:var(--paper); border-radius:6px; padding:28px 30px;
+  margin:24px 0 40px; font-family:var(--sans);
+}
+.objectives h4{
+  font-family:var(--mono); color:var(--signal-bright); text-transform:uppercase;
+  letter-spacing:.12em; font-size:12px; margin:0 0 16px;
+}
+.objectives ul{margin:0; padding-left:0; list-style:none;}
+.objectives li{
+  position:relative; padding-left:26px; margin-bottom:10px; font-size:15px; color:#DCE3E8;
+}
+.objectives li::before{content:"▸"; position:absolute; left:0; color:var(--signal-bright);}
+
+/* ---------- callouts: "case-file ticket" signature element ---------- */
+.ticket{
+  border:1.5px solid var(--ink); border-radius:4px; margin:26px 0; position:relative;
+  background:#fff; overflow:hidden; font-family:var(--sans);
+}
+.ticket-head{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:9px 16px; font-family:var(--mono); font-size:11px; letter-spacing:.08em;
+  text-transform:uppercase; font-weight:700; color:#fff;
+}
+.ticket-id{opacity:.85; font-weight:400;}
+.ticket-body{padding:16px 18px; font-size:15px; line-height:1.6;}
+.ticket-body p:last-child{margin-bottom:0;}
+.ticket.def .ticket-head{background:var(--wire);}
+.ticket.important .ticket-head{background:var(--ink);}
+.ticket.remember .ticket-head{background:#6B4FBB;}
+.ticket.interview .ticket-head{background:var(--signal);}
+.ticket.warning .ticket-head{background:var(--warn);}
+.ticket.alert .ticket-head{background:var(--crit);}
+.ticket.industry .ticket-head{background:#8A5A2B;}
+.ticket.bestpractice .ticket-head{background:#1E7A4C;}
+.ticket.compliance .ticket-head{background:#3A5A78;}
+.ticket.examtip .ticket-head{background:#B0862B;}
+.ticket.soc .ticket-head{background:#0F5E6B;}
+.ticket.threatintel .ticket-head{background:#7A1F3D;}
+.ticket.blueteam .ticket-head{background:#1D4E89;}
+.ticket.redteam .ticket-head{background:#8C1C1C;}
+.ticket.quickrev .ticket-head{background:#4C6444;}
+.ticket.deepdive .ticket-head{background:#2C2C54;}
+.ticket.expert .ticket-head{background:#5C4033;}
+.ticket.incident .ticket-head{background:#7A1F3D;}
+.ticket .icon{margin-right:6px;}
+
+/* ---------- ELI5 ---------- */
+.eli5{
+  border-left:4px solid var(--warn-bright); background:#FFF8ED; border-radius:0 6px 6px 0;
+  padding:18px 22px; margin:22px 0; font-family:var(--serif);
+}
+.eli5 .eli5-tag{
+  font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.1em;
+  color:var(--warn); font-weight:700; margin-bottom:8px; display:block;
+}
+
+/* ---------- multi-level explanation ---------- */
+.levels{margin:26px 0; border:1px solid var(--line); border-radius:6px; overflow:hidden;}
+.level{padding:16px 20px; border-bottom:1px solid var(--line);}
+.level:last-child{border-bottom:none;}
+.level .lv-tag{
+  font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.1em;
+  font-weight:700; margin-bottom:6px; display:inline-block; padding:2px 8px; border-radius:3px;
+}
+.level.l1{background:#FFF8ED;} .level.l1 .lv-tag{background:var(--warn-bright); color:#3A2A00;}
+.level.l2{background:#F2F7FF;} .level.l2 .lv-tag{background:var(--wire-bright); color:#0A1A3A;}
+.level.l3{background:#EFFAF8;} .level.l3 .lv-tag{background:var(--signal-bright); color:#00302B;}
+.level.l4{background:#F7F0FA;} .level.l4 .lv-tag{background:#B27FE0; color:#2A0A3A;}
+.level p{margin:0; font-size:15px;}
+
+/* ---------- tables ---------- */
+.table-wrap{overflow-x:auto; margin:24px 0;}
+table{width:100%; border-collapse:collapse; font-family:var(--sans); font-size:14px;}
+caption{
+  caption-side:top; text-align:left; font-family:var(--mono); font-size:11px;
+  text-transform:uppercase; letter-spacing:.1em; color:var(--signal); margin-bottom:8px; font-weight:700;
+}
+th{
+  background:var(--ink); color:var(--paper); text-align:left; padding:10px 14px;
+  font-weight:700; font-size:12.5px; text-transform:uppercase; letter-spacing:.04em;
+}
+td{padding:10px 14px; border-bottom:1px solid var(--line); vertical-align:top;}
+tr:nth-child(even) td{background:var(--paper-dim);}
+
+/* ---------- code blocks ---------- */
+.code-block{margin:22px 0; border-radius:6px; overflow:hidden; border:1px solid var(--line-dark);}
+.code-head{
+  background:var(--panel); color:#9FB1BE; font-family:var(--mono); font-size:11.5px;
+  padding:8px 14px; display:flex; justify-content:space-between; align-items:center;
+  border-bottom:1px solid var(--line-dark);
+}
+.code-head .lang{color:var(--signal-bright); text-transform:uppercase; letter-spacing:.08em;}
+.copy-btn{
+  background:var(--panel-2); border:1px solid var(--line-dark); color:#C9D3DA;
+  font-family:var(--mono); font-size:11px; padding:3px 10px; border-radius:3px; cursor:pointer;
+}
+.copy-btn:hover{border-color:var(--signal-bright); color:var(--signal-bright);}
+pre{
+  margin:0; background:var(--ink); color:#D9E4EA; padding:16px 18px; overflow-x:auto;
+  font-family:var(--mono); font-size:13.5px; line-height:1.6;
+}
+pre code{counter-reset:line;}
+.code-note{
+  background:var(--paper-dim); border-top:1px solid var(--line); padding:10px 16px;
+  font-family:var(--sans); font-size:13px; color:var(--ink-soft);
+}
+
+/* ---------- svg figure ---------- */
+figure{margin:28px 0; text-align:center;}
+figure svg{max-width:100%; height:auto;}
+figcaption{
+  font-family:var(--mono); font-size:11.5px; color:var(--ink-soft); margin-top:10px;
+  text-transform:uppercase; letter-spacing:.06em;
+}
+
+/* ---------- flashcards ---------- */
+.flash-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin:24px 0;}
+.flash{
+  border:1px solid var(--line); border-radius:6px; padding:16px; cursor:pointer;
+  background:#fff; min-height:96px; position:relative; font-family:var(--sans);
+  transition:box-shadow .15s;
+}
+.flash:hover{box-shadow:0 4px 14px rgba(0,0,0,.08);}
+.flash .front{font-weight:700; font-size:14.5px;}
+.flash .back{
+  display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);
+  font-family:var(--serif); font-size:14px; color:var(--ink-soft);
+}
+.flash.flipped .back{display:block;}
+.flash .hint{
+  position:absolute; top:12px; right:12px; font-family:var(--mono); font-size:9.5px;
+  color:#B0A996; text-transform:uppercase;
+}
+
+/* ---------- accordion ---------- */
+details.acc{border:1px solid var(--line); border-radius:6px; margin:12px 0; overflow:hidden;}
+details.acc summary{
+  padding:13px 18px; cursor:pointer; font-family:var(--sans); font-weight:700; font-size:14.5px;
+  background:var(--paper-dim); list-style:none; display:flex; justify-content:space-between;
+}
+details.acc summary::-webkit-details-marker{display:none;}
+details.acc summary::after{content:"+"; color:var(--signal); font-size:18px;}
+details.acc[open] summary::after{content:"–";}
+details.acc .acc-body{padding:16px 18px; font-size:15px;}
+
+/* ---------- MCQ / practice ---------- */
+.quiz{border:1px solid var(--line); border-radius:6px; padding:18px 20px; margin:16px 0; background:#fff;}
+.quiz .q{font-weight:700; font-family:var(--sans); margin-bottom:10px; font-size:14.5px;}
+.quiz .opt{
+  display:block; width:100%; text-align:left; padding:9px 12px; margin-bottom:6px;
+  border:1px solid var(--line); border-radius:4px; background:var(--paper); cursor:pointer;
+  font-family:var(--sans); font-size:14px;
+}
+.quiz .opt:hover{border-color:var(--wire);}
+.quiz .opt.correct{background:#E6F7EE; border-color:var(--signal); font-weight:700;}
+.quiz .opt.wrong{background:#FBEAEA; border-color:var(--crit);}
+.quiz .fb{margin-top:8px; font-size:13.5px; font-family:var(--sans); color:var(--ink-soft); display:none;}
+.quiz .fb.show{display:block;}
+
+/* ---------- summary / takeaway blocks ---------- */
+.summary-block{
+  background:var(--panel); color:var(--paper); border-radius:8px; padding:30px 32px; margin:36px 0;
+  font-family:var(--sans);
+}
+.summary-block h4{color:var(--signal-bright); font-family:var(--mono); text-transform:uppercase; letter-spacing:.1em; font-size:12px;}
+.summary-block ul{padding-left:20px; margin:12px 0 0;}
+.summary-block li{margin-bottom:8px; font-size:14.5px; color:#DCE3E8;}
+
+/* footer nav */
+.module-nav{
+  display:flex; justify-content:space-between; margin-top:60px; padding-top:24px;
+  border-top:1px solid var(--line); font-family:var(--sans); font-size:13.5px;
+}
+.module-nav a{text-decoration:none; color:var(--ink); font-weight:700;}
+.endmark{
+  text-align:center; font-family:var(--mono); font-size:11px; color:#B0A996;
+  letter-spacing:.15em; text-transform:uppercase; margin:80px 0 20px;
+}
+
+/* print */
+@media print{
+  #spine, #toc-drawer, #progress-track, #scrim, .copy-btn{display:none !important;}
+  main{margin-left:0;}
+  body{font-size:12pt;}
+  .ticket, .levels, .objectives, .summary-block{break-inside:avoid;}
+  h2.module-head{page-break-before:always;}
+  a{color:inherit; text-decoration:none;}
+}
+
+/* accessibility */
+:focus-visible{outline:3px solid var(--signal); outline-offset:2px;}
+.skip-link{
+  position:absolute; left:-999px; top:0; background:var(--ink); color:#fff; padding:10px 16px; z-index:900;
+}
+.skip-link:focus{left:70px; top:8px;}
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main-content">Skip to content</a>
+
+<div id="progress-track"><div id="progress-fill"></div></div>
+
+<nav id="spine" aria-label="Course navigation">
+  <div class="spine-mark">COURSE V</div>
+  <a class="spine-tab" href="#module-1" title="Module 1 · Asset Security">M1</a>
+  <a class="spine-tab" href="#module-2" title="Module 2 · Safeguarding Information">M2</a>
+  <a class="spine-tab" href="#module-3" title="Module 3 · Threats &amp; Vulnerabilities">M3</a>
+  <a class="spine-tab" href="#module-4" title="Module 4 · Social Engineering, Malware &amp; Threat Modeling">M4</a>
+  <button id="toc-toggle" aria-label="Open table of contents" aria-expanded="false">☰</button>
+</nav>
+
+<div id="scrim"></div>
+<aside id="toc-drawer" aria-label="Table of contents">
+  <button id="toc-close" aria-label="Close table of contents">✕</button>
+  <h3>Course V — Assets, Threats &amp; Vulnerabilities</h3>
+  <div class="toc-course">Module 1 · Asset Security</div>
+  <ol>
+    <li><a href="#module-1" class="current">Cover &amp; Module 1 start</a></li>
+    <li><a href="#sec-1">1.1 Risk = Likelihood × Impact</a></li>
+    <li><a href="#sec-2">1.2 Asset Management &amp; Classification</a></li>
+    <li><a href="#sec-3">1.3 Data States: In Use, In Transit, At Rest</a></li>
+    <li><a href="#sec-4">1.4 Cloud-Based Services &amp; Cloud Security</a></li>
+    <li><a href="#sec-5">1.5 Security Plans: Policies, Standards, Procedures</a></li>
+    <li><a href="#sec-6">1.6 The NIST CSF: Core, Tiers, Profiles</a></li>
+    <li><a href="#labs">Labs &amp; Exercises</a></li>
+    <li><a href="#interview">Interview Prep</a></li>
+    <li><a href="#practice">Practice Section</a></li>
+    <li><a href="#revision">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Module 2 · Safeguarding Information</div>
+  <ol>
+    <li><a href="#module-2">Module 2 start</a></li>
+    <li><a href="#sec-2-1">2.1 Security Controls &amp; Least Privilege</a></li>
+    <li><a href="#sec-2-2">2.2 The Data Lifecycle &amp; Data Governance</a></li>
+    <li><a href="#sec-2-3">2.3 Privacy Regulations: GDPR, PCI DSS, HIPAA</a></li>
+    <li><a href="#sec-2-4">2.4 Cryptography Fundamentals &amp; Caesar's Cipher</a></li>
+    <li><a href="#sec-2-5">2.5 Public Key Infrastructure</a></li>
+    <li><a href="#sec-2-6">2.6 Symmetric vs. Asymmetric Encryption</a></li>
+    <li><a href="#sec-2-7">2.7 Hashing, Salting &amp; Rainbow Tables</a></li>
+    <li><a href="#sec-2-8">2.8 AAA: Authentication, Authorization, Accounting</a></li>
+    <li><a href="#sec-2-9">2.9 IAM: MAC, DAC &amp; RBAC</a></li>
+    <li><a href="#labs-2">Labs &amp; Exercises</a></li>
+    <li><a href="#interview-2">Interview Prep</a></li>
+    <li><a href="#practice-2">Practice Section</a></li>
+    <li><a href="#revision-2">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary-2">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Module 3 · Threats &amp; Vulnerabilities</div>
+  <ol>
+    <li><a href="#module-3">Module 3 start</a></li>
+    <li><a href="#sec-3-1">3.1 Vulnerability Management &amp; Zero-Days</a></li>
+    <li><a href="#sec-3-2">3.2 Defense in Depth: 5 Layers</a></li>
+    <li><a href="#sec-3-3">3.3 CVE, CVSS &amp; OWASP Top 10</a></li>
+    <li><a href="#sec-3-4">3.4 OSINT: Information vs. Intelligence</a></li>
+    <li><a href="#sec-3-5">3.5 Vulnerability Assessments &amp; Scanning</a></li>
+    <li><a href="#sec-3-6">3.6 Updates, Patches &amp; EOL Software</a></li>
+    <li><a href="#sec-3-7">3.7 Penetration Testing</a></li>
+    <li><a href="#sec-3-8">3.8 Attack Surfaces &amp; Threat Actors</a></li>
+    <li><a href="#sec-3-9">3.9 Brute Force Attacks &amp; Prevention</a></li>
+    <li><a href="#labs-3">Labs &amp; Exercises</a></li>
+    <li><a href="#interview-3">Interview Prep</a></li>
+    <li><a href="#practice-3">Practice Section</a></li>
+    <li><a href="#revision-3">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary-3">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Module 4 · Social Engineering, Malware &amp; Threat Modeling</div>
+  <ol>
+    <li><a href="#module-4">Module 4 start</a></li>
+    <li><a href="#sec-4-1">4.1 Social Engineering Tactics</a></li>
+    <li><a href="#sec-4-2">4.2 Phishing: Origins &amp; Types</a></li>
+    <li><a href="#sec-4-3">4.3 Malware Deep Dive</a></li>
+    <li><a href="#sec-4-4">4.4 Cryptojacking</a></li>
+    <li><a href="#sec-4-5">4.5 Cross-Site Scripting (XSS)</a></li>
+    <li><a href="#sec-4-6">4.6 SQL Injection</a></li>
+    <li><a href="#sec-4-7">4.7 Threat Modeling: Six Steps</a></li>
+    <li><a href="#sec-4-8">4.8 PASTA &amp; Other Frameworks</a></li>
+    <li><a href="#labs-4">Labs &amp; Exercises</a></li>
+    <li><a href="#interview-4">Interview Prep</a></li>
+    <li><a href="#practice-4">Practice Section</a></li>
+    <li><a href="#revision-4">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary-4">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Course Reference</div>
+  <ol>
+    <li><a href="#course-summary">Course Summary</a></li>
+    <li><a href="#course-glossary">Full Glossary (Weeks 1–4)</a></li>
+    <li><a href="#course-cheatsheet">Master Cheat Sheet</a></li>
+  </ol>
+</aside>
+
+<main id="main-content">
+<div class="page" id="course-page">
+
+<!-- ================= COVER ================= -->
+<section class="cover">
+  <div class="cover-eyebrow">Google Cybersecurity Certificate · Premium Edition</div>
+  <h1>Course V<br>Assets, Threats, and Vulnerabilities</h1>
+  <p class="subtitle">Everything worth protecting, everything that wants to take it, and every crack in between — this is the course where the whole field finally clicks together.</p>
+
+  <div class="cover-svg-wrap">
+    <svg viewBox="0 0 700 220" width="100%" role="img" aria-label="Illustration of a shield with a magnifying glass revealing a crack, representing an asset with a vulnerability being examined for threats">
+      <rect x="0" y="0" width="700" height="220" fill="#F7F5F0"/>
+      <!-- shield (asset) -->
+      <path d="M350 30 L420 55 L420 120 C420 165 385 195 350 210 C315 195 280 165 280 120 L280 55 Z" fill="#3457B2" stroke="#0B0F14" stroke-width="2"/>
+      <!-- crack (vulnerability) -->
+      <path d="M330 60 L345 100 L335 105 L355 145 L340 150 L360 190" fill="none" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+      <!-- magnifying glass (threat detection) -->
+      <circle cx="490" cy="140" r="45" fill="none" stroke="#0B0F14" stroke-width="6"/>
+      <line x1="522" y1="172" x2="565" y2="215" stroke="#0B0F14" stroke-width="10" stroke-linecap="round"/>
+      <circle cx="490" cy="140" r="45" fill="#0F9E93" opacity="0.15"/>
+      <text x="350" y="20" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#0B0F14">Asset + Vulnerability + Threat = Risk</text>
+    </svg>
+  </div>
+
+  <div class="cover-meta">
+    <div><div class="k">Reading Time</div><div class="v">~5 hrs / module</div></div>
+    <div><div class="k">Difficulty</div><div class="v">Intermediate</div></div>
+    <div><div class="k">Prerequisites</div><div class="v">Courses I–IV</div></div>
+    <div><div class="k">Modules</div><div class="v">4 (Weeks 1–4)</div></div>
+  </div>
+
+  <div class="cover-block">
+    <h4>Learning Objectives — Whole Course</h4>
+    <ul>
+      <li>Classify assets, understand the three states of data, and apply the NIST CSF's core, tiers, and profiles.</li>
+      <li>Explain encryption, hashing, PKI, and the AAA/IAM frameworks for safeguarding information.</li>
+      <li>Use the CVE list, CVSS scores, and OWASP Top 10 to understand and prioritize known vulnerabilities.</li>
+      <li>Perform and interpret vulnerability assessments, scans, and penetration tests.</li>
+      <li>Recognize social engineering tactics, malware families, and web-based exploits like XSS and SQL injection.</li>
+      <li>Apply threat modeling frameworks (PASTA, STRIDE) to proactively secure systems.</li>
+    </ul>
+  </div>
+
+  <div class="cover-block">
+    <h4>Skills Gained</h4>
+    <ul>
+      <li>Asset classification and the 5-layer defense-in-depth model</li>
+      <li>Encryption/hashing literacy: symmetric vs. asymmetric, salting, PKI, digital certificates</li>
+      <li>Vulnerability research using CVE/CVSS/OWASP and OSINT tools</li>
+      <li>Attacker-mindset threat modeling using industry frameworks</li>
+      <li>Recognition of named malware, phishing, and web exploit categories</li>
+    </ul>
+  </div>
+
+  <div class="cover-block">
+    <h4>Career Relevance</h4>
+    <p>This course is the conceptual center of gravity for the entire certificate — nearly every remaining course (detection/response, Python automation, career prep) assumes fluency with the vocabulary here. Expect deep interview questions on encryption types, the CIA-triad-to-vulnerability pipeline, and named attack categories like XSS and SQL injection.</p>
+  </div>
+</section>
+
+<!-- ================= PREFACE ================= -->
+<h2 class="module-head"><span class="tag">Preface</span>How to Use This Course</h2>
+
+<p>This is the densest course in the certificate so far — deliberately so. Everything from Courses I through IV was building toward this: a complete, integrated picture of what organizations protect, what threatens it, and exactly where the weak points are. Take this course slower than the others; the payoff is that everything downstream gets easier.</p>
+
+<div class="ticket deepdive">
+  <div class="ticket-head"><span><span class="icon">🧭</span>Deep Dive</span><span class="ticket-id">DD-400</span></div>
+  <div class="ticket-body">
+    <p><strong>Recommended study strategy:</strong> Module 2's cryptography section (symmetric/asymmetric encryption, hashing, salting) is genuinely challenging on a first pass — budget extra time and revisit the diagrams more than once. Modules 3 and 4 reward active recall: after each section, try explaining a concept out loud without notes.</p>
+    <p><strong>Lab recommendation:</strong> If you have access to VirusTotal or a similar OSINT tool, spend 15 minutes exploring it hands-on after Module 3 — seeing a real hash lookup or file analysis makes the abstract concept concrete fast.</p>
+    <p><strong>Interview preparation:</strong> Be ready to explain symmetric vs. asymmetric encryption with a real-world example, and to walk through the six steps of threat modeling from memory. Both appear constantly in intermediate-level interviews.</p>
+    <p><strong>Certification preparation:</strong> This course maps directly onto CompTIA Security+ Domain 1 (General Security Concepts), Domain 2 (Threats, Vulnerabilities, and Mitigations), and portions of Domain 3 (cryptography).</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODULE 1 · WEEK 1 — ASSET SECURITY
+     ============================================================ -->
+<h2 class="module-head" id="module-1"><span class="tag">Module 1 · Week 1</span>The What, Why, and How of Asset Security</h2>
+
+<div class="objectives" id="objectives">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Explain the risk formula (Likelihood × Impact) and how threats and vulnerabilities combine to produce risk.</li>
+    <li>Define asset management and asset classification, and list the four common classification levels.</li>
+    <li>Distinguish the three states of data: in use, in transit, and at rest.</li>
+    <li>Explain cloud-based service models (SaaS, PaaS, IaaS) and the shared responsibility model as it applies to cloud security.</li>
+    <li>Describe the components of a security plan: policies, standards, and procedures.</li>
+    <li>Explain the NIST Cybersecurity Framework's three components: core, tiers, and profiles.</li>
+  </ul>
+</div>
+
+<h3 id="sec-1" data-n="1.1">Risk, Revisited: Likelihood × Impact</h3>
+
+<p>Course II introduced risk as the intersection of threat and vulnerability. This module gives that relationship a working formula you'll use constantly for the rest of the certificate.</p>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-401</span></div>
+  <div class="ticket-body"><p><strong>Risk (as a calculation):</strong> Likelihood × Impact = Risk. Security professionals primarily focus on the likelihood side of the equation, since the business impact of a negative event depends heavily on the specific asset and situation.</p></div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — Driving to Work</span>
+  <p>You risk being late to work every time you drive. A flat tire (a threat exploiting a worn tire — a vulnerability) makes that late arrival more <em>likely</em>. And the <em>impact</em> could be serious — losing your job. Multiply how likely something is by how bad it would be, and you get a working sense of the actual risk. Businesses calculate security risk exactly the same way.</p>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Threat Categories vs. Vulnerability Categories</caption>
+<thead><tr><th>Threats</th><th>Vulnerabilities</th></tr></thead>
+<tbody>
+<tr><td><strong>Intentional</strong> — a malicious hacker exploiting a misconfigured application</td><td><strong>Technical</strong> — misconfigured software granting unauthorized access</td></tr>
+<tr><td><strong>Unintentional</strong> — an employee holding a door open for an unknown person</td><td><strong>Human</strong> — a forgetful employee losing their access card</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-401</span></div>
+  <div class="ticket-body"><p>Calculating risk this way helps organizations do four specific things: prevent costly and disruptive events, identify system/process improvements, determine which risks can be tolerated, and prioritize which critical assets need attention first.</p></div>
+</div>
+
+<h3 id="sec-2" data-n="1.2">Asset Management &amp; Classification</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-402</span></div>
+  <div class="ticket-body">
+    <p><strong>Asset management:</strong> The process of tracking assets and the risks that affect them — forming the foundation of all security plans.</p>
+    <p><strong>Asset inventory:</strong> A comprehensive catalog of assets requiring protection, preventing loss or misplacement and enabling efficient resource allocation.</p>
+    <p><strong>Asset classification:</strong> The practice of categorizing assets based on their sensitivity and importance to an organization.</p>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>The Four Common Asset Classification Levels</caption>
+<thead><tr><th>Level</th><th>Meaning</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td><strong>Restricted</strong></td><td>Highest level — incredibly sensitive, "need-to-know" information</td><td>Intellectual property, sensitive personal data</td></tr>
+<tr><td><strong>Confidential</strong></td><td>Disclosure could lead to significant negative impact on the organization</td><td>Unreleased financial results</td></tr>
+<tr><td><strong>Internal-Only</strong></td><td>Available to employees and business partners, not external parties</td><td>Internal memos, org charts</td></tr>
+<tr><td><strong>Public</strong></td><td>Lowest level — no negative consequences if released</td><td>Marketing brochures, press releases</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-401</span></div>
+  <div class="ticket-body"><p>Government organizations sometimes label their most sensitive assets "confidential" instead of "restricted" — the exact naming scheme varies by organization, but the underlying logic (four tiers by sensitivity) is nearly universal. Also note: identifying an asset's <em>owner</em> is sometimes the hardest classification characteristic to pin down — e.g., who "owns" personal photos stored on a company-issued laptop?</p></div>
+</div>
+
+<h3 id="sec-3" data-n="1.3">Data States: In Use, In Transit, At Rest</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-403</span></div>
+  <div class="ticket-body">
+    <p><strong>Data in use:</strong> Data actively being accessed by one or more users — reading an email, editing a document.</p>
+    <p><strong>Data in transit:</strong> Data moving from one point to another — sending an email or file over the internet.</p>
+    <p><strong>Data at rest:</strong> Data not currently being accessed, typically stored on a physical device — files on a laptop or server.</p>
+  </div>
+</div>
+
+<figure>
+<svg viewBox="0 0 640 180" width="100%" role="img" aria-label="Diagram showing the three states of data: in use on a laptop, in transit across a network, and at rest on a server">
+  <rect x="0" y="0" width="640" height="180" fill="#F7F5F0"/>
+  <g font-family="sans-serif" font-size="12" font-weight="700" fill="#fff">
+    <rect x="30" y="60" width="160" height="55" rx="6" fill="#3457B2"/><text x="110" y="92" text-anchor="middle">Data in Use</text>
+    <rect x="240" y="60" width="160" height="55" rx="6" fill="#0F9E93"/><text x="320" y="92" text-anchor="middle">Data in Transit</text>
+    <rect x="450" y="60" width="160" height="55" rx="6" fill="#B4700A"/><text x="530" y="92" text-anchor="middle">Data at Rest</text>
+  </g>
+  <line x1="190" y1="87" x2="240" y2="87" stroke="#0B0F14" stroke-width="2" stroke-dasharray="4 3"/>
+  <line x1="400" y1="87" x2="450" y2="87" stroke="#0B0F14" stroke-width="2" stroke-dasharray="4 3"/>
+  <text x="320" y="150" text-anchor="middle" font-family="monospace" font-size="11" fill="#3A4650">Each state needs a different protection strategy — one control rarely covers all three</text>
+</svg>
+<figcaption>Figure 1.1 — The three states of data</figcaption>
+</figure>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning</span><span class="ticket-id">WRN-401</span></div>
+  <div class="ticket-body"><p>Our understanding of "data at rest" is shifting. With cloud storage constantly syncing, replicating, and backing up in the background, data may not be truly "at rest" even when a device itself isn't actively in use. Treat this as an evolving vulnerability surface, not a settled category.</p></div>
+</div>
+
+<h3 id="sec-4" data-n="1.4">Cloud-Based Services &amp; Cloud Security</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Cloud Service Models Revisited</caption>
+<thead><tr><th>Model</th><th>Definition</th><th>Examples</th></tr></thead>
+<tbody>
+<tr><td><strong>SaaS</strong></td><td>Front-end applications users access via browser; provider hosts/manages/maintains all back-end systems</td><td>Gmail, Slack, Zoom</td></tr>
+<tr><td><strong>PaaS</strong></td><td>Back-end development tools clients access online to build their own apps</td><td>Google App Engine, Heroku, VMware Cloud Foundry</td></tr>
+<tr><td><strong>IaaS</strong></td><td>Remote access to back-end systems (servers, storage, networking), licensed as needed</td><td>Google Cloud Platform, Microsoft Azure</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important — Shared Responsibility, Revisited</span><span class="ticket-id">IMP-402</span></div>
+  <div class="ticket-body"><p>Clients are commonly responsible for securing anything directly within their control: identity and access management, resource configuration, and data handling. The exact split of responsibility varies by service model — a PaaS client secures the apps they build; the provider secures the underlying servers shared across all their customers.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Cloud Security Challenges</caption>
+<thead><tr><th>Challenge</th><th>Why It Happens</th></tr></thead>
+<tbody>
+<tr><td><strong>Misconfiguration</strong></td><td>Customers use out-of-the-box configurations that don't address their specific security objectives</td></tr>
+<tr><td><strong>Cloud-native breaches</strong></td><td>More likely to occur specifically due to misconfigured services</td></tr>
+<tr><td><strong>Difficult access monitoring</strong></td><td>Depends heavily on client setup and level of service purchased</td></tr>
+<tr><td><strong>Regulatory compliance</strong></td><td>Especially relevant in industries bound by HIPAA, PCI DSS, or GDPR</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket industry">
+  <div class="ticket-head"><span><span class="icon">🏢</span>Industry Insight</span><span class="ticket-id">IND-401</span></div>
+  <div class="ticket-body"><p>Cloud security is consistently ranked among the most in-demand cybersecurity skills by labor market analytics firms — a direct consequence of how quickly organizations have migrated critical infrastructure to the cloud without always building matching in-house security expertise.</p></div>
+</div>
+
+<h3 id="sec-5" data-n="1.5">Security Plans: Policies, Standards &amp; Procedures</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-404</span></div>
+  <div class="ticket-body">
+    <p><strong>Policies:</strong> A set of rules aimed at reducing risk and protecting information, defining the scope, objectives, and limitations of security measures.</p>
+    <p><strong>Standards:</strong> References informing how policies should be implemented — e.g., NIST SP 800-63B specifying password length requirements.</p>
+    <p><strong>Procedures:</strong> Step-by-step instructions for performing specific security tasks, promoting accountability, consistency, and efficiency.</p>
+  </div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The School, Again</span>
+  <p>A school's <strong>policy</strong> might say "protect student records." The <strong>standard</strong> specifies exactly how strong the lock on the records room must be. The <strong>procedure</strong> is the literal step-by-step instructions taped to the wall for exactly how staff should check a record out and back in. Policy → standard → procedure gets progressively more concrete.</p>
+</div>
+
+<h3 id="sec-6" data-n="1.6">The NIST Cybersecurity Framework: Core, Tiers, Profiles</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-405</span></div>
+  <div class="ticket-body"><p><strong>NIST CSF:</strong> A voluntary framework of standards, guidelines, and best practices to manage cybersecurity risk, originally released in 2014 to protect U.S. critical infrastructure and since adapted for public and private sector use of any size.</p></div>
+</div>
+
+<figure>
+<svg viewBox="0 0 640 200" width="100%" role="img" aria-label="Diagram of the three components of the NIST Cybersecurity Framework: Core with five functions, Tiers measuring sophistication from 1 to 4, and Profiles as snapshot templates">
+  <rect x="0" y="0" width="640" height="200" fill="#F7F5F0"/>
+  <text x="320" y="24" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#0B0F14">NIST CSF — Three Components</text>
+  <g font-family="sans-serif" font-size="12" font-weight="700" fill="#fff">
+    <rect x="20" y="55" width="180" height="110" rx="6" fill="#3457B2"/><text x="110" y="85" text-anchor="middle">Core</text>
+    <rect x="230" y="55" width="180" height="110" rx="6" fill="#0F9E93"/><text x="320" y="85" text-anchor="middle">Tiers</text>
+    <rect x="440" y="55" width="180" height="110" rx="6" fill="#B4700A"/><text x="530" y="85" text-anchor="middle">Profiles</text>
+  </g>
+  <text x="110" y="108" font-family="sans-serif" font-size="9.5" fill="#E8EEFC" text-anchor="middle">Identify·Protect·Detect</text>
+  <text x="110" y="122" font-family="sans-serif" font-size="9.5" fill="#E8EEFC" text-anchor="middle">Respond·Recover</text>
+  <text x="320" y="108" font-family="sans-serif" font-size="9.5" fill="#EAFBF8" text-anchor="middle">Scale 1 (passive)</text>
+  <text x="320" y="122" font-family="sans-serif" font-size="9.5" fill="#EAFBF8" text-anchor="middle">to 4 (adaptive)</text>
+  <text x="530" y="108" font-family="sans-serif" font-size="9.5" fill="#FDF2E3" text-anchor="middle">Snapshot templates</text>
+  <text x="530" y="122" font-family="sans-serif" font-size="9.5" fill="#FDF2E3" text-anchor="middle">for tracking change</text>
+</svg>
+<figcaption>Figure 1.2 — The NIST CSF's three components</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<caption>NIST CSF Components in Detail</caption>
+<thead><tr><th>Component</th><th>Function</th></tr></thead>
+<tbody>
+<tr><td><strong>Core</strong></td><td>A security checklist of five functions: Identify, Protect, Detect, Respond, Recover</td></tr>
+<tr><td><strong>Tiers</strong></td><td>Measure the sophistication of a cybersecurity program on a scale of 1 (limited controls) to 4 (adaptive, most sophisticated)</td></tr>
+<tr><td><strong>Profiles</strong></td><td>Pre-made templates tailored to specific risks, used as a baseline or to compare current posture against an industry standard</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice — CISA's CSF Implementation Steps</span><span class="ticket-id">BP-402</span></div>
+  <div class="ticket-body">
+    <p>The U.S. Cybersecurity and Infrastructure Security Agency (CISA) recommends four steps for implementing the CSF:</p>
+    <ol>
+      <li>Create a current profile outlining your business's specific security needs.</li>
+      <li>Perform a risk assessment to identify which operations meet business/regulatory standards.</li>
+      <li>Analyze and prioritize existing gaps that place assets at risk.</li>
+      <li>Implement a plan of action to achieve organizational goals.</li>
+    </ol>
+  </div>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-403</span></div>
+  <div class="ticket-body"><p>Regulations <em>must</em> be followed; frameworks are resources you <em>choose</em> to use. The NIST CSF is voluntary — but many businesses adopt it specifically because it helps them achieve compliance with regulations that are mandatory, like GDPR or HIPAA.</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 1.1 — Risk Calculation Drill</summary>
+  <div class="acc-body">
+    <p>An organization's customer database (high impact if breached) has a 15% likelihood of being targeted this quarter based on threat intelligence. A separate internal wiki (low impact if breached) has a 40% likelihood of being targeted. Which asset represents the higher overall risk, and why?</p>
+    <p><strong>Answer guidance:</strong> Risk = Likelihood × Impact, not likelihood alone. Even though the wiki has a higher likelihood, the customer database's much higher impact (SPII exposure, regulatory consequences) likely makes it the higher overall risk — this is exactly why security teams don't prioritize purely by likelihood.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 1.2 — Asset Classification Practice</summary>
+  <div class="acc-body">
+    <p>Classify each as Public, Internal-Only, Confidential, or Restricted: (1) a press release, (2) unreleased Q3 earnings, (3) the company holiday party schedule, (4) a customer's biometric login data.</p>
+    <p><strong>Answer key:</strong> 1 — Public, 2 — Confidential, 3 — Internal-Only, 4 — Restricted.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Scenario Challenge 1.1 — CSF Tier Assessment</summary>
+  <div class="acc-body">
+    <p>An organization has no documented incident response plan and reacts to security events ad hoc, with no formal risk assessment process. What NIST CSF tier would you estimate, and what would moving to Tier 2 require?</p>
+    <p><strong>Answer guidance:</strong> This describes Tier 1 (passive, limited security controls). Moving to Tier 2 would require documenting basic risk management practices and beginning to formalize (even if not yet fully consistent) incident response procedures.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Beginner Question</span><span class="ticket-id">INT-401</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Explain the risk formula and why security professionals focus mainly on the likelihood side of it.</strong></p>
+    <p><strong>Ideal answer:</strong> "Risk equals likelihood times impact. Impact is largely determined by the asset and business context — it's not something a security team can easily change. Likelihood, on the other hand, is directly influenced by the vulnerabilities we patch and the controls we implement, so that's where day-to-day security work has the most leverage."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Cloud Security Question</span><span class="ticket-id">INT-402</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: A company using a PaaS provider experiences a data breach because they left an admin panel misconfigured. Who's responsible, and why?</strong></p>
+    <p><strong>Ideal answer:</strong> "Under the shared responsibility model, PaaS customers are responsible for securing the applications they build, including configuration choices like admin panel settings. The provider secures the underlying infrastructure they host and maintain — but this specific failure is a customer-side misconfiguration, squarely within the customer's responsibility."</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which data state describes a file being actively edited in a document editor?</div>
+  <button class="opt" onclick="checkAnswer(this,true)">Data in use</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Data in transit</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Data at rest</button>
+  <div class="fb">Correct — data actively being accessed or edited is "data in use."</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: NIST CSF is a legally mandated regulation.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — NIST CSF is a voluntary framework, though it can help achieve mandatory regulatory compliance.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. Which cloud service model gives developers back-end tools to build and deploy their own applications?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">SaaS</button>
+  <button class="opt" onclick="checkAnswer(this,true)">PaaS</button>
+  <button class="opt" onclick="checkAnswer(this,false)">IaaS</button>
+  <div class="fb">Correct — PaaS provides development tools; SaaS is finished applications; IaaS is raw infrastructure.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-401</span></div>
+  <div class="ticket-body"><p>Risk = Likelihood × Impact. Assets classified as Public/Internal-Only/Confidential/Restricted. Data has 3 states: in use, in transit, at rest. Cloud models: SaaS/PaaS/IaaS, governed by the shared responsibility model. Security plans = Policies (rules) → Standards (references) → Procedures (steps). NIST CSF = Core (5 functions) + Tiers (1–4 sophistication) + Profiles (templates).</p></div>
+</div>
+
+<div class="summary-block" id="summary">
+  <h4>Module Summary</h4>
+  <p>This module established the "asset" half of the course's title — how organizations identify, classify, and manage what's worth protecting, across every data state and cloud deployment model, structured through the NIST CSF's three components.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>Risk is a calculation (Likelihood × Impact), not just a feeling — and security work mainly targets the likelihood side.</li>
+    <li>Asset classification (Public/Internal-Only/Confidential/Restricted) determines how carefully an asset must be handled.</li>
+    <li>Data in use, in transit, and at rest each require distinct protection strategies.</li>
+    <li>Cloud service models (SaaS/PaaS/IaaS) split security responsibility differently under the shared responsibility model.</li>
+    <li>The NIST CSF structures security work through its Core (5 functions), Tiers (sophistication), and Profiles (templates).</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives">◂ Back to Module 1 Objectives</a>
+  <a href="#module-2">Module 2 · Safeguarding Information ▸</a>
+</div>
+
+<div class="endmark">— End of Module 1 —</div>
+<!-- ============================================================
+     MODULE 2 · WEEK 2 — SAFEGUARDING INFORMATION
+     ============================================================ -->
+<h2 class="module-head" id="module-2"><span class="tag">Module 2 · Week 2</span>Safeguard Information: Encryption, Authentication &amp; Authorization</h2>
+
+<div class="objectives" id="objectives-2">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Explain the three types of security controls: technical, operational, and managerial.</li>
+    <li>Describe the data lifecycle and the roles of data owners, custodians, and stewards.</li>
+    <li>Explain the three most influential privacy regulations: GDPR, PCI DSS, and HIPAA.</li>
+    <li>Explain cryptography fundamentals using Caesar's Cipher, and modern symmetric/asymmetric encryption.</li>
+    <li>Describe Public Key Infrastructure (PKI) and the role of digital certificates and certificate authorities.</li>
+    <li>Explain hashing, salting, and rainbow table attacks.</li>
+    <li>Explain the AAA framework (authentication, authorization, accounting) and IAM frameworks (MAC, DAC, RBAC).</li>
+  </ul>
+</div>
+
+<h3 id="sec-2-1" data-n="2.1">Security Controls &amp; the Principle of Least Privilege</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Three Types of Security Controls</caption>
+<thead><tr><th>Type</th><th>Description</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td><strong>Technical Controls</strong></td><td>Technologies protecting assets</td><td>Encryption, authentication systems</td></tr>
+<tr><td><strong>Operational Controls</strong></td><td>Day-to-day security management activities carried out by people</td><td>Awareness training, incident response</td></tr>
+<tr><td><strong>Managerial Controls</strong></td><td>Policies, standards, and procedures guiding security efforts</td><td>An organization's overall security policy</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-406</span></div>
+  <div class="ticket-body">
+    <p><strong>Principle of least privilege (PoLP):</strong> A user is only granted the minimum level of access and authorization required to complete a task or function.</p>
+    <p><strong>Data owner:</strong> The person who decides who can access, edit, use, or destroy their information.</p>
+    <p><strong>Data custodian:</strong> Anyone or anything responsible for the safe handling, transport, and storage of information.</p>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>User Account Types</caption>
+<thead><tr><th>Type</th><th>Assigned To</th></tr></thead>
+<tbody>
+<tr><td><strong>Guest accounts</strong></td><td>External users needing internal network access (customers, contractors, partners)</td></tr>
+<tr><td><strong>User accounts</strong></td><td>Staff, based on job duties</td></tr>
+<tr><td><strong>Service accounts</strong></td><td>Applications/software interacting with other network software</td></tr>
+<tr><td><strong>Privileged accounts</strong></td><td>Elevated permissions or administrative access</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Three Types of Access Audits</caption>
+<thead><tr><th>Audit Type</th><th>What It Checks</th></tr></thead>
+<tbody>
+<tr><td><strong>Usage audits</strong></td><td>Which resources each account accesses and what the user does with them</td></tr>
+<tr><td><strong>Privilege audits</strong></td><td>Whether a user's role aligns with the resources they have access to — catches "privilege creep"</td></tr>
+<tr><td><strong>Account change audits</strong></td><td>Whether all account changes were made by authorized users</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-2-2" data-n="2.2">The Data Lifecycle &amp; Data Governance</h3>
+
+<figure>
+<svg viewBox="0 0 640 160" width="100%" role="img" aria-label="Diagram of the five stages of the data lifecycle: Collect, Store, Use, Archive, Destroy">
+  <rect x="0" y="0" width="640" height="160" fill="#F7F5F0"/>
+  <g font-family="sans-serif" font-size="11" font-weight="700" fill="#fff">
+    <rect x="10" y="60" width="112" height="45" rx="5" fill="#3457B2"/><text x="66" y="87" text-anchor="middle">Collect</text>
+    <rect x="140" y="60" width="112" height="45" rx="5" fill="#0F9E93"/><text x="196" y="87" text-anchor="middle">Store</text>
+    <rect x="270" y="60" width="112" height="45" rx="5" fill="#B4700A"/><text x="326" y="87" text-anchor="middle">Use</text>
+    <rect x="400" y="60" width="112" height="45" rx="5" fill="#6B4FBB"/><text x="456" y="87" text-anchor="middle">Archive</text>
+    <rect x="530" y="60" width="100" height="45" rx="5" fill="#7A1F3D"/><text x="580" y="87" text-anchor="middle">Destroy</text>
+  </g>
+  <path d="M122 82 L140 82" stroke="#0B0F14" stroke-width="2" marker-end="url(#a5a)"/>
+  <path d="M252 82 L270 82" stroke="#0B0F14" stroke-width="2" marker-end="url(#a5a)"/>
+  <path d="M382 82 L400 82" stroke="#0B0F14" stroke-width="2" marker-end="url(#a5a)"/>
+  <path d="M512 82 L530 82" stroke="#0B0F14" stroke-width="2" marker-end="url(#a5a)"/>
+  <defs><marker id="a5a" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#0B0F14"/></marker></defs>
+  <text x="320" y="130" text-anchor="middle" font-family="monospace" font-size="11" fill="#3A4650">Data flows through all five stages from creation to permanent removal</text>
+</svg>
+<figcaption>Figure 2.1 — The five-stage data lifecycle</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<caption>Data Lifecycle Stages</caption>
+<thead><tr><th>Stage</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><strong>Collect</strong></td><td>Gathering data from sources — customer interactions, sensors, user input</td></tr>
+<tr><td><strong>Store</strong></td><td>Securely storing data, typically in databases/file systems, with access controls</td></tr>
+<tr><td><strong>Use</strong></td><td>Actively employing data for analysis, decision-making, reporting</td></tr>
+<tr><td><strong>Archive</strong></td><td>Moving data no longer in active use to long-term storage for compliance/historical reference</td></tr>
+<tr><td><strong>Destroy</strong></td><td>Permanently removing data no longer needed, using secure destruction methods</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-407</span></div>
+  <div class="ticket-body">
+    <p><strong>Data governance:</strong> A set of processes defining how an organization manages information — keeping it private, accurate, available, and secure throughout its lifecycle.</p>
+    <p><strong>Data steward:</strong> The person or group that maintains and implements data governance policies.</p>
+  </div>
+</div>
+
+<h3 id="sec-2-3" data-n="2.3">Privacy Regulations: GDPR, PCI DSS &amp; HIPAA</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Three Influential Privacy Regulations</caption>
+<thead><tr><th>Regulation</th><th>Scope</th><th>Applies To</th></tr></thead>
+<tbody>
+<tr><td><strong>GDPR</strong></td><td>Puts data owners in total control of their personal information (name, address, phone, financial, medical data)</td><td>Any business handling E.U. citizens'/residents' data, regardless of where the business operates</td></tr>
+<tr><td><strong>PCI DSS</strong></td><td>Secures credit and debit card transactions against theft and fraud</td><td>Any organization processing card payments</td></tr>
+<tr><td><strong>HIPAA</strong></td><td>Requires protection of sensitive patient health information</td><td>U.S. healthcare organizations and associates</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket compliance">
+  <div class="ticket-head"><span><span class="icon">⚖️</span>Compliance Note — Audits vs. Assessments</span><span class="ticket-id">CMP-401</span></div>
+  <div class="ticket-body"><p>A <strong>security audit</strong> reviews controls/policies/procedures against expectations, typically performed <strong>annually</strong>, sometimes by external third parties. A <strong>security assessment</strong> checks how resilient current implementations are against threats, typically performed <strong>every 3–6 months</strong> by internal staff, often as preparation for the annual audit. They're complementary, not redundant.</p></div>
+</div>
+
+<h3 id="sec-2-4" data-n="2.4">Cryptography Fundamentals &amp; Caesar's Cipher</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-408</span></div>
+  <div class="ticket-body">
+    <p><strong>Cryptography:</strong> The practice of converting data into an unreadable form (ciphertext) through encryption, and back into readable form (plaintext) through decryption.</p>
+    <p><strong>Caesar's Cipher:</strong> An ancient method attributed to Julius Caesar, shifting letters forward by a fixed number of spaces (a shift value) to encrypt a message.</p>
+    <p><strong>Cryptographic key:</strong> A mechanism used to decrypt ciphertext — in Caesar's Cipher, this is simply the shift value.</p>
+  </div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Secret Note</span>
+  <p>If you and a friend agree "shift every letter forward by 3," then "CAT" becomes "FDW." Anyone who doesn't know the number 3 sees only gibberish, but you can instantly decode it. That's Caesar's Cipher — and its biggest weakness is right there in the example: there are only 26 possible shift values, so a computer can brute-force every single one in an instant.</p>
+</div>
+
+<h3 id="sec-2-5" data-n="2.5">Public Key Infrastructure (PKI)</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-409</span></div>
+  <div class="ticket-body">
+    <p><strong>Public Key Infrastructure (PKI):</strong> An encryption framework securing the exchange of information online through a two-step process — exchanging encrypted information, then establishing trust via digital certificates.</p>
+    <p><strong>Digital certificate:</strong> A file verifying the identity of a public key holder — a digital ID badge signaling authenticity.</p>
+    <p><strong>Certificate Authority (CA):</strong> A trusted entity that issues and digitally signs digital certificates, verifying the certificate holder's identity.</p>
+  </div>
+</div>
+
+<figure>
+<svg viewBox="0 0 640 180" width="100%" role="img" aria-label="Diagram of PKI's two-step process: exchange of encrypted information using asymmetric and symmetric encryption, then establishing trust through a digital certificate issued by a certificate authority">
+  <rect x="0" y="0" width="640" height="180" fill="#F7F5F0"/>
+  <g font-family="sans-serif" font-size="11.5" font-weight="700" fill="#fff">
+    <rect x="30" y="60" width="240" height="60" rx="6" fill="#3457B2"/><text x="150" y="85" text-anchor="middle">Step 1: Exchange</text><text x="150" y="102" text-anchor="middle" font-weight="400" font-size="10">Encrypted Info (Asym/Sym)</text>
+    <rect x="370" y="60" width="240" height="60" rx="6" fill="#0F9E93"/><text x="490" y="85" text-anchor="middle">Step 2: Establish Trust</text><text x="490" y="102" text-anchor="middle" font-weight="400" font-size="10">Digital Certificates (CA)</text>
+  </g>
+  <line x1="270" y1="90" x2="370" y2="90" stroke="#0B0F14" stroke-width="2" marker-end="url(#a5b)"/>
+  <defs><marker id="a5b" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#0B0F14"/></marker></defs>
+  <text x="320" y="150" text-anchor="middle" font-family="monospace" font-size="11" fill="#3A4650">Together: speed (symmetric) + secure trust (asymmetric + certificates)</text>
+</svg>
+<figcaption>Figure 2.2 — PKI's two-step process</figcaption>
+</figure>
+
+<h3 id="sec-2-6" data-n="2.6">Symmetric vs. Asymmetric Encryption</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-410</span></div>
+  <div class="ticket-body">
+    <p><strong>Symmetric encryption:</strong> Uses a single secret key for both encryption and decryption — faster, but sender and receiver must both know the same secret key.</p>
+    <p><strong>Asymmetric encryption:</strong> Uses a public/private key pair — the public key encrypts, the private key (kept secret) decrypts.</p>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Approved Encryption Algorithms</caption>
+<thead><tr><th>Algorithm</th><th>Type</th><th>Key Length</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><strong>Triple DES (3DES)</strong></td><td>Symmetric</td><td>192 bits</td><td>Block cipher; being phased out but kept for backwards compatibility</td></tr>
+<tr><td><strong>AES</strong></td><td>Symmetric</td><td>128 / 192 / 256 bits</td><td>Most secure symmetric algorithm today; brute-forcing 128-bit AES could take a modern computer billions of years</td></tr>
+<tr><td><strong>RSA</strong></td><td>Asymmetric</td><td>1,024 / 2,048 / 4,096 bits</td><td>Named for its three MIT creators; used for highly sensitive data</td></tr>
+<tr><td><strong>DSA</strong></td><td>Asymmetric</td><td>2,048 bits</td><td>NIST standard, often complements RSA in PKI</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important — Kerckhoffs's Principle</span><span class="ticket-id">IMP-404</span></div>
+  <div class="ticket-body"><p>A cipher must be provably secure even if every detail of the algorithm — except the private key — is publicly known. Custom, secret, "security through obscurity" encryption schemes have repeatedly been cracked quickly once exposed. AES's inner workings are fully public and it's still unbreakable — that's the standard to aim for.</p></div>
+</div>
+
+<div class="ticket redteam">
+  <div class="ticket-head"><span><span class="icon">🗡️</span>Industry Insight — Heartbleed</span><span class="ticket-id">IND-402</span></div>
+  <div class="ticket-body"><p>In early 2014, OpenSSL (a widely used open-source tool for generating PKI keys) disclosed the <strong>Heartbleed</strong> vulnerability, exposing sensitive memory data across countless websites and applications. It was patched later that year — a clear demonstration of why using up-to-date cryptographic software matters, regardless of how trusted the tool generally is.</p></div>
+</div>
+
+<h3 id="sec-2-7" data-n="2.7">Hashing, Salting &amp; Rainbow Tables</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-411</span></div>
+  <div class="ticket-body">
+    <p><strong>Hash function:</strong> An algorithm producing a one-way code (hash value/digest) that cannot be decrypted — unlike encryption, there is no decryption key.</p>
+    <p><strong>Non-repudiation:</strong> The concept that the authenticity of information cannot be denied — hash functions support this by confirming data integrity.</p>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>The SHA Family vs. MD5</caption>
+<thead><tr><th>Function</th><th>Digest Size</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td><strong>MD5</strong></td><td>128-bit (32 characters)</td><td>Vulnerable to hash collisions; still used by some small/mid businesses despite known weaknesses</td></tr>
+<tr><td><strong>SHA-1</strong></td><td>160-bit</td><td>Not considered collision-resistant</td></tr>
+<tr><td><strong>SHA-224 / 256 / 384 / 512</strong></td><td>224 to 512-bit</td><td>Considered collision-resistant (though not invulnerable to all exploits)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-412</span></div>
+  <div class="ticket-body">
+    <p><strong>Hash collision:</strong> An instance when different inputs produce the same hash value — a serious vulnerability since hashes are used for authentication.</p>
+    <p><strong>Rainbow table:</strong> A file of pre-generated hash values and their associated plaintext — a "dictionary" attackers use to crack hashed passwords.</p>
+    <p><strong>Salting:</strong> Adding a random string of characters to data before hashing, producing a more unique hash value resilient to rainbow table attacks.</p>
+  </div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Fingerprint Ink</span>
+  <p>Imagine two people both write the password "password123." Without salt, their hashed entries look identical — an attacker who cracks one instantly knows the other. Salting is like dipping each person's finger in a slightly different color ink before they stamp it: even with the exact same word, every stamp comes out looking completely different.</p>
+</div>
+
+<h3 id="sec-2-8" data-n="2.8">The AAA Framework: Authentication, Authorization, Accounting</h3>
+
+<div class="table-wrap">
+<table>
+<caption>The Three Factors of Authentication</caption>
+<thead><tr><th>Factor</th><th>Description</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td><strong>Knowledge</strong></td><td>Something the user knows</td><td>Password, security question</td></tr>
+<tr><td><strong>Ownership</strong></td><td>Something the user has</td><td>One-time passcode (OTP) via text/email</td></tr>
+<tr><td><strong>Characteristic</strong></td><td>Something the user is</td><td>Fingerprint, facial scan</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-413</span></div>
+  <div class="ticket-body">
+    <p><strong>Single Sign-On (SSO):</strong> Combines several logins into one, reducing password fatigue and the number of access points attackers can target.</p>
+    <p><strong>Multi-Factor Authentication (MFA):</strong> Requires two or more independent forms of identity verification.</p>
+  </div>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-405</span></div>
+  <div class="ticket-body"><p>SSO relies on trusted third parties exchanging encrypted access tokens, using protocols like <strong>LDAP</strong> (Lightweight Directory Access Protocol, mostly on-premises) and <strong>SAML</strong> (Security Assertion Markup Language, mostly cloud) — often used together. SSO alone is still a single point of failure; combining it with MFA (a "layered defense") addresses that weakness directly.</p></div>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-414</span></div>
+  <div class="ticket-body">
+    <p><strong>Authorization:</strong> Determines the actions or privileges a user is allowed once their identity is confirmed.</p>
+    <p><strong>Separation of duties:</strong> Ensures users don't have permissions that would let them misuse a system alone — divides responsibilities among multiple people.</p>
+    <p><strong>OAuth:</strong> An open-standard authorization protocol sharing designated access between applications using API tokens, without transmitting sensitive credentials over the network.</p>
+  </div>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning</span><span class="ticket-id">WRN-402</span></div>
+  <div class="ticket-body"><p><strong>HTTP Basic Auth</strong> transmits usernames and passwords openly over the network with every request — a significant vulnerability compared to OAuth's token-based approach. Recognizing basic auth in an application should be treated as a security smell worth flagging.</p></div>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-415</span></div>
+  <div class="ticket-body">
+    <p><strong>Session:</strong> A sequence of network requests/responses associated with the same user, tracked from login to logout.</p>
+    <p><strong>Session ID:</strong> A unique token identifying a user/device for the duration of a session.</p>
+    <p><strong>Session hijacking:</strong> An attacker steals a user's session cookie/token and impersonates them, without ever needing their username or password.</p>
+  </div>
+</div>
+
+<h3 id="sec-2-9" data-n="2.9">IAM: MAC, DAC &amp; RBAC</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Three IAM Access Control Frameworks</caption>
+<thead><tr><th>Model</th><th>Who Grants Access</th><th>Typical Use</th></tr></thead>
+<tbody>
+<tr><td><strong>Mandatory Access Control (MAC)</strong></td><td>A central authority/system administrator, strictly need-to-know</td><td>Military, law enforcement, government agencies</td></tr>
+<tr><td><strong>Discretionary Access Control (DAC)</strong></td><td>The data owner decides access levels</td><td>Sharing a Google Drive folder as editor/viewer/commenter</td></tr>
+<tr><td><strong>Role-Based Access Control (RBAC)</strong></td><td>Determined by the user's organizational role</td><td>Marketing staff can see analytics but not network admin tools</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket examtip">
+  <div class="ticket-head"><span><span class="icon">🎯</span>Exam Tip</span><span class="ticket-id">EXM-401</span></div>
+  <div class="ticket-body"><p>MAC is also called "non-discretionary control" — because access is never left to the data owner's personal discretion, unlike DAC. If a scenario mentions a strict chain of command or "need-to-know basis," think MAC; if it mentions a data owner personally sharing access, think DAC.</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs-2">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 2.1 — Caesar's Cipher Practice</summary>
+  <div class="acc-body">
+    <p>Encrypt the word "SECURE" using a Caesar's Cipher shift value of 4. Then decrypt "MTIB" using the same shift value.</p>
+    <p><strong>Answer:</strong> "SECURE" with shift 4 → "WIGYVI". "MTIB" decrypted with shift 4 → "ILEX" (shift each letter back 4 positions).</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 2.2 — Symmetric vs. Asymmetric Scenario</summary>
+  <div class="acc-body">
+    <p>A website needs to (a) securely verify a user's password during login, and (b) quickly encrypt the rest of a long browsing session. Which encryption type fits each need, and why?</p>
+    <p><strong>Answer:</strong> (a) Asymmetric encryption — small amount of highly sensitive data, prioritizing security over speed. (b) Symmetric encryption — larger volume of ongoing data, prioritizing speed once the secure connection is established. This mirrors how real websites operate in practice.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Scenario Challenge 2.1 — IAM Model Selection</summary>
+  <div class="acc-body">
+    <p>A government agency needs the strictest possible access control for classified files, with no room for individual discretion. Which IAM model fits, and why?</p>
+    <p><strong>Answer:</strong> MAC (Mandatory Access Control) — it's the strictest of the three, granting access only through a central authority on a need-to-know basis, with no discretion left to individual data owners.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview-2">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Intermediate Question</span><span class="ticket-id">INT-403</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Why is salting necessary even if you're already using a strong hash function like SHA-256?</strong></p>
+    <p><strong>Ideal answer:</strong> "A strong hash function protects against collisions, but it doesn't stop an attacker from using a precomputed rainbow table against common passwords — identical inputs still always produce identical hashes. Salting adds random characters before hashing, so even identical passwords produce completely different hash values, defeating rainbow table attacks regardless of how strong the underlying hash algorithm is."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Security Engineer Question</span><span class="ticket-id">INT-404</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Explain the difference between authentication and authorization with a real-world analogy.</strong></p>
+    <p><strong>Ideal answer:</strong> "Authentication answers 'who are you' — like showing ID at a building's front desk. Authorization answers 'what are you allowed to do once inside' — like your keycard only opening certain floors. You can be authenticated without being authorized for a specific resource, which is exactly why both steps exist separately in the AAA framework."</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice-2">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which encryption type uses a public key to encrypt and a private key to decrypt?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Symmetric</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Asymmetric</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Hashing</button>
+  <div class="fb">Correct — asymmetric encryption uses a public/private key pair.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: Hash functions can be reversed with the correct decryption key.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — hash functions are one-way; there is no decryption key, unlike encryption.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. Which IAM model lets a data owner personally decide who gets editor/viewer access?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">MAC</button>
+  <button class="opt" onclick="checkAnswer(this,true)">DAC</button>
+  <button class="opt" onclick="checkAnswer(this,false)">RBAC</button>
+  <div class="fb">Correct — DAC (Discretionary Access Control) leaves access decisions to the data owner.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision-2">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-402</span></div>
+  <div class="ticket-body"><p>Controls: technical/operational/managerial. Data lifecycle: Collect→Store→Use→Archive→Destroy. GDPR/PCI DSS/HIPAA govern personal/card/health data respectively. Symmetric (1 key, fast) vs. asymmetric (public+private key pair, secure) encryption; PKI combines both with digital certificates/CAs. Hashing is one-way; salting defeats rainbow tables. AAA = Authentication (who), Authorization (what), Accounting (logged activity). IAM models: MAC (central authority), DAC (owner's discretion), RBAC (role-based).</p></div>
+</div>
+
+<div class="summary-block" id="summary-2">
+  <h4>Module Summary</h4>
+  <p>This module covered the technical machinery that actually protects the assets classified in Module 1 — encryption and hashing to keep data unreadable and verifiable, and the AAA/IAM frameworks to control exactly who can touch it and when.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>Security controls fall into three types: technical, operational, and managerial — each addressing a different layer of protection.</li>
+    <li>The data lifecycle (Collect→Store→Use→Archive→Destroy) requires distinct controls at every stage.</li>
+    <li>Symmetric encryption trades security for speed; asymmetric trades speed for security — PKI uses both together.</li>
+    <li>Hashing with salting is the standard for secure password storage, defeating both collision and rainbow table attacks.</li>
+    <li>AAA (authentication/authorization/accounting) and IAM (MAC/DAC/RBAC) are the two major frameworks for managing who can access what.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives-2">◂ Back to Module 2 Objectives</a>
+  <a href="#module-3">Module 3 · Threats &amp; Vulnerabilities ▸</a>
+</div>
+
+<div class="endmark">— End of Module 2 —</div>
+<!-- ============================================================
+     MODULE 3 · WEEK 3 — THREATS & VULNERABILITIES
+     ============================================================ -->
+<h2 class="module-head" id="module-3"><span class="tag">Module 3 · Week 3</span>Flaws in the System: Threats &amp; Vulnerabilities</h2>
+
+<div class="objectives" id="objectives-3">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Explain vulnerability management's four-step cycle and the concept of zero-day exploits.</li>
+    <li>Describe the Defense in Depth model's five layers.</li>
+    <li>Explain the CVE list, CVSS scoring, and the OWASP Top 10.</li>
+    <li>Distinguish information from intelligence, and describe OSINT tools.</li>
+    <li>Explain the four-step vulnerability assessment process and types of vulnerability scans.</li>
+    <li>Explain patch management strategies and the risk of end-of-life software.</li>
+    <li>Describe penetration testing strategies: red/blue/purple teams and open/closed/partial-knowledge testing.</li>
+    <li>Explain threat actor categories, hacker types, and common attack vectors.</li>
+    <li>Explain brute force attack variants and their prevention.</li>
+  </ul>
+</div>
+
+<h3 id="sec-3-1" data-n="3.1">Vulnerability Management &amp; Zero-Day Exploits</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-416</span></div>
+  <div class="ticket-body">
+    <p><strong>Vulnerability management:</strong> The process of finding and patching vulnerabilities, preventing threats from becoming actual problems.</p>
+    <p><strong>Zero-day exploit:</strong> A vulnerability and exploit that was previously unknown, leaving "zero" time to prepare a defense.</p>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>The Four Steps of Vulnerability Management</caption>
+<thead><tr><th>Step</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td><strong>1. Identify</strong> vulnerabilities</td><td>The foundational step — you can't fix what you haven't found</td></tr>
+<tr><td><strong>2. Consider</strong> potential exploits</td><td>Understand how each vulnerability could actually be leveraged</td></tr>
+<tr><td><strong>3. Prepare</strong> defenses</td><td>Build controls to address the specific exploit paths identified</td></tr>
+<tr><td><strong>4. Evaluate</strong> effectiveness</td><td>Confirm the defenses actually work, then repeat — it's a continuous cycle</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-3-2" data-n="3.2">Defense in Depth: The Five-Layer Castle Model</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-417</span></div>
+  <div class="ticket-body"><p><strong>Defense in Depth:</strong> A layered security model where multiple layers of controls protect assets — if one layer fails, another takes its place. Often called the "castle approach," referencing medieval castles' moats, walls, and watchtowers.</p></div>
+</div>
+
+<figure>
+<svg viewBox="0 0 640 260" width="100%" role="img" aria-label="Diagram of the five layers of Defense in Depth as concentric rings: Perimeter, Network, Endpoint, Application, and Data at the center">
+  <rect x="0" y="0" width="640" height="260" fill="#F7F5F0"/>
+  <text x="320" y="24" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#0B0F14">Defense in Depth — 5 Layers</text>
+  <circle cx="320" cy="150" r="105" fill="#3457B2" opacity="0.9"/>
+  <circle cx="320" cy="150" r="85" fill="#0F9E93" opacity="0.9"/>
+  <circle cx="320" cy="150" r="63" fill="#B4700A" opacity="0.9"/>
+  <circle cx="320" cy="150" r="40" fill="#6B4FBB" opacity="0.9"/>
+  <circle cx="320" cy="150" r="18" fill="#0B0F14"/>
+  <text x="320" y="60" text-anchor="middle" font-family="sans-serif" font-size="10.5" font-weight="700" fill="#0B0F14">Perimeter</text>
+  <text x="320" y="80" text-anchor="middle" font-family="sans-serif" font-size="10.5" font-weight="700" fill="#0B0F14">Network</text>
+  <text x="320" y="102" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="700" fill="#fff">Endpoint</text>
+  <text x="320" y="130" text-anchor="middle" font-family="sans-serif" font-size="9.5" font-weight="700" fill="#fff">Application</text>
+  <text x="320" y="154" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="700" fill="#fff">Data</text>
+</svg>
+<figcaption>Figure 3.1 — Defense in Depth's five concentric layers</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<caption>The Five Layers Explained</caption>
+<thead><tr><th>Layer</th><th>Focus</th><th>Example Control</th></tr></thead>
+<tbody>
+<tr><td><strong>Perimeter</strong></td><td>User authentication, filtering external access</td><td>Usernames and passwords</td></tr>
+<tr><td><strong>Network</strong></td><td>Authorization, controlling traffic</td><td>Network firewalls</td></tr>
+<tr><td><strong>Endpoint</strong></td><td>Securing devices with network access</td><td>Antivirus software</td></tr>
+<tr><td><strong>Application</strong></td><td>Security built into applications themselves</td><td>Multi-factor authentication</td></tr>
+<tr><td><strong>Data</strong></td><td>Protecting critical data like PII</td><td>Asset classification</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-3-3" data-n="3.3">CVE, CVSS &amp; the OWASP Top 10</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-418</span></div>
+  <div class="ticket-body">
+    <p><strong>CVE list:</strong> An openly accessible dictionary of known vulnerabilities and exposures, created by the MITRE Corporation in 1999.</p>
+    <p><strong>Vulnerability:</strong> A weakness within a system. <strong>Exposure:</strong> A mistake that can be exploited by threats.</p>
+    <p><strong>CVE Numbering Authority (CNA):</strong> An organization that volunteers to analyze and distribute information on eligible CVEs.</p>
+  </div>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-406</span></div>
+  <div class="ticket-body"><p>To be assigned a CVE ID, a vulnerability must meet strict criteria: it must be independent of other issues, recognized as a security risk, submitted with supporting evidence, and affect only one codebase. Not every reported bug qualifies.</p></div>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-419</span></div>
+  <div class="ticket-body"><p><strong>Common Vulnerability Scoring System (CVSS):</strong> A measurement system calculating a vulnerability's impact and urgency, scored 0–10. Lower scores = low risk; higher scores = critical risk. Maintained via the NIST National Vulnerabilities Database.</p></div>
+</div>
+
+<div class="ticket blueteam">
+  <div class="ticket-head"><span><span class="icon">🛡️</span>Blue Team Tip</span><span class="ticket-id">BT-401</span></div>
+  <div class="ticket-body"><p>The CVE list identifies vulnerabilities in <em>existing</em> software; the OWASP Top 10 (revisited from Course II) mainly influences <em>new or custom</em> software design. Both matter, but they operate at different points in an application's lifecycle — CVE reactively, OWASP proactively.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>OWASP Top 10 — Full List</caption>
+<thead><tr><th>Category</th><th>Core Issue</th></tr></thead>
+<tbody>
+<tr><td><strong>Broken access control</strong></td><td>Failures in limiting what users can do, leading to unauthorized disclosure/modification/destruction</td></tr>
+<tr><td><strong>Cryptographic failures</strong></td><td>Failing to properly encrypt sensitive data like PII</td></tr>
+<tr><td><strong>Injection</strong></td><td>Malicious code inserted into a vulnerable application</td></tr>
+<tr><td><strong>Insecure design</strong></td><td>Missing or poorly implemented security controls from the start</td></tr>
+<tr><td><strong>Security misconfiguration</strong></td><td>Security settings not properly set or maintained — often default settings left unchanged</td></tr>
+<tr><td><strong>Vulnerable and outdated components</strong></td><td>Using unmaintained open-source libraries/dependencies</td></tr>
+<tr><td><strong>Identification and authentication failures</strong></td><td>Applications failing to correctly recognize who should have access</td></tr>
+<tr><td><strong>Software and data integrity failures</strong></td><td>Inadequately reviewed updates/patches, enabling supply chain attacks</td></tr>
+<tr><td><strong>Security logging and monitoring failures</strong></td><td>Insufficient event logging/tracing to detect and investigate incidents</td></tr>
+<tr><td><strong>Server-side request forgery (SSRF)</strong></td><td>Manipulating server operations to read/update unauthorized resources</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket industry">
+  <div class="ticket-head"><span><span class="icon">🏢</span>Industry Insight — SolarWinds (2020)</span><span class="ticket-id">IND-403</span></div>
+  <div class="ticket-body"><p>The SolarWinds attack is the canonical example of a software/data integrity failure: hackers injected malicious code into legitimate software updates, which SolarWinds then unknowingly distributed to its own customers — a textbook supply chain attack with cascading downstream effects across the U.S. government and private sector.</p></div>
+</div>
+
+<h3 id="sec-3-4" data-n="3.4">Open-Source Intelligence: Information vs. Intelligence</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-420</span></div>
+  <div class="ticket-body">
+    <p><strong>Information:</strong> Raw data or facts about a specific subject.</p>
+    <p><strong>Intelligence:</strong> The analysis of information to produce knowledge or insights supporting decision-making.</p>
+    <p><strong>Open-source intelligence (OSINT):</strong> The collection and analysis of information from publicly available sources to generate usable intelligence.</p>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Common OSINT Tools</caption>
+<thead><tr><th>Tool</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><strong>VirusTotal</strong></td><td>Analyzes suspicious files, domains, URLs, and IP addresses for malicious content</td></tr>
+<tr><td><strong>MITRE ATT&amp;CK®</strong></td><td>A knowledge base of adversary tactics and techniques based on real-world observations</td></tr>
+<tr><td><strong>OSINT Framework</strong></td><td>A web-based directory of OSINT tools for nearly any source or platform</td></tr>
+<tr><td><strong>Have I Been Pwned</strong></td><td>Searches for breached email accounts</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-3-5" data-n="3.5">Vulnerability Assessments &amp; Scanning</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-421</span></div>
+  <div class="ticket-body"><p><strong>Vulnerability assessment:</strong> An internal review process identifying, evaluating, scoring, and fixing vulnerabilities — the organization's own version of the CVE process, applied internally.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Four-Step Vulnerability Assessment Process</caption>
+<thead><tr><th>Step</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><strong>1. Identification</strong></td><td>Scanning tools and manual testing discover vulnerabilities</td></tr>
+<tr><td><strong>2. Vulnerability analysis</strong></td><td>Each vulnerability is tested to determine its root source</td></tr>
+<tr><td><strong>3. Risk assessment</strong></td><td>Vulnerabilities scored by severity and exploitation likelihood</td></tr>
+<tr><td><strong>4. Remediation</strong></td><td>Collaborative fix — new procedures, updates, or patches</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Vulnerability Scan Types</caption>
+<thead><tr><th>Comparison</th><th>Simulates</th></tr></thead>
+<tbody>
+<tr><td><strong>External vs. Internal</strong></td><td>External tests the perimeter (websites, firewalls); internal examines systems from inside</td></tr>
+<tr><td><strong>Authenticated vs. Unauthenticated</strong></td><td>Authenticated logs in as a real user to check access controls; unauthenticated simulates an outsider with no access</td></tr>
+<tr><td><strong>Limited vs. Comprehensive</strong></td><td>Limited checks specific devices; comprehensive checks everything connected to the network</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-403</span></div>
+  <div class="ticket-body"><p><strong>Discovery scanning</strong> — getting a basic inventory of computers, devices, and open ports on a network — should always happen before limited or comprehensive scanning. You can't scope a scan properly without first knowing what's actually there.</p></div>
+</div>
+
+<h3 id="sec-3-6" data-n="3.6">Updates, Patches &amp; End-of-Life Software</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Manual vs. Automatic Update Strategies</caption>
+<thead><tr><th>Strategy</th><th>Advantage</th><th>Disadvantage</th></tr></thead>
+<tbody>
+<tr><td><strong>Manual updates</strong></td><td>More control if updates aren't well-tested</td><td>Critical updates can be forgotten or disregarded</td></tr>
+<tr><td><strong>Automatic updates</strong></td><td>Simplified deployment, keeps systems current — CISA-recommended</td><td>Instability if the vendor didn't thoroughly test the patch</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning — WannaCry (2017)</span><span class="ticket-id">WRN-403</span></div>
+  <div class="ticket-body"><p>The WannaCry ransomware attack affected computers in over 150 countries and caused an estimated $4 billion in damages — despite a security patch having been available months before the attack. This is the single clearest real-world illustration of why patch management isn't optional busywork.</p></div>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-422</span></div>
+  <div class="ticket-body"><p><strong>End-of-life (EOL) software:</strong> Software the manufacturer no longer supports or patches, even though it may still function. CISA recommends discontinuing EOL software entirely, since it poses an unfixable risk — though replacement cost often keeps organizations running it anyway.</p></div>
+</div>
+
+<h3 id="sec-3-7" data-n="3.7">Penetration Testing</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-423</span></div>
+  <div class="ticket-body"><p><strong>Penetration test (pen test):</strong> A simulated, authorized attack identifying vulnerabilities by exploiting them — unlike a vulnerability assessment, which finds weaknesses without exploiting them. It's a form of ethical hacking.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Pen Testing Team Types</caption>
+<thead><tr><th>Team</th><th>Focus</th></tr></thead>
+<tbody>
+<tr><td><strong>Red team</strong></td><td>Simulates attacks to identify vulnerabilities</td></tr>
+<tr><td><strong>Blue team</strong></td><td>Defense and incident response, validating existing security systems</td></tr>
+<tr><td><strong>Purple team</strong></td><td>Collaborative — combines red and blue team elements to improve overall posture</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Pen Testing Knowledge Strategies</caption>
+<thead><tr><th>Strategy</th><th>Also Known As</th><th>Access Level</th></tr></thead>
+<tbody>
+<tr><td><strong>Open-box testing</strong></td><td>Internal, full knowledge, white-box, clear-box</td><td>Same privileged access as an internal developer</td></tr>
+<tr><td><strong>Closed-box testing</strong></td><td>External, black-box, zero knowledge</td><td>Little to no access — most realistic real-attack simulation</td></tr>
+<tr><td><strong>Partial knowledge testing</strong></td><td>Gray-box</td><td>Limited access, like a customer service rep would have</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket redteam">
+  <div class="ticket-head"><span><span class="icon">🗡️</span>Red Team Tip — Bug Bounties</span><span class="ticket-id">RT-401</span></div>
+  <div class="ticket-body"><p>Organizations frequently run <strong>bug bounty</strong> programs offering freelance pen testers financial rewards for finding and reporting vulnerabilities. Platforms like HackerOne let amateur security professionals participate legally and build real-world experience — a genuinely accessible entry point into offensive security work.</p></div>
+</div>
+
+<h3 id="sec-3-8" data-n="3.8">Attack Surfaces &amp; Threat Actors</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-424</span></div>
+  <div class="ticket-body">
+    <p><strong>Physical attack surface:</strong> People and their devices, targetable from inside or outside the organization.</p>
+    <p><strong>Digital attack surface:</strong> Everything beyond the firewall connecting to the organization online — expanded dramatically by cloud computing.</p>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Threat Actor Categories by Motivation</caption>
+<thead><tr><th>Category</th><th>Motivation</th></tr></thead>
+<tbody>
+<tr><td><strong>Competitors</strong></td><td>Benefit from leaked rival information</td></tr>
+<tr><td><strong>State actors</strong></td><td>Government intelligence agencies</td></tr>
+<tr><td><strong>Criminal syndicates</strong></td><td>Organized groups profiting from criminal activity</td></tr>
+<tr><td><strong>Insider threats</strong></td><td>Anyone with/had authorized access, intentional or accidental</td></tr>
+<tr><td><strong>Shadow IT</strong></td><td>Individuals using technology lacking IT governance (e.g., personal email for work)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Hacker Types by Intent</caption>
+<thead><tr><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><strong>Unauthorized (unethical) hacker</strong></td><td>Uses programming skills to commit crimes; includes "script kiddies" using pre-written code</td></tr>
+<tr><td><strong>Authorized (ethical) hacker</strong></td><td>Improves organizational security; includes internal teams and bug bounty participants</td></tr>
+<tr><td><strong>Semi-authorized hacker</strong></td><td>May violate ethical standards without being malicious — e.g., a hacktivist exposing risks for a political goal</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-425</span></div>
+  <div class="ticket-body"><p><strong>Advanced Persistent Threat (APT):</strong> A threat actor maintaining unauthorized system access for an extended period, mostly associated with nation-states, focused on long-term surveillance rather than smash-and-grab attacks. Private businesses are frequently targeted first as a stepping stone toward larger government/utility targets.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Common Attack Vectors (Access Points)</caption>
+<thead><tr><th>Vector</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td><strong>Direct access</strong></td><td>Physical access to a system</td></tr>
+<tr><td><strong>Removable media</strong></td><td>USB flash drives</td></tr>
+<tr><td><strong>Social media</strong></td><td>Communication and content-sharing platforms</td></tr>
+<tr><td><strong>Email</strong></td><td>Personal and business accounts</td></tr>
+<tr><td><strong>Wireless networks</strong></td><td>On-premises Wi-Fi</td></tr>
+<tr><td><strong>Cloud services</strong></td><td>Usually via third-party providers</td></tr>
+<tr><td><strong>Supply chains</strong></td><td>Third-party vendors as a backdoor</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-3-9" data-n="3.9">Brute Force Attacks &amp; Prevention</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Brute Force Attack Variants</caption>
+<thead><tr><th>Variant</th><th>Method</th></tr></thead>
+<tbody>
+<tr><td><strong>Simple brute force</strong></td><td>Guessing any combination of username/password until one works</td></tr>
+<tr><td><strong>Dictionary attack</strong></td><td>Using a list of commonly used credentials</td></tr>
+<tr><td><strong>Reverse brute force</strong></td><td>Starting with one known credential, trying it across many systems</td></tr>
+<tr><td><strong>Credential stuffing</strong></td><td>Using stolen credentials from one breach to access accounts elsewhere</td></tr>
+<tr><td><strong>Pass the hash</strong></td><td>Reusing stolen, unsalted hashed credentials to trick authentication into creating a new session</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket redteam">
+  <div class="ticket-head"><span><span class="icon">🗡️</span>Red Team Tip</span><span class="ticket-id">RT-402</span></div>
+  <div class="ticket-body"><p>Common brute-forcing tools worth recognizing by name: <strong>Aircrack-ng</strong> (Wi-Fi password cracking), <strong>Hashcat</strong> (hashed password cracking), <strong>John the Ripper</strong> (fast, effective password cracking), <strong>Ophcrack</strong> (Windows-specific), and <strong>THC Hydra</strong> (versatile, multi-protocol). Security professionals also use these defensively to test their own systems.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Brute Force Prevention Measures, Revisited</caption>
+<thead><tr><th>Measure</th><th>Mechanism</th></tr></thead>
+<tbody>
+<tr><td><strong>Hashing + salting</strong></td><td>Makes stolen credential databases far harder to crack</td></tr>
+<tr><td><strong>MFA</strong></td><td>Even a stolen password alone isn't enough to gain access</td></tr>
+<tr><td><strong>CAPTCHA</strong></td><td>Proves the requester is human, blocking automated attempts</td></tr>
+<tr><td><strong>Password policy</strong></td><td>Standardizes length/complexity/lockout rules per NIST SP 800-63B</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs-3">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 3.1 — OWASP Category Matching</summary>
+  <div class="acc-body">
+    <p>Match each scenario to its OWASP Top 10 category: (1) a login form vulnerable to malicious code insertion, (2) a server deployed with unchanged default settings, (3) an app using an unmaintained open-source library from 2015.</p>
+    <p><strong>Answer key:</strong> 1 — Injection, 2 — Security misconfiguration, 3 — Vulnerable and outdated components.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 3.2 — Pen Test Strategy Selection</summary>
+  <div class="acc-body">
+    <p>A company wants the most realistic possible simulation of what an external attacker with zero inside knowledge could accomplish. Which pen testing strategy fits, and which team type would typically perform it?</p>
+    <p><strong>Answer:</strong> Closed-box (black-box/zero-knowledge) testing, typically performed by a red team — this combination most closely mirrors a genuine external attack.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Scenario Challenge 3.1 — Attack Vector Identification</summary>
+  <div class="acc-body">
+    <p>A departing employee copies confidential files to a personal USB drive before their last day. What attack vector category does this represent, and what threat actor category does the employee fall into?</p>
+    <p><strong>Answer:</strong> Removable media (attack vector); insider threat (threat actor category) — specifically intentional, since they deliberately chose to exfiltrate data.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview-3">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Intermediate Question</span><span class="ticket-id">INT-405</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: What's the difference between a vulnerability assessment and a penetration test?</strong></p>
+    <p><strong>Ideal answer:</strong> "A vulnerability assessment identifies and scores weaknesses without exploiting them — it's about finding the cracks. A penetration test actually exploits those weaknesses under authorization to determine the real-world consequences if a genuine attacker found them first. Vulnerability assessments usually come first and inform what a pen test should target."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Threat Intelligence Question</span><span class="ticket-id">INT-406</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: How would you use OSINT tools to investigate a suspicious file found on a company laptop?</strong></p>
+    <p><strong>Ideal answer:</strong> "I'd start by generating a hash of the file and checking it against VirusTotal to see if it matches known malicious signatures. If it's a novel or unclear threat, I might cross-reference behavior patterns against MITRE ATT&amp;CK to identify likely tactics and techniques, turning raw information about the file into actionable intelligence for the investigation."</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice-3">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. What score range does CVSS use to rate vulnerability severity?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">0–5</button>
+  <button class="opt" onclick="checkAnswer(this,true)">0–10</button>
+  <button class="opt" onclick="checkAnswer(this,false)">1–100</button>
+  <div class="fb">Correct — CVSS scores range from 0 (low risk) to 10 (critical risk).</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: A pen tester using open-box testing has the same access as an internal developer.</div>
+  <button class="opt" onclick="checkAnswer(this,true)">True</button>
+  <button class="opt" onclick="checkAnswer(this,false)">False</button>
+  <div class="fb">True — open-box (white-box/full knowledge) testing grants full internal access.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. Which brute force variant reuses stolen, unsalted hashed credentials to create a new session?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Dictionary attack</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Pass the hash</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Reverse brute force</button>
+  <div class="fb">Correct — pass the hash specifically exploits unsalted hashed credentials.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision-3">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-403</span></div>
+  <div class="ticket-body"><p>Vulnerability management: Identify→Consider→Prepare→Evaluate, continuous cycle. Defense in Depth: Perimeter→Network→Endpoint→Application→Data. CVE (known vulns) + CVSS (0–10 severity) + OWASP Top 10 (new software risks). OSINT turns information into intelligence. Vulnerability assessment: Identification→Analysis→Risk Assessment→Remediation. Pen testing: red/blue/purple teams; open/closed/partial-knowledge strategies. Threat actors: competitors, state actors, criminal syndicates, insiders, shadow IT. Brute force defenses: hashing+salting, MFA, CAPTCHA, password policy.</p></div>
+</div>
+
+<div class="summary-block" id="summary-3">
+  <h4>Module Summary</h4>
+  <p>This module gave you the complete vulnerability side of the equation: how weaknesses are cataloged (CVE/CVSS/OWASP), discovered (assessments, scans, OSINT), tested (pen testing), and exploited by real threat actors using recognizable, named techniques.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>Vulnerability management and Defense in Depth are continuous, layered processes — never a one-time fix.</li>
+    <li>CVE catalogs known vulnerabilities; CVSS scores their severity; OWASP Top 10 guides secure new development.</li>
+    <li>Vulnerability assessments find weaknesses; penetration tests exploit them to reveal real consequences.</li>
+    <li>Threat actors span competitors, state actors, criminal syndicates, insiders, and shadow IT — each with distinct motivations.</li>
+    <li>Brute force attacks come in several named variants, all countered by the same core defenses: hashing/salting, MFA, CAPTCHA, and password policy.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives-3">◂ Back to Module 3 Objectives</a>
+  <a href="#module-4">Module 4 · Social Engineering, Malware &amp; Threat Modeling ▸</a>
+</div>
+
+<div class="endmark">— End of Module 3 —</div>
+<!-- ============================================================
+     MODULE 4 · WEEK 4 — SOCIAL ENGINEERING, MALWARE & THREAT MODELING
+     ============================================================ -->
+<h2 class="module-head" id="module-4"><span class="tag">Module 4 · Week 4</span>Social Engineering, Malware, Web-Based Exploits &amp; Threat Modeling</h2>
+
+<div class="objectives" id="objectives-4">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Explain social engineering's stages and named tactics: baiting, quid pro quo, tailgating, watering hole.</li>
+    <li>Trace phishing's history and describe its five main types.</li>
+    <li>Describe major malware families in detail: virus, worm, trojan, adware, spyware, scareware, fileless malware, rootkits, botnets, ransomware.</li>
+    <li>Explain cryptojacking and its detection signs.</li>
+    <li>Describe Cross-Site Scripting (XSS) and its three variants.</li>
+    <li>Explain SQL injection's three categories and prevention techniques.</li>
+    <li>Recite the six steps of threat modeling.</li>
+    <li>Explain the PASTA framework and name other threat modeling frameworks (STRIDE, Trike, VAST).</li>
+  </ul>
+</div>
+
+<h3 id="sec-4-1" data-n="4.1">Social Engineering: Stages &amp; Tactics</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-426</span></div>
+  <div class="ticket-body"><p><strong>Social engineering:</strong> A manipulation technique exploiting human error to gain private information, access, or valuables — relying on manipulating people rather than computer systems.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>The Four Stages of a Social Engineering Attack</caption>
+<thead><tr><th>Stage</th><th>What Happens</th></tr></thead>
+<tbody>
+<tr><td><strong>1. Prepare</strong></td><td>Attacker researches the target, sometimes over months</td></tr>
+<tr><td><strong>2. Establish trust</strong></td><td>Building rapport or a credible pretext with the target</td></tr>
+<tr><td><strong>3. Use persuasive tactics</strong></td><td>Exploiting curiosity, generosity, or urgency to extract the desired outcome</td></tr>
+<tr><td><strong>4. Disconnect</strong></td><td>The attacker exits the interaction, ideally without raising suspicion</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket industry">
+  <div class="ticket-head"><span><span class="icon">🏢</span>Industry Insight — The 2020 Twitter Hack</span><span class="ticket-id">IND-404</span></div>
+  <div class="ticket-body"><p>Attackers called Twitter employees pretending to be from the IT department — a basic social engineering scam — and used it to gain access to internal tools, ultimately taking over high-profile accounts belonging to politicians, celebrities, and entrepreneurs. No sophisticated exploit was needed; a phone call and a false identity were enough.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Named Social Engineering Tactics</caption>
+<thead><tr><th>Tactic</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><strong>Baiting</strong></td><td>Tempting people into compromising security (e.g., USB baiting)</td></tr>
+<tr><td><strong>Quid pro quo</strong></td><td>Tricking someone into believing they'll be rewarded for sharing access/information/money</td></tr>
+<tr><td><strong>Tailgating (piggybacking)</strong></td><td>Unauthorized people following an authorized person into a restricted area</td></tr>
+<tr><td><strong>Watering hole</strong></td><td>Compromising a website frequently visited by a specific target group</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket blueteam">
+  <div class="ticket-head"><span><span class="icon">🛡️</span>Blue Team Tip — Three Training Pillars</span><span class="ticket-id">BT-402</span></div>
+  <div class="ticket-body"><p>Effective security awareness training focuses on three habits: <strong>Stay alert</strong> (watch for spelling errors, verify sender identity), <strong>Be cautious</strong> (limit what's shared on social media), and <strong>Control curiosity</strong> (resist clicking things that seem too good to be true). These three habits address nearly every named social engineering tactic at once.</p></div>
+</div>
+
+<h3 id="sec-4-2" data-n="4.2">Phishing: Origins &amp; Types</h3>
+
+<div class="ticket industry">
+  <div class="ticket-head"><span><span class="icon">🏢</span>Industry Insight — Phishing's Origins</span><span class="ticket-id">IND-405</span></div>
+  <div class="ticket-body"><p>One of the earliest phishing campaigns targeted AOL Instant Messenger users in the 1990s, with emails impersonating AOL asking users to "verify" account/billing information — an early example of mass phishing. By the early 2000s, fraudulent websites mimicking eBay and PayPal extended the same tactic to e-commerce and banking.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Five Common Types of Phishing</caption>
+<thead><tr><th>Type</th><th>Method</th></tr></thead>
+<tbody>
+<tr><td><strong>Email phishing</strong></td><td>Messages pretending to be from a trusted person/entity</td></tr>
+<tr><td><strong>Smishing</strong></td><td>SMS/text-based (covers iMessage, WhatsApp, and other chat mediums)</td></tr>
+<tr><td><strong>Vishing</strong></td><td>Voice calls or voicemail impersonating a trusted source</td></tr>
+<tr><td><strong>Spear phishing</strong></td><td>Specific individuals purposefully targeted (e.g., a company's accountants)</td></tr>
+<tr><td><strong>Whaling</strong></td><td>Spear phishing aimed at high-ranking executives</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-427</span></div>
+  <div class="ticket-body">
+    <p><strong>Phishing kit:</strong> A collection of software tools required to launch phishing campaigns, typically containing malicious attachments, fake data-collection forms, and fraudulent web links.</p>
+    <p><strong>Angler phishing:</strong> Attackers impersonate customer service reps on social media, intercepting public complaints to trick angry customers into sharing sensitive information.</p>
+  </div>
+</div>
+
+<h3 id="sec-4-3" data-n="4.3">Malware Deep Dive</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Complete Malware Family Reference</caption>
+<thead><tr><th>Type</th><th>Requires User Action?</th><th>Self-Replicates?</th><th>Core Behavior</th></tr></thead>
+<tbody>
+<tr><td><strong>Virus</strong></td><td>Yes</td><td>Only within opened files</td><td>Hides in trusted applications, damages data/software</td></tr>
+<tr><td><strong>Worm</strong></td><td>No (self-spreading)</td><td>Yes, across networks</td><td>Targets shared-access devices/files/drives</td></tr>
+<tr><td><strong>Trojan</strong></td><td>Yes (disguised)</td><td>No</td><td>Looks legitimate, grants access, installs other malware</td></tr>
+<tr><td><strong>Adware</strong></td><td>Sometimes bundled</td><td>No</td><td>Displays ads; malicious form is a PUA</td></tr>
+<tr><td><strong>Spyware</strong></td><td>Often bundled/hidden</td><td>No</td><td>Gathers/sells information without consent (also a PUA)</td></tr>
+<tr><td><strong>Scareware</strong></td><td>Yes (tricked)</td><td>No</td><td>Displays fake warnings to frighten users into self-infecting</td></tr>
+<tr><td><strong>Fileless malware</strong></td><td>No</td><td>No</td><td>Lives in memory, uses legitimate installed programs</td></tr>
+<tr><td><strong>Rootkit</strong></td><td>Varies</td><td>No</td><td>Grants remote administrative access, opens a backdoor</td></tr>
+<tr><td><strong>Ransomware</strong></td><td>Varies</td><td>Sometimes</td><td>Encrypts data, demands payment for restoration</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket industry">
+  <div class="ticket-head"><span><span class="icon">🏢</span>Industry Insight — The Blaster Worm</span><span class="ticket-id">IND-406</span></div>
+  <div class="ticket-body"><p>The early-2000s Blaster worm (Lovesan/MSBlast) forced Windows XP and 2000 machines into a continuous shutdown-and-restart loop, spreading to hundreds of thousands of users worldwide — without directly damaging infected devices. Its purely disruptive impact demonstrates that malware doesn't need to steal data to cause massive operational harm.</p></div>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-428</span></div>
+  <div class="ticket-body">
+    <p><strong>Potentially Unwanted Application (PUA):</strong> Unwanted software bundled with legitimate programs, which might display ads, cause slowdown, or install other software.</p>
+    <p><strong>Dropper:</strong> Malware disguised as a legitimate file, delivering and installing malicious code once opened.</p>
+    <p><strong>Loader:</strong> Malware that downloads additional malicious code from an external source after initial installation, often used in multi-stage attacks like setting up a botnet.</p>
+  </div>
+</div>
+
+<figure>
+<svg viewBox="0 0 640 160" width="100%" role="img" aria-label="Diagram showing a dropper delivering initial malicious code, followed by a loader downloading additional malware from an external source, resulting in botnet formation">
+  <rect x="0" y="0" width="640" height="160" fill="#F7F5F0"/>
+  <g font-family="sans-serif" font-size="11.5" font-weight="700" fill="#fff">
+    <rect x="20" y="55" width="150" height="50" rx="6" fill="#7A1F3D"/><text x="95" y="85" text-anchor="middle">Dropper</text>
+    <rect x="240" y="55" width="150" height="50" rx="6" fill="#B4700A"/><text x="315" y="85" text-anchor="middle">Loader</text>
+    <rect x="460" y="55" width="160" height="50" rx="6" fill="#0B0F14"/><text x="540" y="85" text-anchor="middle">Botnet</text>
+  </g>
+  <path d="M170 80 L240 80" stroke="#0B0F14" stroke-width="2" marker-end="url(#a5c)"/>
+  <path d="M390 80 L460 80" stroke="#0B0F14" stroke-width="2" marker-end="url(#a5c)"/>
+  <defs><marker id="a5c" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#0B0F14"/></marker></defs>
+  <text x="320" y="135" text-anchor="middle" font-family="monospace" font-size="11" fill="#3A4650">Deliver → Download additional malware → Recruit device into a bot-herder's network</text>
+</svg>
+<figcaption>Figure 4.1 — Dropper → loader → botnet infection chain</figcaption>
+</figure>
+
+<h3 id="sec-4-4" data-n="4.4">Cryptojacking</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-429</span></div>
+  <div class="ticket-body"><p><strong>Cryptojacking:</strong> Malware installed on compromised devices for unauthorized cryptocurrency mining, emerging in 2017 and increasingly targeting vulnerable servers rather than just personal computers.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Five Signs of Cryptojacking Infection</caption>
+<thead><tr><th>Sign</th><th>Cause</th></tr></thead>
+<tbody>
+<tr><td><strong>Slowdown</strong></td><td>Mining consumes device resources</td></tr>
+<tr><td><strong>Increased CPU usage</strong></td><td>Mining is computationally intensive</td></tr>
+<tr><td><strong>Sudden system crashes</strong></td><td>Resource exhaustion destabilizes the system</td></tr>
+<tr><td><strong>Fast-draining batteries</strong></td><td>Continuous processing drains power quickly</td></tr>
+<tr><td><strong>Unusually high electricity costs</strong></td><td>Constant resource-intensive processing</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-4-5" data-n="4.5">Cross-Site Scripting (XSS)</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-430</span></div>
+  <div class="ticket-body"><p><strong>Cross-Site Scripting (XSS):</strong> A dangerous injection attack inserting malicious code into a vulnerable website/web application, often exploiting HTML and JavaScript — giving attackers access to session cookies, geolocation, webcams, and microphones.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Three Types of XSS Attacks</caption>
+<thead><tr><th>Type</th><th>Mechanism</th></tr></thead>
+<tbody>
+<tr><td><strong>Reflected XSS</strong></td><td>Malicious script sent to and activated by the server's response, often via a deceptive link</td></tr>
+<tr><td><strong>Stored XSS</strong></td><td>Malicious script directly injected on the server, infecting the site itself without requiring user awareness</td></tr>
+<tr><td><strong>DOM-Based XSS</strong></td><td>Malicious script exists within the page's source code, requiring no server interaction to activate</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-4-6" data-n="4.6">SQL Injection</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-431</span></div>
+  <div class="ticket-body"><p><strong>SQL injection:</strong> An attack exploiting vulnerable input fields (login forms, search bars) that aren't programmed to filter unwanted text — letting attackers manipulate, steal, or gain administrative control over a database.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Three SQL Injection Categories</caption>
+<thead><tr><th>Category</th><th>Channel</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><strong>In-band (classic)</strong></td><td>Same channel launches attack and returns results</td><td>Most common type</td></tr>
+<tr><td><strong>Out-of-band</strong></td><td>Different channel launches attack vs. gathers results</td><td>Very uncommon — requires specific server features enabled</td></tr>
+<tr><td><strong>Inferential</strong></td><td>No direct visibility — attacker infers results from system behavior</td><td>Uses error messages/response timing to deduce database structure</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>SQL Injection Prevention Techniques</caption>
+<thead><tr><th>Technique</th><th>Function</th></tr></thead>
+<tbody>
+<tr><td><strong>Prepared statements</strong></td><td>Execute SQL statements before passing them on to the database</td></tr>
+<tr><td><strong>Input sanitization</strong></td><td>Removes user input that could be interpreted as code</td></tr>
+<tr><td><strong>Input validation</strong></td><td>Ensures user input meets the system's expected format</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-4-7" data-n="4.7">Threat Modeling: Six Steps</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-432</span></div>
+  <div class="ticket-body"><p><strong>Threat modeling:</strong> The process of identifying assets, their vulnerabilities, and how they're exposed to threats — an advanced, comprehensive security activity usually performed by a team.</p></div>
+</div>
+
+<figure>
+<svg viewBox="0 0 640 260" width="100%" role="img" aria-label="Diagram of the six steps of threat modeling arranged in a cycle: Define Scope, Identify Threats, Characterize the Environment, Analyze Threats, Mitigate Risk, Evaluate Findings">
+  <rect x="0" y="0" width="640" height="260" fill="#F7F5F0"/>
+  <text x="320" y="24" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#0B0F14">Threat Modeling — 6 Steps</text>
+  <g font-family="sans-serif" font-size="10.5" font-weight="700" fill="#fff">
+    <rect x="20" y="55" width="180" height="50" rx="6" fill="#3457B2"/><text x="110" y="85" text-anchor="middle">1. Define Scope</text>
+    <rect x="230" y="55" width="180" height="50" rx="6" fill="#0F9E93"/><text x="320" y="85" text-anchor="middle">2. Identify Threats</text>
+    <rect x="440" y="55" width="180" height="50" rx="6" fill="#B4700A"/><text x="530" y="78" text-anchor="middle">3. Characterize</text><text x="530" y="93" text-anchor="middle" font-weight="400" font-size="9">the Environment</text>
+    <rect x="440" y="130" width="180" height="50" rx="6" fill="#6B4FBB"/><text x="530" y="160" text-anchor="middle">4. Analyze Threats</text>
+    <rect x="230" y="130" width="180" height="50" rx="6" fill="#7A1F3D"/><text x="320" y="160" text-anchor="middle">5. Mitigate Risk</text>
+    <rect x="20" y="130" width="180" height="50" rx="6" fill="#1E7A4C"/><text x="110" y="160" text-anchor="middle">6. Evaluate Findings</text>
+  </g>
+  <path d="M200 80 L230 80" stroke="#0B0F14" stroke-width="2" marker-end="url(#a5d)"/>
+  <path d="M410 80 L440 80" stroke="#0B0F14" stroke-width="2" marker-end="url(#a5d)"/>
+  <path d="M530 105 L530 130" stroke="#0B0F14" stroke-width="2" marker-end="url(#a5d)"/>
+  <path d="M440 155 L410 155" stroke="#0B0F14" stroke-width="2" marker-end="url(#a5d)"/>
+  <path d="M230 155 L200 155" stroke="#0B0F14" stroke-width="2" marker-end="url(#a5d)"/>
+  <defs><marker id="a5d" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#0B0F14"/></marker></defs>
+  <text x="320" y="220" text-anchor="middle" font-family="monospace" font-size="11" fill="#3A4650">Evaluate Findings feeds back into Define Scope — a continuous cycle</text>
+</svg>
+<figcaption>Figure 4.2 — Threat modeling's six-step cycle</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<caption>Threat Modeling — Six Steps Explained</caption>
+<thead><tr><th>Step</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td><strong>1. Define Scope</strong></td><td>Create an inventory of assets, classify them</td></tr>
+<tr><td><strong>2. Identify Threats</strong></td><td>Define potential threat actors (internal/external); build an attack tree mapping threats to assets</td></tr>
+<tr><td><strong>3. Characterize the Environment</strong></td><td>Adopt an attacker's perspective — how do customers, employees, partners, vendors interact with the environment?</td></tr>
+<tr><td><strong>4. Analyze Threats</strong></td><td>Examine existing protections, identify gaps, rank threats by risk score</td></tr>
+<tr><td><strong>5. Mitigate Risk</strong></td><td>Create a defense plan — avoid, transfer, reduce, or accept risk</td></tr>
+<tr><td><strong>6. Evaluate Findings</strong></td><td>Document everything, implement fixes, record lessons learned</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-4-8" data-n="4.8">PASTA &amp; Other Threat Modeling Frameworks</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-433</span></div>
+  <div class="ticket-body"><p><strong>PASTA (Process for Attack Simulation and Threat Analysis):</strong> A risk-centric, evidence-based threat modeling framework developed by two OWASP leaders, using a seven-stage process.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>PASTA's Seven Stages</caption>
+<thead><tr><th>#</th><th>Stage</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Define Business and Security Objectives</td><td>Set clear goals for the exercise</td></tr>
+<tr><td>2</td><td>Define Technical Scope</td><td>Identify components needing evaluation — attack surface, protocols, controls</td></tr>
+<tr><td>3</td><td>Decompose the Application</td><td>Break down existing controls; produce a data flow diagram</td></tr>
+<tr><td>4</td><td>Threat Analysis</td><td>Collect current information on relevant attack types</td></tr>
+<tr><td>5</td><td>Vulnerability Analysis</td><td>Investigate potential vulnerabilities' root causes</td></tr>
+<tr><td>6</td><td>Attack Modeling</td><td>Simulate attacks based on analyzed vulnerabilities; build attack trees</td></tr>
+<tr><td>7</td><td>Analyze Risk and Impact</td><td>Consolidate findings into risk management recommendations</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Other Threat Modeling Frameworks</caption>
+<thead><tr><th>Framework</th><th>Origin</th><th>Focus</th></tr></thead>
+<tbody>
+<tr><td><strong>STRIDE</strong></td><td>Microsoft</td><td>Six attack vectors: Spoofing, Tampering, Repudiation, Information disclosure, Denial of service, Elevation of privilege</td></tr>
+<tr><td><strong>Trike</strong></td><td>Open source</td><td>Security-centric — permissions, use cases, privilege models</td></tr>
+<tr><td><strong>VAST</strong></td><td>ThreatModeler® platform</td><td>Automated, streamlined threat modeling assessments</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket examtip">
+  <div class="ticket-head"><span><span class="icon">🎯</span>Exam Tip</span><span class="ticket-id">EXM-402</span></div>
+  <div class="ticket-body"><p><strong>STRIDE</strong> spells out its own six attack vectors — worth memorizing as an acronym: <strong>S</strong>poofing, <strong>T</strong>ampering, <strong>R</strong>epudiation, <strong>I</strong>nformation disclosure, <strong>D</strong>enial of service, <strong>E</strong>levation of privilege. If a scenario mentions any of these six specifically, STRIDE is likely the intended reference framework.</p></div>
+</div>
+
+<div class="ticket redteam">
+  <div class="ticket-head"><span><span class="icon">🗡️</span>Deep Dive — Log4Shell Applied</span><span class="ticket-id">DD-401</span></div>
+  <div class="ticket-body"><p>An application using Java-based logging libraries with the Log4Shell vulnerability (CVE-2021-44228), if unpatched, allows remote code execution — letting an attacker gain full system access from anywhere in the world. This single CVE, if exploited at scale, can impact millions of devices — a vivid illustration of why threat modeling and patch management are inseparable.</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs-4">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 4.1 — Malware Family Identification</summary>
+  <div class="acc-body">
+    <p>A user's laptop suddenly runs sluggishly, the fan runs constantly, and the battery drains in under two hours despite normal usage. Which malware family is most likely responsible, and what would you check first?</p>
+    <p><strong>Answer:</strong> Cryptojacking — the specific combination of slowdown, high CPU usage, and fast battery drain matches its signature profile. Check Task Manager/Activity Monitor for unusually high CPU-consuming processes and review recently installed browser extensions or software.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 4.2 — XSS Type Classification</summary>
+  <div class="acc-body">
+    <p>Classify each scenario: (1) a malicious script permanently embedded in a forum's comment database, infecting every visitor automatically; (2) a script activated only when a victim clicks a specially crafted link sent via email.</p>
+    <p><strong>Answer key:</strong> 1 — Stored XSS (persists on the server, no user interaction needed to plant it). 2 — Reflected XSS (activated by the server's response to a specific crafted request).</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Portfolio Project 4.1 — Mini Threat Model</summary>
+  <div class="acc-body">
+    <p>Choose a simple hypothetical system (e.g., a small business's customer login page). Walk through all six threat modeling steps for it in a one-page write-up: scope, threat actors, environment, threat analysis, one mitigation, and one lesson learned. Save this to your portfolio as a capstone artifact for Course V.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview-4">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Beginner Question</span><span class="ticket-id">INT-407</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: What's the difference between a virus, a worm, and a trojan?</strong></p>
+    <p><strong>Ideal answer:</strong> "A virus requires user action to activate and spreads by attaching to files. A worm also usually needs an initial installation but then spreads on its own across a network without further user action. A trojan disguises itself as a legitimate program to trick a user into installing it, and unlike a worm, it doesn't self-replicate — it typically opens the door for other malware instead."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Scenario Question</span><span class="ticket-id">INT-408</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Walk me through how you'd threat-model a new customer-facing mobile app before launch.</strong></p>
+    <p><strong>Ideal answer:</strong> "I'd follow the six-step cycle: define the scope by inventorying what data and systems the app touches; identify likely threat actors, from opportunistic hackers to competitors; characterize the environment by mapping how customers, employees, and third-party APIs interact with it; analyze existing protections for gaps; build a mitigation plan prioritized by risk score; and document everything so lessons learned inform the next review cycle. I'd likely reference PASTA specifically since it's risk-centric and well-suited to application security."</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice-4">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which social engineering tactic involves following an authorized person into a restricted area?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Baiting</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Tailgating</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Quid pro quo</button>
+  <div class="fb">Correct — tailgating (piggybacking) means following an authorized person into a restricted area.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: Fileless malware is stored as a file on the hard drive like other malware.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — fileless malware lives in memory and never touches the hard drive, making it harder to detect.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. Which threat modeling framework was developed by Microsoft around six specific attack vectors?</div>
+  <button class="opt" onclick="checkAnswer(this,true)">STRIDE</button>
+  <button class="opt" onclick="checkAnswer(this,false)">PASTA</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Trike</button>
+  <div class="fb">Correct — STRIDE (Spoofing, Tampering, Repudiation, Information disclosure, Denial of service, Elevation of privilege) was developed by Microsoft.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision-4">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-404</span></div>
+  <div class="ticket-body"><p>Social engineering: prepare→trust→persuade→disconnect; tactics include baiting, quid pro quo, tailgating, watering hole. Phishing: email/smishing/vishing/spear phishing/whaling. Malware family: virus/worm/trojan/adware/spyware/scareware/fileless/rootkit/ransomware, often chained via dropper→loader→botnet. Cryptojacking signs: slowdown, high CPU, crashes, battery drain, high electricity costs. XSS: reflected/stored/DOM-based. SQL injection: in-band/out-of-band/inferential, prevented via prepared statements/sanitization/validation. Threat modeling: 6 steps (Scope→Identify→Characterize→Analyze→Mitigate→Evaluate); PASTA has 7 stages; also know STRIDE, Trike, VAST.</p></div>
+</div>
+
+<div class="summary-block" id="summary-4">
+  <h4>Module Summary</h4>
+  <p>This module closed Course V by covering the human and technical exploitation techniques that turn vulnerabilities into real incidents — social engineering, the full malware taxonomy, web-based exploits like XSS and SQL injection — and gave you a proactive, structured way to get ahead of all of it through threat modeling.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>Social engineering exploits human psychology through a predictable four-stage pattern, regardless of the specific tactic used.</li>
+    <li>Malware families differ meaningfully in whether they need user action and whether they self-replicate — both matter for detection and response.</li>
+    <li>XSS and SQL injection remain among the most common web-based exploits precisely because input validation is so easy to get wrong.</li>
+    <li>Threat modeling's six-step cycle applies to any system, application, or business process — not just software.</li>
+    <li>PASTA, STRIDE, Trike, and VAST each offer a different lens on the same underlying goal: getting ahead of attackers before they act.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives-4">◂ Back to Module 4 Objectives</a>
+  <a href="#course-summary">Course Summary ▸</a>
+</div>
+
+<div class="endmark">— End of Module 4 —</div>
+
+<!-- ============================================================
+     COURSE SUMMARY
+     ============================================================ -->
+<h2 class="module-head" id="course-summary"><span class="tag">Course Summary</span>Assets, Threats, and Vulnerabilities — Complete</h2>
+
+<p>Course V is the conceptual center of the entire certificate. You now understand how organizations classify what's worth protecting, how encryption and access control frameworks safeguard it, how vulnerabilities are cataloged and tested, and how real attackers — human and automated — actually exploit the gaps in between.</p>
+
+<div class="table-wrap">
+<table>
+<caption>Course V — Module-by-Module Recap</caption>
+<thead><tr><th>Module</th><th>Core Theme</th><th>Signature Concepts</th></tr></thead>
+<tbody>
+<tr><td><strong>1. Asset Security</strong></td><td>What organizations protect and how they classify it</td><td>Risk formula, asset classification, data states, cloud models, NIST CSF core/tiers/profiles</td></tr>
+<tr><td><strong>2. Safeguarding Information</strong></td><td>Technical controls protecting assets</td><td>Data lifecycle, GDPR/PCI DSS/HIPAA, encryption/hashing/PKI, AAA, IAM (MAC/DAC/RBAC)</td></tr>
+<tr><td><strong>3. Threats &amp; Vulnerabilities</strong></td><td>Cataloging and testing weaknesses</td><td>CVE/CVSS/OWASP, OSINT, vulnerability assessments/scans, pen testing, threat actors, brute force</td></tr>
+<tr><td><strong>4. Social Engineering, Malware &amp; Threat Modeling</strong></td><td>How weaknesses actually get exploited — and how to get ahead of it</td><td>Social engineering tactics, phishing, full malware taxonomy, XSS, SQL injection, threat modeling (6 steps, PASTA)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket expert">
+  <div class="ticket-head"><span><span class="icon">🎓</span>Expert Note</span><span class="ticket-id">EXP-401</span></div>
+  <div class="ticket-body"><p>If you remember only five things from Course V going into an interview: (1) the risk formula (Likelihood × Impact) and why security work targets likelihood; (2) symmetric vs. asymmetric encryption with a concrete example of each in use together; (3) CVE/CVSS/OWASP as three distinct but complementary vulnerability resources; (4) the complete malware taxonomy, especially the self-replication distinction; (5) the six-step threat modeling cycle, cold, from memory. This course's material shows up, directly or indirectly, in essentially every remaining course and every technical interview.</p></div>
+</div>
+
+<!-- ============================================================
+     FULL COURSE GLOSSARY
+     ============================================================ -->
+<h2 class="module-head" id="course-glossary"><span class="tag">Reference</span>Full Glossary — Weeks 1–4</h2>
+
+<div class="table-wrap">
+<table>
+<caption>Complete Course V Glossary</caption>
+<thead><tr><th>Term</th><th>Definition</th></tr></thead>
+<tbody>
+<tr><td><strong>Advanced Persistent Threat (APT)</strong></td><td>A threat actor maintaining unauthorized system access for an extended period</td></tr>
+<tr><td><strong>Angler phishing</strong></td><td>Impersonating customer service reps on social media to exploit public complaints</td></tr>
+<tr><td><strong>Asset classification</strong></td><td>Categorizing assets based on sensitivity and importance (Public/Internal-Only/Confidential/Restricted)</td></tr>
+<tr><td><strong>Attack surface</strong></td><td>All potential vulnerabilities a threat actor could exploit — physical or digital</td></tr>
+<tr><td><strong>Bug bounty</strong></td><td>A program offering financial rewards for finding and reporting vulnerabilities</td></tr>
+<tr><td><strong>Caesar's Cipher</strong></td><td>An ancient cryptographic method shifting letters by a fixed value to encrypt messages</td></tr>
+<tr><td><strong>CAPTCHA</strong></td><td>A challenge-response test proving a user is human, not automated brute-force software</td></tr>
+<tr><td><strong>Certificate Authority (CA)</strong></td><td>A trusted entity that issues and signs digital certificates</td></tr>
+<tr><td><strong>Credential stuffing</strong></td><td>Using stolen login credentials from one breach to access accounts elsewhere</td></tr>
+<tr><td><strong>Cryptojacking</strong></td><td>Malware that installs unauthorized cryptocurrency mining software on a device</td></tr>
+<tr><td><strong>CVE list</strong></td><td>An openly accessible dictionary of known vulnerabilities and exposures</td></tr>
+<tr><td><strong>CVSS</strong></td><td>A 0–10 scoring system measuring a vulnerability's severity and urgency</td></tr>
+<tr><td><strong>Data governance</strong></td><td>Processes defining how an organization manages information throughout its lifecycle</td></tr>
+<tr><td><strong>Data lifecycle</strong></td><td>The five stages data moves through: Collect, Store, Use, Archive, Destroy</td></tr>
+<tr><td><strong>Defense in Depth</strong></td><td>A five-layer security model (Perimeter/Network/Endpoint/Application/Data)</td></tr>
+<tr><td><strong>Digital certificate</strong></td><td>A file verifying the identity of a public key holder</td></tr>
+<tr><td><strong>Discretionary Access Control (DAC)</strong></td><td>An access model where the data owner decides permissions</td></tr>
+<tr><td><strong>End-of-life (EOL) software</strong></td><td>Software the manufacturer no longer supports or patches</td></tr>
+<tr><td><strong>Hash collision</strong></td><td>Different inputs producing the same hash value</td></tr>
+<tr><td><strong>Hash function</strong></td><td>A one-way algorithm producing a code that cannot be decrypted</td></tr>
+<tr><td><strong>Insider threat</strong></td><td>Anyone with (or who had) authorized access who poses a risk, intentionally or accidentally</td></tr>
+<tr><td><strong>Mandatory Access Control (MAC)</strong></td><td>The strictest access model, granted only by a central authority on a need-to-know basis</td></tr>
+<tr><td><strong>Multi-Factor Authentication (MFA)</strong></td><td>Requiring two or more independent forms of identity verification</td></tr>
+<tr><td><strong>OAuth</strong></td><td>An open-standard authorization protocol sharing access via API tokens</td></tr>
+<tr><td><strong>OSINT</strong></td><td>Open-source intelligence — collecting and analyzing public information for usable intelligence</td></tr>
+<tr><td><strong>OWASP Top 10</strong></td><td>A list of the most critical web application security risks, updated periodically</td></tr>
+<tr><td><strong>PASTA</strong></td><td>Process for Attack Simulation and Threat Analysis — a 7-stage threat modeling framework</td></tr>
+<tr><td><strong>Penetration test (pen test)</strong></td><td>A simulated, authorized attack that exploits vulnerabilities to determine real consequences</td></tr>
+<tr><td><strong>Phishing kit</strong></td><td>A toolkit of software for launching phishing campaigns</td></tr>
+<tr><td><strong>PKI (Public Key Infrastructure)</strong></td><td>An encryption framework securing online information exchange via keys and digital certificates</td></tr>
+<tr><td><strong>Rainbow table</strong></td><td>A precomputed file of hash values and their plaintext, used to crack hashes</td></tr>
+<tr><td><strong>Role-Based Access Control (RBAC)</strong></td><td>An access model determined by the user's organizational role</td></tr>
+<tr><td><strong>Salting</strong></td><td>Adding random characters to data before hashing to defeat rainbow table attacks</td></tr>
+<tr><td><strong>Session hijacking</strong></td><td>Stealing a user's session cookie/token to impersonate them</td></tr>
+<tr><td><strong>Shadow IT</strong></td><td>Using technology that lacks IT governance</td></tr>
+<tr><td><strong>Single Sign-On (SSO)</strong></td><td>Combining multiple logins into one, reducing password fatigue</td></tr>
+<tr><td><strong>Social engineering</strong></td><td>Manipulation exploiting human error to gain private information, access, or valuables</td></tr>
+<tr><td><strong>STRIDE</strong></td><td>A Microsoft threat modeling framework covering 6 attack vectors</td></tr>
+<tr><td><strong>Symmetric / Asymmetric encryption</strong></td><td>Single shared key vs. public/private key pair encryption</td></tr>
+<tr><td><strong>Threat modeling</strong></td><td>Identifying assets, vulnerabilities, and threat exposure through a structured 6-step process</td></tr>
+<tr><td><strong>Vulnerability assessment</strong></td><td>An internal review identifying, evaluating, scoring, and fixing vulnerabilities</td></tr>
+<tr><td><strong>Vulnerability scanner</strong></td><td>Software automatically comparing known vulnerabilities against network technologies</td></tr>
+<tr><td><strong>XSS (Cross-Site Scripting)</strong></td><td>An injection attack inserting malicious code into a vulnerable website/web application</td></tr>
+<tr><td><strong>Zero-day exploit</strong></td><td>A previously unknown vulnerability, leaving no time to prepare a defense</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ============================================================
+     MASTER CHEAT SHEET
+     ============================================================ -->
+<h2 class="module-head" id="course-cheatsheet"><span class="tag">Reference</span>Master Cheat Sheet &amp; Revision Checklist</h2>
+
+<h4>Revision Checklist</h4>
+<div class="quiz" style="background:var(--paper-dim);">
+  <p>Before moving to Course VI, confirm you can do all of the following from memory:</p>
+  <ul>
+    <li>☐ Explain the risk formula and the four asset classification levels</li>
+    <li>☐ Name the three states of data and one security concern for each</li>
+    <li>☐ Explain symmetric vs. asymmetric encryption with a real-world example combining both</li>
+    <li>☐ Explain why salting defeats rainbow table attacks even with a strong hash function</li>
+    <li>☐ Distinguish MAC, DAC, and RBAC with an example of each</li>
+    <li>☐ Explain the relationship between CVE, CVSS, and OWASP Top 10</li>
+    <li>☐ Distinguish a vulnerability assessment from a penetration test</li>
+    <li>☐ Name at least 6 malware types and one defining trait of each</li>
+    <li>☐ Explain the 3 types of XSS and the 3 categories of SQL injection</li>
+    <li>☐ Recite the six steps of threat modeling in order</li>
+  </ul>
+</div>
+
+<h4>Cybersecurity Terms Cheat Sheet — By Category</h4>
+<div class="table-wrap">
+<table>
+<tbody>
+<tr><td><strong>Asset Classification</strong></td><td>Public, Internal-Only, Confidential, Restricted</td></tr>
+<tr><td><strong>Data States</strong></td><td>In Use, In Transit, At Rest</td></tr>
+<tr><td><strong>Cloud Models</strong></td><td>SaaS, PaaS, IaaS</td></tr>
+<tr><td><strong>NIST CSF Components</strong></td><td>Core (5 functions), Tiers (1–4), Profiles</td></tr>
+<tr><td><strong>Encryption</strong></td><td>Symmetric (3DES, AES) vs. Asymmetric (RSA, DSA); PKI combines both</td></tr>
+<tr><td><strong>Hashing</strong></td><td>MD5, SHA family; Salting defeats rainbow tables</td></tr>
+<tr><td><strong>AAA Framework</strong></td><td>Authentication, Authorization, Accounting</td></tr>
+<tr><td><strong>IAM Models</strong></td><td>MAC, DAC, RBAC</td></tr>
+<tr><td><strong>Vulnerability Resources</strong></td><td>CVE list, CVSS scoring, OWASP Top 10</td></tr>
+<tr><td><strong>Vulnerability Assessment Steps</strong></td><td>Identification, Analysis, Risk Assessment, Remediation</td></tr>
+<tr><td><strong>Pen Test Teams</strong></td><td>Red, Blue, Purple</td></tr>
+<tr><td><strong>Pen Test Strategies</strong></td><td>Open-box, Closed-box, Partial knowledge</td></tr>
+<tr><td><strong>Brute Force Variants</strong></td><td>Simple, Dictionary, Reverse, Credential Stuffing, Pass the Hash</td></tr>
+<tr><td><strong>Malware Taxonomy</strong></td><td>Virus, Worm, Trojan, Adware, Spyware, Scareware, Fileless, Rootkit, Ransomware</td></tr>
+<tr><td><strong>Web Exploits</strong></td><td>XSS (Reflected/Stored/DOM-based), SQL Injection (In-band/Out-of-band/Inferential)</td></tr>
+<tr><td><strong>Threat Modeling Steps</strong></td><td>Define Scope, Identify Threats, Characterize Environment, Analyze Threats, Mitigate Risk, Evaluate Findings</td></tr>
+<tr><td><strong>Threat Modeling Frameworks</strong></td><td>PASTA (7 stages), STRIDE, Trike, VAST</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="summary-block">
+  <h4>Where to Go Next</h4>
+  <ul>
+    <li><strong>Course VI — Sound the Alarm: Detection and Response</strong> takes everything from this course and applies it operationally — how SOC teams actually detect these threats in real time and respond according to a structured incident response process.</li>
+    <li>Add your Course V portfolio artifacts (mini threat model) to your growing collection — this is likely your strongest artifact so far.</li>
+    <li>Revisit the six-step threat modeling cycle and the malware taxonomy table one week from now using spaced repetition.</li>
+  </ul>
+</div>
+
+<div class="endmark">— End of Course V: Assets, Threats, and Vulnerabilities —</div>
+</div>
+</main>
+<script>
+// progress bar
+window.addEventListener('scroll', function(){
+  var h = document.documentElement;
+  var scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+  document.getElementById('progress-fill').style.width = scrolled + '%';
+});
+
+// TOC drawer
+var drawer = document.getElementById('toc-drawer');
+var scrim = document.getElementById('scrim');
+document.getElementById('toc-toggle').addEventListener('click', function(){
+  drawer.classList.add('open'); scrim.classList.add('show');
+  this.setAttribute('aria-expanded','true');
+});
+document.getElementById('toc-close').addEventListener('click', closeDrawer);
+scrim.addEventListener('click', closeDrawer);
+function closeDrawer(){
+  drawer.classList.remove('open'); scrim.classList.remove('show');
+  document.getElementById('toc-toggle').setAttribute('aria-expanded','false');
+}
+
+// flashcards
+document.querySelectorAll('.flash').forEach(function(card){
+  function flip(){
+    card.classList.toggle('flipped');
+    card.setAttribute('aria-pressed', card.classList.contains('flipped'));
+  }
+  card.addEventListener('click', flip);
+  card.addEventListener('keypress', function(e){ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); flip(); } });
+});
+
+// quiz
+function checkAnswer(btn, isCorrect){
+  var quiz = btn.closest('.quiz');
+  var opts = quiz.querySelectorAll('.opt');
+  opts.forEach(function(o){ o.disabled = true; });
+  if(isCorrect){ btn.classList.add('correct'); }
+  else { btn.classList.add('wrong'); }
+  quiz.querySelector('.fb').classList.add('show');
+}
+
+// copy code
+function copyCode(btn){
+  var code = btn.closest('.code-block').querySelector('pre').innerText;
+  navigator.clipboard.writeText(code).then(function(){
+    var old = btn.innerText; btn.innerText = 'Copied!';
+    setTimeout(function(){ btn.innerText = old; }, 1500);
+  });
+}
+
+// scroll-spy for TOC + spine
+var spySections = document.querySelectorAll('[id]');
+var tocLinks = document.querySelectorAll('#toc-drawer a[href^="#"]');
+var spineTabs = document.querySelectorAll('#spine .spine-tab');
+var moduleIds = ['module-1','module-2','module-3','module-4'];
+window.addEventListener('scroll', function(){
+  var current = '';
+  spySections.forEach(function(sec){
+    var rect = sec.getBoundingClientRect();
+    if(rect.top < 150) current = sec.id;
+  });
+  tocLinks.forEach(function(link){
+    link.classList.remove('current');
+    if(link.getAttribute('href') === '#' + current) link.classList.add('current');
+  });
+  // determine which module we're currently in for the spine rail
+  var currentModule = 'module-1';
+  moduleIds.forEach(function(mid){
+    var el = document.getElementById(mid);
+    if(el && el.getBoundingClientRect().top < 150) currentModule = mid;
+  });
+  spineTabs.forEach(function(tab){
+    tab.classList.remove('active');
+    if(tab.getAttribute('href') === '#' + currentModule) tab.classList.add('active');
+  });
+});
+</script>
+
+  <script src="../../js/storage.js" defer></script>
+  <script src="../../js/reader.js" defer></script>
+</body>
+</html>

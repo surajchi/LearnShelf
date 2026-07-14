@@ -1,0 +1,2262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course III · Connect and Protect — Networks and Network Security — Complete Course (Modules 1–4)</title>
+<style>
+/* ============================================================
+   DESIGN SYSTEM — "CASE FILE" — SOC Reference Book
+   Palette: ink #0B0F14, paper #F7F5F0, panel #16202B, signal teal #2DD4BF,
+            warning amber #F59E0B, critical red #EF4444, wire blue #5B8DEF
+   Type: display = geometric sans, body = humanist serif, mono = code/log
+   ============================================================ */
+:root{
+  --ink:#0B0F14;
+  --paper:#F7F5F0;
+  --paper-dim:#EDE9E0;
+  --panel:#16202B;
+  --panel-2:#1E2B38;
+  --line:#D8D2C4;
+  --line-dark:#2A3A48;
+  --signal:#0F9E93;
+  --signal-bright:#2DD4BF;
+  --warn:#B4700A;
+  --warn-bright:#F59E0B;
+  --crit:#C4342A;
+  --crit-bright:#EF4444;
+  --wire:#3457B2;
+  --wire-bright:#5B8DEF;
+  --ink-soft:#3A4650;
+  --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
+  --sans: -apple-system, 'Segoe UI', 'Inter', Avenir, Helvetica, Arial, sans-serif;
+  --mono: 'SF Mono', 'JetBrains Mono', Consolas, 'Courier New', monospace;
+  --maxw: 780px;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:17px;
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+
+::selection{background:var(--signal-bright); color:var(--ink);}
+
+/* ---------- progress bar (signal-strength style) ---------- */
+#progress-track{
+  position:fixed; top:0; left:0; right:0; height:4px; z-index:500;
+  background:var(--paper-dim);
+  border-bottom:1px solid var(--line);
+}
+#progress-fill{
+  height:100%; width:0%;
+  background:repeating-linear-gradient(90deg, var(--signal) 0 6px, var(--signal-bright) 6px 12px);
+  transition:width .1s linear;
+}
+
+/* ---------- spine rail (left nav) ---------- */
+#spine{
+  position:fixed; top:0; left:0; bottom:0; width:64px; z-index:400;
+  background:var(--ink);
+  border-right:1px solid var(--line-dark);
+  display:flex; flex-direction:column; align-items:center;
+  padding-top:24px; gap:4px;
+  font-family:var(--mono);
+}
+#spine .spine-mark{
+  writing-mode:vertical-rl; text-orientation:mixed;
+  color:var(--signal-bright); font-size:11px; letter-spacing:.15em;
+  margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid var(--line-dark);
+  text-transform:uppercase;
+}
+#spine .spine-tab{
+  width:40px; height:40px; border-radius:3px;
+  display:flex; align-items:center; justify-content:center;
+  color:#6B7A85; font-size:13px; font-weight:700;
+  border:1px solid transparent; cursor:pointer; text-decoration:none;
+  transition:all .15s ease;
+}
+#spine .spine-tab:hover{border-color:var(--line-dark); color:var(--paper);}
+#spine .spine-tab.active{background:var(--panel-2); color:var(--signal-bright); border-color:var(--signal);}
+#toc-toggle{
+  margin-top:auto; margin-bottom:20px; width:40px; height:40px;
+  border-radius:3px; border:1px solid var(--line-dark); background:none;
+  color:#6B7A85; cursor:pointer; font-size:16px;
+}
+#toc-toggle:hover{color:var(--signal-bright); border-color:var(--signal);}
+
+@media (max-width: 860px){
+  #spine{width:44px; padding-top:16px;}
+  #spine .spine-mark{display:none;}
+  #spine .spine-tab{width:30px; height:30px; font-size:11px;}
+}
+
+/* ---------- TOC drawer ---------- */
+#toc-drawer{
+  position:fixed; top:0; left:-380px; bottom:0; width:340px; z-index:450;
+  background:var(--panel); color:var(--paper);
+  padding:32px 28px; overflow-y:auto;
+  transition:left .25s ease;
+  box-shadow:8px 0 30px rgba(0,0,0,.35);
+  font-family:var(--sans);
+}
+#toc-drawer.open{left:64px;}
+@media (max-width:860px){ #toc-drawer.open{left:44px;} }
+#toc-drawer h3{
+  font-family:var(--mono); text-transform:uppercase; letter-spacing:.12em;
+  font-size:12px; color:var(--signal-bright); margin:0 0 18px;
+  border-bottom:1px solid var(--line-dark); padding-bottom:12px;
+}
+#toc-drawer .toc-course{font-size:13px; font-weight:700; margin:18px 0 6px; color:#9FB1BE;}
+#toc-drawer ol{list-style:none; margin:0 0 8px; padding:0;}
+#toc-drawer li a{
+  display:block; padding:7px 8px; border-radius:4px; color:#C9D3DA;
+  text-decoration:none; font-size:13.5px; line-height:1.4;
+  border-left:2px solid transparent;
+}
+#toc-drawer li a:hover{background:var(--panel-2); border-left-color:var(--signal-bright); color:#fff;}
+#toc-drawer li a.current{border-left-color:var(--signal-bright); color:var(--signal-bright); background:var(--panel-2);}
+#toc-close{
+  position:absolute; top:28px; right:24px; background:none; border:none;
+  color:#9FB1BE; font-size:20px; cursor:pointer;
+}
+#scrim{position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:440; display:none;}
+#scrim.show{display:block;}
+
+/* ---------- layout ---------- */
+main{margin-left:64px; padding:0 24px 120px;}
+@media (max-width:860px){ main{margin-left:44px; padding:0 16px 100px;} }
+.page{max-width:var(--maxw); margin:0 auto; padding-top:56px;}
+
+/* ---------- cover ---------- */
+.cover{
+  min-height:92vh; display:flex; flex-direction:column; justify-content:center;
+  border-bottom:3px solid var(--ink); padding-bottom:48px; margin-bottom:56px;
+}
+.cover-eyebrow{
+  font-family:var(--mono); font-size:12.5px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--signal); margin-bottom:18px; display:flex; align-items:center; gap:10px;
+}
+.cover-eyebrow::before{content:"";width:28px;height:2px;background:var(--signal-bright);display:inline-block;}
+.cover h1{
+  font-family:var(--sans); font-size:clamp(2.4rem, 6vw, 4rem); font-weight:800;
+  line-height:1.05; margin:0 0 14px; letter-spacing:-.02em; color:var(--ink);
+}
+.cover .subtitle{
+  font-family:var(--serif); font-style:italic; font-size:1.35rem; color:var(--ink-soft);
+  margin:0 0 36px; max-width:640px;
+}
+.cover-svg-wrap{margin:8px 0 40px;}
+.cover-meta{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:0;
+  border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+}
+.cover-meta div{padding:16px 18px; border-right:1px solid var(--line);}
+.cover-meta div:last-child{border-right:none;}
+.cover-meta .k{font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.1em; color:#8A8272; margin-bottom:5px;}
+.cover-meta .v{font-family:var(--sans); font-size:14.5px; font-weight:700; color:var(--ink);}
+
+.cover-block{margin-top:36px;}
+.cover-block h4{
+  font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.12em;
+  color:var(--signal); margin:0 0 10px;
+}
+.cover-block ul{margin:0; padding-left:20px;}
+.cover-block li{margin-bottom:6px; font-size:15.5px;}
+
+/* ---------- headings ---------- */
+h2.module-head{
+  font-family:var(--sans); font-size:2.1rem; font-weight:800; letter-spacing:-.01em;
+  margin:64px 0 6px; padding-top:40px; border-top:3px solid var(--ink);
+  page-break-before:always;
+}
+h2.module-head .tag{
+  display:block; font-family:var(--mono); font-size:12px; letter-spacing:.15em;
+  text-transform:uppercase; color:var(--signal); font-weight:700; margin-bottom:10px;
+}
+h3{
+  font-family:var(--sans); font-size:1.42rem; font-weight:800; margin:42px 0 14px;
+  color:var(--ink); letter-spacing:-.005em;
+  display:flex; align-items:baseline; gap:10px;
+}
+h3::before{
+  content:attr(data-n); font-family:var(--mono); font-size:.65em; color:var(--signal);
+  font-weight:700;
+}
+h4{font-family:var(--sans); font-weight:700; font-size:1.08rem; margin:28px 0 10px; color:var(--ink);}
+p{margin:0 0 16px;}
+strong{color:var(--ink); font-weight:700;}
+a{color:var(--wire);}
+
+/* ---------- objectives box ---------- */
+.objectives{
+  background:var(--ink); color:var(--paper); border-radius:6px; padding:28px 30px;
+  margin:24px 0 40px; font-family:var(--sans);
+}
+.objectives h4{
+  font-family:var(--mono); color:var(--signal-bright); text-transform:uppercase;
+  letter-spacing:.12em; font-size:12px; margin:0 0 16px;
+}
+.objectives ul{margin:0; padding-left:0; list-style:none;}
+.objectives li{
+  position:relative; padding-left:26px; margin-bottom:10px; font-size:15px; color:#DCE3E8;
+}
+.objectives li::before{content:"▸"; position:absolute; left:0; color:var(--signal-bright);}
+
+/* ---------- callouts: "case-file ticket" signature element ---------- */
+.ticket{
+  border:1.5px solid var(--ink); border-radius:4px; margin:26px 0; position:relative;
+  background:#fff; overflow:hidden; font-family:var(--sans);
+}
+.ticket-head{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:9px 16px; font-family:var(--mono); font-size:11px; letter-spacing:.08em;
+  text-transform:uppercase; font-weight:700; color:#fff;
+}
+.ticket-id{opacity:.85; font-weight:400;}
+.ticket-body{padding:16px 18px; font-size:15px; line-height:1.6;}
+.ticket-body p:last-child{margin-bottom:0;}
+.ticket.def .ticket-head{background:var(--wire);}
+.ticket.important .ticket-head{background:var(--ink);}
+.ticket.remember .ticket-head{background:#6B4FBB;}
+.ticket.interview .ticket-head{background:var(--signal);}
+.ticket.warning .ticket-head{background:var(--warn);}
+.ticket.alert .ticket-head{background:var(--crit);}
+.ticket.industry .ticket-head{background:#8A5A2B;}
+.ticket.bestpractice .ticket-head{background:#1E7A4C;}
+.ticket.compliance .ticket-head{background:#3A5A78;}
+.ticket.examtip .ticket-head{background:#B0862B;}
+.ticket.soc .ticket-head{background:#0F5E6B;}
+.ticket.threatintel .ticket-head{background:#7A1F3D;}
+.ticket.blueteam .ticket-head{background:#1D4E89;}
+.ticket.redteam .ticket-head{background:#8C1C1C;}
+.ticket.quickrev .ticket-head{background:#4C6444;}
+.ticket.deepdive .ticket-head{background:#2C2C54;}
+.ticket.expert .ticket-head{background:#5C4033;}
+.ticket.incident .ticket-head{background:#7A1F3D;}
+.ticket .icon{margin-right:6px;}
+
+/* ---------- ELI5 ---------- */
+.eli5{
+  border-left:4px solid var(--warn-bright); background:#FFF8ED; border-radius:0 6px 6px 0;
+  padding:18px 22px; margin:22px 0; font-family:var(--serif);
+}
+.eli5 .eli5-tag{
+  font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.1em;
+  color:var(--warn); font-weight:700; margin-bottom:8px; display:block;
+}
+
+/* ---------- multi-level explanation ---------- */
+.levels{margin:26px 0; border:1px solid var(--line); border-radius:6px; overflow:hidden;}
+.level{padding:16px 20px; border-bottom:1px solid var(--line);}
+.level:last-child{border-bottom:none;}
+.level .lv-tag{
+  font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.1em;
+  font-weight:700; margin-bottom:6px; display:inline-block; padding:2px 8px; border-radius:3px;
+}
+.level.l1{background:#FFF8ED;} .level.l1 .lv-tag{background:var(--warn-bright); color:#3A2A00;}
+.level.l2{background:#F2F7FF;} .level.l2 .lv-tag{background:var(--wire-bright); color:#0A1A3A;}
+.level.l3{background:#EFFAF8;} .level.l3 .lv-tag{background:var(--signal-bright); color:#00302B;}
+.level.l4{background:#F7F0FA;} .level.l4 .lv-tag{background:#B27FE0; color:#2A0A3A;}
+.level p{margin:0; font-size:15px;}
+
+/* ---------- tables ---------- */
+.table-wrap{overflow-x:auto; margin:24px 0;}
+table{width:100%; border-collapse:collapse; font-family:var(--sans); font-size:14px;}
+caption{
+  caption-side:top; text-align:left; font-family:var(--mono); font-size:11px;
+  text-transform:uppercase; letter-spacing:.1em; color:var(--signal); margin-bottom:8px; font-weight:700;
+}
+th{
+  background:var(--ink); color:var(--paper); text-align:left; padding:10px 14px;
+  font-weight:700; font-size:12.5px; text-transform:uppercase; letter-spacing:.04em;
+}
+td{padding:10px 14px; border-bottom:1px solid var(--line); vertical-align:top;}
+tr:nth-child(even) td{background:var(--paper-dim);}
+
+/* ---------- code blocks ---------- */
+.code-block{margin:22px 0; border-radius:6px; overflow:hidden; border:1px solid var(--line-dark);}
+.code-head{
+  background:var(--panel); color:#9FB1BE; font-family:var(--mono); font-size:11.5px;
+  padding:8px 14px; display:flex; justify-content:space-between; align-items:center;
+  border-bottom:1px solid var(--line-dark);
+}
+.code-head .lang{color:var(--signal-bright); text-transform:uppercase; letter-spacing:.08em;}
+.copy-btn{
+  background:var(--panel-2); border:1px solid var(--line-dark); color:#C9D3DA;
+  font-family:var(--mono); font-size:11px; padding:3px 10px; border-radius:3px; cursor:pointer;
+}
+.copy-btn:hover{border-color:var(--signal-bright); color:var(--signal-bright);}
+pre{
+  margin:0; background:var(--ink); color:#D9E4EA; padding:16px 18px; overflow-x:auto;
+  font-family:var(--mono); font-size:13.5px; line-height:1.6;
+}
+pre code{counter-reset:line;}
+.code-note{
+  background:var(--paper-dim); border-top:1px solid var(--line); padding:10px 16px;
+  font-family:var(--sans); font-size:13px; color:var(--ink-soft);
+}
+
+/* ---------- svg figure ---------- */
+figure{margin:28px 0; text-align:center;}
+figure svg{max-width:100%; height:auto;}
+figcaption{
+  font-family:var(--mono); font-size:11.5px; color:var(--ink-soft); margin-top:10px;
+  text-transform:uppercase; letter-spacing:.06em;
+}
+
+/* ---------- flashcards ---------- */
+.flash-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin:24px 0;}
+.flash{
+  border:1px solid var(--line); border-radius:6px; padding:16px; cursor:pointer;
+  background:#fff; min-height:96px; position:relative; font-family:var(--sans);
+  transition:box-shadow .15s;
+}
+.flash:hover{box-shadow:0 4px 14px rgba(0,0,0,.08);}
+.flash .front{font-weight:700; font-size:14.5px;}
+.flash .back{
+  display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);
+  font-family:var(--serif); font-size:14px; color:var(--ink-soft);
+}
+.flash.flipped .back{display:block;}
+.flash .hint{
+  position:absolute; top:12px; right:12px; font-family:var(--mono); font-size:9.5px;
+  color:#B0A996; text-transform:uppercase;
+}
+
+/* ---------- accordion ---------- */
+details.acc{border:1px solid var(--line); border-radius:6px; margin:12px 0; overflow:hidden;}
+details.acc summary{
+  padding:13px 18px; cursor:pointer; font-family:var(--sans); font-weight:700; font-size:14.5px;
+  background:var(--paper-dim); list-style:none; display:flex; justify-content:space-between;
+}
+details.acc summary::-webkit-details-marker{display:none;}
+details.acc summary::after{content:"+"; color:var(--signal); font-size:18px;}
+details.acc[open] summary::after{content:"–";}
+details.acc .acc-body{padding:16px 18px; font-size:15px;}
+
+/* ---------- MCQ / practice ---------- */
+.quiz{border:1px solid var(--line); border-radius:6px; padding:18px 20px; margin:16px 0; background:#fff;}
+.quiz .q{font-weight:700; font-family:var(--sans); margin-bottom:10px; font-size:14.5px;}
+.quiz .opt{
+  display:block; width:100%; text-align:left; padding:9px 12px; margin-bottom:6px;
+  border:1px solid var(--line); border-radius:4px; background:var(--paper); cursor:pointer;
+  font-family:var(--sans); font-size:14px;
+}
+.quiz .opt:hover{border-color:var(--wire);}
+.quiz .opt.correct{background:#E6F7EE; border-color:var(--signal); font-weight:700;}
+.quiz .opt.wrong{background:#FBEAEA; border-color:var(--crit);}
+.quiz .fb{margin-top:8px; font-size:13.5px; font-family:var(--sans); color:var(--ink-soft); display:none;}
+.quiz .fb.show{display:block;}
+
+/* ---------- summary / takeaway blocks ---------- */
+.summary-block{
+  background:var(--panel); color:var(--paper); border-radius:8px; padding:30px 32px; margin:36px 0;
+  font-family:var(--sans);
+}
+.summary-block h4{color:var(--signal-bright); font-family:var(--mono); text-transform:uppercase; letter-spacing:.1em; font-size:12px;}
+.summary-block ul{padding-left:20px; margin:12px 0 0;}
+.summary-block li{margin-bottom:8px; font-size:14.5px; color:#DCE3E8;}
+
+/* footer nav */
+.module-nav{
+  display:flex; justify-content:space-between; margin-top:60px; padding-top:24px;
+  border-top:1px solid var(--line); font-family:var(--sans); font-size:13.5px;
+}
+.module-nav a{text-decoration:none; color:var(--ink); font-weight:700;}
+.endmark{
+  text-align:center; font-family:var(--mono); font-size:11px; color:#B0A996;
+  letter-spacing:.15em; text-transform:uppercase; margin:80px 0 20px;
+}
+
+/* print */
+@media print{
+  #spine, #toc-drawer, #progress-track, #scrim, .copy-btn{display:none !important;}
+  main{margin-left:0;}
+  body{font-size:12pt;}
+  .ticket, .levels, .objectives, .summary-block{break-inside:avoid;}
+  h2.module-head{page-break-before:always;}
+  a{color:inherit; text-decoration:none;}
+}
+
+/* accessibility */
+:focus-visible{outline:3px solid var(--signal); outline-offset:2px;}
+.skip-link{
+  position:absolute; left:-999px; top:0; background:var(--ink); color:#fff; padding:10px 16px; z-index:900;
+}
+.skip-link:focus{left:70px; top:8px;}
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main-content">Skip to content</a>
+
+<div id="progress-track"><div id="progress-fill"></div></div>
+
+<nav id="spine" aria-label="Course navigation">
+  <div class="spine-mark">COURSE III</div>
+  <a class="spine-tab" href="#module-1" title="Module 1 · Network Architecture &amp; Communication">M1</a>
+  <a class="spine-tab" href="#module-2" title="Module 2 · Protocols, VPNs &amp; Firewalls">M2</a>
+  <a class="spine-tab" href="#module-3" title="Module 3 · Network Attacks">M3</a>
+  <a class="spine-tab" href="#module-4" title="Module 4 · Security Hardening">M4</a>
+  <button id="toc-toggle" aria-label="Open table of contents" aria-expanded="false">☰</button>
+</nav>
+
+<div id="scrim"></div>
+<aside id="toc-drawer" aria-label="Table of contents">
+  <button id="toc-close" aria-label="Close table of contents">✕</button>
+  <h3>Course III — Connect and Protect</h3>
+  <div class="toc-course">Module 1 · Network Architecture &amp; Communication</div>
+  <ol>
+    <li><a href="#module-1" class="current">Cover &amp; Module 1 start</a></li>
+    <li><a href="#sec-1">1.1 What Is a Network? LAN vs. WAN</a></li>
+    <li><a href="#sec-2">1.2 Network Devices: Hub, Switch, Router, Modem</a></li>
+    <li><a href="#sec-3">1.3 Cloud Networks &amp; SDN</a></li>
+    <li><a href="#sec-4">1.4 Data Packets &amp; Network Performance</a></li>
+    <li><a href="#sec-5">1.5 The TCP/IP Model — Four Layers</a></li>
+    <li><a href="#sec-6">1.6 The OSI Model — Seven Layers</a></li>
+    <li><a href="#sec-7">1.7 IP Addresses, MAC Addresses &amp; the IPv4 Packet</a></li>
+    <li><a href="#labs">Labs &amp; Exercises</a></li>
+    <li><a href="#interview">Interview Prep</a></li>
+    <li><a href="#practice">Practice Section</a></li>
+    <li><a href="#revision">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Module 2 · Protocols, VPNs &amp; Firewalls</div>
+  <ol>
+    <li><a href="#module-2">Module 2 start</a></li>
+    <li><a href="#sec-2-1">2.1 Network Protocols: 3 Categories</a></li>
+    <li><a href="#sec-2-2">2.2 NAT, DHCP, ARP &amp; Mail Protocols</a></li>
+    <li><a href="#sec-2-3">2.3 Wireless Security: WEP → WPA3</a></li>
+    <li><a href="#sec-2-4">2.4 Firewall Types &amp; NGFW</a></li>
+    <li><a href="#sec-2-5">2.5 Virtual Private Networks (VPN)</a></li>
+    <li><a href="#sec-2-6">2.6 Security Zones &amp; Network Segmentation</a></li>
+    <li><a href="#sec-2-7">2.7 Subnetting &amp; CIDR</a></li>
+    <li><a href="#sec-2-8">2.8 Proxy Servers</a></li>
+    <li><a href="#labs-2">Labs &amp; Exercises</a></li>
+    <li><a href="#interview-2">Interview Prep</a></li>
+    <li><a href="#practice-2">Practice Section</a></li>
+    <li><a href="#revision-2">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary-2">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Module 3 · Network Attacks</div>
+  <ol>
+    <li><a href="#module-3">Module 3 start</a></li>
+    <li><a href="#sec-3-1">3.1 Why Networks Get Attacked</a></li>
+    <li><a href="#sec-3-2">3.2 Denial of Service &amp; Distributed DoS</a></li>
+    <li><a href="#sec-3-3">3.3 Reading tcpdump Logs</a></li>
+    <li><a href="#sec-3-4">3.4 Real-World DDoS: The 2016 DNS Attack</a></li>
+    <li><a href="#sec-3-5">3.5 Packet Sniffing: Passive vs. Active</a></li>
+    <li><a href="#sec-3-6">3.6 IP Spoofing: On-Path, Replay, Smurf</a></li>
+    <li><a href="#sec-3-7">3.7 Backdoor Attacks</a></li>
+    <li><a href="#labs-3">Labs &amp; Exercises</a></li>
+    <li><a href="#interview-3">Interview Prep</a></li>
+    <li><a href="#practice-3">Practice Section</a></li>
+    <li><a href="#revision-3">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary-3">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Module 4 · Security Hardening</div>
+  <ol>
+    <li><a href="#module-4">Module 4 start</a></li>
+    <li><a href="#sec-4-1">4.1 What Is Security Hardening?</a></li>
+    <li><a href="#sec-4-2">4.2 OS Hardening &amp; Brute Force Defense</a></li>
+    <li><a href="#sec-4-3">4.3 Network Hardening Tools</a></li>
+    <li><a href="#sec-4-4">4.4 Firewall vs. IDS vs. IPS vs. SIEM</a></li>
+    <li><a href="#sec-4-5">4.5 Cloud Hardening &amp; Shared Responsibility</a></li>
+    <li><a href="#sec-4-6">4.6 Cryptography &amp; Key Management in the Cloud</a></li>
+    <li><a href="#labs-4">Labs &amp; Exercises</a></li>
+    <li><a href="#interview-4">Interview Prep</a></li>
+    <li><a href="#practice-4">Practice Section</a></li>
+    <li><a href="#revision-4">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary-4">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Course Reference</div>
+  <ol>
+    <li><a href="#course-summary">Course Summary</a></li>
+    <li><a href="#course-glossary">Full Glossary (Weeks 1–4)</a></li>
+    <li><a href="#course-cheatsheet">Master Cheat Sheet</a></li>
+  </ol>
+</aside>
+
+<main id="main-content">
+<div class="page" id="course-page">
+
+<!-- ================= COVER ================= -->
+<section class="cover">
+  <div class="cover-eyebrow">Google Cybersecurity Certificate · Premium Edition</div>
+  <h1>Course III<br>Connect and Protect: Networks and Network Security</h1>
+  <p class="subtitle">Every attack travels through a network before it reaches anything worth stealing. This is the book that teaches you to read that journey, packet by packet.</p>
+
+  <div class="cover-svg-wrap">
+    <svg viewBox="0 0 700 220" width="100%" role="img" aria-label="Illustration of a network topology diagram with a router at the center connecting to a firewall, server, and multiple client devices, with a lock icon representing security">
+      <rect x="0" y="0" width="700" height="220" fill="#F7F5F0"/>
+      <!-- central router -->
+      <rect x="315" y="85" width="70" height="50" rx="6" fill="#0B0F14"/>
+      <text x="350" y="115" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#fff">Router</text>
+      <!-- connections -->
+      <line x1="350" y1="85" x2="350" y2="40" stroke="#8A8272" stroke-width="2"/>
+      <line x1="315" y1="110" x2="180" y2="70" stroke="#8A8272" stroke-width="2"/>
+      <line x1="315" y1="120" x2="150" y2="160" stroke="#8A8272" stroke-width="2"/>
+      <line x1="385" y1="110" x2="520" y2="70" stroke="#8A8272" stroke-width="2"/>
+      <line x1="385" y1="120" x2="550" y2="160" stroke="#8A8272" stroke-width="2"/>
+      <!-- firewall (top) -->
+      <rect x="322" y="18" width="56" height="30" rx="4" fill="#0F9E93"/>
+      <text x="350" y="38" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="700" fill="#fff">Firewall</text>
+      <!-- server -->
+      <rect x="140" y="45" width="80" height="34" rx="4" fill="#3457B2"/>
+      <text x="180" y="66" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="700" fill="#fff">Server</text>
+      <!-- clients -->
+      <circle cx="150" cy="170" r="18" fill="#B4700A"/>
+      <circle cx="550" cy="170" r="18" fill="#B4700A"/>
+      <circle cx="520" cy="55" r="18" fill="#B4700A"/>
+      <text x="350" y="200" text-anchor="middle" font-family="monospace" font-size="11" fill="#3A4650">Every device speaks the same language: protocols</text>
+    </svg>
+  </div>
+
+  <div class="cover-meta">
+    <div><div class="k">Reading Time</div><div class="v">~4.5 hrs / module</div></div>
+    <div><div class="k">Difficulty</div><div class="v">Intermediate</div></div>
+    <div><div class="k">Prerequisites</div><div class="v">Courses I–II</div></div>
+    <div><div class="k">Modules</div><div class="v">4 (Weeks 1–4)</div></div>
+  </div>
+
+  <div class="cover-block">
+    <h4>Learning Objectives — Whole Course</h4>
+    <ul>
+      <li>Describe network architecture: LANs, WANs, cloud networks, and the devices that connect them.</li>
+      <li>Explain the TCP/IP and OSI models layer by layer, and map real protocols onto each.</li>
+      <li>Compare firewalls, VPNs, proxy servers, and security zones as complementary network defenses.</li>
+      <li>Identify and defend against network-layer attacks: DoS/DDoS, packet sniffing, IP spoofing, on-path attacks.</li>
+      <li>Apply security hardening practices across OS, network, and cloud layers.</li>
+      <li>Read raw tcpdump output and identify attack signatures within it.</li>
+    </ul>
+  </div>
+
+  <div class="cover-block">
+    <h4>Skills Gained</h4>
+    <ul>
+      <li>OSI/TCP-IP model fluency — mapping any protocol to its correct layer on demand</li>
+      <li>Firewall/VPN/proxy configuration literacy</li>
+      <li>Named-attack recognition: SYN flood, smurf attack, ping of death, KRACK</li>
+      <li>Security hardening checklist across OS, network, and cloud environments</li>
+      <li>Reading and interpreting tcpdump packet capture output</li>
+    </ul>
+  </div>
+
+  <div class="cover-block">
+    <h4>Career Relevance</h4>
+    <p>Networking fundamentals are the single most commonly tested technical knowledge area in SOC Analyst interviews — expect to be asked to explain the OSI model, name a protocol's port number, or walk through how a firewall decides to block traffic. This course is also the most direct overlap with CompTIA Network+ and the networking portion of Security+.</p>
+  </div>
+</section>
+
+<!-- ================= PREFACE ================= -->
+<h2 class="module-head"><span class="tag">Preface</span>How to Use This Course</h2>
+
+<p>Courses I and II gave you the vocabulary and the method. Course III gives you the terrain: the actual paths data takes across a network, and every point along that path where an attacker — or a defender — can intervene. Nothing here is abstract; every protocol, every port number, and every device in this course is something you'll type, configure, or investigate in a real job.</p>
+
+<div class="ticket deepdive">
+  <div class="ticket-head"><span><span class="icon">🧭</span>Deep Dive</span><span class="ticket-id">DD-200</span></div>
+  <div class="ticket-body">
+    <p><strong>Recommended study strategy:</strong> Module 1's OSI and TCP/IP models are the backbone of this entire course — and arguably the entire networking side of the certificate. Don't just memorize layer names; practice mapping specific real protocols (DNS, HTTP, SSH) onto specific layers until it's automatic.</p>
+    <p><strong>Lab recommendation:</strong> If you haven't already, set up a simple lab now: a virtual machine running Linux with Wireshark or tcpdump installed. Module 3's attack-signature exercises are dramatically more useful if you can capture and inspect real traffic yourself, even on a home network.</p>
+    <p><strong>Interview preparation:</strong> Memorize common port numbers (80, 443, 22, 25, 53) and the OSI's seven layers in order — these are near-universal technical screening questions for network-adjacent security roles.</p>
+    <p><strong>Certification preparation:</strong> This course maps very closely onto CompTIA Network+ objectives and Security+ Domain 3 (Security Architecture), particularly around network segmentation, firewalls, and secure protocols.</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODULE 1 · WEEK 1 — NETWORK ARCHITECTURE & COMMUNICATION
+     ============================================================ -->
+<h2 class="module-head" id="module-1"><span class="tag">Module 1 · Week 1</span>Network Architecture &amp; Communication</h2>
+
+<div class="objectives" id="objectives">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Define a network and distinguish LAN from WAN with real examples.</li>
+    <li>Identify the function of core network devices: hub, switch, router, modem, wireless access point.</li>
+    <li>Explain cloud networks, CSPs, and the SaaS/PaaS/IaaS service models.</li>
+    <li>Describe a data packet's structure and how bandwidth and speed relate to security monitoring.</li>
+    <li>Recite the TCP/IP model's four layers and the OSI model's seven layers, and map real protocols to each.</li>
+    <li>Distinguish public from private IP addresses, and IPv4 from IPv6.</li>
+    <li>Read the fields of an IPv4 packet header and explain their security relevance.</li>
+  </ul>
+</div>
+
+<h3 id="sec-1" data-n="1.1">What Is a Network? LAN vs. WAN</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-201</span></div>
+  <div class="ticket-body">
+    <p><strong>Network:</strong> A group of connected devices. At home, this might be a laptop, phone, and smart devices; in an office, workstations, printers, and servers.</p>
+    <p><strong>Local Area Network (LAN):</strong> Spans a small area like an office building, school, or home.</p>
+    <p><strong>Wide Area Network (WAN):</strong> Spans a large geographical area like a city, state, or country — the internet is one enormous WAN.</p>
+  </div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The School</span>
+  <p>A <strong>LAN</strong> is like all the classrooms inside one school building talking to each other over the school's internal intercom. A <strong>WAN</strong> is like that same school calling a school in another country over the phone — same idea, much bigger distance.</p>
+</div>
+
+<p>Devices find each other using unique addresses: <strong>IP addresses</strong> and <strong>MAC addresses</strong>. Three everyday skills matter most for a security analyst working with networks: the <strong>command line</strong> (interacting with the OS at every level), <strong>log parsing</strong> (debugging what's actually happening), and <strong>network traffic analysis</strong> (diagnosing slowness, misrouted traffic, or vulnerabilities).</p>
+
+<h3 id="sec-2" data-n="1.2">Network Devices: Hub, Switch, Router, Modem</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Core Physical Network Devices</caption>
+<thead><tr><th>Device</th><th>Function</th><th>Security Relevance</th></tr></thead>
+<tbody>
+<tr><td><strong>Hub</strong></td><td>Broadcasts information to every device on the network — like a radio tower broadcasting to any tuned-in radio</td><td>Vulnerable to eavesdropping since all traffic reaches all ports; rarely used on modern networks</td></tr>
+<tr><td><strong>Switch</strong></td><td>Sends/receives data between specific devices only, using a MAC address table matching addresses to ports</td><td>More secure than a hub — only the intended destination receives the data</td></tr>
+<tr><td><strong>Router</strong></td><td>Connects multiple networks together, reading destination addresses to forward data appropriately</td><td>Often includes a firewall feature that can block malicious traffic before it reaches the LAN</td></tr>
+<tr><td><strong>Modem</strong></td><td>Connects a router to the internet via an ISP, translating internet transmissions into digital signals</td><td>The boundary point where external internet traffic first enters the network</td></tr>
+<tr><td><strong>Wireless Access Point</strong></td><td>Sends/receives digital signals over radio waves, creating a Wi-Fi network</td><td>An additional entry point that must be secured with modern Wi-Fi protocols (Module 2)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-201</span></div>
+  <div class="ticket-body"><p>Many physical network functions can now be performed by <strong>virtualization tools</strong> — software that carries out the same operations a hub, switch, router, or modem would, offered by cloud service providers. These provide cost savings and scalability without owning physical hardware.</p></div>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-202</span></div>
+  <div class="ticket-body"><p><strong>Client-server model:</strong> Devices called clients send requests to a server for information and services, and the server performs the requests. Common examples: DNS servers (domain name lookups), file servers (storing/retrieving files), and mail servers (organizing company email).</p></div>
+</div>
+
+<figure>
+<svg viewBox="0 0 640 220" width="100%" role="img" aria-label="Network topology diagram showing a router connecting to a firewall, a switch, and multiple client devices, with a modem connecting to the internet">
+  <rect x="0" y="0" width="640" height="220" fill="#F7F5F0"/>
+  <text x="320" y="24" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#0B0F14">Simple Network Topology</text>
+  <g font-family="sans-serif" font-size="11" font-weight="700" fill="#fff">
+    <rect x="270" y="40" width="100" height="36" rx="5" fill="#0B0F14"/><text x="320" y="63" text-anchor="middle">Internet</text>
+    <rect x="270" y="95" width="100" height="36" rx="5" fill="#3457B2"/><text x="320" y="118" text-anchor="middle">Modem</text>
+    <rect x="270" y="150" width="100" height="36" rx="5" fill="#0F9E93"/><text x="320" y="173" text-anchor="middle">Router / FW</text>
+    <rect x="60" y="150" width="90" height="36" rx="5" fill="#B4700A"/><text x="105" y="173" text-anchor="middle">Switch</text>
+    <rect x="490" y="150" width="90" height="36" rx="5" fill="#6B4FBB"/><text x="535" y="173" text-anchor="middle">Server</text>
+  </g>
+  <line x1="320" y1="76" x2="320" y2="95" stroke="#0B0F14" stroke-width="2"/>
+  <line x1="320" y1="131" x2="320" y2="150" stroke="#0B0F14" stroke-width="2"/>
+  <line x1="270" y1="168" x2="150" y2="168" stroke="#0B0F14" stroke-width="2"/>
+  <line x1="370" y1="168" x2="490" y2="168" stroke="#0B0F14" stroke-width="2"/>
+  <circle cx="60" cy="130" r="10" fill="#8A8272"/><circle cx="90" cy="130" r="10" fill="#8A8272"/><circle cx="120" cy="130" r="10" fill="#8A8272"/>
+  <line x1="65" y1="140" x2="80" y2="150" stroke="#8A8272" stroke-width="1.5"/>
+  <line x1="105" y1="140" x2="105" y2="150" stroke="#8A8272" stroke-width="1.5"/>
+</svg>
+<figcaption>Figure 1.1 — Router, modem, switch, and server in a simple topology</figcaption>
+</figure>
+
+<h3 id="sec-3" data-n="1.3">Cloud Networks &amp; Software-Defined Networking</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-203</span></div>
+  <div class="ticket-body">
+    <p><strong>Cloud computing:</strong> Using remote servers, applications, and network services hosted on the internet instead of on local physical devices.</p>
+    <p><strong>Cloud network:</strong> A collection of servers/computers storing resources and data in a remote data center, accessed via the internet.</p>
+    <p><strong>On-premise networks:</strong> Traditional networks where all devices for network operations are kept at a physical location the company owns.</p>
+    <p><strong>Cloud service provider (CSP):</strong> A company offering cloud computing services, owning large data centers customers pay to use via API or web console.</p>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>The Three CSP Service Models</caption>
+<thead><tr><th>Model</th><th>What It Provides</th><th>Example Use</th></tr></thead>
+<tbody>
+<tr><td><strong>SaaS</strong> (Software as a Service)</td><td>Software suites operated by the CSP, used remotely without hosting the software yourself</td><td>Web-based email, CRM tools</td></tr>
+<tr><td><strong>IaaS</strong> (Infrastructure as a Service)</td><td>Virtual computer components — containers and storage — configured via API/console</td><td>Running existing applications on rented virtual servers</td></tr>
+<tr><td><strong>PaaS</strong> (Platform as a Service)</td><td>Tools for developers to design custom applications</td><td>Building a company-specific application in the cloud</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-204</span></div>
+  <div class="ticket-body">
+    <p><strong>Hybrid cloud environment:</strong> Using a CSP's services in addition to on-premise computers, networks, and storage.</p>
+    <p><strong>Multi-cloud environment:</strong> Using more than one CSP.</p>
+    <p><strong>Software-defined networks (SDNs):</strong> Virtual network devices and services — virtual switches, routers, and firewalls — hosted on CSP servers rather than physical hardware.</p>
+  </div>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-201</span></div>
+  <div class="ticket-body"><p>The three reasons cloud computing attracts businesses: <strong>reliability</strong> (consistent access with minimal interruption), <strong>cost</strong> (avoiding upfront infrastructure spend), and <strong>scalability</strong> (paying only for what's needed, adjustable through an API or web console far faster than buying physical hardware).</p></div>
+</div>
+
+<h3 id="sec-4" data-n="1.4">Data Packets &amp; Network Performance</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-205</span></div>
+  <div class="ticket-body"><p><strong>Data packet:</strong> A basic unit of information traveling from one device to another across a network, containing information about its destination, origin, and content.</p></div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Postal Service</span>
+  <p>A data packet is like a physical letter. The <strong>header</strong> is the envelope — it has the destination address (IP/MAC address of the receiving device). The <strong>protocol number</strong> tells the receiving device what to do with the letter's contents. The <strong>body</strong> is the actual letter — the message. The <strong>footer</strong> is like a signature, signaling the letter is complete.</p>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Network Performance Metrics</caption>
+<thead><tr><th>Metric</th><th>Definition</th><th>Security Relevance</th></tr></thead>
+<tbody>
+<tr><td><strong>Bandwidth</strong></td><td>Amount of data a device receives per second (data quantity ÷ time in seconds)</td><td>Irregular bandwidth can indicate a DDoS attack in progress</td></tr>
+<tr><td><strong>Speed</strong></td><td>Rate at which data packets are received or downloaded</td><td>Sudden speed changes are worth investigating for the same reason</td></tr>
+<tr><td><strong>Packet sniffing</strong></td><td>Capturing and inspecting data packets across the network</td><td>Legitimate for troubleshooting; malicious when used to steal data (Module 3)</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-5" data-n="1.5">The TCP/IP Model — Four Layers</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-206</span></div>
+  <div class="ticket-body">
+    <p><strong>TCP/IP model:</strong> A framework used to visualize how data is organized and transmitted across a network, helping security professionals monitor and secure against risks.</p>
+    <p><strong>Transmission Control Protocol (TCP):</strong> Allows two devices to form a connection and stream data, ensuring packets reach their destination.</p>
+    <p><strong>Internet Protocol (IP):</strong> A set of standards for routing and addressing data packets between devices.</p>
+  </div>
+</div>
+
+<figure>
+<svg viewBox="0 0 640 260" width="100%" role="img" aria-label="Diagram of the four layers of the TCP/IP model from bottom to top: Network Access, Internet, Transport, Application">
+  <rect x="0" y="0" width="640" height="260" fill="#F7F5F0"/>
+  <text x="320" y="24" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#0B0F14">TCP/IP Model — 4 Layers</text>
+  <g font-family="sans-serif" font-size="13" font-weight="700" fill="#fff">
+    <rect x="170" y="45" width="300" height="42" rx="5" fill="#6B4FBB"/><text x="320" y="70" text-anchor="middle">4. Application Layer</text>
+    <rect x="170" y="97" width="300" height="42" rx="5" fill="#B4700A"/><text x="320" y="122" text-anchor="middle">3. Transport Layer</text>
+    <rect x="170" y="149" width="300" height="42" rx="5" fill="#0F9E93"/><text x="320" y="174" text-anchor="middle">2. Internet Layer</text>
+    <rect x="170" y="201" width="300" height="42" rx="5" fill="#3457B2"/><text x="320" y="226" text-anchor="middle">1. Network Access Layer</text>
+  </g>
+  <text x="500" y="70" font-family="monospace" font-size="10" fill="#3A4650">HTTP, DNS, SSH</text>
+  <text x="500" y="122" font-family="monospace" font-size="10" fill="#3A4650">TCP, UDP</text>
+  <text x="500" y="174" font-family="monospace" font-size="10" fill="#3A4650">IP, ICMP</text>
+  <text x="500" y="226" font-family="monospace" font-size="10" fill="#3A4650">ARP, hardware</text>
+</svg>
+<figcaption>Figure 1.2 — The TCP/IP model, bottom to top</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<caption>TCP/IP Model — Layer Functions</caption>
+<thead><tr><th>Layer</th><th>Function</th><th>Key Protocols</th></tr></thead>
+<tbody>
+<tr><td><strong>1. Network Access Layer</strong></td><td>Creation of data packets and transmission across the network; hardware devices, cables, switches</td><td>ARP (maps IP to MAC addresses)</td></tr>
+<tr><td><strong>2. Internet Layer</strong></td><td>Attaches IP addresses to packets indicating sender/receiver location; determines whether data stays on LAN or goes to a remote network</td><td>IP, ICMP</td></tr>
+<tr><td><strong>3. Transport Layer</strong></td><td>Controls flow of traffic; permits/denies communication; error control</td><td>TCP, UDP</td></tr>
+<tr><td><strong>4. Application Layer</strong></td><td>Determines how packets interact with receiving devices — file transfers, email</td><td>HTTP, SMTP, SSH, FTP, DNS</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Application Layer Protocols &amp; Port Numbers</caption>
+<thead><tr><th>Protocol</th><th>Port</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><strong>HTTP</strong></td><td>80</td><td>Transferring web pages (unencrypted)</td></tr>
+<tr><td><strong>SMTP</strong></td><td>25</td><td>Sending email messages</td></tr>
+<tr><td><strong>SSH</strong></td><td>22</td><td>Secure remote access/management of servers</td></tr>
+<tr><td><strong>FTP</strong></td><td>20 (data), 21 (control)</td><td>Transferring files between computers</td></tr>
+<tr><td><strong>DNS</strong></td><td>53</td><td>Translating domain names to IP addresses</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket examtip">
+  <div class="ticket-head"><span><span class="icon">🎯</span>Exam Tip</span><span class="ticket-id">EXM-201</span></div>
+  <div class="ticket-body"><p>Port numbers are frequently tested in technical interviews. Memorize at minimum: 80 (HTTP), 443 (HTTPS), 22 (SSH), 25 (SMTP), 53 (DNS), 20/21 (FTP). These come up constantly in log analysis exercises throughout the rest of the certificate.</p></div>
+</div>
+
+<h3 id="sec-6" data-n="1.6">The OSI Model — Seven Layers</h3>
+
+<p>The OSI (Open Systems Interconnection) model is the more granular, seven-layer counterpart to TCP/IP's four. Both describe the same reality at different resolutions — TCP/IP condenses several OSI layers together.</p>
+
+<figure>
+<svg viewBox="0 0 640 340" width="100%" role="img" aria-label="Diagram of the seven layers of the OSI model from bottom to top: Physical, Data Link, Network, Transport, Session, Presentation, Application">
+  <rect x="0" y="0" width="640" height="340" fill="#F7F5F0"/>
+  <text x="320" y="22" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#0B0F14">OSI Model — 7 Layers</text>
+  <g font-family="sans-serif" font-size="12" font-weight="700" fill="#fff">
+    <rect x="170" y="35" width="300" height="34" rx="4" fill="#7A1F3D"/><text x="320" y="57" text-anchor="middle">7. Application</text>
+    <rect x="170" y="73" width="300" height="34" rx="4" fill="#6B4FBB"/><text x="320" y="95" text-anchor="middle">6. Presentation</text>
+    <rect x="170" y="111" width="300" height="34" rx="4" fill="#3457B2"/><text x="320" y="133" text-anchor="middle">5. Session</text>
+    <rect x="170" y="149" width="300" height="34" rx="4" fill="#0F9E93"/><text x="320" y="171" text-anchor="middle">4. Transport</text>
+    <rect x="170" y="187" width="300" height="34" rx="4" fill="#1E7A4C"/><text x="320" y="209" text-anchor="middle">3. Network</text>
+    <rect x="170" y="225" width="300" height="34" rx="4" fill="#B4700A"/><text x="320" y="247" text-anchor="middle">2. Data Link</text>
+    <rect x="170" y="263" width="300" height="34" rx="4" fill="#0B0F14"/><text x="320" y="285" text-anchor="middle">1. Physical</text>
+  </g>
+  <text x="500" y="57" font-family="monospace" font-size="9" fill="#3A4650">Browser, email client</text>
+  <text x="500" y="95" font-family="monospace" font-size="9" fill="#3A4650">Encryption, SSL</text>
+  <text x="500" y="133" font-family="monospace" font-size="9" fill="#3A4650">Session open/close</text>
+  <text x="500" y="171" font-family="monospace" font-size="9" fill="#3A4650">Segmentation, TCP/UDP</text>
+  <text x="500" y="209" font-family="monospace" font-size="9" fill="#3A4650">Routing, IP packets</text>
+  <text x="500" y="247" font-family="monospace" font-size="9" fill="#3A4650">Switches, MAC addresses</text>
+  <text x="500" y="285" font-family="monospace" font-size="9" fill="#3A4650">Cables, hubs, bits</text>
+</svg>
+<figcaption>Figure 1.3 — The OSI model, layer 7 down to layer 1</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<caption>OSI Model — All Seven Layers</caption>
+<thead><tr><th>Layer</th><th>Name</th><th>Function</th></tr></thead>
+<tbody>
+<tr><td>7</td><td><strong>Application</strong></td><td>Processes that directly involve the everyday user — browsers using HTTP/HTTPS, email clients using SMTP</td></tr>
+<tr><td>6</td><td><strong>Presentation</strong></td><td>Data translation and encryption — e.g., SSL encrypting data between web servers and browsers</td></tr>
+<tr><td>5</td><td><strong>Session</strong></td><td>Establishes, maintains, and terminates connections; handles authentication, reconnection, checkpoints</td></tr>
+<tr><td>4</td><td><strong>Transport</strong></td><td>Delivers data between devices; handles speed, flow, and segmentation (TCP, UDP)</td></tr>
+<tr><td>3</td><td><strong>Network</strong></td><td>Receives frames from the data link layer and delivers them to the intended destination via IP addressing</td></tr>
+<tr><td>2</td><td><strong>Data Link</strong></td><td>Organizes sending/receiving packets within a single network; home of switches and network interface cards</td></tr>
+<tr><td>1</td><td><strong>Physical</strong></td><td>The actual hardware — hubs, modems, cables, wiring; data becomes a stream of 0s and 1s here</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket remember">
+  <div class="ticket-head"><span><span class="icon">🧠</span>Remember</span><span class="ticket-id">REM-201</span></div>
+  <div class="ticket-body"><p>Classic mnemonic, top to bottom (7→1): <strong>"All People Seem To Need Data Processing"</strong> — Application, Presentation, Session, Transport, Network, Data Link, Physical.</p></div>
+</div>
+
+<h3 id="sec-7" data-n="1.7">IP Addresses, MAC Addresses &amp; the IPv4 Packet</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-207</span></div>
+  <div class="ticket-body">
+    <p><strong>IP address:</strong> A unique string of characters identifying a device's location on the internet.</p>
+    <p><strong>IPv4:</strong> Written as four 1–3 digit numbers separated by decimals (e.g., 192.168.1.100); allows up to ~4.3 billion addresses.</p>
+    <p><strong>IPv6:</strong> Made of eight hexadecimal groups (32 characters total); allows for 340 undecillion addresses, developed to solve IPv4 address exhaustion.</p>
+    <p><strong>Public IP address:</strong> Assigned by your ISP, connected to your geographic location; shared by all devices behind one router.</p>
+    <p><strong>Private IP address:</strong> Seen only by other devices on the same local network.</p>
+    <p><strong>MAC address:</strong> A unique alphanumeric identifier assigned to each physical device on a network, used by switches to direct packets via a MAC address table.</p>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>IPv4 vs. IPv6</caption>
+<thead><tr><th>Feature</th><th>IPv4</th><th>IPv6</th></tr></thead>
+<tbody>
+<tr><td>Format</td><td>Four decimal numbers, 0–255 (e.g., 198.51.100.0)</td><td>Eight hexadecimal groups (e.g., 2001:0db8:...)</td></tr>
+<tr><td>Address space</td><td>4 bytes, ~4.3 billion addresses</td><td>16 bytes, 340 undecillion addresses</td></tr>
+<tr><td>Header complexity</td><td>More fields (IHL, Identification, Flags)</td><td>Simpler; adds a Flow Label field</td></tr>
+<tr><td>Security notes</td><td>Prone to address exhaustion; private address collisions possible</td><td>More efficient routing; eliminates private address collisions</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-208</span></div>
+  <div class="ticket-body"><p><strong>Time to Live (TTL):</strong> A counter in the IPv4 header set by the source, decremented by one at each router hop; when it reaches zero, the router discards the packet and returns an ICMP "Time Exceeded" error. This prevents packets from being forwarded indefinitely.</p></div>
+</div>
+
+<div class="ticket redteam">
+  <div class="ticket-head"><span><span class="icon">🗡️</span>Threat Intelligence</span><span class="ticket-id">TI-201</span></div>
+  <div class="ticket-body"><p>Analyzing IPv4 header fields has direct security value: source/destination IP addresses reveal where traffic is coming from and going to, the protocol field reveals what's being used for the data portion, and the header checksum flags corruption. Security analysts inspect these fields routinely when investigating suspicious traffic captured via a packet sniffer.</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 1.1 — Layer Mapping Drill</summary>
+  <div class="acc-body">
+    <p>Map each protocol to its correct TCP/IP layer: (1) HTTP, (2) TCP, (3) ARP, (4) IP.</p>
+    <p><strong>Answer key:</strong> 1 — Application Layer, 2 — Transport Layer, 3 — Network Access Layer, 4 — Internet Layer.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 1.2 — Device Function Drill</summary>
+  <div class="acc-body">
+    <p>A computer on Network A needs to send a file to a tablet on Network B in a different city. List, in order, every device type the data passes through.</p>
+    <p><strong>Answer:</strong> Computer → Router (Network A) → Modem → Internet → Modem (Network B) → Router (Network B) → Tablet. A switch may also be involved locally on either end if multiple devices share that LAN.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Portfolio Project 1.1 — Draw Your Own Network Diagram</summary>
+  <div class="acc-body">
+    <p>Sketch a simple network diagram (by hand or digitally) showing a home network: modem, router, 2–3 client devices, and one wireless access point. Label each device's function in one sentence. Save this to your portfolio as your first networking artifact.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Beginner Question</span><span class="ticket-id">INT-201</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: What's the difference between the OSI model and the TCP/IP model?</strong></p>
+    <p><strong>Ideal answer:</strong> "Both are conceptual frameworks for understanding how data moves across a network. The OSI model has seven layers and is more granular; the TCP/IP model has four layers and is a simplified, practical version — several OSI layers combine into single TCP/IP layers. Network professionals use both to communicate about where in the stack a problem or attack occurred."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Scenario Question</span><span class="ticket-id">INT-202</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: You notice a sudden, sustained drop in network bandwidth across the organization. What are your first thoughts?</strong></p>
+    <p><strong>Ideal answer:</strong> "Irregular bandwidth can indicate either a legitimate infrastructure issue or an active attack, such as a DDoS attempt overwhelming available capacity. I'd check network logs and traffic patterns to distinguish between the two, correlate the timing against any recent changes, and escalate per the incident response playbook if attack indicators are present."</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which network device is more secure because it only sends data to its intended destination?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Hub</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Switch</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Modem</button>
+  <div class="fb">Correct — a switch uses a MAC address table to send data only to its intended destination, unlike a hub which broadcasts to everyone.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: The TCP/IP model has more layers than the OSI model.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — OSI has seven layers; TCP/IP has four, condensing several OSI layers together.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. Which port number is the default for unencrypted HTTP traffic?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">443</button>
+  <button class="opt" onclick="checkAnswer(this,true)">80</button>
+  <button class="opt" onclick="checkAnswer(this,false)">22</button>
+  <div class="fb">Correct — port 80 is standard for unencrypted HTTP; 443 is for HTTPS.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-201</span></div>
+  <div class="ticket-body"><p>Networks are LAN (small) or WAN (large). Core devices: hub (broadcasts), switch (targeted), router (connects networks), modem (connects to ISP). Cloud service models: SaaS, IaaS, PaaS. TCP/IP has 4 layers (Network Access, Internet, Transport, Application); OSI has 7 (Physical, Data Link, Network, Transport, Session, Presentation, Application). IPv4 (4 bytes) vs. IPv6 (16 bytes). Key ports: 80 (HTTP), 443 (HTTPS), 22 (SSH), 25 (SMTP), 53 (DNS).</p></div>
+</div>
+
+<div class="summary-block" id="summary">
+  <h4>Module Summary</h4>
+  <p>This module built the physical and conceptual map of how networks are structured — the devices that make them up, the cloud services that increasingly replace physical hardware, and the two foundational models (TCP/IP and OSI) that every later module in this course will build on.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>LANs span small areas; WANs span large ones — the internet is the ultimate WAN.</li>
+    <li>Hubs broadcast to everyone (less secure); switches and routers target specific destinations (more secure).</li>
+    <li>Cloud computing offers reliability, cost savings, and scalability compared to on-premise infrastructure.</li>
+    <li>TCP/IP's 4 layers and OSI's 7 layers describe the same reality at different levels of granularity.</li>
+    <li>IPv4 and IPv6 differ primarily in address space size and header simplicity — both remain in active use.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives">◂ Back to Module 1 Objectives</a>
+  <a href="#module-2">Module 2 · Protocols, VPNs &amp; Firewalls ▸</a>
+</div>
+
+<div class="endmark">— End of Module 1 —</div>
+<!-- ============================================================
+     MODULE 2 · WEEK 2 — PROTOCOLS, VPNS & FIREWALLS
+     ============================================================ -->
+<h2 class="module-head" id="module-2"><span class="tag">Module 2 · Week 2</span>Network Protocols, VPNs &amp; Firewalls</h2>
+
+<div class="objectives" id="objectives-2">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Classify network protocols into communication, management, and security categories.</li>
+    <li>Explain NAT, DHCP, ARP, and common mail protocols (POP, IMAP, SMTP).</li>
+    <li>Trace the evolution of wireless security protocols from WEP through WPA3.</li>
+    <li>Compare firewall types: hardware, software, cloud-based, stateful, stateless, and NGFW.</li>
+    <li>Explain how VPNs protect privacy through encryption and encapsulation.</li>
+    <li>Describe security zones, network segmentation, subnetting, and CIDR notation.</li>
+    <li>Explain the three types of proxy servers and their security functions.</li>
+  </ul>
+</div>
+
+<h3 id="sec-2-1" data-n="2.1">Network Protocols: Three Categories</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-209</span></div>
+  <div class="ticket-body"><p><strong>Network protocol:</strong> A set of rules used by two or more devices on a network to describe the order of delivery and structure of data — a common language that lets devices worldwide communicate and understand each other.</p></div>
+</div>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>SOC Example — Visiting a Website</span><span class="ticket-id">SOC-201</span></div>
+  <div class="ticket-body"><p>Typing a URL into your browser quietly invokes four different protocols: <strong>TCP</strong> establishes the connection (via a handshake), <strong>ARP</strong> determines the MAC address of the next router, <strong>HTTPS</strong> securely requests and receives the actual webpage, and <strong>DNS</strong> translates the domain name into the destination IP address. A single page load is a small orchestra of protocols working in sequence.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Three Categories of Network Protocols</caption>
+<thead><tr><th>Category</th><th>Purpose</th><th>Examples</th></tr></thead>
+<tbody>
+<tr><td><strong>Communication protocols</strong></td><td>Govern the exchange of information — timing, structure, and lost-data recovery</td><td>TCP, UDP, HTTP, DNS</td></tr>
+<tr><td><strong>Management protocols</strong></td><td>Monitor and manage activity on the network — error reporting, performance</td><td>SNMP, ICMP</td></tr>
+<tr><td><strong>Security protocols</strong></td><td>Ensure data is sent/received securely using encryption</td><td>HTTPS, SFTP</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Communication Protocols Deep Dive</caption>
+<thead><tr><th>Protocol</th><th>Port</th><th>Layer</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><strong>TCP</strong></td><td>varies</td><td>Transport</td><td>Uses a 3-way handshake: SYN → SYN/ACK → ACK</td></tr>
+<tr><td><strong>UDP</strong></td><td>varies</td><td>Transport</td><td>Connectionless; less reliable but faster — used for gaming/streaming</td></tr>
+<tr><td><strong>HTTP</strong></td><td>80</td><td>Application</td><td>Insecure; largely replaced by HTTPS</td></tr>
+<tr><td><strong>DNS</strong></td><td>53</td><td>Application</td><td>Uses UDP normally; switches to TCP for large replies</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-202</span></div>
+  <div class="ticket-body"><p>Even encrypted protocols like HTTPS and SFTP don't hide the source or destination IP address of traffic. A malicious actor intercepting encrypted traffic still learns <em>who is talking to whom</em>, even if they can't read <em>what</em> is being said. Encryption protects content, not metadata.</p></div>
+</div>
+
+<h3 id="sec-2-2" data-n="2.2">NAT, DHCP, ARP &amp; Mail Protocols</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-210</span></div>
+  <div class="ticket-body">
+    <p><strong>Network Address Translation (NAT):</strong> Replaces a private source IP address with the router's public IP address (and vice versa for responses), letting many private devices share one public address.</p>
+    <p><strong>Dynamic Host Configuration Protocol (DHCP):</strong> A management-family, application-layer protocol that assigns each device a unique IP address and provides DNS/gateway addresses. Servers use UDP port 67; clients use UDP port 68.</p>
+    <p><strong>Address Resolution Protocol (ARP):</strong> Translates IP addresses in packets into the MAC address of the hardware device; tracked in an ARP cache. Has no specific port number.</p>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Mail &amp; Remote-Access Protocols</caption>
+<thead><tr><th>Protocol</th><th>Port(s)</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><strong>Telnet</strong></td><td>TCP 23</td><td>Remote device communication in clear text — insecure, largely obsolete</td></tr>
+<tr><td><strong>SSH</strong></td><td>TCP 22</td><td>Secure, encrypted replacement for Telnet</td></tr>
+<tr><td><strong>POP3</strong></td><td>TCP/UDP 110 (unencrypted), 995 (SSL/TLS)</td><td>Downloads email locally; doesn't sync across devices</td></tr>
+<tr><td><strong>IMAP</strong></td><td>TCP 143 (unencrypted), 993 (TLS)</td><td>Keeps content on the server, allowing multi-device sync; slower than POP3</td></tr>
+<tr><td><strong>SMTP</strong></td><td>TCP/UDP 25 (unencrypted), 587 (TLS)</td><td>Transmits/routes email; port 25 is frequently abused by spam</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket blueteam">
+  <div class="ticket-head"><span><span class="icon">🛡️</span>Blue Team Tip</span><span class="ticket-id">BT-201</span></div>
+  <div class="ticket-body"><p>Firewalls can filter by port number — e.g., only allowing IP addresses belonging to the organization to reach TCP port 995 (encrypted POP3). Knowing which port a protocol uses is what lets you write a precise, minimal firewall rule instead of an overly broad one.</p></div>
+</div>
+
+<h3 id="sec-2-3" data-n="2.3">Wireless Security: WEP → WPA → WPA2 → WPA3</h3>
+
+<p>Wi-Fi is formally IEEE 802.11 — a suite of standards maintained by the Institute of Electrical and Electronics Engineers. Its security protocols have evolved substantially, each generation fixing the previous one's known weaknesses.</p>
+
+<figure>
+<svg viewBox="0 0 640 160" width="100%" role="img" aria-label="Timeline showing the evolution of wireless security protocols from WEP in 1999 to WPA in 2003 to WPA2 in 2004 to WPA3 in 2018">
+  <rect x="0" y="0" width="640" height="160" fill="#F7F5F0"/>
+  <line x1="40" y1="80" x2="600" y2="80" stroke="#0B0F14" stroke-width="2"/>
+  <g font-family="sans-serif" font-size="11" font-weight="700">
+    <circle cx="80" cy="80" r="8" fill="#C4342A"/><text x="80" y="105" text-anchor="middle" fill="#0B0F14">WEP</text><text x="80" y="120" text-anchor="middle" font-size="9" font-weight="400" fill="#3A4650">1999</text>
+    <circle cx="240" cy="80" r="8" fill="#B4700A"/><text x="240" y="105" text-anchor="middle" fill="#0B0F14">WPA</text><text x="240" y="120" text-anchor="middle" font-size="9" font-weight="400" fill="#3A4650">2003</text>
+    <circle cx="400" cy="80" r="8" fill="#3457B2"/><text x="400" y="105" text-anchor="middle" fill="#0B0F14">WPA2</text><text x="400" y="120" text-anchor="middle" font-size="9" font-weight="400" fill="#3A4650">2004</text>
+    <circle cx="560" cy="80" r="8" fill="#0F9E93"/><text x="560" y="105" text-anchor="middle" fill="#0B0F14">WPA3</text><text x="560" y="120" text-anchor="middle" font-size="9" font-weight="400" fill="#3A4650">2018</text>
+  </g>
+  <text x="320" y="30" text-anchor="middle" font-family="monospace" font-size="11" fill="#3A4650">Each generation fixes a known weakness in the last</text>
+</svg>
+<figcaption>Figure 2.1 — The evolution of Wi-Fi security protocols</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<caption>Wireless Security Protocol Evolution</caption>
+<thead><tr><th>Protocol</th><th>Year</th><th>Key Weakness / Improvement</th></tr></thead>
+<tbody>
+<tr><td><strong>WEP</strong></td><td>1999</td><td>Oldest standard; encryption crackable — considered high-risk today, though still occasionally found on old/misconfigured hardware</td></tr>
+<tr><td><strong>WPA</strong></td><td>2003</td><td>Introduced TKIP with larger secret keys and a message integrity check; still vulnerable to KRACK (key reinstallation) attacks</td></tr>
+<tr><td><strong>WPA2</strong></td><td>2004</td><td>Uses AES and CCMP; the standard for Wi-Fi today, but still vulnerable to KRACK</td></tr>
+<tr><td><strong>WPA3</strong></td><td>2018</td><td>Fixes the KRACK vulnerability using SAE (Simultaneous Authentication of Equals); 128-bit encryption (192-bit optional in Enterprise mode)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-211</span></div>
+  <div class="ticket-body">
+    <p><strong>KRACK attack (Key Reinstallation Attack):</strong> Inserts a new encryption key into the authentication handshake instead of the dynamic one WPA/WPA2 assigned — if set to all zeros, it's as if the transmission is unencrypted at all.</p>
+    <p><strong>WPA2/WPA3 Personal vs. Enterprise:</strong> Personal mode uses one shared global passphrase (best for home networks); Enterprise mode offers individualized, centralized control where users never see the actual encryption keys (best for organizations).</p>
+  </div>
+</div>
+
+<h3 id="sec-2-4" data-n="2.4">Firewall Types &amp; NGFW</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-212</span></div>
+  <div class="ticket-body"><p><strong>Firewall:</strong> A network security device/system that regulates and controls incoming and outgoing traffic, evaluating packets against a predefined set of security rules based on source, destination, and port.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Firewall Types by Deployment</caption>
+<thead><tr><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><strong>Hardware firewalls</strong></td><td>Physical dedicated devices, often the first line of defense, inspecting packets before they enter the network</td></tr>
+<tr><td><strong>Software firewalls</strong></td><td>Programs installed on individual devices, providing host-tailored protection</td></tr>
+<tr><td><strong>Cloud-based firewalls</strong></td><td>Firewall-as-a-Service (FaaS) hosted by a CSP, configured via the provider's interface, protecting both on-site and cloud-hosted assets</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Comparison — Stateless vs. Stateful vs. NGFW</caption>
+<thead><tr><th>Type</th><th>Tracks Connection State?</th><th>Rule Direction</th><th>Relative Security</th></tr></thead>
+<tbody>
+<tr><td><strong>Stateless</strong></td><td>No — relies solely on preconfigured rules</td><td>Rules needed in both directions</td><td>Lower — cannot proactively identify trends</td></tr>
+<tr><td><strong>Stateful</strong></td><td>Yes — tracks active connections in a state table</td><td>Rule needed in one direction only</td><td>Higher — can match return traffic to an existing session</td></tr>
+<tr><td><strong>Next Generation Firewall (NGFW)</strong></td><td>Yes, plus deep packet inspection</td><td>Application-aware</td><td>Highest — includes intrusion protection and threat intelligence integration</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-213</span></div>
+  <div class="ticket-body"><p><strong>Deep Packet Inspection (DPI):</strong> Analyzes the actual content of data packets, not just headers — a form of packet sniffing that examines payloads for threats and can act on them. This is what distinguishes NGFWs from traditional firewalls, which only inspect headers.</p></div>
+</div>
+
+<h3 id="sec-2-5" data-n="2.5">Virtual Private Networks (VPN)</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-214</span></div>
+  <div class="ticket-body"><p><strong>Virtual Private Network (VPN):</strong> A network security service that changes your public IP address, hides your virtual location, and encrypts your data — protecting privacy on the internet.</p></div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Postal Service, Again</span>
+  <p>Imagine mailing a letter inside a locked box, which is itself placed inside a plain, ordinary-looking outer box that the mail carrier can read the address on. The carrier delivers the outer box fine — they just can't see what's inside the locked inner box. That's <strong>encapsulation</strong>: your real data is encrypted and wrapped inside a packet routers can still read enough of to deliver, without exposing your private information.</p>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Remote Access VPN vs. Site-to-Site VPN</caption>
+<thead><tr><th>Type</th><th>Used By</th><th>Common Protocol</th></tr></thead>
+<tbody>
+<tr><td><strong>Remote access VPN</strong></td><td>Individual users connecting a personal device to a VPN server</td><td>WireGuard or IPSec</td></tr>
+<tr><td><strong>Site-to-site VPN</strong></td><td>Enterprises extending their network to other offices/locations</td><td>IPSec (most common)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>WireGuard vs. IPSec</caption>
+<thead><tr><th>Protocol</th><th>Age</th><th>Strengths</th></tr></thead>
+<tbody>
+<tr><td><strong>WireGuard</strong></td><td>Newer</td><td>Faster (fewer lines of code), open source, simpler to set up and debug; good for streaming/large downloads</td></tr>
+<tr><td><strong>IPSec</strong></td><td>Older</td><td>Longer history of security testing, wide OS support; more complex configuration</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-2-6" data-n="2.6">Security Zones &amp; Network Segmentation</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-215</span></div>
+  <div class="ticket-body">
+    <p><strong>Network segmentation:</strong> Dividing a network into segments, each with its own access permissions and security rules.</p>
+    <p><strong>Security zone:</strong> A network segment protecting the internal network from external threats, particularly the internet.</p>
+  </div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Hotel</span>
+  <p>A hotel offers unsecured public Wi-Fi for guests and a separate, encrypted network for staff. That's network segmentation in action: two networks, two sets of rules, so a problem on the guest Wi-Fi can't spread into the staff systems handling reservations and payments.</p>
+</div>
+
+<figure>
+<svg viewBox="0 0 640 220" width="100%" role="img" aria-label="Diagram of security zones showing the uncontrolled zone (internet) outside, connected through a firewall to the DMZ, then through another firewall to the internal network and restricted zone">
+  <rect x="0" y="0" width="640" height="220" fill="#F7F5F0"/>
+  <text x="320" y="22" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#0B0F14">Security Zones</text>
+  <g font-family="sans-serif" font-size="11" font-weight="700" fill="#fff">
+    <rect x="10" y="80" width="110" height="50" rx="5" fill="#C4342A"/><text x="65" y="109" text-anchor="middle">Uncontrolled</text>
+    <rect x="30" y="140" width="70" height="24" rx="3" fill="#7A1F3D"/><text x="65" y="157" text-anchor="middle" font-size="9">(Internet)</text>
+    <rect x="170" y="30" width="26" height="150" rx="3" fill="#0B0F14"/>
+    <rect x="230" y="80" width="110" height="50" rx="5" fill="#B4700A"/><text x="285" y="109" text-anchor="middle">DMZ</text>
+    <rect x="390" y="30" width="26" height="150" rx="3" fill="#0B0F14"/>
+    <rect x="450" y="60" width="120" height="45" rx="5" fill="#0F9E93"/><text x="510" y="87" text-anchor="middle">Internal Net</text>
+    <rect x="450" y="120" width="120" height="45" rx="5" fill="#3457B2"/><text x="510" y="147" text-anchor="middle">Restricted Zone</text>
+  </g>
+  <line x1="120" y1="105" x2="170" y2="105" stroke="#0B0F14" stroke-width="2"/>
+  <line x1="196" y1="105" x2="230" y2="105" stroke="#0B0F14" stroke-width="2"/>
+  <line x1="340" y1="105" x2="390" y2="105" stroke="#0B0F14" stroke-width="2"/>
+  <line x1="416" y1="105" x2="450" y2="82" stroke="#0B0F14" stroke-width="2"/>
+  <line x1="416" y1="105" x2="450" y2="142" stroke="#0B0F14" stroke-width="2"/>
+  <text x="183" y="200" text-anchor="middle" font-family="monospace" font-size="9" fill="#3A4650">FW 1</text>
+  <text x="403" y="200" text-anchor="middle" font-family="monospace" font-size="9" fill="#3A4650">FW 2</text>
+</svg>
+<figcaption>Figure 2.2 — Security zones: uncontrolled → DMZ → internal/restricted, guarded by two firewalls</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<caption>Security Zone Types</caption>
+<thead><tr><th>Zone</th><th>Contains</th></tr></thead>
+<tbody>
+<tr><td><strong>Uncontrolled Zone</strong></td><td>Any network outside the organization's control — the internet</td></tr>
+<tr><td><strong>Demilitarized Zone (DMZ)</strong></td><td>Public-facing services: web servers, proxy servers, DNS servers, email servers</td></tr>
+<tr><td><strong>Internal Network</strong></td><td>Private servers and sensitive data the organization protects</td></tr>
+<tr><td><strong>Restricted Zone</strong></td><td>Highly confidential information, limited to employees with specific privileges</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>SOC Insight</span><span class="ticket-id">SOC-202</span></div>
+  <div class="ticket-body"><p>In an ideal setup, the DMZ sits between two firewalls: one filtering traffic from outside the DMZ, one filtering traffic entering the internal network. Security analysts manage access control policies on both firewalls — for example, ensuring only HTTPS traffic reaches web servers in the DMZ.</p></div>
+</div>
+
+<h3 id="sec-2-7" data-n="2.7">Subnetting &amp; CIDR</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-216</span></div>
+  <div class="ticket-body">
+    <p><strong>Subnetting:</strong> Subdividing a network into logical groups called subnets — a network inside a network — improving efficiency and enabling security zones.</p>
+    <p><strong>Classless Inter-Domain Routing (CIDR):</strong> A method of assigning subnet masks to IP addresses to create subnets, using a slash notation (e.g., 198.51.100.0/24) to indicate the IP network prefix.</p>
+  </div>
+</div>
+
+<div class="ticket examtip">
+  <div class="ticket-head"><span><span class="icon">🎯</span>Exam Tip</span><span class="ticket-id">EXM-202</span></div>
+  <div class="ticket-body"><p>You don't need to compute CIDR ranges by hand for this certificate — just recognize the notation and know it replaced older "classful addressing" (Class A–E) to make more efficient use of the shrinking IPv4 address space.</p></div>
+</div>
+
+<h3 id="sec-2-8" data-n="2.8">Proxy Servers</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-217</span></div>
+  <div class="ticket-body"><p><strong>Proxy server:</strong> A network security system acting as an intermediary between a client and other internet servers — forwarding requests while hiding the organization's actual network from potential threats.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Three Types of Proxy Servers</caption>
+<thead><tr><th>Type</th><th>Direction</th><th>Function</th></tr></thead>
+<tbody>
+<tr><td><strong>Forward proxy server</strong></td><td>Outgoing (internal → internet)</td><td>Controls/restricts internet access for individuals; hides users' IP addresses</td></tr>
+<tr><td><strong>Reverse proxy server</strong></td><td>Incoming (internet → internal)</td><td>Regulates external access to internal servers, protecting their real IP addresses</td></tr>
+<tr><td><strong>Email proxy server</strong></td><td>Incoming email</td><td>Filters spam and verifies sender authenticity, reducing phishing risk</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket industry">
+  <div class="ticket-head"><span><span class="icon">🏢</span>Industry Insight</span><span class="ticket-id">IND-201</span></div>
+  <div class="ticket-body"><p>A large U.S. broadband ISP used an email proxy server for robust anti-spam filtering, tagging a significant portion of incoming email as spam before it ever reached delivery — demonstrating how proxy-layer filtering can operate independently of the underlying email platform itself.</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs-2">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 2.1 — Firewall Rule Design</summary>
+  <div class="acc-body">
+    <p>Design a firewall rule (in plain English) that allows only HTTPS traffic to reach web servers in a DMZ, and blocks everything else.</p>
+    <p><strong>Sample answer:</strong> "Allow inbound TCP traffic on port 443 to the DMZ web server IP range; deny all other inbound traffic to that range by default." This mirrors real-world port-filtering practice discussed in this module.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 2.2 — Wireless Protocol Identification</summary>
+  <div class="acc-body">
+    <p>An organization's Wi-Fi router still uses WEP because the administrator never changed the default setting. What's the risk, and what should the analyst recommend?</p>
+    <p><strong>Answer:</strong> WEP is considered high-risk and crackable by modern standards. The analyst should recommend upgrading to WPA3 (or at minimum WPA2 with AES/CCMP) and verifying hardware compatibility, since older devices may not support newer protocols.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Scenario Challenge 2.1 — Zone Placement</summary>
+  <div class="acc-body">
+    <p>Where should a public-facing company website's web server be placed: the internal network, the DMZ, or the restricted zone? Why?</p>
+    <p><strong>Answer:</strong> The DMZ — it needs to be internet-accessible but should remain isolated from the internal network and restricted zone, so a compromise of the web server doesn't directly expose sensitive internal or highly confidential data.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview-2">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Intermediate Question</span><span class="ticket-id">INT-203</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: What's the difference between a stateful and stateless firewall?</strong></p>
+    <p><strong>Ideal answer:</strong> "A stateless firewall applies fixed rules without tracking connection history, requiring rules in both directions and offering less context-aware filtering. A stateful firewall maintains a state table tracking active connections, so it only needs a rule in one direction and can match return traffic to an existing session — making it generally more secure."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Security Engineer Question</span><span class="ticket-id">INT-204</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Why does a VPN need encapsulation, not just encryption?</strong></p>
+    <p><strong>Ideal answer:</strong> "Encryption alone would make the packet's header unreadable, but routers need to read header information — like IP and MAC addresses — to route traffic correctly. Encapsulation solves this by wrapping the encrypted data inside another packet with a readable outer header, letting routers deliver it while keeping the actual content and original addressing hidden."</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice-2">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which wireless security protocol fixed the KRACK vulnerability present in WPA2?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">WEP</button>
+  <button class="opt" onclick="checkAnswer(this,false)">WPA</button>
+  <button class="opt" onclick="checkAnswer(this,true)">WPA3</button>
+  <div class="fb">Correct — WPA3 uses SAE specifically to address the KRACK vulnerability.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: A reverse proxy server handles requests from internal users accessing the internet.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — that's a forward proxy. A reverse proxy handles external requests to internal servers.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. Which VPN protocol is generally faster due to using fewer lines of code?</div>
+  <button class="opt" onclick="checkAnswer(this,true)">WireGuard</button>
+  <button class="opt" onclick="checkAnswer(this,false)">IPSec</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Telnet</button>
+  <div class="fb">Correct — WireGuard's smaller codebase generally makes it faster and simpler to configure.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision-2">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-202</span></div>
+  <div class="ticket-body"><p>3 protocol categories: communication, management, security. Wi-Fi security evolved WEP (1999) → WPA (2003) → WPA2 (2004) → WPA3 (2018), each fixing the last generation's weakness. Firewalls: hardware/software/cloud-based, and stateless/stateful/NGFW. VPNs use encryption + encapsulation to hide data and routing info. Security zones: uncontrolled → DMZ → internal → restricted. Proxy types: forward, reverse, email.</p></div>
+</div>
+
+<div class="summary-block" id="summary-2">
+  <h4>Module Summary</h4>
+  <p>This module covered the rules and defenses that govern network traffic: the three protocol categories, the evolution of wireless security, and the four major defensive tools — firewalls, VPNs, security zones, and proxy servers — that together form a network's layered defense.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>Network protocols split cleanly into communication, management, and security categories.</li>
+    <li>Wireless security has evolved through four generations, each fixing a specific vulnerability in the last.</li>
+    <li>Stateful firewalls and NGFWs offer progressively more context-aware, application-aware protection than stateless firewalls.</li>
+    <li>VPNs combine encryption (hiding content) with encapsulation (hiding routing information) for full traffic privacy.</li>
+    <li>Security zones and proxy servers work together to keep public-facing and sensitive internal assets properly separated.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives-2">◂ Back to Module 2 Objectives</a>
+  <a href="#module-3">Module 3 · Network Attacks ▸</a>
+</div>
+
+<div class="endmark">— End of Module 2 —</div>
+<!-- ============================================================
+     MODULE 3 · WEEK 3 — NETWORK ATTACKS
+     ============================================================ -->
+<h2 class="module-head" id="module-3"><span class="tag">Module 3 · Week 3</span>Network Intrusion Tactics &amp; Defense</h2>
+
+<div class="objectives" id="objectives-3">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Explain why secure networks matter, using the 2014 Home Depot breach as a case study.</li>
+    <li>Distinguish DoS from DDoS attacks and describe SYN flood, ICMP flood, and ping of death attacks.</li>
+    <li>Read and interpret basic tcpdump packet capture output.</li>
+    <li>Analyze the 2016 Dyn DNS DDoS attack as a real-world case study.</li>
+    <li>Distinguish passive from active packet sniffing.</li>
+    <li>Explain IP spoofing and its three common forms: on-path attacks, replay attacks, and smurf attacks.</li>
+    <li>Explain backdoor attacks and their role in persistent unauthorized access.</li>
+  </ul>
+</div>
+
+<h3 id="sec-3-1" data-n="3.1">Why Networks Get Attacked</h3>
+
+<p>Every network has inherent vulnerabilities. Attackers may be financially, personally, or politically motivated — or they may be a disgruntled employee or activist. Security analysts must stay constantly alert to potential vulnerabilities and act quickly to mitigate them.</p>
+
+<div class="ticket industry">
+  <div class="ticket-head"><span><span class="icon">🏢</span>Industry Insight — Home Depot (2014)</span><span class="ticket-id">IND-202</span></div>
+  <div class="ticket-body"><p>In 2014, hackers compromised Home Depot's servers with malware, resulting in a data breach that exposed <strong>over 56 million</strong> customers' credit and debit card information. This case illustrates how a single network-level compromise can cascade into a catastrophic, large-scale financial data exposure.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Categories of Network Intrusion Attacks</caption>
+<thead><tr><th>Category</th><th>Mechanism</th></tr></thead>
+<tbody>
+<tr><td><strong>Malware attacks</strong></td><td>Malicious software infecting systems — viruses, worms, Trojans, ransomware</td></tr>
+<tr><td><strong>Spoofing attacks</strong></td><td>Impersonating a legitimate entity to gain unauthorized access — IP, DNS, or ARP spoofing</td></tr>
+<tr><td><strong>Packet sniffing attacks</strong></td><td>Intercepting and analyzing transmitted data packets to capture sensitive information</td></tr>
+<tr><td><strong>Packet flooding attacks</strong></td><td>Overwhelming a network with high volumes of traffic — DoS/DDoS</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-218</span></div>
+  <div class="ticket-body"><p><strong>Backdoor attack:</strong> Exploits a weakness intentionally left by programmers or administrators (often for troubleshooting purposes) that bypasses normal access control mechanisms. Attackers can also install their own backdoor after compromising a system to ensure persistent access.</p></div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Office Building</span>
+  <p>A backdoor is like an office building's rear exit that maintenance staff use to bring in supplies — it's not monitored as closely as the guarded front entrance. An employee (or an attacker who's compromised that access) can slip in and out through it without triggering the same scrutiny as the front door.</p>
+</div>
+
+<h4>Impacts on an Organization</h4>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Impact</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><strong>Financial</strong></td><td>Interrupted revenue-generating operations; potential litigation and settlement costs from exposed customer data</td></tr>
+<tr><td><strong>Reputation</strong></td><td>Public awareness of a breach erodes customer trust and may drive customers to competitors</td></tr>
+<tr><td><strong>Public safety</strong></td><td>Attacks on government or infrastructure networks (power grids, water systems) can cause real physical harm</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important — The 3 Cs of Incident Management</span><span class="ticket-id">IMP-203</span></div>
+  <div class="ticket-body"><p><strong>Command</strong> (a clear leader guiding the response), <strong>Control</strong> (organizing all involved parties toward the mission), and <strong>Communications</strong> (sharing information and updates promptly) are the three pillars of effective incident management. Communicating intentions rather than acting independently keeps a response coordinated instead of chaotic.</p></div>
+</div>
+
+<h3 id="sec-3-2" data-n="3.2">Denial of Service &amp; Distributed Denial of Service</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-219</span></div>
+  <div class="ticket-body">
+    <p><strong>Denial of Service (DoS) Attack:</strong> A malicious attack that targets a network or server by overwhelming it with excessive traffic, making it unresponsive to legitimate requests.</p>
+    <p><strong>Distributed Denial of Service (DDoS) Attack:</strong> A DoS subtype using multiple devices/servers in different locations to flood a target, increasing the likelihood of overwhelming it.</p>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Three Named DoS Attack Types</caption>
+<thead><tr><th>Attack</th><th>Mechanism</th></tr></thead>
+<tbody>
+<tr><td><strong>SYN Flood Attack</strong></td><td>Simulates the TCP handshake, flooding the server with SYN packets to exceed available ports and overwhelm it</td></tr>
+<tr><td><strong>ICMP Flood Attack</strong></td><td>Repeatedly sends ICMP packets, forcing the server to reply until bandwidth is depleted and it crashes</td></tr>
+<tr><td><strong>Ping of Death Attack</strong></td><td>Sends oversized ICMP packets (larger than the 64 KB maximum) to overload and crash a vulnerable server</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Anthill</span>
+  <p>A ping of death attack is like dropping one huge rock on an anthill. Individual ants can each carry a certain amount of weight just fine — but a single oversized rock crushes far more than the colony can handle, and the whole anthill stops functioning until it rebuilds.</p>
+</div>
+
+<h3 id="sec-3-3" data-n="3.3">Reading tcpdump Logs</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-220</span></div>
+  <div class="ticket-body"><p><strong>tcpdump:</strong> A lightweight, text-based, command-line network protocol analyzer using the open-source libpcap library, preinstalled on many Linux distributions. It converts raw network traffic into human-readable output directly in the terminal.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Fields in tcpdump Output</caption>
+<thead><tr><th>Field</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><strong>Timestamp</strong></td><td>Hours, minutes, seconds, and fractions of a second</td></tr>
+<tr><td><strong>Source IP / Port</strong></td><td>Where the packet originated</td></tr>
+<tr><td><strong>Destination IP / Port</strong></td><td>Where the packet is being transmitted to</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">tcpdump Output</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>14:02:01.223142 IP 203.0.113.9.51422 > 10.0.4.12.80: Flags [S], seq 100
+14:02:01.223301 IP 203.0.113.9.51423 > 10.0.4.12.80: Flags [S], seq 101
+14:02:01.223350 IP 203.0.113.9.51424 > 10.0.4.12.80: Flags [S], seq 102
+14:02:01.223412 IP 203.0.113.9.51425 > 10.0.4.12.80: Flags [S], seq 103</code></pre>
+  <div class="code-note"><strong>What this shows:</strong> A single source IP (203.0.113.9) sending a rapid burst of SYN packets ("Flags [S]") from many different source ports to the same destination on port 80, within milliseconds.<br><strong>Security implication:</strong> This pattern — many SYN packets, one source, no completed handshakes — is the textbook signature of a SYN flood attack.<br><strong>Common mistake:</strong> Assuming any burst of SYN packets is malicious; some legitimate high-traffic web services also produce SYN bursts. Context (source diversity, completed handshakes, timing) matters.</div>
+</div>
+
+<div class="ticket redteam">
+  <div class="ticket-head"><span><span class="icon">🗡️</span>Blue Team Tip</span><span class="ticket-id">BT-202</span></div>
+  <div class="ticket-body"><p>tcpdump and similar tools (Wireshark, SolarWinds NetFlow Traffic Analyzer, Azure Network Watcher) can establish a baseline for normal traffic, detect malicious activity, and create alerts. But the same tools are dual-use — attackers use identical software to capture usernames and passwords in transit. Understanding a tool's legitimate purpose doesn't mean assuming benign intent whenever you see it in use.</p></div>
+</div>
+
+<h3 id="sec-3-4" data-n="3.4">Real-World DDoS: The 2016 Dyn DNS Attack</h3>
+
+<div class="ticket industry">
+  <div class="ticket-head"><span><span class="icon">🏢</span>Industry Insight — 2016 DNS DDoS</span><span class="ticket-id">IND-203</span></div>
+  <div class="ticket-body">
+    <p>On October 21, 2016, a major DNS service provider used by many large companies was hit by a DDoS attack from a <strong>botnet</strong> — a collection of malware-infected computers controlled by a single "bot-herder." University students had earlier built the botnet to attack gaming servers, then published its code publicly (partly to avoid attribution), which let other criminals repurpose it.</p>
+    <p>At 7:00 a.m., the botnet sent <strong>tens of millions of DNS requests</strong> to the provider, overwhelming its systems and taking the DNS service offline. Because so many companies relied on this one provider, websites across North America and Europe became unreachable. The provider restored service after roughly <strong>two hours</strong> and, despite subsequent attack waves, was prepared to mitigate further impact.</p>
+  </div>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-221</span></div>
+  <div class="ticket-body"><p><strong>Botnet:</strong> A collection of malware-infected computers under the control of a single threat actor (the "bot-herder"), each remotely commandable to send traffic toward a target simultaneously.</p></div>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-202</span></div>
+  <div class="ticket-body"><p>Distributing important operations across dynamically scalable hosts means operations can continue even if some baseline host infrastructure goes offline — a key mitigation strategy against DDoS impact, echoing this course's earlier lessons on cloud scalability and redundancy.</p></div>
+</div>
+
+<h3 id="sec-3-5" data-n="3.5">Packet Sniffing: Passive vs. Active</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-222</span></div>
+  <div class="ticket-body">
+    <p><strong>Passive packet sniffing:</strong> Unauthorized reading of data packets in transit — like a postal worker secretly reading someone's mail without altering it.</p>
+    <p><strong>Active packet sniffing:</strong> Manipulating data packets in transit — like a neighbor changing the contents of a letter before delivering it.</p>
+  </div>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-223</span></div>
+  <div class="ticket-body"><p><strong>Promiscuous mode:</strong> A Network Interface Card (NIC) setting that accepts all traffic on the network, even packets not addressed to that device's MAC address — the setting malicious actors exploit to sniff traffic that isn't meant for them.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Defenses Against Malicious Packet Sniffing</caption>
+<thead><tr><th>Defense</th><th>How It Helps</th></tr></thead>
+<tbody>
+<tr><td><strong>VPN usage</strong></td><td>Encrypts data in transit, making sniffed traffic unreadable</td></tr>
+<tr><td><strong>HTTPS</strong></td><td>Encrypts web traffic with SSL/TLS, preventing eavesdropping on browsing activity</td></tr>
+<tr><td><strong>Avoiding unprotected Wi-Fi</strong></td><td>Public Wi-Fi in cafes/airports is often unprotected; use a VPN if connecting anyway</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-3-6" data-n="3.6">IP Spoofing: On-Path, Replay &amp; Smurf Attacks</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-224</span></div>
+  <div class="ticket-body"><p><strong>IP spoofing:</strong> Manipulating the source IP address of a data packet to impersonate an authorized system, potentially bypassing firewall rules that restrict outside traffic.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Three Common IP Spoofing Attack Types</caption>
+<thead><tr><th>Attack</th><th>Mechanism</th><th>Also Known As</th></tr></thead>
+<tbody>
+<tr><td><strong>On-path attack</strong></td><td>Attacker positions themselves between two devices in a trusted connection, intercepting and potentially modifying data</td><td>Meddler-in-the-middle attack</td></tr>
+<tr><td><strong>Replay attack</strong></td><td>Intercepts a packet and delays or repeats its transmission later, disrupting connections or impersonating an authorized user</td><td>—</td></tr>
+<tr><td><strong>Smurf attack</strong></td><td>Combines IP spoofing with DDoS — floods a spoofed authorized IP with packets (often ICMP pings), overwhelming the server/network</td><td>—</td></tr>
+</tbody>
+</table>
+</div>
+
+<figure>
+<svg viewBox="0 0 640 200" width="100%" role="img" aria-label="Diagram of an on-path attack showing an attacker positioned between a client and a server, intercepting communication between them">
+  <rect x="0" y="0" width="640" height="200" fill="#F7F5F0"/>
+  <g font-family="sans-serif" font-size="12" font-weight="700" fill="#fff">
+    <rect x="30" y="80" width="110" height="45" rx="5" fill="#3457B2"/><text x="85" y="107" text-anchor="middle">Client</text>
+    <rect x="500" y="80" width="110" height="45" rx="5" fill="#0F9E93"/><text x="555" y="107" text-anchor="middle">Server</text>
+    <rect x="265" y="30" width="110" height="45" rx="5" fill="#C4342A"/><text x="320" y="57" text-anchor="middle">Attacker</text>
+  </g>
+  <line x1="140" y1="100" x2="500" y2="100" stroke="#8A8272" stroke-width="2" stroke-dasharray="5 4"/>
+  <line x1="320" y1="75" x2="320" y2="100" stroke="#C4342A" stroke-width="2"/>
+  <text x="320" y="150" text-anchor="middle" font-family="monospace" font-size="11" fill="#3A4650">Attacker sits invisibly between two trusted parties</text>
+  <text x="320" y="168" text-anchor="middle" font-family="monospace" font-size="11" fill="#3A4650">intercepting or altering the "trusted" conversation</text>
+</svg>
+<figcaption>Figure 3.1 — An on-path (meddler-in-the-middle) attack</figcaption>
+</figure>
+
+<div class="ticket redteam">
+  <div class="ticket-head"><span><span class="icon">🗡️</span>Blue Team Tip — Defense in Depth</span><span class="ticket-id">BT-203</span></div>
+  <div class="ticket-body"><p>There is no single perfect strategy for stopping every IP spoofing variant. Layer defenses: encryption (e.g., TLS) protects against on-path attacks; advanced firewalls with anomaly detection catch smurf-style broadcast floods; firewall rules rejecting inbound traffic with source IPs matching the local network's own range catch basic spoofing attempts.</p></div>
+</div>
+
+<h3 id="sec-3-7" data-n="3.7">Network Interception Attacks &amp; Data Structure Recap</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-225</span></div>
+  <div class="ticket-body"><p><strong>Network interception attack:</strong> Intercepts network traffic to steal valuable information or interfere with a transmission — for example, altering a bank transfer's destination account mid-transit.</p></div>
+</div>
+
+<p>Recall from Module 1 that every data packet has a <strong>header</strong> (source/destination IP and MAC addresses) and a <strong>body</strong> (the actual data — potentially names, dates of birth, financial data, or credit card numbers). Interception attacks target exactly this structure: read the header to learn who's talking, read or alter the body to steal or corrupt the message.</p>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs-3">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 3.1 — tcpdump Attack Identification</summary>
+  <div class="acc-body">
+    <div class="code-block">
+      <div class="code-head"><span class="lang">tcpdump Output</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+      <pre><code>09:14:01.001 IP 198.51.100.7 > 10.0.0.5: ICMP echo request, id 1, seq 1, length 65500
+09:14:01.150 IP 198.51.100.7 > 10.0.0.5: ICMP echo request, id 1, seq 2, length 65500</code></pre>
+    </div>
+    <p><strong>Task:</strong> Identify the attack type based on the oversized ICMP packet length.</p>
+    <p><strong>Answer:</strong> Ping of death attack — the ICMP packet length (65,500 bytes) vastly exceeds the standard maximum, designed to crash the receiving system.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 3.2 — Attack Classification Drill</summary>
+  <div class="acc-body">
+    <p>Classify each scenario: (1) an attacker floods a server with SYN packets without completing handshakes; (2) an attacker intercepts and resends an authorized login transmission an hour later; (3) an attacker spoofs an IP and floods it with ICMP pings that get broadcast to an entire network.</p>
+    <p><strong>Answer key:</strong> 1 — SYN flood attack (a DoS attack). 2 — Replay attack. 3 — Smurf attack.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Portfolio Project 3.1 — Write an Incident Summary</summary>
+  <div class="acc-body">
+    <p>Using the 2016 Dyn DNS DDoS attack as your model, write a one-page incident summary of a fictional DDoS scenario, including root cause (botnet), impact, and mitigation (scalable, redundant hosting). Add this to your portfolio alongside your Course II incident report.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview-3">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Beginner Question</span><span class="ticket-id">INT-205</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: What's the difference between a DoS and a DDoS attack?</strong></p>
+    <p><strong>Ideal answer:</strong> "A DoS attack overwhelms a target from a single source, while a DDoS attack uses multiple distributed devices — often a botnet — to flood the target simultaneously, making it much harder to block by simply denying one source IP."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>SOC Analyst Question</span><span class="ticket-id">INT-206</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: You're reviewing tcpdump output and see hundreds of SYN packets from one IP with no completed handshakes. What's your next step?</strong></p>
+    <p><strong>Ideal answer:</strong> "I'd treat this as a likely SYN flood attempt and check whether the volume is consistent with legitimate traffic patterns for that server. If it looks malicious, I'd escalate per the incident response playbook — likely involving rate-limiting or blocking the source at the firewall — while documenting the pattern for the eventual incident report."</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice-3">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which attack combines IP spoofing with a DoS technique using broadcast ICMP pings?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Replay attack</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Smurf attack</button>
+  <button class="opt" onclick="checkAnswer(this,false)">On-path attack</button>
+  <div class="fb">Correct — a smurf attack combines IP spoofing with a flood of ICMP pings broadcast across the network.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: Passive packet sniffing involves modifying data packets in transit.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — passive sniffing only reads packets; active sniffing modifies them.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. What is a botnet's controller commonly called?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Threat researcher</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Bot-herder</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Packet analyst</button>
+  <div class="fb">Correct — the "bot-herder" remotely controls every infected device in the botnet.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision-3">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-203</span></div>
+  <div class="ticket-body"><p>DoS overwhelms from one source; DDoS uses many (often a botnet). Named DoS attacks: SYN flood, ICMP flood, ping of death. tcpdump reads timestamp/source/destination fields from raw traffic. Packet sniffing is passive (read-only) or active (modifies data). IP spoofing attacks: on-path (meddler-in-the-middle), replay, smurf. Backdoors bypass normal access controls, intentionally or maliciously installed.</p></div>
+</div>
+
+<div class="summary-block" id="summary-3">
+  <h4>Module Summary</h4>
+  <p>This module covered the attacker's side of the network equation: how DoS/DDoS attacks overwhelm capacity, how packet sniffing and IP spoofing exploit trust and visibility, and how real incidents like Home Depot and the 2016 Dyn DNS attack demonstrate the scale of damage possible.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>DDoS attacks are distributed and dramatically harder to block than single-source DoS attacks.</li>
+    <li>tcpdump and similar tools reveal attack signatures directly in raw traffic — but require context to interpret correctly.</li>
+    <li>Passive sniffing reads; active sniffing modifies — both are serious threats to data in transit.</li>
+    <li>On-path, replay, and smurf attacks are the three IP spoofing variants most relevant to entry-level analysts.</li>
+    <li>Defense in depth — layering encryption, firewalls, and anomaly detection — is the only realistic strategy against a varied attack landscape.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives-3">◂ Back to Module 3 Objectives</a>
+  <a href="#module-4">Module 4 · Security Hardening ▸</a>
+</div>
+
+<div class="endmark">— End of Module 3 —</div>
+<!-- ============================================================
+     MODULE 4 · WEEK 4 — SECURITY HARDENING
+     ============================================================ -->
+<h2 class="module-head" id="module-4"><span class="tag">Module 4 · Week 4</span>Security Hardening: OS, Network &amp; Cloud</h2>
+
+<div class="objectives" id="objectives-4">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Define security hardening and explain the concept of attack surface.</li>
+    <li>List common OS hardening practices: patching, baseline configuration, password policies, MFA.</li>
+    <li>Explain brute force attacks and their prevention: hashing, salting, CAPTCHA, password policies.</li>
+    <li>Compare firewalls, IDS, IPS, and SIEM as layered network defenses.</li>
+    <li>List common network hardening tasks and distinguish recurring from one-time tasks.</li>
+    <li>Explain cloud hardening concepts: server baseline images, segmentation, and the shared responsibility model.</li>
+    <li>Describe cryptography, cryptographic erasure, and key management in cloud environments.</li>
+  </ul>
+</div>
+
+<h3 id="sec-4-1" data-n="4.1">What Is Security Hardening?</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-226</span></div>
+  <div class="ticket-body"><p><strong>Security hardening:</strong> The process of strengthening systems to reduce vulnerability to attack, aimed at minimizing the <strong>attack surface</strong> — all potential vulnerabilities a threat actor could exploit.</p></div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The House</span>
+  <p>Think of a network like a house. The attack surface is every door and window a burglar could use to get in. Security hardening is installing locks, reinforcing frames, and closing windows you never use — the fewer and stronger the entry points, the harder the house is to break into.</p>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Scope of Security Hardening</caption>
+<thead><tr><th>Domain</th><th>What Gets Hardened</th></tr></thead>
+<tbody>
+<tr><td><strong>Hardware</strong></td><td>Physical devices, preventing unauthorized access</td></tr>
+<tr><td><strong>Operating systems</strong></td><td>The underlying software layer</td></tr>
+<tr><td><strong>Applications</strong></td><td>Configuration for enhanced security and vulnerability mitigation</td></tr>
+<tr><td><strong>Computer networks</strong></td><td>Infrastructure protection against intrusion</td></tr>
+<tr><td><strong>Databases</strong></td><td>Controls protecting sensitive stored data</td></tr>
+<tr><td><strong>Physical security</strong></td><td>Cameras, guards, and other physical-space protections</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Common Security Hardening Procedures</caption>
+<thead><tr><th>Procedure</th><th>Effect</th></tr></thead>
+<tbody>
+<tr><td><strong>Software updates (patches)</strong></td><td>Addresses known vulnerabilities</td></tr>
+<tr><td><strong>Configuration changes</strong></td><td>e.g., longer/more frequent password requirements</td></tr>
+<tr><td><strong>Encryption updates</strong></td><td>Strengthens protection of stored data</td></tr>
+<tr><td><strong>Unused app/service removal</strong></td><td>Attackers can't exploit what isn't present or active</td></tr>
+<tr><td><strong>Port disabling</strong></td><td>Reduces potential entry points</td></tr>
+<tr><td><strong>Access permissions reduction</strong></td><td>Limits who can reach what</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-227</span></div>
+  <div class="ticket-body"><p><strong>Penetration testing (pen test):</strong> A simulated attack that identifies vulnerabilities in systems, networks, websites, applications, and processes. Testers document findings in reports that guide remediation.</p></div>
+</div>
+
+<h3 id="sec-4-2" data-n="4.2">OS Hardening &amp; Brute Force Defense</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-228</span></div>
+  <div class="ticket-body"><p><strong>OS hardening:</strong> Procedures maintaining and improving operating system security — patch management, baseline configuration, secure disposal, and password policies. A single vulnerable OS can compromise the entire network.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Regular OS Hardening Tasks</caption>
+<thead><tr><th>Task</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><strong>Patch installation</strong></td><td>Fixes known vulnerabilities before attackers exploit them</td></tr>
+<tr><td><strong>Baseline configuration</strong></td><td>A documented reference specification; detects unauthorized changes</td></tr>
+<tr><td><strong>Hardware/software disposal</strong></td><td>Securely wiping old hardware and removing unused software prevents data leakage</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-229</span></div>
+  <div class="ticket-body">
+    <p><strong>Brute force attack:</strong> A trial-and-error process of discovering private information, most commonly login credentials.</p>
+    <p><strong>Simple brute force attack:</strong> Entering any combination of usernames/passwords until one works.</p>
+    <p><strong>Dictionary attack:</strong> Using a list of commonly used passwords and previously stolen credentials.</p>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Brute Force Prevention Measures</caption>
+<thead><tr><th>Measure</th><th>How It Helps</th></tr></thead>
+<tbody>
+<tr><td><strong>Hashing + salting</strong></td><td>Hashing is a one-way conversion that can't be decrypted; salting adds random characters, making hash values harder to reverse or match against precomputed tables</td></tr>
+<tr><td><strong>MFA / 2FA</strong></td><td>Requires two or more independent forms of verification, so a stolen password alone isn't enough</td></tr>
+<tr><td><strong>CAPTCHA / reCAPTCHA</strong></td><td>Proves the requester is human, blocking automated brute force attempts</td></tr>
+<tr><td><strong>Password policies</strong></td><td>Standardizes complexity requirements, update frequency, and login-attempt limits</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-230</span></div>
+  <div class="ticket-body">
+    <p><strong>Virtual machine (VM):</strong> A software version of a physical computer, used to run code in isolation and revert to a clean state after testing malware.</p>
+    <p><strong>Sandbox:</strong> A testing environment for executing software separately from the main network, used to test patches, identify bugs, and evaluate suspicious files.</p>
+  </div>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning</span><span class="ticket-id">WRN-201</span></div>
+  <div class="ticket-body"><p>Neither VMs nor sandboxes are perfectly safe. There's a small but real risk a malicious program can escape virtualization and access the host machine. Some sophisticated malware is even written to detect it's running in a VM/sandbox and deliberately behave harmlessly to avoid analysis — don't treat a clean sandbox result as absolute proof of safety.</p></div>
+</div>
+
+<h3 id="sec-4-3" data-n="4.3">Network Hardening Tools</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-231</span></div>
+  <div class="ticket-body"><p><strong>Network hardening:</strong> Network-focused security hardening — port filtering, network access privileges, and encryption over networks.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Network Hardening — Regular vs. One-Time Tasks</caption>
+<thead><tr><th>Frequency</th><th>Tasks</th></tr></thead>
+<tbody>
+<tr><td><strong>Performed regularly</strong></td><td>Firewall rules maintenance, network log analysis, patch updates, server backups</td></tr>
+<tr><td><strong>Performed once, updated as needed</strong></td><td>Port filtering, network access privileges, encryption for communication</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-232</span></div>
+  <div class="ticket-body"><p><strong>Network log analysis:</strong> Examining network logs to identify events of interest, typically using a log analyzer or SIEM tool that presents data on a centralized dashboard — sometimes called a "single pane of glass."</p></div>
+</div>
+
+<h3 id="sec-4-4" data-n="4.4">Firewall vs. IDS vs. IPS vs. SIEM</h3>
+
+<p>This section ties together several tools from across this course and Course II into one layered defense-in-depth stack — each tool adding incrementally more protection.</p>
+
+<figure>
+<svg viewBox="0 0 640 220" width="100%" role="img" aria-label="Diagram showing layered network defense: internet traffic passes through a firewall, then an IDS/IPS, then reaches the internal network, with a SIEM tool monitoring everything centrally">
+  <rect x="0" y="0" width="640" height="220" fill="#F7F5F0"/>
+  <text x="320" y="22" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#0B0F14">Layered Network Defense</text>
+  <g font-family="sans-serif" font-size="11" font-weight="700" fill="#fff">
+    <rect x="10" y="90" width="90" height="40" rx="5" fill="#7A1F3D"/><text x="55" y="114" text-anchor="middle">Internet</text>
+    <rect x="140" y="90" width="90" height="40" rx="5" fill="#0B0F14"/><text x="185" y="114" text-anchor="middle">Firewall</text>
+    <rect x="270" y="90" width="90" height="40" rx="5" fill="#B4700A"/><text x="315" y="114" text-anchor="middle">IDS / IPS</text>
+    <rect x="400" y="90" width="90" height="40" rx="5" fill="#0F9E93"/><text x="445" y="114" text-anchor="middle">LAN</text>
+    <rect x="230" y="160" width="200" height="40" rx="5" fill="#3457B2"/><text x="330" y="184" text-anchor="middle">SIEM (monitors everything)</text>
+  </g>
+  <line x1="100" y1="110" x2="140" y2="110" stroke="#0B0F14" stroke-width="2"/>
+  <line x1="230" y1="110" x2="270" y2="110" stroke="#0B0F14" stroke-width="2"/>
+  <line x1="360" y1="110" x2="400" y2="110" stroke="#0B0F14" stroke-width="2"/>
+  <line x1="185" y1="130" x2="270" y2="160" stroke="#8A8272" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <line x1="315" y1="130" x2="315" y2="160" stroke="#8A8272" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <line x1="445" y1="130" x2="380" y2="160" stroke="#8A8272" stroke-width="1.5" stroke-dasharray="3 3"/>
+</svg>
+<figcaption>Figure 4.1 — Firewall, IDS/IPS, and SIEM working together in layered defense</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<caption>Firewall vs. IDS vs. IPS vs. SIEM</caption>
+<thead><tr><th>Tool</th><th>Advantage</th><th>Disadvantage</th></tr></thead>
+<tbody>
+<tr><td><strong>Firewall</strong></td><td>Allows/blocks traffic based on rules</td><td>Only filters based on packet header info (unless NGFW)</td></tr>
+<tr><td><strong>IDS</strong></td><td>Detects and alerts on possible intrusions</td><td>Only catches known attacks/obvious anomalies; doesn't stop traffic itself</td></tr>
+<tr><td><strong>IPS</strong></td><td>Detects <em>and actively stops</em> intrusive activity</td><td>Inline — if it fails, the connection breaks; false positives can drop legitimate traffic</td></tr>
+<tr><td><strong>SIEM</strong></td><td>Aggregates and analyzes log data from IDS/IPS/firewalls/VPNs/proxies/DNS in one dashboard</td><td>Only reports issues — doesn't take action itself</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-204</span></div>
+  <div class="ticket-body"><p>Placement matters. An IDS or IPS sits <em>behind</em> the firewall and before the LAN — this way, it only analyzes traffic that already survived the firewall's filtering, reducing noise (false positives) in its alerts. This layering — adding tools incrementally to raise the security ceiling — is called <strong>defense in depth</strong>.</p></div>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-233</span></div>
+  <div class="ticket-body"><p><strong>Full packet capture device:</strong> Records and analyzes all data transmitted over a network, useful for investigating alerts an IDS raises in more depth than the IDS's own summary provides.</p></div>
+</div>
+
+<h3 id="sec-4-5" data-n="4.5">Cloud Hardening &amp; the Shared Responsibility Model</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Cloud Hardening Concepts</caption>
+<thead><tr><th>Concept</th><th>Definition</th></tr></thead>
+<tbody>
+<tr><td><strong>Server baseline image</strong></td><td>A reference image representing a securely configured server; comparing live cloud servers against it reveals unauthorized changes</td></tr>
+<tr><td><strong>Segmentation and isolation</strong></td><td>Separating data/applications by service category — older apps isolated from newer, back-end from front-end</td></tr>
+<tr><td><strong>Shared responsibility model</strong></td><td>The CSP secures the underlying cloud infrastructure; the organization is responsible for its own access controls, data protection, and compliant configuration</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Apartment Building</span>
+  <p>Renting a cloud service is like renting an apartment. The landlord (CSP) is responsible for the building's structure, plumbing, and locks on the main entrance. You (the organization) are still responsible for locking your own apartment door and not leaving your windows open. If you leave your door unlocked and something goes missing, the landlord isn't at fault — that's the shared responsibility model.</p>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning</span><span class="ticket-id">WRN-202</span></div>
+  <div class="ticket-body"><p>The most common source of cloud security incidents isn't a CSP failure — it's <strong>misconfiguration</strong> on the customer's side. Loosely configured IAM roles are a frequent culprit, letting unauthorized users reach critical cloud operations they should never have touched.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Cloud-Specific Security Considerations</caption>
+<thead><tr><th>Consideration</th><th>Why It Matters</th></tr></thead>
+<tbody>
+<tr><td><strong>Identity Access Management (IAM)</strong></td><td>Manages digital identities and authorizes cloud resource use; misconfiguration is a top cause of cloud breaches</td></tr>
+<tr><td><strong>Configuration complexity</strong></td><td>More available services means more configuration surface, especially risky during initial cloud migration</td></tr>
+<tr><td><strong>Attack surface</strong></td><td>Every service/application adds risk, though a well-designed network doesn't necessarily add more entry points per service</td></tr>
+<tr><td><strong>Zero-day attacks</strong></td><td>CSPs often detect and patch zero-days (including at the hypervisor level) faster than a traditional on-prem IT team could</td></tr>
+<tr><td><strong>Visibility and tracking</strong></td><td>CSPs offer flow logs and packet mirroring, but organizations can't monitor traffic directly on the CSP's own servers</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-4-6" data-n="4.6">Cryptography &amp; Key Management in the Cloud</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-234</span></div>
+  <div class="ticket-body">
+    <p><strong>Hypervisor:</strong> Abstracts a host's hardware from the operating software environment. Type 1 hypervisors run directly on hardware (common with CSPs); Type 2 run on top of an existing OS.</p>
+    <p><strong>VM escape:</strong> An exploit where a malicious actor gains access to the primary hypervisor — and potentially the host and other VMs — via a hypervisor vulnerability or misconfiguration.</p>
+    <p><strong>Baselining (cloud):</strong> A fixed reference point for how a cloud environment is configured, used to detect unauthorized changes — e.g., restricting admin portal access, enabling password management and file encryption.</p>
+  </div>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-235</span></div>
+  <div class="ticket-body">
+    <p><strong>Cryptographic erasure:</strong> Erasing the encryption key for encrypted data, rendering it undecipherable — a more effective cloud data-destruction method than traditional deletion.</p>
+    <p><strong>Crypto-shredding:</strong> Destroying all copies of a cryptographic key so no one can ever decrypt the associated data again.</p>
+    <p><strong>Trusted Platform Module (TPM):</strong> A computer chip securely storing passwords, certificates, and encryption keys.</p>
+    <p><strong>CloudHSM (Cloud Hardware Security Module):</strong> A computing device providing secure storage for cryptographic keys and processing cryptographic operations.</p>
+  </div>
+</div>
+
+<div class="ticket compliance">
+  <div class="ticket-head"><span><span class="icon">⚖️</span>Compliance Note</span><span class="ticket-id">CMP-201</span></div>
+  <div class="ticket-body"><p>For federal contractors, <strong>FedRAMP</strong> (recalled from Course I) provides a list of verified, security-assessed CSPs — a direct, practical application of the compliance frameworks introduced earlier in this certificate.</p></div>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-205</span></div>
+  <div class="ticket-body"><p>Most CSPs let customers supply their own encryption keys, but customers are then fully responsible for keeping those keys confidential — the CSP is limited in what it can do if a customer's own keys are lost or compromised. This is one of the clearest, most concrete expressions of the shared responsibility model in practice.</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs-4">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 4.1 — Hardening Task Classification</summary>
+  <div class="acc-body">
+    <p>Classify each task as OS hardening, network hardening, or cloud hardening: (1) enforcing MFA on all logins, (2) disabling unused firewall ports, (3) comparing a cloud server's config against a baseline image, (4) setting a password-complexity policy.</p>
+    <p><strong>Answer key:</strong> 1 — OS hardening (though it also supports network/cloud security broadly). 2 — Network hardening. 3 — Cloud hardening. 4 — OS hardening.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 4.2 — Tool Selection Scenario</summary>
+  <div class="acc-body">
+    <p>An organization wants a tool that will automatically block traffic the moment it detects a known attack signature, not just alert on it. Which tool should they deploy: IDS or IPS? Why?</p>
+    <p><strong>Answer:</strong> IPS — unlike an IDS, which only alerts an administrator, an IPS actively drops or blocks suspicious traffic in real time.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Scenario Challenge 4.1 — Shared Responsibility Dispute</summary>
+  <div class="acc-body">
+    <p>A company blames their CSP after a data breach caused by an overly permissive IAM role they configured themselves. Where does responsibility actually lie, according to the shared responsibility model?</p>
+    <p><strong>Answer:</strong> With the company. The CSP secures the underlying infrastructure, but configuring access controls (like IAM roles) correctly is the customer's responsibility under the shared responsibility model.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview-4">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Beginner Question</span><span class="ticket-id">INT-207</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: What's the difference between hashing and salting?</strong></p>
+    <p><strong>Ideal answer:</strong> "Hashing converts data into a fixed, one-way value that can't be reversed to reveal the original — it's used to verify integrity without storing plaintext. Salting adds random characters to data before hashing, so even identical passwords produce different hash values, defeating precomputed lookup attacks like rainbow tables."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Cloud Security Question</span><span class="ticket-id">INT-208</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Explain the shared responsibility model and give a concrete example of where responsibility shifts.</strong></p>
+    <p><strong>Ideal answer:</strong> "The CSP secures the physical infrastructure, hypervisors, and host operating systems. The customer is responsible for how they configure and use the services they've rented — access controls, data classification, and application-level security. A concrete example: the CSP patches the hypervisor against a zero-day, but if a customer leaves a storage bucket publicly accessible, that misconfiguration is squarely the customer's responsibility, not the CSP's."</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice-4">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which tool actively stops malicious traffic in real time, rather than only alerting an administrator?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">IDS</button>
+  <button class="opt" onclick="checkAnswer(this,true)">IPS</button>
+  <button class="opt" onclick="checkAnswer(this,false)">SIEM</button>
+  <div class="fb">Correct — an IPS both detects and actively blocks intrusive traffic.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: Under the shared responsibility model, the CSP is responsible for how a customer configures their own IAM roles.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — configuring access controls correctly is the customer's responsibility.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. Which cloud data-destruction method destroys the encryption key rather than the data itself?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Baselining</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Cryptographic erasure</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Segmentation</button>
+  <div class="fb">Correct — cryptographic erasure (crypto-shredding) destroys the key, making the data permanently undecipherable.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision-4">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-204</span></div>
+  <div class="ticket-body"><p>Security hardening minimizes the attack surface across hardware, OS, apps, networks, databases, and physical security. OS hardening: patching, baseline config, password policies, MFA. Brute force defense: hashing + salting, MFA/2FA, CAPTCHA, password policies. Defense in depth stack: Firewall → IDS/IPS → SIEM. Cloud hardening: baseline images, segmentation, shared responsibility model. Cryptographic erasure destroys keys, not data, for cloud disposal.</p></div>
+</div>
+
+<div class="summary-block" id="summary-4">
+  <h4>Module Summary</h4>
+  <p>This module closed Course III by tying every previous concept — devices, protocols, attacks — into a concrete hardening discipline spanning OS, network, and cloud layers, and by clarifying exactly where an organization's security responsibility begins when using a cloud provider.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>Security hardening minimizes attack surface across hardware, OS, applications, networks, databases, and physical security.</li>
+    <li>Brute force attacks are countered with hashing/salting, MFA/2FA, CAPTCHA, and password policies working together.</li>
+    <li>Firewalls, IDS, IPS, and SIEM form a layered defense-in-depth stack, each adding distinct value and limitations.</li>
+    <li>Cloud hardening depends on baseline images, segmentation, and a clear understanding of the shared responsibility model.</li>
+    <li>Cryptographic erasure and key management are the cloud-specific answers to secure data destruction and protection.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives-4">◂ Back to Module 4 Objectives</a>
+  <a href="#course-summary">Course Summary ▸</a>
+</div>
+
+<div class="endmark">— End of Module 4 —</div>
+
+<!-- ============================================================
+     COURSE SUMMARY
+     ============================================================ -->
+<h2 class="module-head" id="course-summary"><span class="tag">Course Summary</span>Connect and Protect: Networks and Network Security — Complete</h2>
+
+<p>Course III took you from "what is a network" to "how do you defend one at every layer" — architecture and models first, then the protocols and defensive tools that operate within them, then the attacks that target them, then the hardening discipline that closes the gaps.</p>
+
+<div class="table-wrap">
+<table>
+<caption>Course III — Module-by-Module Recap</caption>
+<thead><tr><th>Module</th><th>Core Theme</th><th>Signature Concepts</th></tr></thead>
+<tbody>
+<tr><td><strong>1. Network Architecture &amp; Communication</strong></td><td>How networks are built and modeled</td><td>LAN/WAN, hub/switch/router/modem, cloud services, TCP/IP (4 layers), OSI (7 layers), IPv4/IPv6</td></tr>
+<tr><td><strong>2. Protocols, VPNs &amp; Firewalls</strong></td><td>The rules and defenses governing traffic</td><td>3 protocol categories, WEP→WPA3, firewall types, VPN encapsulation, security zones, proxy servers</td></tr>
+<tr><td><strong>3. Network Attacks</strong></td><td>How networks get compromised</td><td>DoS/DDoS, SYN/ICMP/ping-of-death floods, tcpdump, packet sniffing, IP spoofing (on-path/replay/smurf)</td></tr>
+<tr><td><strong>4. Security Hardening</strong></td><td>Closing the gaps at every layer</td><td>Attack surface, OS/network/cloud hardening, IDS/IPS/SIEM, shared responsibility model, cryptographic erasure</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket expert">
+  <div class="ticket-head"><span><span class="icon">🎓</span>Expert Note</span><span class="ticket-id">EXP-201</span></div>
+  <div class="ticket-body"><p>If you remember only five things from Course III going into an interview: (1) fluently map any protocol to its OSI/TCP-IP layer; (2) know your port numbers cold (80, 443, 22, 25, 53); (3) explain the firewall → IDS/IPS → SIEM defense-in-depth stack with each tool's specific limitation; (4) distinguish DoS from DDoS and name at least two named attack types; (5) state the shared responsibility model precisely — it's one of the most commonly misunderstood concepts even among working professionals, and getting it right stands out.</p></div>
+</div>
+
+<!-- ============================================================
+     FULL COURSE GLOSSARY
+     ============================================================ -->
+<h2 class="module-head" id="course-glossary"><span class="tag">Reference</span>Full Glossary — Weeks 1–4</h2>
+
+<div class="table-wrap">
+<table>
+<caption>Complete Course III Glossary</caption>
+<thead><tr><th>Term</th><th>Definition</th></tr></thead>
+<tbody>
+<tr><td><strong>Address Resolution Protocol (ARP)</strong></td><td>Translates IP addresses into MAC addresses on the network access layer</td></tr>
+<tr><td><strong>Attack surface</strong></td><td>All potential vulnerabilities a threat actor could exploit</td></tr>
+<tr><td><strong>Backdoor attack</strong></td><td>Exploiting an intentionally left weakness that bypasses normal access controls</td></tr>
+<tr><td><strong>Baseline configuration</strong></td><td>A documented reference specification used to detect unauthorized changes</td></tr>
+<tr><td><strong>Bandwidth</strong></td><td>Amount of data a device receives per second</td></tr>
+<tr><td><strong>Botnet</strong></td><td>A collection of malware-infected computers controlled by a single "bot-herder"</td></tr>
+<tr><td><strong>CIDR (Classless Inter-Domain Routing)</strong></td><td>A method of assigning subnet masks to IP addresses using slash notation</td></tr>
+<tr><td><strong>Client-server model</strong></td><td>Clients request information/services; the server performs the requests</td></tr>
+<tr><td><strong>Cloud service provider (CSP)</strong></td><td>A company offering cloud computing services via large data centers</td></tr>
+<tr><td><strong>Cryptographic erasure</strong></td><td>Erasing an encryption key to render encrypted data permanently undecipherable</td></tr>
+<tr><td><strong>Data packet</strong></td><td>A basic unit of information traveling between devices, with header, body, and footer</td></tr>
+<tr><td><strong>Deep Packet Inspection (DPI)</strong></td><td>Analyzing packet content (not just headers) for threats</td></tr>
+<tr><td><strong>Demilitarized Zone (DMZ)</strong></td><td>Network segment hosting public-facing services, isolated from the internal network</td></tr>
+<tr><td><strong>DHCP</strong></td><td>Assigns unique IP addresses and DNS/gateway info to network devices</td></tr>
+<tr><td><strong>DNS (Domain Name System)</strong></td><td>Translates internet domain names into IP addresses</td></tr>
+<tr><td><strong>DoS / DDoS</strong></td><td>Denial of Service (single source) / Distributed Denial of Service (multiple sources) attacks flooding a target with traffic</td></tr>
+<tr><td><strong>Encapsulation</strong></td><td>Wrapping encrypted data inside a readable outer packet so routers can deliver it</td></tr>
+<tr><td><strong>Firewall</strong></td><td>A device/system regulating network traffic based on predefined rules</td></tr>
+<tr><td><strong>Hardening (security)</strong></td><td>Strengthening systems to reduce attack surface and vulnerability</td></tr>
+<tr><td><strong>HTTP / HTTPS</strong></td><td>Protocols for transferring web pages; HTTPS adds SSL/TLS encryption</td></tr>
+<tr><td><strong>Hypervisor</strong></td><td>Abstracts host hardware from the operating software environment (Type 1 or Type 2)</td></tr>
+<tr><td><strong>ICMP</strong></td><td>Reports data transmission errors; used for network troubleshooting (e.g., ping)</td></tr>
+<tr><td><strong>IDS (Intrusion Detection System)</strong></td><td>Monitors and alerts on possible intrusions without stopping traffic</td></tr>
+<tr><td><strong>IPS (Intrusion Prevention System)</strong></td><td>Monitors and actively blocks intrusive traffic</td></tr>
+<tr><td><strong>IPv4 / IPv6</strong></td><td>The two IP addressing standards; IPv6 offers a vastly larger address space</td></tr>
+<tr><td><strong>KRACK attack</strong></td><td>Key Reinstallation Attack exploiting WPA/WPA2's handshake process</td></tr>
+<tr><td><strong>LAN / WAN</strong></td><td>Local Area Network (small area) / Wide Area Network (large geographic area)</td></tr>
+<tr><td><strong>MAC address</strong></td><td>A unique alphanumeric identifier assigned to each physical network device</td></tr>
+<tr><td><strong>NAT (Network Address Translation)</strong></td><td>Replaces private IP addresses with a public one for internet communication</td></tr>
+<tr><td><strong>Network segmentation</strong></td><td>Dividing a network into segments with distinct access rules</td></tr>
+<tr><td><strong>NGFW (Next Generation Firewall)</strong></td><td>Advanced firewall combining stateful inspection, DPI, and intrusion protection</td></tr>
+<tr><td><strong>On-path attack</strong></td><td>Intercepting communication between two trusted devices (meddler-in-the-middle)</td></tr>
+<tr><td><strong>OSI model</strong></td><td>Seven-layer conceptual model of network communication</td></tr>
+<tr><td><strong>Packet sniffing</strong></td><td>Capturing and inspecting data packets across a network, passively or actively</td></tr>
+<tr><td><strong>Ping of death attack</strong></td><td>Sending oversized ICMP packets to crash a vulnerable server</td></tr>
+<tr><td><strong>Promiscuous mode</strong></td><td>NIC setting accepting all network traffic, not just packets addressed to it</td></tr>
+<tr><td><strong>Proxy server</strong></td><td>An intermediary server forwarding client requests — forward, reverse, or email type</td></tr>
+<tr><td><strong>Replay attack</strong></td><td>Intercepting and delaying or resending a data packet later</td></tr>
+<tr><td><strong>Router</strong></td><td>Connects multiple networks and directs traffic based on destination IP address</td></tr>
+<tr><td><strong>Sandbox</strong></td><td>An isolated testing environment for executing potentially malicious software safely</td></tr>
+<tr><td><strong>Security zone</strong></td><td>A network segment protecting internal assets from external threats</td></tr>
+<tr><td><strong>Shared responsibility model</strong></td><td>The principle that CSPs secure infrastructure while customers secure their own configuration and access</td></tr>
+<tr><td><strong>SIEM</strong></td><td>Aggregates and analyzes log data from multiple sources into a centralized dashboard</td></tr>
+<tr><td><strong>Smurf attack</strong></td><td>IP spoofing combined with a broadcast ICMP flood</td></tr>
+<tr><td><strong>Subnetting</strong></td><td>Dividing a network into logical subnets for efficiency and security</td></tr>
+<tr><td><strong>SYN flood attack</strong></td><td>Flooding a server with SYN packets to exhaust available ports</td></tr>
+<tr><td><strong>tcpdump</strong></td><td>A command-line network protocol analyzer for capturing and reading raw traffic</td></tr>
+<tr><td><strong>TCP/IP model</strong></td><td>Four-layer conceptual model of network communication</td></tr>
+<tr><td><strong>TTL (Time to Live)</strong></td><td>A packet counter preventing indefinite forwarding by routers</td></tr>
+<tr><td><strong>VPN (Virtual Private Network)</strong></td><td>Encrypts data and hides IP address/location using encapsulation</td></tr>
+<tr><td><strong>VM escape</strong></td><td>An exploit letting an attacker access the host machine from within a VM</td></tr>
+<tr><td><strong>WPA / WPA2 / WPA3</strong></td><td>Successive generations of Wi-Fi security protocols, each fixing prior weaknesses</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ============================================================
+     MASTER CHEAT SHEET
+     ============================================================ -->
+<h2 class="module-head" id="course-cheatsheet"><span class="tag">Reference</span>Master Cheat Sheet &amp; Revision Checklist</h2>
+
+<h4>Revision Checklist</h4>
+<div class="quiz" style="background:var(--paper-dim);">
+  <p>Before moving to Course IV, confirm you can do all of the following from memory:</p>
+  <ul>
+    <li>☐ Explain the difference between LAN and WAN with an example of each</li>
+    <li>☐ Name all 4 TCP/IP layers and all 7 OSI layers in order</li>
+    <li>☐ Map at least 6 common protocols to their correct port numbers</li>
+    <li>☐ Explain the evolution from WEP to WPA3 and what each generation fixed</li>
+    <li>☐ Distinguish stateless, stateful, and next-generation firewalls</li>
+    <li>☐ Explain how a VPN uses both encryption and encapsulation</li>
+    <li>☐ Name the four security zones and their purpose</li>
+    <li>☐ Distinguish DoS from DDoS and name 3 specific named DoS attacks</li>
+    <li>☐ Explain the difference between passive and active packet sniffing</li>
+    <li>☐ Recite the shared responsibility model precisely</li>
+  </ul>
+</div>
+
+<h4>Cybersecurity Terms Cheat Sheet — By Category</h4>
+<div class="table-wrap">
+<table>
+<tbody>
+<tr><td><strong>Network Types</strong></td><td>LAN, WAN, Cloud Network, Hybrid Cloud, Multi-Cloud</td></tr>
+<tr><td><strong>Physical Devices</strong></td><td>Hub, Switch, Router, Modem, Wireless Access Point</td></tr>
+<tr><td><strong>Cloud Service Models</strong></td><td>SaaS, IaaS, PaaS</td></tr>
+<tr><td><strong>TCP/IP Layers</strong></td><td>Network Access, Internet, Transport, Application</td></tr>
+<tr><td><strong>OSI Layers</strong></td><td>Physical, Data Link, Network, Transport, Session, Presentation, Application</td></tr>
+<tr><td><strong>Key Ports</strong></td><td>20/21 FTP, 22 SSH, 25 SMTP, 53 DNS, 80 HTTP, 443 HTTPS, 67/68 DHCP</td></tr>
+<tr><td><strong>Wi-Fi Security Evolution</strong></td><td>WEP (1999) → WPA (2003) → WPA2 (2004) → WPA3 (2018)</td></tr>
+<tr><td><strong>Firewall Types</strong></td><td>Hardware, Software, Cloud-based; Stateless, Stateful, NGFW</td></tr>
+<tr><td><strong>Security Zones</strong></td><td>Uncontrolled, DMZ, Internal Network, Restricted</td></tr>
+<tr><td><strong>Proxy Types</strong></td><td>Forward, Reverse, Email</td></tr>
+<tr><td><strong>Named DoS Attacks</strong></td><td>SYN Flood, ICMP Flood, Ping of Death</td></tr>
+<tr><td><strong>IP Spoofing Attacks</strong></td><td>On-path, Replay, Smurf</td></tr>
+<tr><td><strong>Brute Force Defenses</strong></td><td>Hashing + Salting, MFA/2FA, CAPTCHA/reCAPTCHA, Password Policies</td></tr>
+<tr><td><strong>Defense-in-Depth Stack</strong></td><td>Firewall → IDS/IPS → SIEM</td></tr>
+<tr><td><strong>Cloud Hardening</strong></td><td>Server Baseline Image, Segmentation, Shared Responsibility Model</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="summary-block">
+  <h4>Where to Go Next</h4>
+  <ul>
+    <li><strong>Course IV — Tools of the Trade: Linux and SQL</strong> shifts from conceptual network architecture to hands-on command-line and database skills — the practical tools you'll use daily to investigate the very attacks and systems covered in this course.</li>
+    <li>Add your Course III portfolio artifacts (network diagram, incident summary) to your growing collection.</li>
+    <li>Revisit the OSI/TCP-IP layer mapping and port numbers one week from now using spaced repetition — these are foundational and will keep coming up.</li>
+  </ul>
+</div>
+
+<div class="endmark">— End of Course III: Connect and Protect — Networks and Network Security —</div>
+</div>
+</main>
+<script>
+// progress bar
+window.addEventListener('scroll', function(){
+  var h = document.documentElement;
+  var scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+  document.getElementById('progress-fill').style.width = scrolled + '%';
+});
+
+// TOC drawer
+var drawer = document.getElementById('toc-drawer');
+var scrim = document.getElementById('scrim');
+document.getElementById('toc-toggle').addEventListener('click', function(){
+  drawer.classList.add('open'); scrim.classList.add('show');
+  this.setAttribute('aria-expanded','true');
+});
+document.getElementById('toc-close').addEventListener('click', closeDrawer);
+scrim.addEventListener('click', closeDrawer);
+function closeDrawer(){
+  drawer.classList.remove('open'); scrim.classList.remove('show');
+  document.getElementById('toc-toggle').setAttribute('aria-expanded','false');
+}
+
+// flashcards
+document.querySelectorAll('.flash').forEach(function(card){
+  function flip(){
+    card.classList.toggle('flipped');
+    card.setAttribute('aria-pressed', card.classList.contains('flipped'));
+  }
+  card.addEventListener('click', flip);
+  card.addEventListener('keypress', function(e){ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); flip(); } });
+});
+
+// quiz
+function checkAnswer(btn, isCorrect){
+  var quiz = btn.closest('.quiz');
+  var opts = quiz.querySelectorAll('.opt');
+  opts.forEach(function(o){ o.disabled = true; });
+  if(isCorrect){ btn.classList.add('correct'); }
+  else { btn.classList.add('wrong'); }
+  quiz.querySelector('.fb').classList.add('show');
+}
+
+// copy code
+function copyCode(btn){
+  var code = btn.closest('.code-block').querySelector('pre').innerText;
+  navigator.clipboard.writeText(code).then(function(){
+    var old = btn.innerText; btn.innerText = 'Copied!';
+    setTimeout(function(){ btn.innerText = old; }, 1500);
+  });
+}
+
+// scroll-spy for TOC + spine
+var spySections = document.querySelectorAll('[id]');
+var tocLinks = document.querySelectorAll('#toc-drawer a[href^="#"]');
+var spineTabs = document.querySelectorAll('#spine .spine-tab');
+var moduleIds = ['module-1','module-2','module-3','module-4'];
+window.addEventListener('scroll', function(){
+  var current = '';
+  spySections.forEach(function(sec){
+    var rect = sec.getBoundingClientRect();
+    if(rect.top < 150) current = sec.id;
+  });
+  tocLinks.forEach(function(link){
+    link.classList.remove('current');
+    if(link.getAttribute('href') === '#' + current) link.classList.add('current');
+  });
+  // determine which module we're currently in for the spine rail
+  var currentModule = 'module-1';
+  moduleIds.forEach(function(mid){
+    var el = document.getElementById(mid);
+    if(el && el.getBoundingClientRect().top < 150) currentModule = mid;
+  });
+  spineTabs.forEach(function(tab){
+    tab.classList.remove('active');
+    if(tab.getAttribute('href') === '#' + currentModule) tab.classList.add('active');
+  });
+});
+</script>
+
+  <script src="../../js/storage.js" defer></script>
+  <script src="../../js/reader.js" defer></script>
+</body>
+</html>

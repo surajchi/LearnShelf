@@ -1,0 +1,7 @@
+{
+  "title": "Docker",
+  "description": "Package, ship, and run applications in containers — images, volumes, networking, and Compose.",
+  "icon": "🐳",
+  "difficulty": "Intermediate",
+  "chapters": []
+}

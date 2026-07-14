@@ -1,0 +1,2384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course I · Foundations of Cybersecurity — Complete Course (Modules 1–4)</title>
+<style>
+/* ============================================================
+   DESIGN SYSTEM — "CASE FILE" — SOC Reference Book
+   Palette: ink #0B0F14, paper #F7F5F0, panel #16202B, signal teal #2DD4BF,
+            warning amber #F59E0B, critical red #EF4444, wire blue #5B8DEF
+   Type: display = geometric sans, body = humanist serif, mono = code/log
+   ============================================================ */
+:root{
+  --ink:#0B0F14;
+  --paper:#F7F5F0;
+  --paper-dim:#EDE9E0;
+  --panel:#16202B;
+  --panel-2:#1E2B38;
+  --line:#D8D2C4;
+  --line-dark:#2A3A48;
+  --signal:#0F9E93;
+  --signal-bright:#2DD4BF;
+  --warn:#B4700A;
+  --warn-bright:#F59E0B;
+  --crit:#C4342A;
+  --crit-bright:#EF4444;
+  --wire:#3457B2;
+  --wire-bright:#5B8DEF;
+  --ink-soft:#3A4650;
+  --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
+  --sans: -apple-system, 'Segoe UI', 'Inter', Avenir, Helvetica, Arial, sans-serif;
+  --mono: 'SF Mono', 'JetBrains Mono', Consolas, 'Courier New', monospace;
+  --maxw: 780px;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:17px;
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+
+::selection{background:var(--signal-bright); color:var(--ink);}
+
+/* ---------- progress bar (signal-strength style) ---------- */
+#progress-track{
+  position:fixed; top:0; left:0; right:0; height:4px; z-index:500;
+  background:var(--paper-dim);
+  border-bottom:1px solid var(--line);
+}
+#progress-fill{
+  height:100%; width:0%;
+  background:repeating-linear-gradient(90deg, var(--signal) 0 6px, var(--signal-bright) 6px 12px);
+  transition:width .1s linear;
+}
+
+/* ---------- spine rail (left nav) ---------- */
+#spine{
+  position:fixed; top:0; left:0; bottom:0; width:64px; z-index:400;
+  background:var(--ink);
+  border-right:1px solid var(--line-dark);
+  display:flex; flex-direction:column; align-items:center;
+  padding-top:24px; gap:4px;
+  font-family:var(--mono);
+}
+#spine .spine-mark{
+  writing-mode:vertical-rl; text-orientation:mixed;
+  color:var(--signal-bright); font-size:11px; letter-spacing:.15em;
+  margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid var(--line-dark);
+  text-transform:uppercase;
+}
+#spine .spine-tab{
+  width:40px; height:40px; border-radius:3px;
+  display:flex; align-items:center; justify-content:center;
+  color:#6B7A85; font-size:13px; font-weight:700;
+  border:1px solid transparent; cursor:pointer; text-decoration:none;
+  transition:all .15s ease;
+}
+#spine .spine-tab:hover{border-color:var(--line-dark); color:var(--paper);}
+#spine .spine-tab.active{background:var(--panel-2); color:var(--signal-bright); border-color:var(--signal);}
+#toc-toggle{
+  margin-top:auto; margin-bottom:20px; width:40px; height:40px;
+  border-radius:3px; border:1px solid var(--line-dark); background:none;
+  color:#6B7A85; cursor:pointer; font-size:16px;
+}
+#toc-toggle:hover{color:var(--signal-bright); border-color:var(--signal);}
+
+@media (max-width: 860px){
+  #spine{width:44px; padding-top:16px;}
+  #spine .spine-mark{display:none;}
+  #spine .spine-tab{width:30px; height:30px; font-size:11px;}
+}
+
+/* ---------- TOC drawer ---------- */
+#toc-drawer{
+  position:fixed; top:0; left:-380px; bottom:0; width:340px; z-index:450;
+  background:var(--panel); color:var(--paper);
+  padding:32px 28px; overflow-y:auto;
+  transition:left .25s ease;
+  box-shadow:8px 0 30px rgba(0,0,0,.35);
+  font-family:var(--sans);
+}
+#toc-drawer.open{left:64px;}
+@media (max-width:860px){ #toc-drawer.open{left:44px;} }
+#toc-drawer h3{
+  font-family:var(--mono); text-transform:uppercase; letter-spacing:.12em;
+  font-size:12px; color:var(--signal-bright); margin:0 0 18px;
+  border-bottom:1px solid var(--line-dark); padding-bottom:12px;
+}
+#toc-drawer .toc-course{font-size:13px; font-weight:700; margin:18px 0 6px; color:#9FB1BE;}
+#toc-drawer ol{list-style:none; margin:0 0 8px; padding:0;}
+#toc-drawer li a{
+  display:block; padding:7px 8px; border-radius:4px; color:#C9D3DA;
+  text-decoration:none; font-size:13.5px; line-height:1.4;
+  border-left:2px solid transparent;
+}
+#toc-drawer li a:hover{background:var(--panel-2); border-left-color:var(--signal-bright); color:#fff;}
+#toc-drawer li a.current{border-left-color:var(--signal-bright); color:var(--signal-bright); background:var(--panel-2);}
+#toc-close{
+  position:absolute; top:28px; right:24px; background:none; border:none;
+  color:#9FB1BE; font-size:20px; cursor:pointer;
+}
+#scrim{position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:440; display:none;}
+#scrim.show{display:block;}
+
+/* ---------- layout ---------- */
+main{margin-left:64px; padding:0 24px 120px;}
+@media (max-width:860px){ main{margin-left:44px; padding:0 16px 100px;} }
+.page{max-width:var(--maxw); margin:0 auto; padding-top:56px;}
+
+/* ---------- cover ---------- */
+.cover{
+  min-height:92vh; display:flex; flex-direction:column; justify-content:center;
+  border-bottom:3px solid var(--ink); padding-bottom:48px; margin-bottom:56px;
+}
+.cover-eyebrow{
+  font-family:var(--mono); font-size:12.5px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--signal); margin-bottom:18px; display:flex; align-items:center; gap:10px;
+}
+.cover-eyebrow::before{content:"";width:28px;height:2px;background:var(--signal-bright);display:inline-block;}
+.cover h1{
+  font-family:var(--sans); font-size:clamp(2.4rem, 6vw, 4rem); font-weight:800;
+  line-height:1.05; margin:0 0 14px; letter-spacing:-.02em; color:var(--ink);
+}
+.cover .subtitle{
+  font-family:var(--serif); font-style:italic; font-size:1.35rem; color:var(--ink-soft);
+  margin:0 0 36px; max-width:640px;
+}
+.cover-svg-wrap{margin:8px 0 40px;}
+.cover-meta{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:0;
+  border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+}
+.cover-meta div{padding:16px 18px; border-right:1px solid var(--line);}
+.cover-meta div:last-child{border-right:none;}
+.cover-meta .k{font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.1em; color:#8A8272; margin-bottom:5px;}
+.cover-meta .v{font-family:var(--sans); font-size:14.5px; font-weight:700; color:var(--ink);}
+
+.cover-block{margin-top:36px;}
+.cover-block h4{
+  font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.12em;
+  color:var(--signal); margin:0 0 10px;
+}
+.cover-block ul{margin:0; padding-left:20px;}
+.cover-block li{margin-bottom:6px; font-size:15.5px;}
+
+/* ---------- headings ---------- */
+h2.module-head{
+  font-family:var(--sans); font-size:2.1rem; font-weight:800; letter-spacing:-.01em;
+  margin:64px 0 6px; padding-top:40px; border-top:3px solid var(--ink);
+  page-break-before:always;
+}
+h2.module-head .tag{
+  display:block; font-family:var(--mono); font-size:12px; letter-spacing:.15em;
+  text-transform:uppercase; color:var(--signal); font-weight:700; margin-bottom:10px;
+}
+h3{
+  font-family:var(--sans); font-size:1.42rem; font-weight:800; margin:42px 0 14px;
+  color:var(--ink); letter-spacing:-.005em;
+  display:flex; align-items:baseline; gap:10px;
+}
+h3::before{
+  content:attr(data-n); font-family:var(--mono); font-size:.65em; color:var(--signal);
+  font-weight:700;
+}
+h4{font-family:var(--sans); font-weight:700; font-size:1.08rem; margin:28px 0 10px; color:var(--ink);}
+p{margin:0 0 16px;}
+strong{color:var(--ink); font-weight:700;}
+a{color:var(--wire);}
+
+/* ---------- objectives box ---------- */
+.objectives{
+  background:var(--ink); color:var(--paper); border-radius:6px; padding:28px 30px;
+  margin:24px 0 40px; font-family:var(--sans);
+}
+.objectives h4{
+  font-family:var(--mono); color:var(--signal-bright); text-transform:uppercase;
+  letter-spacing:.12em; font-size:12px; margin:0 0 16px;
+}
+.objectives ul{margin:0; padding-left:0; list-style:none;}
+.objectives li{
+  position:relative; padding-left:26px; margin-bottom:10px; font-size:15px; color:#DCE3E8;
+}
+.objectives li::before{content:"▸"; position:absolute; left:0; color:var(--signal-bright);}
+
+/* ---------- callouts: "case-file ticket" signature element ---------- */
+.ticket{
+  border:1.5px solid var(--ink); border-radius:4px; margin:26px 0; position:relative;
+  background:#fff; overflow:hidden; font-family:var(--sans);
+}
+.ticket-head{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:9px 16px; font-family:var(--mono); font-size:11px; letter-spacing:.08em;
+  text-transform:uppercase; font-weight:700; color:#fff;
+}
+.ticket-id{opacity:.85; font-weight:400;}
+.ticket-body{padding:16px 18px; font-size:15px; line-height:1.6;}
+.ticket-body p:last-child{margin-bottom:0;}
+.ticket.def .ticket-head{background:var(--wire);}
+.ticket.important .ticket-head{background:var(--ink);}
+.ticket.remember .ticket-head{background:#6B4FBB;}
+.ticket.interview .ticket-head{background:var(--signal);}
+.ticket.warning .ticket-head{background:var(--warn);}
+.ticket.alert .ticket-head{background:var(--crit);}
+.ticket.industry .ticket-head{background:#8A5A2B;}
+.ticket.bestpractice .ticket-head{background:#1E7A4C;}
+.ticket.compliance .ticket-head{background:#3A5A78;}
+.ticket.examtip .ticket-head{background:#B0862B;}
+.ticket.soc .ticket-head{background:#0F5E6B;}
+.ticket.threatintel .ticket-head{background:#7A1F3D;}
+.ticket.blueteam .ticket-head{background:#1D4E89;}
+.ticket.redteam .ticket-head{background:#8C1C1C;}
+.ticket.quickrev .ticket-head{background:#4C6444;}
+.ticket.deepdive .ticket-head{background:#2C2C54;}
+.ticket.expert .ticket-head{background:#5C4033;}
+.ticket.incident .ticket-head{background:#7A1F3D;}
+.ticket .icon{margin-right:6px;}
+
+/* ---------- ELI5 ---------- */
+.eli5{
+  border-left:4px solid var(--warn-bright); background:#FFF8ED; border-radius:0 6px 6px 0;
+  padding:18px 22px; margin:22px 0; font-family:var(--serif);
+}
+.eli5 .eli5-tag{
+  font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.1em;
+  color:var(--warn); font-weight:700; margin-bottom:8px; display:block;
+}
+
+/* ---------- multi-level explanation ---------- */
+.levels{margin:26px 0; border:1px solid var(--line); border-radius:6px; overflow:hidden;}
+.level{padding:16px 20px; border-bottom:1px solid var(--line);}
+.level:last-child{border-bottom:none;}
+.level .lv-tag{
+  font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.1em;
+  font-weight:700; margin-bottom:6px; display:inline-block; padding:2px 8px; border-radius:3px;
+}
+.level.l1{background:#FFF8ED;} .level.l1 .lv-tag{background:var(--warn-bright); color:#3A2A00;}
+.level.l2{background:#F2F7FF;} .level.l2 .lv-tag{background:var(--wire-bright); color:#0A1A3A;}
+.level.l3{background:#EFFAF8;} .level.l3 .lv-tag{background:var(--signal-bright); color:#00302B;}
+.level.l4{background:#F7F0FA;} .level.l4 .lv-tag{background:#B27FE0; color:#2A0A3A;}
+.level p{margin:0; font-size:15px;}
+
+/* ---------- tables ---------- */
+.table-wrap{overflow-x:auto; margin:24px 0;}
+table{width:100%; border-collapse:collapse; font-family:var(--sans); font-size:14px;}
+caption{
+  caption-side:top; text-align:left; font-family:var(--mono); font-size:11px;
+  text-transform:uppercase; letter-spacing:.1em; color:var(--signal); margin-bottom:8px; font-weight:700;
+}
+th{
+  background:var(--ink); color:var(--paper); text-align:left; padding:10px 14px;
+  font-weight:700; font-size:12.5px; text-transform:uppercase; letter-spacing:.04em;
+}
+td{padding:10px 14px; border-bottom:1px solid var(--line); vertical-align:top;}
+tr:nth-child(even) td{background:var(--paper-dim);}
+
+/* ---------- code blocks ---------- */
+.code-block{margin:22px 0; border-radius:6px; overflow:hidden; border:1px solid var(--line-dark);}
+.code-head{
+  background:var(--panel); color:#9FB1BE; font-family:var(--mono); font-size:11.5px;
+  padding:8px 14px; display:flex; justify-content:space-between; align-items:center;
+  border-bottom:1px solid var(--line-dark);
+}
+.code-head .lang{color:var(--signal-bright); text-transform:uppercase; letter-spacing:.08em;}
+.copy-btn{
+  background:var(--panel-2); border:1px solid var(--line-dark); color:#C9D3DA;
+  font-family:var(--mono); font-size:11px; padding:3px 10px; border-radius:3px; cursor:pointer;
+}
+.copy-btn:hover{border-color:var(--signal-bright); color:var(--signal-bright);}
+pre{
+  margin:0; background:var(--ink); color:#D9E4EA; padding:16px 18px; overflow-x:auto;
+  font-family:var(--mono); font-size:13.5px; line-height:1.6;
+}
+pre code{counter-reset:line;}
+.code-note{
+  background:var(--paper-dim); border-top:1px solid var(--line); padding:10px 16px;
+  font-family:var(--sans); font-size:13px; color:var(--ink-soft);
+}
+
+/* ---------- svg figure ---------- */
+figure{margin:28px 0; text-align:center;}
+figure svg{max-width:100%; height:auto;}
+figcaption{
+  font-family:var(--mono); font-size:11.5px; color:var(--ink-soft); margin-top:10px;
+  text-transform:uppercase; letter-spacing:.06em;
+}
+
+/* ---------- flashcards ---------- */
+.flash-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin:24px 0;}
+.flash{
+  border:1px solid var(--line); border-radius:6px; padding:16px; cursor:pointer;
+  background:#fff; min-height:96px; position:relative; font-family:var(--sans);
+  transition:box-shadow .15s;
+}
+.flash:hover{box-shadow:0 4px 14px rgba(0,0,0,.08);}
+.flash .front{font-weight:700; font-size:14.5px;}
+.flash .back{
+  display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);
+  font-family:var(--serif); font-size:14px; color:var(--ink-soft);
+}
+.flash.flipped .back{display:block;}
+.flash .hint{
+  position:absolute; top:12px; right:12px; font-family:var(--mono); font-size:9.5px;
+  color:#B0A996; text-transform:uppercase;
+}
+
+/* ---------- accordion ---------- */
+details.acc{border:1px solid var(--line); border-radius:6px; margin:12px 0; overflow:hidden;}
+details.acc summary{
+  padding:13px 18px; cursor:pointer; font-family:var(--sans); font-weight:700; font-size:14.5px;
+  background:var(--paper-dim); list-style:none; display:flex; justify-content:space-between;
+}
+details.acc summary::-webkit-details-marker{display:none;}
+details.acc summary::after{content:"+"; color:var(--signal); font-size:18px;}
+details.acc[open] summary::after{content:"–";}
+details.acc .acc-body{padding:16px 18px; font-size:15px;}
+
+/* ---------- MCQ / practice ---------- */
+.quiz{border:1px solid var(--line); border-radius:6px; padding:18px 20px; margin:16px 0; background:#fff;}
+.quiz .q{font-weight:700; font-family:var(--sans); margin-bottom:10px; font-size:14.5px;}
+.quiz .opt{
+  display:block; width:100%; text-align:left; padding:9px 12px; margin-bottom:6px;
+  border:1px solid var(--line); border-radius:4px; background:var(--paper); cursor:pointer;
+  font-family:var(--sans); font-size:14px;
+}
+.quiz .opt:hover{border-color:var(--wire);}
+.quiz .opt.correct{background:#E6F7EE; border-color:var(--signal); font-weight:700;}
+.quiz .opt.wrong{background:#FBEAEA; border-color:var(--crit);}
+.quiz .fb{margin-top:8px; font-size:13.5px; font-family:var(--sans); color:var(--ink-soft); display:none;}
+.quiz .fb.show{display:block;}
+
+/* ---------- summary / takeaway blocks ---------- */
+.summary-block{
+  background:var(--panel); color:var(--paper); border-radius:8px; padding:30px 32px; margin:36px 0;
+  font-family:var(--sans);
+}
+.summary-block h4{color:var(--signal-bright); font-family:var(--mono); text-transform:uppercase; letter-spacing:.1em; font-size:12px;}
+.summary-block ul{padding-left:20px; margin:12px 0 0;}
+.summary-block li{margin-bottom:8px; font-size:14.5px; color:#DCE3E8;}
+
+/* footer nav */
+.module-nav{
+  display:flex; justify-content:space-between; margin-top:60px; padding-top:24px;
+  border-top:1px solid var(--line); font-family:var(--sans); font-size:13.5px;
+}
+.module-nav a{text-decoration:none; color:var(--ink); font-weight:700;}
+.endmark{
+  text-align:center; font-family:var(--mono); font-size:11px; color:#B0A996;
+  letter-spacing:.15em; text-transform:uppercase; margin:80px 0 20px;
+}
+
+/* print */
+@media print{
+  #spine, #toc-drawer, #progress-track, #scrim, .copy-btn{display:none !important;}
+  main{margin-left:0;}
+  body{font-size:12pt;}
+  .ticket, .levels, .objectives, .summary-block{break-inside:avoid;}
+  h2.module-head{page-break-before:always;}
+  a{color:inherit; text-decoration:none;}
+}
+
+/* accessibility */
+:focus-visible{outline:3px solid var(--signal); outline-offset:2px;}
+.skip-link{
+  position:absolute; left:-999px; top:0; background:var(--ink); color:#fff; padding:10px 16px; z-index:900;
+}
+.skip-link:focus{left:70px; top:8px;}
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main-content">Skip to content</a>
+
+<div id="progress-track"><div id="progress-fill"></div></div>
+
+<nav id="spine" aria-label="Course navigation">
+  <div class="spine-mark">COURSE I</div>
+  <a class="spine-tab" href="#module-1" title="Module 1 · Intro to Cybersecurity">M1</a>
+  <a class="spine-tab" href="#module-2" title="Module 2 · History &amp; Types of Attacks">M2</a>
+  <a class="spine-tab" href="#module-3" title="Module 3 · Frameworks, Controls &amp; Ethics">M3</a>
+  <a class="spine-tab" href="#module-4" title="Module 4 · Tools &amp; Career Prep">M4</a>
+  <button id="toc-toggle" aria-label="Open table of contents" aria-expanded="false">☰</button>
+</nav>
+
+<div id="scrim"></div>
+<aside id="toc-drawer" aria-label="Table of contents">
+  <button id="toc-close" aria-label="Close table of contents">✕</button>
+  <h3>Course I — Foundations of Cybersecurity</h3>
+  <div class="toc-course">Module 1 · Intro to Cybersecurity</div>
+  <ol>
+    <li><a href="#module-1" class="current">Cover &amp; Module 1 start</a></li>
+    <li><a href="#sec-1">1.1 What Is Cybersecurity?</a></li>
+    <li><a href="#sec-2">1.2 The CIA Triad</a></li>
+    <li><a href="#sec-3">1.3 Threat Actors &amp; Internal Threats</a></li>
+    <li><a href="#sec-4">1.4 PII and SPII</a></li>
+    <li><a href="#sec-5">1.5 Frameworks, Controls &amp; Posture</a></li>
+    <li><a href="#sec-6">1.6 Job Titles</a></li>
+    <li><a href="#sec-7">1.7 Transferable Skills</a></li>
+    <li><a href="#sec-8">1.8 Technical Skills &amp; Tools</a></li>
+    <li><a href="#sec-9">1.9 Business Continuity &amp; Ethics</a></li>
+    <li><a href="#sec-10">1.10 Analyst Workflow Walkthrough</a></li>
+    <li><a href="#labs">Labs &amp; Exercises</a></li>
+    <li><a href="#interview">Interview Prep</a></li>
+    <li><a href="#practice">Practice Section</a></li>
+    <li><a href="#revision">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Module 2 · History &amp; Types of Attacks</div>
+  <ol>
+    <li><a href="#module-2">Module 2 start</a></li>
+    <li><a href="#sec-2-1">2.1 Early Malware: Brain Virus &amp; Morris Worm</a></li>
+    <li><a href="#sec-2-2">2.2 The Love Letter &amp; Rise of Social Engineering</a></li>
+    <li><a href="#sec-2-3">2.3 The Equifax Breach</a></li>
+    <li><a href="#sec-2-4">2.4 Phishing Attack Types</a></li>
+    <li><a href="#sec-2-5">2.5 Malware Types</a></li>
+    <li><a href="#sec-2-6">2.6 Social Engineering Techniques</a></li>
+    <li><a href="#sec-2-7">2.7 Why Social Engineering Works</a></li>
+    <li><a href="#sec-2-8">2.8 Threat Actor Types &amp; Hacker Types</a></li>
+    <li><a href="#labs-2">Labs &amp; Exercises</a></li>
+    <li><a href="#interview-2">Interview Prep</a></li>
+    <li><a href="#practice-2">Practice Section</a></li>
+    <li><a href="#revision-2">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary-2">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Module 3 · Frameworks, Controls &amp; Ethics</div>
+  <ol>
+    <li><a href="#module-3">Module 3 start</a></li>
+    <li><a href="#sec-3-1">3.1 Security Frameworks &amp; the Security Lifecycle</a></li>
+    <li><a href="#sec-3-2">3.2 CIA Triad in Secure Design</a></li>
+    <li><a href="#sec-3-3">3.3 NIST Frameworks</a></li>
+    <li><a href="#sec-3-4">3.4 Named Frameworks &amp; Compliance Laws</a></li>
+    <li><a href="#sec-3-5">3.5 CISSP's Eight Security Domains</a></li>
+    <li><a href="#sec-3-6">3.6 Attack Types Mapped to Domains</a></li>
+    <li><a href="#sec-3-7">3.7 Security Ethics</a></li>
+    <li><a href="#sec-3-8">3.8 Counterattacks &amp; the Law</a></li>
+    <li><a href="#labs-3">Labs &amp; Exercises</a></li>
+    <li><a href="#interview-3">Interview Prep</a></li>
+    <li><a href="#practice-3">Practice Section</a></li>
+    <li><a href="#revision-3">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary-3">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Module 4 · Tools &amp; Career Prep</div>
+  <ol>
+    <li><a href="#module-4">Module 4 start</a></li>
+    <li><a href="#sec-4-1">4.1 Logs &amp; SIEM Tools</a></li>
+    <li><a href="#sec-4-2">4.2 Packet Sniffers &amp; Playbooks</a></li>
+    <li><a href="#sec-4-3">4.3 Chain of Custody &amp; Evidence Preservation</a></li>
+    <li><a href="#sec-4-4">4.4 Linux, SQL &amp; Python</a></li>
+    <li><a href="#sec-4-5">4.5 Operating Systems &amp; the CLI</a></li>
+    <li><a href="#sec-4-6">4.6 Web Vulnerabilities, Antivirus, IDS, Encryption, Pen Testing</a></li>
+    <li><a href="#sec-4-7">4.7 Building a Cybersecurity Portfolio</a></li>
+    <li><a href="#labs-4">Labs &amp; Exercises</a></li>
+    <li><a href="#interview-4">Interview Prep</a></li>
+    <li><a href="#practice-4">Practice Section</a></li>
+    <li><a href="#revision-4">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary-4">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Course Reference</div>
+  <ol>
+    <li><a href="#course-summary">Course Summary</a></li>
+    <li><a href="#course-glossary">Full Glossary (Weeks 1–4)</a></li>
+    <li><a href="#course-cheatsheet">Master Cheat Sheet</a></li>
+  </ol>
+</aside>
+
+<main id="main-content">
+<div class="page" id="module-1">
+
+<!-- ================= COVER ================= -->
+<section class="cover">
+  <div class="cover-eyebrow">Google Cybersecurity Certificate · Premium Edition</div>
+  <h1>Course I<br>Foundations of Cybersecurity</h1>
+  <p class="subtitle">The book Google's course notes wish they were — every term explained from zero, every concept tied to a real SOC ticket.</p>
+
+  <div class="cover-svg-wrap">
+    <svg viewBox="0 0 700 220" width="100%" role="img" aria-label="Illustration of a shield formed from a network of connected nodes, representing the foundations of cybersecurity">
+      <defs>
+        <linearGradient id="shieldGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#0F9E93"/>
+          <stop offset="100%" stop-color="#0B0F14"/>
+        </linearGradient>
+      </defs>
+      <rect x="0" y="0" width="700" height="220" fill="#F7F5F0"/>
+      <!-- network lines -->
+      <g stroke="#D8D2C4" stroke-width="1.5">
+        <line x1="40" y1="40" x2="160" y2="90"/>
+        <line x1="160" y1="90" x2="120" y2="180"/>
+        <line x1="160" y1="90" x2="260" y2="60"/>
+        <line x1="540" y1="50" x2="620" y2="120"/>
+        <line x1="620" y1="120" x2="560" y2="190"/>
+        <line x1="540" y1="50" x2="480" y2="130"/>
+      </g>
+      <g fill="#B0A996">
+        <circle cx="40" cy="40" r="5"/>
+        <circle cx="160" cy="90" r="5"/>
+        <circle cx="120" cy="180" r="5"/>
+        <circle cx="260" cy="60" r="5"/>
+        <circle cx="540" cy="50" r="5"/>
+        <circle cx="620" cy="120" r="5"/>
+        <circle cx="560" cy="190" r="5"/>
+        <circle cx="480" cy="130" r="5"/>
+      </g>
+      <!-- central shield -->
+      <path d="M350 30 L410 55 L410 120 C410 165 380 190 350 205 C320 190 290 165 290 120 L290 55 Z"
+            fill="url(#shieldGrad)" stroke="#0B0F14" stroke-width="2"/>
+      <path d="M330 110 L345 128 L378 88" fill="none" stroke="#F7F5F0" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <div class="cover-meta">
+    <div><div class="k">Reading Time</div><div class="v">~3.5 hrs / module</div></div>
+    <div><div class="k">Difficulty</div><div class="v">Beginner</div></div>
+    <div><div class="k">Prerequisites</div><div class="v">None</div></div>
+    <div><div class="k">Modules</div><div class="v">4 (Weeks 1–4)</div></div>
+  </div>
+
+  <div class="cover-block">
+    <h4>Learning Objectives — Whole Course</h4>
+    <ul>
+      <li>Define cybersecurity and explain the CIA triad from first principles.</li>
+      <li>Trace the history of cybersecurity from the 1970s to today's threat landscape.</li>
+      <li>Explain the eight CISSP security domains and major compliance frameworks (NIST, GDPR, HIPAA, PCI DSS).</li>
+      <li>Identify the tools (SIEM, IDS, packet sniffers) and skills every entry-level analyst needs.</li>
+      <li>Apply an ethical framework to real security decisions.</li>
+    </ul>
+  </div>
+
+  <div class="cover-block">
+    <h4>Skills Gained</h4>
+    <ul>
+      <li>Security terminology fluency (100+ terms defined from zero)</li>
+      <li>Risk, threat, and vulnerability differentiation</li>
+      <li>Framework literacy: NIST CSF, NIST RMF, ISO 27001, CIS Controls</li>
+      <li>Foundational tool awareness: SIEM, IDS, packet sniffers, antivirus</li>
+    </ul>
+  </div>
+
+  <div class="cover-block">
+    <h4>Career Relevance</h4>
+    <p>This course maps directly onto the first section of the CompTIA Security+ exam objectives and is the baseline vocabulary test in almost every SOC Analyst I interview. Recruiters expect you to define CIA triad, PII vs. SPII, and threat vs. vulnerability without hesitation.</p>
+  </div>
+</section>
+
+<!-- ================= PREFACE ================= -->
+<h2 class="module-head"><span class="tag">Preface</span>How to Use This Course</h2>
+
+<p>This course is the front door to the entire Google Cybersecurity Certificate. Nothing here assumes you have touched a terminal, read a log file, or configured a firewall. What it does assume is curiosity and the willingness to look up a word the moment you don't recognize it — which, conveniently, is exactly what this book does for you, inline, every time a new term appears.</p>
+
+<div class="ticket deepdive">
+  <div class="ticket-head"><span><span class="icon">🧭</span>Deep Dive</span><span class="ticket-id">DD-000</span></div>
+  <div class="ticket-body">
+    <p><strong>Recommended study strategy:</strong> Read one module per sitting (45–60 minutes). Immediately after finishing a module, close the book and write down five terms from memory with one-sentence definitions. This "closed-book recall" is more effective for long-term retention than re-reading. Revisit the Revision &amp; Cheat Sheet section at the end of each module 24 hours later, then again after one week (spaced repetition).</p>
+    <p><strong>Lab recommendation:</strong> You don't need a home lab yet for Course I — this course is conceptual. Save your lab environment setup for Course IV (Linux and SQL) and Course V (Assets, Threats, and Vulnerabilities), where hands-on practice becomes essential.</p>
+    <p><strong>Interview preparation:</strong> Course I vocabulary shows up in nearly every entry-level interview as "warm-up" questions. Treat every bolded term in this module as a flashcard.</p>
+    <p><strong>Certification preparation:</strong> This course aligns with CompTIA Security+ Domain 1.1–1.2 (security concepts and threat actor types) and Domain 5 (governance, risk, and compliance) at an introductory level.</p>
+  </div>
+</div>
+
+<!-- ================= MODULE HEAD ================= -->
+<h2 class="module-head"><span class="tag">Module 1 · Week 1</span>Welcome to the World of Cybersecurity</h2>
+
+<div class="objectives" id="objectives">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Define cybersecurity in your own words and explain why organizations need it.</li>
+    <li>Explain the CIA triad (Confidentiality, Integrity, Availability) and give a real-world example of each.</li>
+    <li>Distinguish a threat, a threat actor, and an internal threat.</li>
+    <li>Differentiate PII from SPII and explain why the distinction matters legally and operationally.</li>
+    <li>Describe security frameworks, security controls, and security posture, and how the three relate.</li>
+    <li>List common entry-level cybersecurity job titles and what each one actually does day to day.</li>
+    <li>Identify the eight transferable skills and five technical skill areas most valued in entry-level analysts.</li>
+  </ul>
+</div>
+
+<!-- ============ SECTION 1 ============ -->
+<h3 id="sec-1" data-n="1.1">What Is Cybersecurity?</h3>
+
+<p><strong>Cybersecurity</strong> (often just called <strong>security</strong>) is the practice of ensuring the confidentiality, integrity, and availability of information by protecting networks, devices, people, and data from unauthorized access or criminal exploitation.</p>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-001</span></div>
+  <div class="ticket-body">
+    <p><strong>Cybersecurity:</strong> The practice of ensuring confidentiality, integrity, and availability of information by protecting networks, devices, people, and data from unauthorized access or criminal exploitation.</p>
+  </div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Library</span>
+  <p>Imagine a <strong>library</strong>. The librarian's job isn't just to hand out books — it's to make sure only people with a library card can borrow certain rare books (that's <em>confidentiality</em>), that nobody sneaks in and rips pages out of a book or rewrites the ending (that's <em>integrity</em>), and that the library is actually open and the books are on the shelf when you need them, not locked in a flooded basement (that's <em>availability</em>). Cybersecurity is the librarian's job, but for computers, networks, and data instead of books.</p>
+</div>
+
+<p>Why does this practice exist at all? Because information has value — to the organization that owns it, and to criminals who want to steal, corrupt, or hold it hostage. Every hospital record, banking transaction, airline reservation, and school grade report is a target. Cybersecurity exists to make attacking that information expensive, slow, and detectable, while making legitimate use of it fast and easy.</p>
+
+<h4>Historical Background &amp; Industry Context</h4>
+<p>Cybersecurity as a formal discipline is younger than most people expect. Early computer networks in the 1970s were built by researchers who trusted each other implicitly — security was not a design goal because the network (ARPANET) had a small, known set of users. As networks grew and connected strangers to strangers, that trust model broke down. Course I, Module 2 covers this history in depth (the Morris Worm, early viruses, and the birth of firewalls); for now, the key industry context is this: cybersecurity grew from an afterthought into a board-level business risk because the cost of getting it wrong — regulatory fines, lawsuits, reputational collapse — became too large to ignore.</p>
+
+<figure>
+<svg viewBox="0 0 640 260" width="100%" role="img" aria-label="Diagram of the CIA Triad showing Confidentiality, Integrity, and Availability as three connected pillars supporting a central shield labeled Cybersecurity">
+  <rect x="0" y="0" width="640" height="260" fill="#F7F5F0"/>
+  <text x="320" y="30" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="700" fill="#0B0F14">The CIA Triad</text>
+  <!-- three pillars -->
+  <g font-family="sans-serif">
+    <rect x="60" y="100" width="140" height="120" rx="6" fill="#0F9E93"/>
+    <text x="130" y="150" text-anchor="middle" fill="#fff" font-size="15" font-weight="700">Confidentiality</text>
+    <text x="130" y="172" text-anchor="middle" fill="#EAFBF8" font-size="11">Only the right</text>
+    <text x="130" y="188" text-anchor="middle" fill="#EAFBF8" font-size="11">people can see it</text>
+
+    <rect x="250" y="80" width="140" height="140" rx="6" fill="#3457B2"/>
+    <text x="320" y="140" text-anchor="middle" fill="#fff" font-size="15" font-weight="700">Integrity</text>
+    <text x="320" y="162" text-anchor="middle" fill="#E8EEFC" font-size="11">Data is accurate</text>
+    <text x="320" y="178" text-anchor="middle" fill="#E8EEFC" font-size="11">and unaltered</text>
+
+    <rect x="440" y="100" width="140" height="120" rx="6" fill="#B4700A"/>
+    <text x="510" y="150" text-anchor="middle" fill="#fff" font-size="15" font-weight="700">Availability</text>
+    <text x="510" y="172" text-anchor="middle" fill="#FDF2E3" font-size="11">Systems are up</text>
+    <text x="510" y="188" text-anchor="middle" fill="#FDF2E3" font-size="11">when needed</text>
+  </g>
+  <path d="M130 100 L320 80 L510 100" fill="none" stroke="#0B0F14" stroke-width="2" stroke-dasharray="4 3"/>
+  <text x="320" y="245" text-anchor="middle" font-family="monospace" font-size="11" fill="#3A4650">Break any one pillar, and the whole security posture fails.</text>
+</svg>
+<figcaption>Figure 1.1 — The CIA Triad: the three pillars every security control ultimately serves</figcaption>
+</figure>
+
+<!-- ============ SECTION 2: CIA TRIAD DEEP ============ -->
+<h3 id="sec-2" data-n="1.2">The CIA Triad, Explained Four Ways</h3>
+
+<p>Every security decision an organization makes — every firewall rule, every password policy, every backup schedule — ultimately serves one or more of three goals: confidentiality, integrity, and availability. Google's course introduces these terms briefly; here we unpack each one at four levels of depth.</p>
+
+<div class="levels">
+  <div class="level l1"><span class="lv-tag">Level 1 · Child-Friendly</span>
+    <p><strong>Confidentiality</strong> is like a diary with a lock — only you (and people you allow) can read it.</p>
+  </div>
+  <div class="level l2"><span class="lv-tag">Level 2 · Student Level</span>
+    <p><strong>Confidentiality</strong> means restricting access to information so that only authorized individuals, processes, or systems can view it. It's typically enforced through authentication (proving who you are) and authorization (defining what you're allowed to do).</p>
+  </div>
+  <div class="level l3"><span class="lv-tag">Level 3 · Working Professional</span>
+    <p><strong>Confidentiality</strong> is implemented through access control lists, encryption at rest and in transit, role-based access control (RBAC), and the principle of least privilege. A SOC analyst monitors for confidentiality violations by watching for unusual data access patterns — e.g., a help-desk account suddenly querying the customer payment-card database at 3 a.m.</p>
+  </div>
+  <div class="level l4"><span class="lv-tag">Level 4 · Interview Answer</span>
+    <p>"Confidentiality ensures that data is accessible only to those authorized to see it. In practice, I'd enforce it with least-privilege access controls, encryption, and continuous monitoring for anomalous access — and I'd validate it's working by auditing access logs against the access control policy on a regular cadence."</p>
+  </div>
+</div>
+
+<div class="levels">
+  <div class="level l1"><span class="lv-tag">Level 1 · Child-Friendly</span>
+    <p><strong>Integrity</strong> is like making sure nobody erased your homework answer and wrote a wrong one instead.</p>
+  </div>
+  <div class="level l2"><span class="lv-tag">Level 2 · Student Level</span>
+    <p><strong>Integrity</strong> means data stays accurate, consistent, and unaltered unless changed by an authorized process. It protects against both malicious tampering and accidental corruption.</p>
+  </div>
+  <div class="level l3"><span class="lv-tag">Level 3 · Working Professional</span>
+    <p><strong>Integrity</strong> is enforced with cryptographic hashing (to detect tampering), digital signatures, version control, and checksums. In incident response, comparing a file's current hash against a known-good baseline hash is a standard integrity check during forensic analysis.</p>
+  </div>
+  <div class="level l4"><span class="lv-tag">Level 4 · Interview Answer</span>
+    <p>"Integrity means the data hasn't been improperly modified. I'd use hashing algorithms like SHA-256 to create a baseline fingerprint of critical files, then periodically re-hash and compare — any mismatch signals unauthorized modification worth investigating."</p>
+  </div>
+</div>
+
+<div class="levels">
+  <div class="level l1"><span class="lv-tag">Level 1 · Child-Friendly</span>
+    <p><strong>Availability</strong> is like a restaurant that's actually open when the sign says it's open.</p>
+  </div>
+  <div class="level l2"><span class="lv-tag">Level 2 · Student Level</span>
+    <p><strong>Availability</strong> means authorized users can access the systems and data they need, when they need them. Threats to availability include denial-of-service attacks, hardware failure, and natural disasters.</p>
+  </div>
+  <div class="level l3"><span class="lv-tag">Level 3 · Working Professional</span>
+    <p><strong>Availability</strong> is protected through redundancy (failover servers), load balancing, DDoS mitigation services, and tested backup/disaster-recovery plans with defined Recovery Time Objectives (RTO) and Recovery Point Objectives (RPO).</p>
+  </div>
+  <div class="level l4"><span class="lv-tag">Level 4 · Interview Answer</span>
+    <p>"Availability ensures systems stay up and accessible to legitimate users. I'd mitigate availability risk with redundant infrastructure, a tested incident response and disaster recovery plan, and DDoS protection at the network edge — and I'd measure success against a defined RTO/RPO."</p>
+  </div>
+</div>
+
+<div class="ticket examtip">
+  <div class="ticket-head"><span><span class="icon">🎯</span>Exam Tip</span><span class="ticket-id">EXM-001</span></div>
+  <div class="ticket-body"><p>CompTIA Security+ occasionally tests the CIA triad with its inverse: the <strong>DAD triad</strong> — Disclosure (loss of confidentiality), Alteration (loss of integrity), and Destruction (loss of availability). If a question describes an attack, ask yourself which of the three pillars it breaks — that usually reveals the correct control to apply.</p></div>
+</div>
+
+<h4>Memory Trick</h4>
+<p><strong>"See It All"</strong> → <strong>C</strong>onfidentiality, <strong>I</strong>ntegrity, <strong>A</strong>vailability. If you can "see it all," you have full visibility and control over your information.</p>
+
+<!-- ============ SECTION 3 ============ -->
+<h3 id="sec-3" data-n="1.3">Threat Actors and Internal Threats</h3>
+
+<p>A <strong>threat</strong> is any circumstance or event that can negatively impact assets. A <strong>threat actor</strong> (sometimes called a <strong>malicious attacker</strong>) is any person or group who presents a security risk to computers, applications, networks, or data.</p>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-002</span></div>
+  <div class="ticket-body">
+    <p><strong>Threat actor:</strong> Any person or group who presents a security risk. This risk can relate to computers, applications, networks, and data.</p>
+    <p><strong>Internal threat:</strong> A current or former employee, an external vendor, or a trusted partner who poses a security risk — sometimes accidentally, sometimes intentionally.</p>
+  </div>
+</div>
+
+<p>Not every threat comes from outside the organization. An <strong>internal threat</strong> can be entirely accidental — an employee who clicks a malicious email link isn't trying to cause harm, but the outcome is the same as if they were. Other internal threats are intentional, such as an employee who deliberately exfiltrates customer data before resigning.</p>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Bank</span>
+  <p>Picture a <strong>bank</strong>. A robber who breaks in through the vault door is an <em>external threat actor</em> — a stranger trying to get in. But a bank teller who accidentally leaves the vault door unlocked at closing time, or a teller who secretly hands cash to a friend, is an <em>internal threat</em> — someone who already has a key, whether they meant harm or not.</p>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Comparison — Threat vs. Vulnerability vs. Risk</caption>
+<thead><tr><th>Concept</th><th>Definition</th><th>Analogy</th><th>Who/What Controls It</th></tr></thead>
+<tbody>
+<tr><td><strong>Threat</strong></td><td>Any circumstance or event that can negatively impact assets</td><td>A burglar who might target your house</td><td>Often outside your direct control</td></tr>
+<tr><td><strong>Vulnerability</strong></td><td>A weakness that can be exploited by a threat</td><td>An unlocked window</td><td>You can fix it (patch, configure, train)</td></tr>
+<tr><td><strong>Risk</strong></td><td>The likelihood and impact of a threat exploiting a vulnerability</td><td>The chance the burglar finds and uses the unlocked window</td><td>Managed through mitigation, transfer, acceptance, or avoidance</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>SOC Insight</span><span class="ticket-id">SOC-001</span></div>
+  <div class="ticket-body"><p>Tier 1 SOC analysts spend a disproportionate amount of time on internal-threat-adjacent alerts — phishing clicks, policy violations, misconfigured permissions — because these are far more common day-to-day than sophisticated external intrusions. Statistically, human error remains one of the leading contributing factors in breach reports year over year (see Course V for detailed threat-landscape data).</p></div>
+</div>
+
+<h4>How Attackers Abuse This / How Defenders Detect and Prevent It</h4>
+<ul>
+<li><strong>Abuse:</strong> Threat actors exploit internal trust by posing as employees (social engineering) or by directly compromising an employee's credentials (phishing, credential stuffing) to move inside the network undetected as an "insider."</li>
+<li><strong>Detection:</strong> User and Entity Behavior Analytics (UEBA) baselines normal behavior per account and flags deviations — e.g., a payroll clerk's account suddenly accessing engineering source code repositories.</li>
+<li><strong>Prevention:</strong> Least-privilege access, mandatory security awareness training, offboarding checklists that revoke access immediately upon termination, and separation of duties for sensitive actions.</li>
+</ul>
+
+<!-- ============ SECTION 4 ============ -->
+<h3 id="sec-4" data-n="1.4">PII and SPII</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-003</span></div>
+  <div class="ticket-body">
+    <p><strong>Personally Identifiable Information (PII):</strong> Any information used to infer an individual's identity — full name, date of birth, physical address, phone number, email address, or IP address.</p>
+    <p><strong>Sensitive Personally Identifiable Information (SPII):</strong> A specific type of PII that falls under stricter handling guidelines — Social Security numbers, medical or financial information, and biometric data such as facial recognition.</p>
+  </div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Hospital</span>
+  <p>At a <strong>hospital</strong>, your name and appointment time are like PII — mildly private, but not devastating if someone at the front desk sees it. Your actual diagnosis, medications, and blood test results are like SPII — if that got out, it could seriously affect your life, your job, or your insurance. That's why hospitals lock medical charts behind extra doors that even PII doesn't need.</p>
+</div>
+
+<div class="ticket compliance">
+  <div class="ticket-head"><span><span class="icon">⚖️</span>Compliance Note</span><span class="ticket-id">CMP-001</span></div>
+  <div class="ticket-body"><p>The PII/SPII distinction is why regulations layer differently: general PII handling might fall under a state privacy law, while SPII like health data triggers HIPAA, and payment card data triggers PCI DSS. Course I, Module 3 covers these frameworks in full — file this distinction away now, because it's the reason those frameworks exist at all.</p></div>
+</div>
+
+<!-- ============ SECTION 5 ============ -->
+<h3 id="sec-5" data-n="1.5">Security Frameworks, Controls &amp; Posture</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-004</span></div>
+  <div class="ticket-body">
+    <p><strong>Security frameworks:</strong> Guidelines used for building plans to help mitigate risks and threats to data and privacy.</p>
+    <p><strong>Security controls:</strong> Safeguards designed to reduce specific security risks, used alongside frameworks to establish a strong security posture.</p>
+    <p><strong>Security posture:</strong> An organization's ability to manage its defense of critical assets and data and react to change. A strong security posture means lower organizational risk.</p>
+  </div>
+</div>
+
+<p>Think of the relationship this way: a <strong>framework</strong> is the blueprint, a <strong>control</strong> is the actual brick-and-mortar safeguard you build from that blueprint, and your <strong>posture</strong> is how sturdy the finished building is when a storm hits.</p>
+
+<figure>
+<svg viewBox="0 0 640 200" width="100%" role="img" aria-label="Diagram showing Security Frameworks flowing into Security Controls which together produce Security Posture">
+  <rect x="0" y="0" width="640" height="200" fill="#F7F5F0"/>
+  <g font-family="sans-serif" font-size="13" font-weight="700">
+    <rect x="20" y="70" width="170" height="60" rx="6" fill="#3457B2"/>
+    <text x="105" y="105" text-anchor="middle" fill="#fff">Frameworks</text>
+    <rect x="235" y="70" width="170" height="60" rx="6" fill="#0F9E93"/>
+    <text x="320" y="105" text-anchor="middle" fill="#fff">Controls</text>
+    <rect x="450" y="70" width="170" height="60" rx="6" fill="#0B0F14"/>
+    <text x="535" y="105" text-anchor="middle" fill="#fff">Security Posture</text>
+  </g>
+  <path d="M190 100 L235 100" stroke="#0B0F14" stroke-width="2" marker-end="url(#arrow1)"/>
+  <path d="M405 100 L450 100" stroke="#0B0F14" stroke-width="2" marker-end="url(#arrow1)"/>
+  <defs><marker id="arrow1" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#0B0F14"/></marker></defs>
+  <text x="320" y="160" text-anchor="middle" font-family="monospace" font-size="11" fill="#3A4650">Blueprint → Brick-and-mortar safeguard → How sturdy the building is</text>
+</svg>
+<figcaption>Figure 1.2 — From framework to control to posture</figcaption>
+</figure>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-001</span></div>
+  <div class="ticket-body"><p>Do not confuse a framework with a law. Frameworks like NIST CSF are voluntary guidelines an organization chooses to adopt; laws like HIPAA or GDPR are legally mandated. An organization can be fully "NIST-aligned" and still be non-compliant with a relevant law if it hasn't separately met that law's specific requirements. Course I, Module 3 details this distinction with named frameworks.</p></div>
+</div>
+
+<!-- ============ SECTION 6 ============ -->
+<h3 id="sec-6" data-n="1.6">Common Cybersecurity Job Titles</h3>
+
+<p>The titles below are frequently used interchangeably in job postings, which can be confusing for newcomers. Here's what each one actually means in most organizations.</p>
+
+<div class="table-wrap">
+<table>
+<caption>Entry-Level Cybersecurity Job Titles</caption>
+<thead><tr><th>Title</th><th>Typical Focus</th><th>A Day in the Life</th></tr></thead>
+<tbody>
+<tr><td><strong>Security Analyst</strong></td><td>Monitoring networks for breaches, developing security strategies</td><td>Reviewing SIEM alerts, triaging suspicious logins, updating documentation</td></tr>
+<tr><td><strong>Cybersecurity Analyst</strong></td><td>Broad security monitoring and threat research</td><td>Same core duties as Security Analyst; title varies by employer</td></tr>
+<tr><td><strong>Security Operations Center (SOC) Analyst</strong></td><td>Frontline monitoring within a dedicated SOC team</td><td>Working shift rotations, escalating incidents per playbook, tracking tickets</td></tr>
+<tr><td><strong>Information Security Analyst</strong></td><td>Enterprise-wide information protection, often more compliance-adjacent</td><td>Auditing access controls, coordinating with compliance teams</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-005</span></div>
+  <div class="ticket-body"><p><strong>Playbook:</strong> A manual detailing the steps an analyst must take to work through a specific type of security detection — what to check, who to notify, and how to escalate.</p></div>
+</div>
+
+<div class="ticket redteam">
+  <div class="ticket-head"><span><span class="icon">🗡️</span>Red Team Tip</span><span class="ticket-id">RT-001</span></div>
+  <div class="ticket-body"><p>Even at the introductory level, it's worth knowing that "Red Team" (offensive, simulating attackers — see also Ethical Hacker/Penetration Tester) and "Blue Team" (defensive, monitoring and responding — SOC Analysts) are the two broad camps cybersecurity roles fall into. Most entry-level roles, including everything in this course, are Blue Team.</p></div>
+</div>
+
+<!-- ============ SECTION 7 ============ -->
+<h3 id="sec-7" data-n="1.7">Transferable Skills</h3>
+
+<p>You do not need a computer science degree to succeed in this field. <strong>Transferable skills</strong> are skills developed in other areas of life or previous careers that apply directly to cybersecurity work.</p>
+
+<div class="flash-grid">
+  <div class="flash" tabindex="0" role="button" aria-pressed="false">
+    <span class="hint">tap to flip</span>
+    <div class="front">Communication</div>
+    <div class="back">Explaining technical risk to non-technical stakeholders clearly and calmly — critical during incidents when leadership needs a fast, jargon-free update.</div>
+  </div>
+  <div class="flash" tabindex="0" role="button" aria-pressed="false">
+    <span class="hint">tap to flip</span>
+    <div class="front">Problem Solving</div>
+    <div class="back">Recognizing attack patterns and finding the most efficient mitigation — accepting that perfect solutions are rare and compromise is normal.</div>
+  </div>
+  <div class="flash" tabindex="0" role="button" aria-pressed="false">
+    <span class="hint">tap to flip</span>
+    <div class="front">Time Management</div>
+    <div class="back">Prioritizing the most urgent alert first — a skill directly tested in triage scenarios and SOC shift work.</div>
+  </div>
+  <div class="flash" tabindex="0" role="button" aria-pressed="false">
+    <span class="hint">tap to flip</span>
+    <div class="front">Growth Mindset</div>
+    <div class="back">Treating the constantly-shifting threat landscape as exciting rather than exhausting — you'll never "finish learning" in this field, by design.</div>
+  </div>
+  <div class="flash" tabindex="0" role="button" aria-pressed="false">
+    <span class="hint">tap to flip</span>
+    <div class="front">Diverse Perspectives</div>
+    <div class="back">Security problems are rarely solved by one person thinking one way — teams with varied backgrounds catch blind spots individuals miss.</div>
+  </div>
+  <div class="flash" tabindex="0" role="button" aria-pressed="false">
+    <span class="hint">tap to flip</span>
+    <div class="front">Analytical Thinking</div>
+    <div class="back">Thinking carefully and thoroughly when monitoring systems, responding to threats, and determining risk mitigation strategies.</div>
+  </div>
+  <div class="flash" tabindex="0" role="button" aria-pressed="false">
+    <span class="hint">tap to flip</span>
+    <div class="front">Collaboration</div>
+    <div class="back">Working with stakeholders and teammates during active threat response — blocking access and restoring systems is rarely a solo job.</div>
+  </div>
+</div>
+
+<!-- ============ SECTION 8 ============ -->
+<h3 id="sec-8" data-n="1.8">Technical Skills &amp; Foundational Tools</h3>
+
+<p>Alongside transferable skills, entry-level analysts build a specific technical toolkit over the course of this certificate. Course I only introduces these at a conceptual level — deep hands-on work comes in Courses III, IV, and V.</p>
+
+<div class="table-wrap">
+<table>
+<caption>Core Technical Skills Introduced in Course I</caption>
+<thead><tr><th>Skill / Tool</th><th>What It Does</th><th>Covered in Depth</th></tr></thead>
+<tbody>
+<tr><td><strong>Programming Languages</strong></td><td>Automate repetitive tasks like scanning for malicious domains</td><td>Course VII</td></tr>
+<tr><td><strong>SIEM (Security Information and Event Management)</strong></td><td>Collects and analyzes log data to surface suspicious activity</td><td>Course VI</td></tr>
+<tr><td><strong>Intrusion Detection System (IDS)</strong></td><td>Monitors system/network activity and alerts on possible intrusions</td><td>Course III, VI</td></tr>
+<tr><td><strong>Threat Landscape Knowledge</strong></td><td>Staying current on attacker tactics, techniques, and procedures (TTPs)</td><td>Course V</td></tr>
+<tr><td><strong>Incident Response</strong></td><td>Following established procedures to investigate and remediate security events</td><td>Course VI</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-006</span></div>
+  <div class="ticket-body"><p><strong>Security Information and Event Management (SIEM):</strong> An application that collects and analyzes log data to monitor critical activities within an organization, helping analysts identify and analyze potential threats, risks, and vulnerabilities more efficiently.</p></div>
+</div>
+
+<div class="ticket blueteam">
+  <div class="ticket-head"><span><span class="icon">🛡️</span>Blue Team Tip</span><span class="ticket-id">BT-001</span></div>
+  <div class="ticket-body"><p>You will hear "SIEM" constantly from your first week on the job. Get comfortable with the acronym now: it's pronounced "sim," not spelled out letter by letter. Two of the most common SIEM platforms named later in this certificate are Splunk and Chronicle (Google's cloud-native SIEM) — both appear again in Course VI.</p></div>
+</div>
+
+<h4>CompTIA Security+ Connection</h4>
+<p>Completing all eight courses of the Google Cybersecurity Certificate unlocks a discount toward the CompTIA Security+ exam, and the two credentials are designed to complement each other — Security+ validates the same foundational knowledge this certificate builds, with a formal industry-recognized exam.</p>
+
+<!-- ============ SECTION 9 ============ -->
+<h3 id="sec-9" data-n="1.9">Why Cybersecurity Matters: Business Continuity &amp; Ethics</h3>
+
+<p>Security is not just a technical requirement — it's essential for an organization's business continuity and ethical standing. A <strong>data breach</strong> doesn't only cost the organization money; it affects every person whose data was involved, from customers to employees to partners.</p>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-007</span></div>
+  <div class="ticket-body"><p><strong>Data breach:</strong> An incident that exposes confidential or protected information, affecting the organization and everyone associated with it — its reputation as well as the lives and reputations of its users, clients, and customers.</p></div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Post Office</span>
+  <p>Imagine a <strong>postal service</strong> where every letter is supposed to be sealed and private. If a careless worker leaves a mailbag open in the street, it isn't just the post office's problem — it's every single person whose letter is now lying on the sidewalk. A data breach works the same way: one organization's mistake becomes thousands of individuals' problem.</p>
+</div>
+
+<div class="ticket industry">
+  <div class="ticket-head"><span><span class="icon">🏢</span>Industry Insight</span><span class="ticket-id">IND-001</span></div>
+  <div class="ticket-body"><p>Course I, Module 2 covers the Equifax breach as a case study in exactly this dynamic: a single unpatched vulnerability led to the exposure of sensitive personal data for roughly 143 million people, with consequences that extended far beyond Equifax's own balance sheet.</p></div>
+</div>
+
+<!-- ============ SECTION 10 ============ -->
+<h3 id="sec-10" data-n="1.10">Analyst Workflow Walkthrough: A Day in the SOC</h3>
+
+<p>To tie every concept in this module together, walk through a realistic (composite, non-attributed) scenario.</p>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>SOC Example</span><span class="ticket-id">SOC-002</span></div>
+  <div class="ticket-body">
+    <p><strong>08:14 —</strong> The SIEM generates an alert: an employee account in the finance department has logged in from two geographically distant locations within ten minutes ("impossible travel").</p>
+    <p><strong>08:16 —</strong> A Tier 1 SOC Analyst opens the alert and consults the relevant <strong>playbook</strong> for impossible-travel detections.</p>
+    <p><strong>08:20 —</strong> The analyst checks whether this is an <strong>internal threat</strong> (compromised legitimate credentials) or a benign explanation (VPN misconfiguration). They pull authentication logs.</p>
+    <p><strong>08:30 —</strong> Evidence points to a likely credential-theft event: the second login used an unfamiliar device fingerprint. The analyst escalates per the playbook, flags the account for containment, and documents the timeline — protecting the <strong>confidentiality</strong> of the finance data the account could access and preserving the <strong>integrity</strong> of any financial records it touched.</p>
+    <p><strong>08:45 —</strong> The analyst communicates the finding to their SOC Manager and the affected employee's department, demonstrating the <strong>communication</strong> and <strong>collaboration</strong> transferable skills covered above.</p>
+  </div>
+</div>
+
+<div class="ticket incident">
+  <div class="ticket-head" style="background:#7A1F3D;"><span><span class="icon">🚨</span>Incident Response Example</span><span class="ticket-id">IR-001</span></div>
+  <div class="ticket-body"><p>This scenario illustrates why Incident Response appears as a core technical skill in Section 8: the analyst didn't improvise. They followed an established, documented procedure (the playbook), which is precisely what separates a controlled, auditable response from chaotic guesswork — and it's what regulators and auditors look for after any real incident.</p></div>
+</div>
+
+<!-- ============ LABS ============ -->
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 1.1 — Terminology Mapping Exercise <span></span></summary>
+  <div class="acc-body">
+    <p><strong>Scenario:</strong> Below is a short fictional incident report. Identify every CIA triad pillar affected, and label each entity as a threat, threat actor, or vulnerability.</p>
+    <div class="code-block">
+      <div class="code-head"><span class="lang">Log Analysis</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+      <pre><code>INCIDENT-2024-0091
+An employee's laptop, running an outdated OS with a known unpatched
+flaw, was infected after the employee clicked a link in a phishing
+email. The malware encrypted the finance server's shared drive and
+demanded payment for the decryption key. The finance team was unable
+to access payroll records for six hours.</code></pre>
+      <div class="code-note"><strong>Task:</strong> (1) Which CIA pillars were violated? (2) What is the vulnerability? (3) Who is the threat actor? (4) What is the threat?</div>
+    </div>
+    <p><strong>Answer key:</strong> Confidentiality was not clearly violated (no evidence of data theft), but Integrity was violated (files encrypted/altered without authorization) and Availability was violated (payroll inaccessible for six hours). The vulnerability is the unpatched OS flaw. The threat actor is the ransomware operator behind the phishing email. The threat is the ransomware attack itself.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 1.2 — PII/SPII Sorting Challenge</summary>
+  <div class="acc-body">
+    <p>Sort the following data points into PII or SPII: full name, Social Security number, favorite color, home address, fingerprint scan, employer name, medical diagnosis, email address, credit card number, job title.</p>
+    <p><strong>Answer key — PII:</strong> full name, home address, employer name, email address, job title. <strong>SPII:</strong> Social Security number, fingerprint scan, medical diagnosis, credit card number. <strong>Neither (not identifying on its own):</strong> favorite color.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Portfolio Project 1.1 — Draft a One-Page "Why Cybersecurity Matters" Brief</summary>
+  <div class="acc-body">
+    <p>Write a one-page brief, as if for a non-technical small-business owner, explaining why they should invest in cybersecurity. Use at least four terms from this module (cybersecurity, CIA triad, threat actor, data breach) and explain each in plain language. Save this in your professional portfolio — Course VIII will teach you how to present artifacts like this to employers.</p>
+  </div>
+</details>
+
+<!-- ============ INTERVIEW ============ -->
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Beginner Question</span><span class="ticket-id">INT-001</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: What is cybersecurity, in your own words?</strong></p>
+    <p><strong>Ideal answer:</strong> "Cybersecurity is the practice of protecting networks, devices, people, and data from unauthorized access or exploitation, with the goal of maintaining confidentiality, integrity, and availability of information."</p>
+    <p><strong>Common mistake:</strong> Only mentioning "protecting against hackers" without naming the CIA triad — interviewers are listening for the framework, not just the vibe.</p>
+    <p><strong>Follow-up:</strong> "Can you give me a real-world example of an availability failure that isn't caused by an attacker?" (Good answer: hardware failure, natural disaster, power outage.)</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Scenario Question</span><span class="ticket-id">INT-002</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: An employee reports they accidentally emailed a spreadsheet containing customer Social Security numbers to the wrong external recipient. Walk me through how you'd think about this.</strong></p>
+    <p><strong>Ideal answer:</strong> "First, I'd recognize this as an accidental internal threat rather than a malicious one, but the impact is still real — SPII has been exposed, which is a confidentiality breach. I'd follow the incident response playbook: contain by trying to recall/delete the email if possible, notify the SOC manager and compliance team since SPII exposure often triggers regulatory notification requirements, and document the timeline for the incident report."</p>
+    <p><strong>Follow-up:</strong> "Would your answer change if the recipient was inside the company versus outside?" (Yes — external exposure typically carries more severe compliance and notification implications.)</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Google-Style Behavioral Question</span><span class="ticket-id">INT-003</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Tell me about a time you had to learn something completely new under time pressure.</strong></p>
+    <p><strong>Ideal answer approach:</strong> Use the STAR method (Situation, Task, Action, Result — covered fully in Course VIII). Tie your answer back to "growth mindset," one of the transferable skills from this module, and be specific about what you learned and how you applied it.</p>
+  </div>
+</div>
+
+<!-- ============ PRACTICE ============ -->
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which pillar of the CIA triad is violated when a ransomware attack encrypts files, making them inaccessible?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Confidentiality</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Integrity</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Availability</button>
+  <div class="fb">Correct answer: Availability — the data still exists but authorized users can no longer access it.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: A former employee who still has active system access poses no security risk.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — a former employee with lingering access is a textbook internal threat, whether or not they intend harm.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. Which of the following is SPII rather than plain PII?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Full name</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Social Security number</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Email address</button>
+  <div class="fb">Correct — Social Security numbers fall under stricter handling guidelines as SPII, unlike general contact-style PII.</div>
+</div>
+
+<h4>Fill in the Blank</h4>
+<p>A ______ is a manual detailing the steps an analyst must take to investigate a specific type of detection. <em>(Answer: playbook)</em></p>
+
+<h4>Match the Following</h4>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Term</th><th>Match to Definition</th></tr></thead>
+<tbody>
+<tr><td>1. Security posture</td><td>a. Guidelines for building risk-mitigation plans</td></tr>
+<tr><td>2. Security framework</td><td>b. Safeguards designed to reduce specific risks</td></tr>
+<tr><td>3. Security control</td><td>c. An organization's ability to defend assets and react to change</td></tr>
+</tbody>
+</table>
+</div>
+<p><em>Answer key: 1-c, 2-a, 3-b</em></p>
+
+<!-- ============ REVISION ============ -->
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-001</span></div>
+  <div class="ticket-body"><p>Cybersecurity protects the <strong>CIA triad</strong> (Confidentiality, Integrity, Availability). Threats come from <strong>threat actors</strong>, external or internal. PII identifies a person; <strong>SPII</strong> is the higher-stakes subset (SSNs, medical, biometric data). Frameworks are blueprints; controls are the safeguards built from them; posture is how strong the result is. Analysts need both transferable skills (communication, problem solving) and technical skills (SIEM, IDS, programming).</p></div>
+</div>
+
+<h4>One-Line Definitions Cheat Sheet</h4>
+<div class="table-wrap">
+<table>
+<tbody>
+<tr><td><strong>Cybersecurity</strong></td><td>Protecting CIA of information from unauthorized access/exploitation</td></tr>
+<tr><td><strong>Threat</strong></td><td>Any event that can negatively impact assets</td></tr>
+<tr><td><strong>Threat actor</strong></td><td>Any person/group presenting a security risk</td></tr>
+<tr><td><strong>Internal threat</strong></td><td>Insider (employee/vendor/partner) posing risk, accidental or intentional</td></tr>
+<tr><td><strong>PII</strong></td><td>Info used to infer identity</td></tr>
+<tr><td><strong>SPII</strong></td><td>PII under stricter handling rules (SSN, medical, biometric)</td></tr>
+<tr><td><strong>Security framework</strong></td><td>Guidelines for risk-mitigation plans</td></tr>
+<tr><td><strong>Security control</strong></td><td>Safeguard reducing a specific risk</td></tr>
+<tr><td><strong>Security posture</strong></td><td>Org's defensive strength and adaptability</td></tr>
+<tr><td><strong>SIEM</strong></td><td>Tool collecting/analyzing log data for threat detection</td></tr>
+<tr><td><strong>Playbook</strong></td><td>Step-by-step manual for investigating a detection type</td></tr>
+</tbody>
+</table>
+</div>
+
+<h4>Mind Map (Text Form)</h4>
+<pre style="background:var(--paper-dim); color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:16px; font-family:var(--mono); font-size:13px;">
+Cybersecurity
+├── Goal: CIA Triad
+│   ├── Confidentiality → access control, encryption
+│   ├── Integrity → hashing, checksums
+│   └── Availability → redundancy, backups
+├── Risk Vocabulary
+│   ├── Threat → Threat Actor → Internal Threat
+│   └── PII → SPII
+├── Governance
+│   ├── Framework → Control → Posture
+├── Roles
+│   └── Security/Cybersecurity/SOC/InfoSec Analyst
+└── Skills
+    ├── Transferable (communication, problem solving...)
+    └── Technical (SIEM, IDS, programming...)
+</pre>
+
+<!-- ============ SUMMARY ============ -->
+<div class="summary-block" id="summary">
+  <h4>Module Summary</h4>
+  <p>This module established the vocabulary and mental model that every later course builds on. You now understand cybersecurity as the discipline of protecting the CIA triad, can distinguish threats from threat actors from internal threats, know why PII and SPII are treated differently, and understand how frameworks, controls, and posture relate to one another.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>The CIA triad (Confidentiality, Integrity, Availability) is the foundational goal behind every security control.</li>
+    <li>Threats can be external or internal, and internal threats can be entirely accidental.</li>
+    <li>SPII carries stricter handling requirements than general PII because the harm potential is greater.</li>
+    <li>Frameworks, controls, and posture form a chain: guideline → safeguard → measurable strength.</li>
+    <li>Entry-level roles rely as much on transferable skills (communication, problem-solving) as on technical tools (SIEM, IDS).</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives">◂ Back to Module 1 Objectives</a>
+  <a href="#module-2">Module 2 · History &amp; Types of Attacks ▸</a>
+</div>
+
+<div class="endmark">— End of Module 1 —</div>
+
+<!-- ============================================================
+     MODULE 2 · WEEK 2 — HISTORY OF CYBERSECURITY & TYPES OF ATTACKS
+     ============================================================ -->
+<h2 class="module-head" id="module-2"><span class="tag">Module 2 · Week 2</span>History of Cybersecurity &amp; Types of Attacks</h2>
+
+<div class="objectives" id="objectives-2">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Explain how early malware (the Brain virus and the Morris worm) shaped the modern security industry.</li>
+    <li>Describe the Love Letter attack and why it marks the birth of social engineering as an attack category.</li>
+    <li>Summarize the Equifax breach and its lasting regulatory impact.</li>
+    <li>Differentiate the major phishing variants: BEC, spear phishing, whaling, vishing, smishing.</li>
+    <li>Differentiate the major malware types: viruses, worms, ransomware, spyware.</li>
+    <li>List social engineering techniques and the psychological principles that make them effective.</li>
+    <li>Distinguish threat actor types (APT, insider threat, hacktivist) and hacker types (ethical, unethical, researcher).</li>
+  </ul>
+</div>
+
+<h3 id="sec-2-1" data-n="2.1">Early Malware: The Brain Virus &amp; the Morris Worm</h3>
+
+<p>Before cybersecurity was an industry, it was a series of accidents and experiments that revealed how fragile early networks really were. Two incidents from the 1980s still shape how the field talks about malware today.</p>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-008</span></div>
+  <div class="ticket-body"><p><strong>Computer virus:</strong> Malicious code written to interfere with computer operations and cause damage to data and software. A virus attaches itself to programs or documents, then spreads and infects one or more computers on a network. Today, viruses are more broadly referred to as <strong>malware</strong> — software designed to harm devices or networks.</p></div>
+</div>
+
+<div class="ticket industry">
+  <div class="ticket-head"><span><span class="icon">🏢</span>Industry Insight — The Brain Virus (1986)</span><span class="ticket-id">IND-002</span></div>
+  <div class="ticket-body">
+    <p>In 1986, brothers <strong>Amjad and Basit Farooq Alvi</strong> created the <strong>Brain virus</strong>, intending only to track illegal copies of their medical software and prevent pirated licenses. What actually happened was very different from the plan: once someone ran a pirated copy, the virus infected that computer, and any disk later inserted into it also became infected — spreading globally within a couple of months, entirely undetected at first. It wasn't designed to destroy data, but it slowed productivity and disrupted business operations worldwide.</p>
+  </div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Library (Again)</span>
+  <p>Imagine a library that stamps a secret mark inside every book someone photocopies illegally, just to keep count. But the stamp accidentally starts jumping onto every other book that touches the photocopied one on a shelf. Soon, half the library's books have the mark, and nobody meant for that to happen. That's the Brain virus — a tracking experiment that became an accidental global outbreak.</p>
+</div>
+
+<div class="ticket industry">
+  <div class="ticket-head"><span><span class="icon">🏢</span>Industry Insight — The Morris Worm (1988)</span><span class="ticket-id">IND-003</span></div>
+  <div class="ticket-body">
+    <p><strong>Robert Morris</strong> wrote a program intended simply to measure the size of the internet by crawling the web and installing copies of itself to count connected computers. The program had a critical flaw: it didn't track which computers it had already infected, so it kept reinstalling itself on the same machines until they ran out of memory and crashed. Roughly 6,000 computers were affected — about 10% of the internet at the time — costing millions of dollars in damages and cleanup effort.</p>
+  </div>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-002</span></div>
+  <div class="ticket-body"><p>The Morris Worm's aftermath directly created an industry institution: <strong>Computer Emergency Response Teams (CERTs)</strong> were established to respond to computer security incidents. CERTs still exist today, and their scope has expanded far beyond their original purpose — many countries and large organizations maintain their own CERT or CSIRT (Computer Security Incident Response Team).</p></div>
+</div>
+
+<h4>Memory Trick</h4>
+<p><strong>Brain</strong> = tracking tool gone rogue (no malicious intent, still global damage). <strong>Morris</strong> = counting tool with a bug (no malicious intent, still crashed 10% of the internet). Neither attacker set out to cause harm — which is exactly why "intent" is not part of the technical definition of malware.</p>
+
+<h3 id="sec-2-2" data-n="2.2">The Love Letter &amp; the Birth of Social Engineering as an Attack Category</h3>
+
+<p>In 2000, <strong>Onel de Guzman</strong> created the <strong>Love Letter</strong> malware to steal internet login credentials. Victims received an email with the subject line "I Love You" and an attachment titled "Love Letter For You." When opened, the malware scanned the victim's address book, emailed itself to every contact, and installed a program to harvest passwords and personal data.</p>
+
+<div class="ticket alert">
+  <div class="ticket-head"><span><span class="icon">🚩</span>Security Alert — Historical Impact</span><span class="ticket-id">ALT-001</span></div>
+  <div class="ticket-body"><p>The Love Letter infected an estimated <strong>45 million computers globally</strong> and is believed to have caused over <strong>$10 billion</strong> in damages. It is widely regarded as the first large-scale example of <strong>social engineering</strong> — the attack succeeded not because of clever code, but because recipients trusted an email that appeared to come from a friend.</p></div>
+</div>
+
+<div class="levels">
+  <div class="level l1"><span class="lv-tag">Level 1 · Child-Friendly</span>
+    <p>Imagine a note passed in class that says "open me, I'm from your best friend!" — but it's actually from a stranger pretending to be your friend, and opening it lets the stranger copy your homework answers to send to everyone else in class, pretending to be you.</p>
+  </div>
+  <div class="level l2"><span class="lv-tag">Level 2 · Student Level</span>
+    <p>Social engineering exploits trust rather than technical flaws. The Love Letter worked because people were conditioned to open emails from known contacts without suspicion — a psychological gap, not a software bug.</p>
+  </div>
+  <div class="level l3"><span class="lv-tag">Level 3 · Working Professional</span>
+    <p>The Love Letter's propagation mechanism (self-mailing to the entire address book) is now a textbook worm behavior, but its initial infection vector — a socially engineered lure disguised as affection from a trusted contact — is what analysts study as the archetype for phishing awareness training today.</p>
+  </div>
+  <div class="level l4"><span class="lv-tag">Level 4 · Interview Answer</span>
+    <p>"The Love Letter attack in 2000 is a foundational case study because it demonstrated that human trust, not just system vulnerabilities, is an attack surface. It's why modern security programs invest heavily in security awareness training alongside technical controls."</p>
+  </div>
+</div>
+
+<h3 id="sec-2-3" data-n="2.3">The Equifax Breach: A Case Study in Consequences</h3>
+
+<div class="ticket industry">
+  <div class="ticket-head"><span><span class="icon">🏢</span>Industry Insight — Equifax (2017)</span><span class="ticket-id">IND-004</span></div>
+  <div class="ticket-body">
+    <p>In 2017, attackers infiltrated <strong>Equifax</strong>, a major credit reporting agency, in one of the largest known data breaches of sensitive information. Over <strong>143 million</strong> customer records were stolen — affecting roughly <strong>40% of all Americans</strong>. The stolen records included Social Security numbers, birth dates, driver's license numbers, home addresses, and credit card numbers.</p>
+  </div>
+</div>
+
+<div class="ticket compliance">
+  <div class="ticket-head"><span><span class="icon">⚖️</span>Compliance Note</span><span class="ticket-id">CMP-002</span></div>
+  <div class="ticket-body"><p>Equifax is the canonical example connecting an unpatched technical vulnerability to massive real-world SPII exposure (recall Module 1, Section 4). It's frequently cited in interviews and case studies as the reason patch management is treated as a governance issue, not just an IT chore.</p></div>
+</div>
+
+<div class="ticket blueteam">
+  <div class="ticket-head"><span><span class="icon">🛡️</span>Blue Team Tip</span><span class="ticket-id">BT-002</span></div>
+  <div class="ticket-body"><p>"Keep your cool during a data breach" is standard incident-manager guidance: the first priority is always to <strong>contain the breach</strong> — stop the data loss, even if that means shutting down a server, a data center, or communications — before beginning the investigation. Contain first, investigate second. This ordering appears again, formally, in Course VI's incident response lifecycle.</p></div>
+</div>
+
+<h3 id="sec-2-4" data-n="2.4">Phishing Attack Types</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-009</span></div>
+  <div class="ticket-body"><p><strong>Phishing:</strong> The use of digital communications to trick people into revealing sensitive data or deploying malicious software.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Phishing Variants Compared</caption>
+<thead><tr><th>Type</th><th>Definition</th><th>Target Scope</th></tr></thead>
+<tbody>
+<tr><td><strong>Business Email Compromise (BEC)</strong></td><td>Threat actor impersonates a known/legitimate source via email to obtain a financial advantage</td><td>Usually finance/accounting staff</td></tr>
+<tr><td><strong>Spear phishing</strong></td><td>Malicious email targeting a specific user or group, appearing to come from a trusted source</td><td>Narrow, targeted individual/group</td></tr>
+<tr><td><strong>Whaling</strong></td><td>A form of spear phishing aimed at company executives to access sensitive data</td><td>C-suite / senior leadership</td></tr>
+<tr><td><strong>Vishing</strong></td><td>Exploits electronic voice communication (phone calls) to extract sensitive info or impersonate a source</td><td>Any phone-reachable target</td></tr>
+<tr><td><strong>Smishing</strong></td><td>Uses text messages (SMS) to trick users into revealing info or clicking malicious links</td><td>Any mobile-phone target</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Bank, Again</span>
+  <p>Whaling is like a scammer specifically targeting the bank's president rather than a random customer, because the president can authorize huge wire transfers — "going after the big fish" gives a much bigger payoff for the same amount of effort.</p>
+</div>
+
+<h4>Memory Trick</h4>
+<p><strong>Whaling = "big fish."</strong> If regular phishing is fishing with a wide net, whaling is harpooning one specific, high-value target: an executive.</p>
+
+<h3 id="sec-2-5" data-n="2.5">Malware Types</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Comparison — Virus vs. Worm vs. Trojan vs. Ransomware vs. Spyware</caption>
+<thead><tr><th>Type</th><th>Requires User Action?</th><th>Self-Replicates?</th><th>Primary Goal</th></tr></thead>
+<tbody>
+<tr><td><strong>Virus</strong></td><td>Yes — user must open infected file/attachment</td><td>Only within already-opened files on the host</td><td>Damage/destroy data, spread via shared files</td></tr>
+<tr><td><strong>Worm</strong></td><td>No — spreads automatically</td><td>Yes, across a network on its own</td><td>Spread rapidly, often for volume/disruption</td></tr>
+<tr><td><strong>Trojan</strong> <em>(covered in Course V)</em></td><td>Yes — disguised as legitimate software</td><td>No</td><td>Grant hidden access while masquerading as something useful</td></tr>
+<tr><td><strong>Ransomware</strong></td><td>Varies — often delivered via phishing or exploited vulnerability</td><td>Sometimes (worm-like variants exist)</td><td>Encrypt data and demand payment for restoration</td></tr>
+<tr><td><strong>Spyware</strong></td><td>Often installed without consent, sometimes bundled with other software</td><td>No</td><td>Covertly collect and sell information</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-010</span></div>
+  <div class="ticket-body">
+    <p><strong>Worm:</strong> Malware that can duplicate and spread itself across systems on its own — unlike a virus, it does not need to be downloaded by a user; it self-replicates from an already-infected computer to other devices on the network.</p>
+    <p><strong>Ransomware:</strong> A malicious attack in which threat actors encrypt an organization's data and demand payment to restore access.</p>
+    <p><strong>Spyware:</strong> Malware used to gather and sell information without consent, allowing threat actors to collect private emails, texts, voice/image recordings, and locations.</p>
+  </div>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning</span><span class="ticket-id">WRN-001</span></div>
+  <div class="ticket-body"><p>Don't confuse "virus" and "malware" as strict synonyms in professional writing — malware is the umbrella term; virus is one specific category under it, defined by its self-attaching, user-triggered spread mechanism. Using them interchangeably in an interview is a common beginner mistake that signals imprecise vocabulary.</p></div>
+</div>
+
+<h3 id="sec-2-6" data-n="2.6">Social Engineering Techniques</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-011</span></div>
+  <div class="ticket-body"><p><strong>Social engineering:</strong> A manipulation technique that exploits human error to gain private information, access, or valuables.</p></div>
+</div>
+
+<div class="flash-grid">
+  <div class="flash" tabindex="0" role="button" aria-pressed="false"><span class="hint">tap to flip</span>
+    <div class="front">Social Media Phishing</div>
+    <div class="back">Threat actor collects detailed personal information from social media before initiating a tailored attack.</div>
+  </div>
+  <div class="flash" tabindex="0" role="button" aria-pressed="false"><span class="hint">tap to flip</span>
+    <div class="front">Watering Hole Attack</div>
+    <div class="back">Attacker compromises a website frequently visited by a specific target group, infecting visitors rather than targeting them directly.</div>
+  </div>
+  <div class="flash" tabindex="0" role="button" aria-pressed="false"><span class="hint">tap to flip</span>
+    <div class="front">USB Baiting</div>
+    <div class="back">Attacker leaves a malware-loaded USB drive somewhere an employee will find and plug it in, unknowingly infecting the network.</div>
+  </div>
+  <div class="flash" tabindex="0" role="button" aria-pressed="false"><span class="hint">tap to flip</span>
+    <div class="front">Physical Social Engineering</div>
+    <div class="back">Attacker impersonates an employee, customer, or vendor in person to gain unauthorized physical access.</div>
+  </div>
+</div>
+
+<h3 id="sec-2-7" data-n="2.7">Why Social Engineering Works: The Psychological Principles</h3>
+
+<p>Social engineering succeeds because it exploits deeply human, largely unconscious responses — not technical gaps. Google's course names seven core principles threat actors rely on.</p>
+
+<div class="table-wrap">
+<table>
+<caption>Psychological Principles Behind Social Engineering</caption>
+<thead><tr><th>Principle</th><th>How It's Exploited</th></tr></thead>
+<tbody>
+<tr><td><strong>Authority</strong></td><td>Impersonating someone powerful, since people are conditioned to obey authority figures</td></tr>
+<tr><td><strong>Intimidation</strong></td><td>Bullying or pressuring a victim into compliance</td></tr>
+<tr><td><strong>Consensus / Social Proof</strong></td><td>Claiming "everyone else already gave me access," exploiting herd trust</td></tr>
+<tr><td><strong>Scarcity</strong></td><td>Implying limited availability to force a rushed decision</td></tr>
+<tr><td><strong>Familiarity</strong></td><td>Building a fake emotional connection to lower the target's guard</td></tr>
+<tr><td><strong>Trust</strong></td><td>Cultivating a relationship over time before exploiting it</td></tr>
+<tr><td><strong>Urgency</strong></td><td>Pressuring quick action before the target has time to question the request</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket remember">
+  <div class="ticket-head"><span><span class="icon">🧠</span>Remember</span><span class="ticket-id">REM-001</span></div>
+  <div class="ticket-body"><p>Mnemonic: <strong>"A TIS FUT"</strong> won't win any beauty contests, but try instead: <em>"Authority Trumps, Intimidation Scares, Scarcity Rushes, Familiarity Fools, Urgency Trips."</em> Or simpler — group them as three families: <strong>Power</strong> (authority, intimidation), <strong>Social pressure</strong> (consensus, familiarity, trust), and <strong>Time pressure</strong> (scarcity, urgency).</p></div>
+</div>
+
+<h3 id="sec-2-8" data-n="2.8">Threat Actor Types &amp; Hacker Types</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Threat Actor Types</caption>
+<thead><tr><th>Type</th><th>Defining Trait</th><th>Typical Motivation</th></tr></thead>
+<tbody>
+<tr><td><strong>Advanced Persistent Threat (APT)</strong></td><td>High skill, extensive research, remains undetected long-term</td><td>Damage critical infrastructure, steal intellectual property</td></tr>
+<tr><td><strong>Insider Threat</strong></td><td>Abuses authorized access</td><td>Sabotage, corruption, espionage, unauthorized data access/leaks</td></tr>
+<tr><td><strong>Hacktivist</strong></td><td>Driven by political agenda</td><td>Demonstrations, propaganda, social change campaigns, fame</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Hacker Types</caption>
+<thead><tr><th>Category</th><th>Also Called</th><th>Behavior</th></tr></thead>
+<tbody>
+<tr><td>Authorized</td><td>Ethical hackers</td><td>Follow a code of ethics and the law; conduct organizational risk evaluations to protect against malicious actors</td></tr>
+<tr><td>Semi-authorized</td><td>Researchers</td><td>Search for vulnerabilities but do not exploit what they find</td></tr>
+<tr><td>Unauthorized</td><td>Unethical / malicious hackers</td><td>Do not respect the law; collect and sell confidential data for financial gain</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket redteam">
+  <div class="ticket-head"><span><span class="icon">🗡️</span>Red Team Tip</span><span class="ticket-id">RT-002</span></div>
+  <div class="ticket-body"><p>Some hackers don't fit neatly into "ethical" or "unethical" — contractors who take both legal and illegal jobs for pay, or self-styled "vigilante" hackers who target unethical hackers on their own initiative. The vigilante angle reappears in Module 3's ethics discussion, where counterattacking is explained as illegal in most jurisdictions regardless of good intent.</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs-2">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 2.1 — Classify the Attack</summary>
+  <div class="acc-body">
+    <p>For each scenario below, name the specific attack type:</p>
+    <ol>
+      <li>An email appearing to be from the CFO asks the accounts payable team to urgently wire funds to a new vendor account.</li>
+      <li>A text message claims to be from your bank, warning your card is locked, with a link to "verify" your PIN.</li>
+      <li>An attacker leaves a USB drive labeled "Executive Salaries 2026" in the office parking lot.</li>
+    </ol>
+    <p><strong>Answer key:</strong> 1 — Business Email Compromise (specifically whaling-adjacent, since it invokes executive authority); 2 — Smishing; 3 — USB baiting.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 2.2 — Log Analysis: Spot the Worm Behavior</summary>
+  <div class="acc-body">
+    <div class="code-block">
+      <div class="code-head"><span class="lang">Log Analysis</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+      <pre><code>03:14:02 host-A connect host-B:445 SUCCESS
+03:14:09 host-B connect host-C:445 SUCCESS
+03:14:16 host-C connect host-D:445 SUCCESS
+03:14:22 host-D connect host-A:445 FAILED (already infected)
+03:14:23 host-D connect host-E:445 SUCCESS</code></pre>
+      <div class="code-note"><strong>Task:</strong> What pattern here indicates worm-like propagation rather than a single-point phishing infection?</div>
+    </div>
+    <p><strong>Answer:</strong> The infection chains automatically from host to host over the network (port 445, a common file-sharing port) without any user action, and it self-propagates — hallmark worm behavior, unlike a virus which needs a user to open a file each time.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview-2">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Intermediate Question</span><span class="ticket-id">INT-004</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: What's the difference between a virus and a worm?</strong></p>
+    <p><strong>Ideal answer:</strong> "A virus requires a user to trigger it — usually by opening an infected file — and then spreads by attaching to other files. A worm spreads on its own across a network without any user action, which generally makes worms faster-spreading and harder to contain manually."</p>
+    <p><strong>Follow-up:</strong> "Which one was the Morris Worm's core flaw related to?" (It re-infected the same machines repeatedly because it didn't check for prior infection — a logic bug, not a security control failure.)</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Amazon-Style Question</span><span class="ticket-id">INT-005</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Tell me about a widely known security incident and what you'd have done differently.</strong></p>
+    <p><strong>Ideal answer approach:</strong> Use Equifax as your example. Note the root cause (an unpatched known vulnerability), the delayed detection, and the scale of SPII exposure. Frame your answer around what a stronger patch-management cadence and monitoring posture would have changed — this shows you can reason about root cause, not just recite the incident.</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice-2">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which attack specifically targets company executives?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Smishing</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Whaling</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Watering hole attack</button>
+  <div class="fb">Correct — whaling is spear phishing aimed specifically at executives.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: A worm requires a user to open an infected attachment to spread.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — worms self-replicate and spread without user action, unlike viruses.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. Which psychological principle is a threat actor using when they say "act now, this offer expires in 10 minutes"?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Authority</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Familiarity</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Urgency</button>
+  <div class="fb">Correct — urgency pressures the target into acting before they can think critically.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision-2">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-002</span></div>
+  <div class="ticket-body"><p>Early malware (Brain, Morris Worm) was often unintentional but still catastrophic — leading to CERTs. The Love Letter (2000) birthed social engineering as a named category. Equifax (2017) shows how one unpatched flaw becomes a 143-million-record breach. Phishing has five named variants (BEC, spear phishing, whaling, vishing, smishing); malware has four core types (virus, worm, ransomware, spyware). Social engineering works via seven psychological levers: authority, intimidation, consensus, scarcity, familiarity, trust, urgency.</p></div>
+</div>
+
+<div class="summary-block" id="summary-2">
+  <h4>Module Summary</h4>
+  <p>This module traced cybersecurity's history from accidental 1980s malware outbreaks to the deliberate, large-scale attacks of today, and built a precise vocabulary for classifying phishing, malware, and social engineering techniques.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>The Brain virus and Morris Worm were not malicious in intent but caused global disruption — leading directly to the creation of CERTs.</li>
+    <li>The Love Letter (2000) is considered the first major social engineering attack, exploiting trust rather than a technical flaw.</li>
+    <li>Equifax (2017) remains the reference case for the real-world cost of unpatched vulnerabilities exposing SPII at scale.</li>
+    <li>Phishing, malware, and social engineering each have distinct, well-defined subtypes worth memorizing precisely for interviews.</li>
+    <li>Social engineering is effective because it exploits universal human psychology, not because targets are careless.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives-2">◂ Back to Module 2 Objectives</a>
+  <a href="#module-3">Module 3 · Frameworks, Controls &amp; Ethics ▸</a>
+</div>
+
+<div class="endmark">— End of Module 2 —</div>
+
+<!-- ============================================================
+     MODULE 3 · WEEK 3 — FRAMEWORKS, CONTROLS & ETHICS
+     ============================================================ -->
+<h2 class="module-head" id="module-3"><span class="tag">Module 3 · Week 3</span>Frameworks, Controls &amp; Ethics in Cybersecurity</h2>
+
+<div class="objectives" id="objectives-3">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Explain the security lifecycle and the four core components of a security framework.</li>
+    <li>Apply the CIA triad to secure design decisions, including asset valuation.</li>
+    <li>Name and describe the major NIST frameworks (CSF and RMF) and why they matter.</li>
+    <li>Identify at least six named compliance frameworks/laws and what each protects (GDPR, HIPAA, PCI DSS, FedRAMP, CIS, ISO, SOC 1/2).</li>
+    <li>List the eight CISSP security domains and map common attack types to the correct domain.</li>
+    <li>Explain the core ethical principles guiding cybersecurity professionals: confidentiality, privacy protection, and the law.</li>
+    <li>Explain why counterattacks are illegal in the U.S. and heavily restricted internationally.</li>
+  </ul>
+</div>
+
+<h3 id="sec-3-1" data-n="3.1">Security Frameworks &amp; the Security Lifecycle</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-012</span></div>
+  <div class="ticket-body">
+    <p><strong>Security lifecycle:</strong> A constantly evolving set of policies and standards that define how an organization manages risks, follows established guidelines, and meets regulatory compliance.</p>
+    <p><strong>Security frameworks:</strong> Guidelines used for building plans to help mitigate risks and threats to data and privacy — they provide a structured approach to implementing the security lifecycle.</p>
+  </div>
+</div>
+
+<p>Frameworks exist to protect four things: personally identifiable information, financial information, to identify security weaknesses, and to manage organizational risk while aligning security with business goals.</p>
+
+<figure>
+<svg viewBox="0 0 640 300" width="100%" role="img" aria-label="Diagram of the four core components of a security framework arranged in a cycle: Identify and Document Goals, Set Guidelines, Implement Processes, Monitor and Communicate Results">
+  <rect x="0" y="0" width="640" height="300" fill="#F7F5F0"/>
+  <text x="320" y="28" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="700" fill="#0B0F14">Security Framework: Four Core Components</text>
+  <g font-family="sans-serif" font-size="12.5" font-weight="700" fill="#fff">
+    <rect x="60" y="60" width="220" height="64" rx="6" fill="#3457B2"/>
+    <text x="170" y="88" text-anchor="middle">1. Identify &amp; Document</text>
+    <text x="170" y="106" text-anchor="middle" font-weight="400" font-size="11">Security Goals</text>
+
+    <rect x="360" y="60" width="220" height="64" rx="6" fill="#0F9E93"/>
+    <text x="470" y="88" text-anchor="middle">2. Set Guidelines to</text>
+    <text x="470" y="106" text-anchor="middle" font-weight="400" font-size="11">Achieve Goals</text>
+
+    <rect x="360" y="180" width="220" height="64" rx="6" fill="#B4700A"/>
+    <text x="470" y="208" text-anchor="middle">3. Implement Strong</text>
+    <text x="470" y="226" text-anchor="middle" font-weight="400" font-size="11">Security Processes</text>
+
+    <rect x="60" y="180" width="220" height="64" rx="6" fill="#0B0F14"/>
+    <text x="170" y="208" text-anchor="middle">4. Monitor &amp; Communicate</text>
+    <text x="170" y="226" text-anchor="middle" font-weight="400" font-size="11">Results</text>
+  </g>
+  <path d="M280 92 L360 92" stroke="#0B0F14" stroke-width="2" marker-end="url(#a3)"/>
+  <path d="M470 124 L470 180" stroke="#0B0F14" stroke-width="2" marker-end="url(#a3)"/>
+  <path d="M360 212 L280 212" stroke="#0B0F14" stroke-width="2" marker-end="url(#a3)"/>
+  <path d="M170 180 L170 124" stroke="#0B0F14" stroke-width="2" marker-end="url(#a3)"/>
+  <defs><marker id="a3" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#0B0F14"/></marker></defs>
+  <text x="320" y="285" text-anchor="middle" font-family="monospace" font-size="11" fill="#3A4650">The cycle repeats continuously — it never "finishes."</text>
+</svg>
+<figcaption>Figure 3.1 — The four-component framework cycle</figcaption>
+</figure>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-013</span></div>
+  <div class="ticket-body"><p><strong>Compliance:</strong> The process of adhering to internal standards and external regulations, enabling organizations to avoid fines and security breaches.</p></div>
+</div>
+
+<h3 id="sec-3-2" data-n="3.2">The CIA Triad in Secure Design</h3>
+
+<p>Revisit the CIA triad from Module 1 — here it's applied directly to design decisions rather than defined in the abstract.</p>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-014</span></div>
+  <div class="ticket-body">
+    <p><strong>Asset:</strong> An item perceived as having value to an organization. <strong>Value</strong> is determined by the cost associated with the asset.</p>
+  </div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Shopping Mall</span>
+  <p>In a shopping mall, the jewelry store gets a locked security gate, cameras, and a guard, while the pretzel kiosk just gets a rolling shutter. Both are "assets," but the jewelry store's inventory has more value, so it warrants tighter security controls. An application that stores Social Security numbers is the mall's jewelry store; a public news website is the pretzel kiosk.</p>
+</div>
+
+<div class="ticket redteam">
+  <div class="ticket-head"><span><span class="icon">🗡️</span>Threat Intelligence</span><span class="ticket-id">TI-001</span></div>
+  <div class="ticket-body"><p>Google's course specifically flags <strong>disgruntled employees</strong> as some of the most dangerous threat actors, precisely because they already have legitimate access and know exactly where sensitive data lives. The mitigation is the <strong>principle of least privilege</strong> (tied to the "availability" leg of CIA, ensuring staff can only access what they need) combined with organizational guidelines drawn from frameworks.</p></div>
+</div>
+
+<h3 id="sec-3-3" data-n="3.3">NIST Frameworks</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-015</span></div>
+  <div class="ticket-body"><p><strong>NIST Cybersecurity Framework (CSF):</strong> A voluntary framework developed by the U.S. National Institute of Standards and Technology, consisting of standards, guidelines, and best practices to manage cybersecurity risk. Security teams use it as a baseline for managing short- and long-term risk.</p></div>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-003</span></div>
+  <div class="ticket-body"><p>NIST publishes multiple distinct frameworks — don't conflate them. The <strong>NIST CSF</strong> focuses on managing cybersecurity risk broadly; the <strong>NIST RMF (Risk Management Framework)</strong> is a more detailed, step-by-step process, often used by U.S. federal agencies, for integrating security and risk management into system development.</p></div>
+</div>
+
+<h3 id="sec-3-4" data-n="3.4">Named Frameworks &amp; Compliance Laws</h3>
+
+<p>This is one of the densest vocabulary sections in the entire certificate. Take it slowly — these names recur constantly in job postings and interviews.</p>
+
+<div class="table-wrap">
+<table>
+<caption>Comparison — Major Frameworks, Standards &amp; Laws</caption>
+<thead><tr><th>Name</th><th>Type</th><th>What It Protects / Governs</th><th>Who It Applies To</th></tr></thead>
+<tbody>
+<tr><td><strong>NIST CSF</strong></td><td>Voluntary framework</td><td>General cybersecurity risk management</td><td>Any organization (U.S.-developed, globally used)</td></tr>
+<tr><td><strong>NIST RMF</strong></td><td>Voluntary framework/process</td><td>Structured risk management integrated into system lifecycle</td><td>Often U.S. federal systems</td></tr>
+<tr><td><strong>FERC-NERC</strong></td><td>Regulation</td><td>Power grid / electricity infrastructure security</td><td>Energy sector organizations</td></tr>
+<tr><td><strong>FedRAMP®</strong></td><td>U.S. federal program</td><td>Standardizes security assessment of cloud services</td><td>Cloud providers serving U.S. government</td></tr>
+<tr><td><strong>CIS®</strong></td><td>Nonprofit controls set</td><td>Actionable safeguards against attacks</td><td>Any organization</td></tr>
+<tr><td><strong>GDPR</strong></td><td>E.U. law</td><td>Personal data processing &amp; privacy rights of E.U. residents</td><td>Any org handling E.U. residents' data, anywhere in the world</td></tr>
+<tr><td><strong>PCI DSS</strong></td><td>International standard</td><td>Secure handling of credit card information</td><td>Any org storing/processing/transmitting card data</td></tr>
+<tr><td><strong>HIPAA</strong></td><td>U.S. federal law</td><td>Patients' health information (PHI)</td><td>U.S. healthcare organizations &amp; associates</td></tr>
+<tr><td><strong>ISO</strong></td><td>International standards body</td><td>Technology, manufacturing, and management standards</td><td>Global, cross-industry</td></tr>
+<tr><td><strong>SOC 1 / SOC 2</strong></td><td>Audit reports (AICPA)</td><td>User access policies, financial compliance, risk levels</td><td>Service organizations (audited)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket compliance">
+  <div class="ticket-head"><span><span class="icon">⚖️</span>Compliance Note — GDPR</span><span class="ticket-id">CMP-003</span></div>
+  <div class="ticket-body"><p>Under GDPR, if a breach exposes an E.U. citizen's data, the affected organization has <strong>72 hours</strong> to notify them. This specific number is a frequently tested exam detail.</p></div>
+</div>
+
+<div class="ticket compliance">
+  <div class="ticket-head"><span><span class="icon">⚖️</span>Compliance Note — HIPAA</span><span class="ticket-id">CMP-004</span></div>
+  <div class="ticket-body"><p>HIPAA (1996) is governed by three rules: <strong>Privacy, Security, and Breach Notification</strong>. Organizations storing patient data must inform patients of a breach, since exposed <strong>Protected Health Information (PHI)</strong> can lead to identity theft and insurance fraud. HITRUST® is the associated framework that helps organizations demonstrate HIPAA compliance.</p></div>
+</div>
+
+<div class="ticket examtip">
+  <div class="ticket-head"><span><span class="icon">🎯</span>Exam Tip</span><span class="ticket-id">EXM-002</span></div>
+  <div class="ticket-body"><p>Quick association trick: <strong>G</strong>DPR = <strong>G</strong>lobal/E.U. privacy. <strong>H</strong>IPAA = <strong>H</strong>ealth. <strong>P</strong>CI DSS = <strong>P</strong>ayment cards. If a scenario mentions patient records, medical data, or a hospital, HIPAA is almost always the intended answer; if it mentions credit card numbers, think PCI DSS.</p></div>
+</div>
+
+<div class="ticket deepdive">
+  <div class="ticket-head"><span><span class="icon">🧭</span>Deep Dive</span><span class="ticket-id">DD-001</span></div>
+  <div class="ticket-body"><p>On May 12, 2021, U.S. President Joe Biden signed <strong>Executive Order 14028</strong>, aimed at improving national cybersecurity in response to rising threat actor activity, directing remediation efforts at federal agencies and third parties connected to U.S. critical infrastructure. It's worth knowing this exists, even if the details are outside interview-question scope for entry-level roles.</p></div>
+</div>
+
+<h3 id="sec-3-5" data-n="3.5">CISSP's Eight Security Domains</h3>
+
+<p>As of 2022, (ISC)²'s Certified Information Systems Security Professional (CISSP) credential organizes the entire field of security work into eight domains. You do not need CISSP certification to benefit from this map — it's simply the clearest lens available for understanding "what kind of security work is this?"</p>
+
+<div class="table-wrap">
+<table>
+<caption>The Eight CISSP Security Domains</caption>
+<thead><tr><th>#</th><th>Domain</th><th>Focus</th><th>Entry-Level Example</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><strong>Security &amp; Risk Management</strong></td><td>Security goals, risk mitigation, compliance, business continuity, law</td><td>Updating policy when a law like HIPAA changes</td></tr>
+<tr><td>2</td><td><strong>Asset Security</strong></td><td>Securing digital and physical assets; storage, maintenance, retention, destruction of data</td><td>Ensuring old equipment is properly wiped and destroyed</td></tr>
+<tr><td>3</td><td><strong>Security Architecture &amp; Engineering</strong></td><td>Ensuring effective tools, systems, and processes for data security</td><td>Configuring a firewall correctly</td></tr>
+<tr><td>4</td><td><strong>Communication &amp; Network Security</strong></td><td>Managing/securing physical networks and wireless communications</td><td>Analyzing user behavior across the network</td></tr>
+<tr><td>5</td><td><strong>Identity &amp; Access Management (IAM)</strong></td><td>Controlling physical and logical access via established policy</td><td>Setting up employee keycard access</td></tr>
+<tr><td>6</td><td><strong>Security Assessment &amp; Testing</strong></td><td>Security control testing, data analysis, audits</td><td>Auditing payroll-data access permissions</td></tr>
+<tr><td>7</td><td><strong>Security Operations</strong></td><td>Investigations and preventative measures</td><td>Responding to an alert about an unknown device on the network</td></tr>
+<tr><td>8</td><td><strong>Software Development Security</strong></td><td>Secure coding practices across the software development lifecycle</td><td>Advising a dev team on password policy for a new app</td></tr>
+</tbody>
+</table>
+</div>
+
+<h4>Memory Trick</h4>
+<p><strong>"SAS-CIA-SS"</strong> is clunky — instead, group them into three families you'll actually remember: <strong>Govern</strong> (Security &amp; Risk Management), <strong>Build</strong> (Asset Security, Architecture &amp; Engineering, Software Development Security), and <strong>Run</strong> (Network Security, IAM, Assessment &amp; Testing, Security Operations).</p>
+
+<h3 id="sec-3-6" data-n="3.6">Attack Types Mapped to CISSP Domains</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Attack Types &amp; Their Primary CISSP Domain</caption>
+<thead><tr><th>Attack Type</th><th>Primary Domain</th><th>Examples</th></tr></thead>
+<tbody>
+<tr><td><strong>Password Attack</strong></td><td>Communication &amp; Network Security</td><td>Brute force, rainbow table</td></tr>
+<tr><td><strong>Social Engineering Attack</strong></td><td>Security &amp; Risk Management</td><td>Phishing, smishing, vishing, spear phishing, whaling, BEC</td></tr>
+<tr><td><strong>Physical Attack</strong></td><td>Asset Security</td><td>Malicious USB cable, malicious flash drive, card cloning/skimming</td></tr>
+<tr><td><strong>Adversarial AI</strong></td><td>IAM + Network Security</td><td>Manipulating ML models to conduct attacks more efficiently</td></tr>
+<tr><td><strong>Supply-Chain Attack</strong></td><td>Risk Mgmt + Architecture + Operations</td><td>Compromising a vendor to reach the real target</td></tr>
+<tr><td><strong>Cryptographic Attack</strong></td><td>Communication &amp; Network Security</td><td>Birthday, collision, downgrade</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-016</span></div>
+  <div class="ticket-body">
+    <p><strong>Brute force attack:</strong> A method of attempting every possible password combination until the correct one is found.</p>
+    <p><strong>Rainbow table attack:</strong> Uses a precomputed table to quickly reverse cryptographic hash functions and recover original passwords.</p>
+    <p><strong>Supply-chain attack:</strong> Targets systems, applications, hardware, and/or software to locate a vulnerability where malware can be deployed — costly because it can affect multiple organizations at once through shared vendors.</p>
+  </div>
+</div>
+
+<h3 id="sec-3-7" data-n="3.7">Security Ethics</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-017</span></div>
+  <div class="ticket-body"><p><strong>Security ethics:</strong> Guidelines for making appropriate decisions as a security professional. Being ethical requires remaining unbiased and maintaining the security and confidentiality of private data.</p></div>
+</div>
+
+<p>Three ethical pillars structure nearly every judgment call a security analyst makes:</p>
+
+<div class="table-wrap">
+<table>
+<caption>Three Ethical Pillars in Security</caption>
+<thead><tr><th>Pillar</th><th>Meaning</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td><strong>Confidentiality</strong></td><td>Ethical duty to keep proprietary/private information safe</td><td>Refusing to grant a coworker system access outside documented channels, even as a "favor"</td></tr>
+<tr><td><strong>Privacy Protection</strong></td><td>Safeguarding personal information from unauthorized use</td><td>Refusing to share an employee's home phone number outside the approved database, even if a manager asks after hours</td></tr>
+<tr><td><strong>Laws</strong></td><td>Rules recognized by a community and enforced by a governing entity</td><td>Never leaving PII/SPII files unsupervised, even under time pressure</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning</span><span class="ticket-id">WRN-002</span></div>
+  <div class="ticket-body"><p>Google's course materials describe a specific cautionary scenario: a hospital staff member trained to handle PII/SPII leaves confidential patient files unsupervised on a desk while rushing to a meeting, and the files go missing. This is simultaneously an ethics violation <em>and</em> a compliance violation — the two are not separate concerns in practice; a lapse in ethical judgment routinely becomes a legal liability.</p></div>
+</div>
+
+<h3 id="sec-3-8" data-n="3.8">Counterattacks &amp; the Law</h3>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-004</span></div>
+  <div class="ticket-body"><p>In the United States, deploying a counterattack against a threat actor is <strong>illegal</strong>, under laws including the <strong>Computer Fraud and Abuse Act of 1986</strong> and the <strong>Cybersecurity Information Sharing Act of 2015</strong>. Organizations and individuals may only defend, not retaliate. Only approved federal government or military personnel may legally counterattack in the U.S.</p></div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Police Station</span>
+  <p>If someone breaks into your house, you're allowed to call the police and lock your doors — but you're not allowed to track the burglar down and break into <em>their</em> house in retaliation. That's vigilantism, and it's illegal even if your intentions feel justified. The same logic applies online: defending your network is legal, hacking back is not.</p>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-018</span></div>
+  <div class="ticket-body">
+    <p><strong>Vigilante:</strong> A person who is not a member of law enforcement who decides to stop a crime on their own.</p>
+    <p><strong>Hacktivist:</strong> A person who uses hacking to achieve a political goal, such as promoting social change or civil disobedience.</p>
+  </div>
+</div>
+
+<p>Internationally, the <strong>International Court of Justice (ICJ)</strong> permits counterattacks only under narrow conditions: the response affects only the original attacker, it's a direct communication asking them to stop, it doesn't escalate the situation, and its effects are reversible. In practice, these conditions are hard to satisfy and even harder to verify in real time, so organizations almost never counterattack — the risk of misattribution or escalation is too high.</p>
+
+<div class="ticket deepdive">
+  <div class="ticket-head"><span><span class="icon">🧭</span>Deep Dive</span><span class="ticket-id">DD-002</span></div>
+  <div class="ticket-body"><p>If the threat actor turns out to be a state-sponsored hacktivist, a counterattack can trigger serious international diplomatic consequences — turning a technical incident into a geopolitical one. This is one reason incident response playbooks (Module 4, and again in Course VI) never include "counterattack" as a valid response step.</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs-3">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 3.1 — Framework Matching Exercise</summary>
+  <div class="acc-body">
+    <p>Match each scenario to the correct framework/law: (a) a hospital exposes patient diagnoses, (b) an e-commerce site mishandles credit card numbers, (c) a company fails to notify E.U. users of a breach within 72 hours, (d) a cloud vendor seeks federal government contracts.</p>
+    <p><strong>Answer key:</strong> (a) HIPAA, (b) PCI DSS, (c) GDPR, (d) FedRAMP®.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 3.2 — Domain Mapping Challenge</summary>
+  <div class="acc-body">
+    <p>An analyst is asked to configure keycard access for a new office wing. Which CISSP domain does this fall under, and why?</p>
+    <p><strong>Answer:</strong> Identity and Access Management (IAM) — it governs both physical assets (office spaces) and logical assets (networks/applications), and keycard access control is a textbook IAM task.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Scenario Challenge 3.1 — The Ethics Test</summary>
+  <div class="acc-body">
+    <p>Your manager emails you after hours asking for a colleague's personal cell number because "it's urgent" and they can't access the employee database right now. What do you do?</p>
+    <p><strong>Answer guidance:</strong> Politely decline and direct the request through the proper documented channel (the employee database), even under pressure from authority and urgency — this scenario is deliberately designed to test whether you recognize social-engineering-style pressure even from a legitimate-seeming internal source.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview-3">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Advanced Question</span><span class="ticket-id">INT-006</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Walk me through the difference between a framework, a control, and compliance.</strong></p>
+    <p><strong>Ideal answer:</strong> "A framework is a set of guidelines for managing risk — like NIST CSF. A control is a specific safeguard you implement to reduce a risk, built using that framework as a guide — like requiring MFA on all admin accounts. Compliance is the act of actually adhering to internal standards and external regulations, which controls and frameworks together are meant to support."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Scenario Question</span><span class="ticket-id">INT-007</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Your organization just detected an active attacker in the network. A junior colleague suggests hacking back to identify them. How do you respond?</strong></p>
+    <p><strong>Ideal answer:</strong> "I'd explain that counterattacking is illegal in the U.S. under laws like the Computer Fraud and Abuse Act, and that even internationally it's almost never justifiable given how hard it is to guarantee the response won't escalate the situation or hit the wrong target. Our job is to contain, investigate, and follow the incident response playbook — not retaliate."</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice-3">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which framework specifically governs cloud service providers seeking U.S. federal contracts?</div>
+  <button class="opt" onclick="checkAnswer(this,true)">FedRAMP®</button>
+  <button class="opt" onclick="checkAnswer(this,false)">PCI DSS</button>
+  <button class="opt" onclick="checkAnswer(this,false)">ISO</button>
+  <div class="fb">Correct — FedRAMP standardizes cloud security assessment for federal use.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: Counterattacking a threat actor is legal in the U.S. as long as you can prove they attacked first.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — it's illegal for private individuals/organizations regardless of proof, under laws like the CFAA.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. Configuring a firewall correctly falls under which CISSP domain?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Asset Security</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Security Architecture &amp; Engineering</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Software Development Security</button>
+  <div class="fb">Correct — this domain focuses on effective tools, systems, and processes like firewalls.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision-3">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-003</span></div>
+  <div class="ticket-body"><p>Frameworks (guidelines) → Controls (safeguards) → Compliance (adherence). NIST CSF/RMF are voluntary U.S. frameworks; GDPR/HIPAA/PCI DSS are enforceable laws/standards tied to specific data types (E.U. residents, health, payment cards). CISSP defines 8 domains covering govern/build/run responsibilities. Ethics rests on confidentiality, privacy protection, and law. Counterattacking is illegal in the U.S. and near-impossible to justify internationally.</p></div>
+</div>
+
+<div class="summary-block" id="summary-3">
+  <h4>Module Summary</h4>
+  <p>This module moved from abstract security goals to the concrete governance structures — frameworks, controls, laws, and ethical principles — that keep those goals enforceable and auditable in real organizations.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>A security framework's four components form a continuous cycle: identify, set guidelines, implement, monitor.</li>
+    <li>NIST CSF and RMF are voluntary; GDPR, HIPAA, and PCI DSS carry legal/contractual force tied to specific data types.</li>
+    <li>The eight CISSP domains give you a complete map of what "security work" covers, from asset disposal to secure coding.</li>
+    <li>Security ethics rests on three pillars: confidentiality, privacy protection, and respect for the law.</li>
+    <li>Counterattacking is illegal for private organizations in the U.S. and rarely justifiable even under international guidance.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives-3">◂ Back to Module 3 Objectives</a>
+  <a href="#module-4">Module 4 · Tools &amp; Career Prep ▸</a>
+</div>
+
+<div class="endmark">— End of Module 3 —</div>
+
+<!-- ============================================================
+     MODULE 4 · WEEK 4 — TOOLS & CAREER PREP
+     ============================================================ -->
+<h2 class="module-head" id="module-4"><span class="tag">Module 4 · Week 4</span>Cybersecurity Tools, Core Skills &amp; Career Prep</h2>
+
+<div class="objectives" id="objectives-4">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Explain what logs are and why SIEM tools exist to manage them.</li>
+    <li>Describe network protocol analyzers (packet sniffers) and name common tools.</li>
+    <li>Explain chain-of-custody and evidence-preservation playbooks, including the order of volatility.</li>
+    <li>Introduce Linux, SQL, and Python and their respective roles in a security analyst's toolkit.</li>
+    <li>Define operating system, open source, command, and command-line interface.</li>
+    <li>Explain web vulnerabilities, antivirus software, IDS, encryption, and penetration testing at an introductory level.</li>
+    <li>Build a professional cybersecurity portfolio using one of four hosting options.</li>
+  </ul>
+</div>
+
+<h3 id="sec-4-1" data-n="4.1">Logs &amp; SIEM Tools</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-019</span></div>
+  <div class="ticket-body">
+    <p><strong>Log:</strong> A record of events that occur within an organization's systems — for example, employees signing into computers or accessing web-based services. Logs help security professionals identify vulnerabilities and potential security breaches.</p>
+    <p><strong>Security Information and Event Management (SIEM):</strong> An application that collects and analyzes log data in real time, reducing the volume an analyst must review manually by surfacing alerts for specific risks and threats.</p>
+  </div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Traffic System</span>
+  <p>Imagine a city with a camera at every intersection recording every car that passes — that's a <strong>log</strong>. Now imagine a control room with one big screen that automatically flags any car running a red light, instead of making an officer watch every camera all day — that's a <strong>SIEM tool</strong>. It doesn't replace the officer; it tells the officer exactly where to look.</p>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Comparison — Common SIEM Tools</caption>
+<thead><tr><th>Tool</th><th>Hosting</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><strong>Splunk (Enterprise)</strong></td><td>Self-hosted</td><td>Data analysis platform used to retain, analyze, and search log data</td></tr>
+<tr><td><strong>Chronicle</strong></td><td>Cloud-native</td><td>Google's cloud-native SIEM; cloud-native design enables faster feature delivery and generally easier setup for less experienced teams</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>SOC Insight</span><span class="ticket-id">SOC-003</span></div>
+  <div class="ticket-body"><p>Organizations pick on-premise vs. cloud-hosted SIEM largely based on team expertise and existing infrastructure investment, not just cost. A less experienced security team often gravitates toward cloud-hosted SIEM because it's faster to set up and easier to maintain — a detail worth knowing when discussing tooling trade-offs in an interview.</p></div>
+</div>
+
+<h3 id="sec-4-2" data-n="4.2">Packet Sniffers &amp; Playbooks</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-020</span></div>
+  <div class="ticket-body"><p><strong>Network protocol analyzer (packet sniffer):</strong> A tool designed to capture and analyze data traffic within a network. Common examples include <strong>tcpdump</strong> and <strong>Wireshark</strong>.</p></div>
+</div>
+
+<figure>
+<svg viewBox="0 0 640 200" width="100%" role="img" aria-label="Diagram showing network traffic flowing through a packet sniffer which logs and displays packet contents for analysis">
+  <rect x="0" y="0" width="640" height="200" fill="#F7F5F0"/>
+  <g font-family="sans-serif" font-size="12" font-weight="700" fill="#fff">
+    <rect x="30" y="80" width="130" height="50" rx="6" fill="#3457B2"/>
+    <text x="95" y="110" text-anchor="middle">Client Device</text>
+    <rect x="480" y="80" width="130" height="50" rx="6" fill="#3457B2"/>
+    <text x="545" y="110" text-anchor="middle">Server</text>
+    <rect x="255" y="60" width="130" height="90" rx="6" fill="#0F9E93"/>
+    <text x="320" y="100" text-anchor="middle">Packet</text>
+    <text x="320" y="118" text-anchor="middle">Sniffer</text>
+    <text x="320" y="136" text-anchor="middle" font-weight="400" font-size="10">(Wireshark/tcpdump)</text>
+  </g>
+  <path d="M160 105 L255 105" stroke="#0B0F14" stroke-width="2" marker-end="url(#a4)"/>
+  <path d="M385 105 L480 105" stroke="#0B0F14" stroke-width="2" marker-end="url(#a4)"/>
+  <defs><marker id="a4" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#0B0F14"/></marker></defs>
+  <text x="320" y="180" text-anchor="middle" font-family="monospace" font-size="11" fill="#3A4650">Every packet passing through is captured and logged for analysis</text>
+</svg>
+<figcaption>Figure 4.1 — Where a packet sniffer sits in network traffic</figcaption>
+</figure>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-021</span></div>
+  <div class="ticket-body"><p><strong>Playbook:</strong> A manual providing details about any operational action, such as how to respond to a security incident. Playbooks vary between organizations but consistently guide analysts through a series of steps for specific security tasks.</p></div>
+</div>
+
+<h3 id="sec-4-3" data-n="4.3">Chain of Custody &amp; Evidence Preservation</h3>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>SOC Example</span><span class="ticket-id">SOC-004</span></div>
+  <div class="ticket-body"><p>Scenario: you work for an incident response firm handling a breach at a small medical practice. Your investigative findings will determine whether the practice's cybersecurity insurance pays out. Two playbooks govern your work here: the <strong>Chain of Custody Playbook</strong> and the <strong>Protecting and Preserving Evidence</strong> playbook.</p></div>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-022</span></div>
+  <div class="ticket-body">
+    <p><strong>Chain of custody:</strong> The process of documenting evidence possession and control during an incident lifecycle. Every time evidence changes hands, it must be reported, so all parties know exactly where it is at all times.</p>
+    <p><strong>Order of volatility:</strong> A sequence outlining the order in which data must be preserved, from first to last, prioritizing the most volatile data — data likely to be lost if the device powers off.</p>
+  </div>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning</span><span class="ticket-id">WRN-003</span></div>
+  <div class="ticket-body"><p>Improper handling of digital evidence during an investigation can compromise or alter it — once that happens, it may become unusable, even in a case that otherwise had a strong outcome. This is exactly why the first priority in any investigation is to preserve data properly, typically by working from copies rather than originals.</p></div>
+</div>
+
+<h4>Memory Trick</h4>
+<p><strong>Order of Volatility, simplified:</strong> the more fragile and fast-changing the data, the sooner you must capture it. RAM contents vanish the instant power is cut; a hard drive image can wait a little longer. "Grab the melting ice cube before the frozen block."</p>
+
+<h3 id="sec-4-4" data-n="4.4">Linux, SQL &amp; Python</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-023</span></div>
+  <div class="ticket-body">
+    <p><strong>Linux:</strong> An open-source operating system that relies on a command line as its primary user interface. Linux is not a programming language, but it enables text-based commands between user and OS.</p>
+    <p><strong>Structured Query Language (SQL):</strong> A programming language used to create, interact with, and request information from a database.</p>
+    <p><strong>Python:</strong> A programming language security professionals use to automate repetitive, time-consuming tasks that require a high level of detail and accuracy.</p>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Comparison — Linux vs. SQL vs. Python (Entry-Level Use Case)</caption>
+<thead><tr><th>Tool</th><th>Category</th><th>Typical Analyst Use</th><th>Covered in Depth</th></tr></thead>
+<tbody>
+<tr><td><strong>Linux</strong></td><td>Operating system</td><td>Reviewing error logs, investigating unusual network traffic via command line</td><td>Course IV</td></tr>
+<tr><td><strong>SQL</strong></td><td>Query language</td><td>Filtering millions of data points in a database to retrieve specific records</td><td>Course IV</td></tr>
+<tr><td><strong>Python</strong></td><td>Programming language</td><td>Automating repetitive detection/analysis tasks; reducing human error</td><td>Course VII</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Bash</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>\$ grep "Failed password" /var/log/auth.log | wc -l</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Searches the authentication log for lines containing "Failed password" and counts them — a one-line way to spot a possible brute-force attempt.<br><strong>Security implication:</strong> A sudden spike in this count against a single account is a classic brute-force indicator worth escalating.<br><strong>Common mistake:</strong> Forgetting that log paths and formats vary by distribution and application — always confirm the actual log location first.</div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">SQL</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>SELECT employee_id, login_time, ip_address
+FROM login_events
+WHERE login_time > NOW() - INTERVAL '1 day'
+  AND failed_attempts > 5;</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Retrieves all login events from the last 24 hours where the number of failed attempts exceeds five.<br><strong>Real SOC usage:</strong> A query like this could feed directly into a daily triage report for potential brute-force or credential-stuffing activity.<br><strong>Optimization note:</strong> On a large table, an index on <code>login_time</code> and <code>failed_attempts</code> would make this query far faster.</div>
+</div>
+
+<h3 id="sec-4-5" data-n="4.5">Operating Systems &amp; the Command-Line Interface</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-024</span></div>
+  <div class="ticket-body">
+    <p><strong>Operating system:</strong> The interface between computer hardware and the user (e.g., Linux, macOS, Windows).</p>
+    <p><strong>Open source:</strong> Code available to the public, allowing anyone to view and contribute to improving the software.</p>
+    <p><strong>Command:</strong> An instruction telling the computer to do something.</p>
+    <p><strong>Command-line interface (CLI):</strong> A text-based user interface that uses commands to interact with the computer.</p>
+  </div>
+</div>
+
+<h3 id="sec-4-6" data-n="4.6">Web Vulnerabilities, Antivirus, IDS, Encryption &amp; Penetration Testing</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-025</span></div>
+  <div class="ticket-body">
+    <p><strong>Web vulnerability:</strong> A unique flaw in a web application that a threat actor could exploit using malicious code or behavior to gain unauthorized access, steal data, or deploy malware.</p>
+    <p><strong>Antivirus software:</strong> A program that prevents, detects, and eliminates malware and viruses (also called anti-malware); it can scan device memory for patterns indicating malware presence.</p>
+    <p><strong>Intrusion Detection System (IDS):</strong> An application that monitors system activity and alerts on possible intrusions by scanning and analyzing network packets.</p>
+    <p><strong>Encryption:</strong> The process of converting readable data (plaintext) into a cryptographically encoded format (secure ciphertext), making it unreadable to unauthorized users. Its main goal is confidentiality.</p>
+    <p><strong>Penetration testing (pen testing):</strong> A simulated attack that helps identify vulnerabilities in systems, networks, websites, applications, and processes.</p>
+  </div>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-005</span></div>
+  <div class="ticket-body"><p>Do not confuse <strong>encoding</strong> with <strong>encryption</strong>. Encoding uses a public, reversible conversion algorithm so systems with different data representations can share information — it's about compatibility, not secrecy. Encryption's entire purpose is confidentiality, and reversing it without authorization should be computationally infeasible.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Comparison — Encoding vs. Encryption vs. Hashing</caption>
+<thead><tr><th>Concept</th><th>Reversible?</th><th>Purpose</th><th>Needs a Key?</th></tr></thead>
+<tbody>
+<tr><td><strong>Encoding</strong></td><td>Yes, publicly</td><td>Data compatibility between systems</td><td>No</td></tr>
+<tr><td><strong>Encryption</strong></td><td>Yes, only with the correct key</td><td>Confidentiality</td><td>Yes</td></tr>
+<tr><td><strong>Hashing</strong></td><td>No (one-way by design)</td><td>Integrity verification</td><td>No (though salts are used)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-001</span></div>
+  <div class="ticket-body"><p>Reference the <strong>OWASP Top 10</strong> to stay current on the most critical web application security risks — this list is revisited constantly throughout the certificate and in the security industry generally as the de facto baseline for web vulnerability awareness.</p></div>
+</div>
+
+<h3 id="sec-4-7" data-n="4.7">Building a Cybersecurity Portfolio</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-026</span></div>
+  <div class="ticket-body"><p><strong>Portfolio:</strong> A demonstration of a professional's security education, skills, and knowledge — more in-depth than a resume, used to show potential employers you can do the job you're applying for.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Portfolio Hosting Options</caption>
+<thead><tr><th>Option</th><th>Best For</th><th>Key Feature</th></tr></thead>
+<tbody>
+<tr><td><strong>Documents folder</strong></td><td>Personal organization, offline access</td><td>Full manual control over structure</td></tr>
+<tr><td><strong>Google Drive / Dropbox</strong></td><td>Easy sharing with recruiters</td><td>Automatic sync and file-sharing links</td></tr>
+<tr><td><strong>Google Sites</strong></td><td>A polished, browsable public presence</td><td>Responsive webpages, publishable URL</td></tr>
+<tr><td><strong>Git repository (GitHub, GitLab, Bitbucket)</strong></td><td>Demonstrating technical/Markdown fluency</td><td>Version control, industry-standard for technical roles</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning</span><span class="ticket-id">WRN-004</span></div>
+  <div class="ticket-body"><p>Never include private, copyrighted, or proprietary documents in your portfolio. If using a hosted site option, keep it set to "private" until it's finalized and ready for review.</p></div>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-027</span></div>
+  <div class="ticket-body"><p><strong>Professional statement:</strong> A brief introduction to employers describing who you are and what you care about — showcasing your interest in cybersecurity, work experience, knowledge, skills, and achievements. Expect to revise it as you learn more throughout the certificate.</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs-4">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 4.1 — Order of Volatility Ranking</summary>
+  <div class="acc-body">
+    <p>Rank the following from most volatile (capture first) to least volatile (capture last): hard drive contents, RAM contents, network connection state, archived backup tapes.</p>
+    <p><strong>Answer:</strong> 1) RAM contents (lost instantly on power-off), 2) network connection state, 3) hard drive contents, 4) archived backup tapes (most stable, least urgent).</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Portfolio Project 4.1 — Set Up Your Portfolio Home</summary>
+  <div class="acc-body">
+    <p>Choose one of the four hosting options above and create the top-level folder/site/repository structure you'll use for the rest of this certificate (suggested subfolders: Resume, Education, Portfolio Documents, Cybersecurity Tools, Programming). Do not upload real content yet — just build the skeleton.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Mini Project 4.1 — Draft Your Professional Statement (v1)</summary>
+  <div class="acc-body">
+    <p>Write a 3–4 sentence professional statement introducing yourself as an aspiring cybersecurity professional. Mention one specific concept from this course (e.g., the CIA triad, or a named framework) to show early technical fluency. You'll revise this again in Course VIII.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview-4">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Beginner Question</span><span class="ticket-id">INT-008</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: What's the difference between a SIEM tool and an IDS?</strong></p>
+    <p><strong>Ideal answer:</strong> "A SIEM aggregates and analyzes log data across many sources to surface potential threats through dashboards and alerts. An IDS specifically monitors network or system activity in real time and alerts on possible intrusions by analyzing traffic patterns like network packets. In practice, an IDS is often one of many data sources that feed into a SIEM."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Security Engineer Question</span><span class="ticket-id">INT-009</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Why does the order of volatility matter during an investigation?</strong></p>
+    <p><strong>Ideal answer:</strong> "Because some evidence disappears the moment power is lost or a system changes state — RAM contents, active network connections — while other evidence, like disk images or backups, is comparatively stable. If you don't prioritize capturing volatile evidence first, you can permanently lose data critical to the investigation, even if you eventually get to it 'later.'"</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice-4">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which of these is a common packet sniffer tool?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Splunk</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Wireshark</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Chronicle</button>
+  <div class="fb">Correct — Wireshark (along with tcpdump) is a common network protocol analyzer.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: Encoding and encryption serve the same security purpose.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — encoding enables compatibility (publicly reversible); encryption protects confidentiality (reversible only with a key).</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. What should you do first when handling digital evidence during an investigation?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Analyze the original hard drive directly</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Preserve the data, typically by working from copies</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Contact the threat actor</button>
+  <div class="fb">Correct — preserving data properly (via copies) is the first priority to avoid compromising evidence.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision-4">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-004</span></div>
+  <div class="ticket-body"><p>Logs feed SIEM tools (Splunk, Chronicle); packet sniffers (Wireshark, tcpdump) capture network traffic; playbooks guide chain-of-custody and evidence preservation, respecting the order of volatility. Linux, SQL, and Python are the three foundational technical tools — OS/CLI, database queries, and automation respectively. Encoding ≠ encryption ≠ hashing. Antivirus, IDS, and pen testing are your core defensive/testing tool trio. Build your portfolio early using Drive, Sites, or a Git repository.</p></div>
+</div>
+
+<h4>Course I Command-Line Quick Reference</h4>
+<div class="table-wrap">
+<table>
+<tbody>
+<tr><td><code>grep</code></td><td>Search text for patterns (e.g., failed logins in a log file)</td></tr>
+<tr><td><code>wc -l</code></td><td>Count lines (often piped after grep to count matches)</td></tr>
+<tr><td><code>cat</code></td><td>Display the contents of a file</td></tr>
+<tr><td><code>tcpdump</code></td><td>Command-line packet sniffer / network protocol analyzer</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="summary-block" id="summary-4">
+  <h4>Module Summary</h4>
+  <p>This module introduced the concrete tools of the trade — SIEM, packet sniffers, playbooks, Linux, SQL, Python, antivirus, IDS, encryption, and pen testing — and closed the course loop by helping you start building a portfolio to showcase everything learned so far.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>SIEM tools exist because manually reviewing raw logs at scale is impractical; they surface the alerts that matter.</li>
+    <li>Chain of custody and order of volatility are not bureaucratic overhead — mishandled evidence becomes legally unusable.</li>
+    <li>Linux, SQL, and Python cover three distinct needs: operating system interaction, database querying, and automation.</li>
+    <li>Encoding, encryption, and hashing are frequently confused but serve entirely different purposes.</li>
+    <li>Start your portfolio now — it compounds in value with every course you complete.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives-4">◂ Back to Module 4 Objectives</a>
+  <a href="#course-summary">Course Summary ▸</a>
+</div>
+
+<div class="endmark">— End of Module 4 —</div>
+
+<!-- ============================================================
+     COURSE SUMMARY
+     ============================================================ -->
+<h2 class="module-head" id="course-summary"><span class="tag">Course Summary</span>Foundations of Cybersecurity — Complete</h2>
+
+<p>Course I built the vocabulary and mental models that every subsequent course in this certificate assumes you already have. You started with the CIA triad and the basic language of threats and threat actors; moved through the history of real attacks that shaped the industry; learned the governance layer of frameworks, controls, and ethics; and finished with the concrete tools — SIEM, packet sniffers, Linux, SQL, Python — that turn theory into daily practice.</p>
+
+<div class="table-wrap">
+<table>
+<caption>Course I — Module-by-Module Recap</caption>
+<thead><tr><th>Module</th><th>Core Theme</th><th>Signature Concepts</th></tr></thead>
+<tbody>
+<tr><td><strong>1. Intro to Cybersecurity</strong></td><td>Foundational vocabulary</td><td>CIA triad, threat actor, PII/SPII, frameworks/controls/posture</td></tr>
+<tr><td><strong>2. History &amp; Types of Attacks</strong></td><td>How the industry was shaped by real incidents</td><td>Brain virus, Morris worm, Love Letter, Equifax, phishing/malware taxonomies</td></tr>
+<tr><td><strong>3. Frameworks, Controls &amp; Ethics</strong></td><td>Governance and professional conduct</td><td>NIST CSF/RMF, GDPR/HIPAA/PCI DSS, CISSP's 8 domains, security ethics</td></tr>
+<tr><td><strong>4. Tools &amp; Career Prep</strong></td><td>Practical toolkit and portfolio-building</td><td>SIEM, packet sniffers, chain of custody, Linux/SQL/Python, portfolio options</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket expert">
+  <div class="ticket-head"><span><span class="icon">🎓</span>Expert Note</span><span class="ticket-id">EXP-001</span></div>
+  <div class="ticket-body"><p>If you remember only five things from Course I going into your next interview, make them these: (1) the CIA triad and how to apply it to a scenario, not just define it; (2) the PII/SPII distinction and why it drives compliance obligations; (3) at least three named frameworks/laws and what each protects; (4) the difference between a virus, a worm, and ransomware; (5) that counterattacking is illegal — this specific fact surprises people and demonstrates real industry awareness when you bring it up unprompted.</p></div>
+</div>
+
+<!-- ============================================================
+     FULL COURSE GLOSSARY
+     ============================================================ -->
+<h2 class="module-head" id="course-glossary"><span class="tag">Reference</span>Full Glossary — Weeks 1–4</h2>
+
+<div class="table-wrap">
+<table>
+<caption>Complete Course I Glossary (100+ Terms)</caption>
+<thead><tr><th>Term</th><th>Definition</th></tr></thead>
+<tbody>
+<tr><td><strong>Adversarial artificial intelligence</strong></td><td>A technique that manipulates AI/ML technology to conduct attacks more efficiently</td></tr>
+<tr><td><strong>Antivirus software</strong></td><td>Software that prevents, detects, and eliminates malware and viruses</td></tr>
+<tr><td><strong>Asset</strong></td><td>An item perceived as having value to an organization</td></tr>
+<tr><td><strong>Brute force attack</strong></td><td>Attempting every possible password combination until the correct one is found</td></tr>
+<tr><td><strong>Business Email Compromise (BEC)</strong></td><td>Impersonating a known source via email to obtain a financial advantage</td></tr>
+<tr><td><strong>Chain of custody</strong></td><td>Documenting evidence possession and control during an incident lifecycle</td></tr>
+<tr><td><strong>CIA triad</strong></td><td>Confidentiality, Integrity, and Availability — the three foundational security goals</td></tr>
+<tr><td><strong>Cloud security</strong></td><td>Ensuring cloud-stored assets are properly configured and access-restricted</td></tr>
+<tr><td><strong>Command</strong></td><td>An instruction telling the computer to do something</td></tr>
+<tr><td><strong>Command-line interface (CLI)</strong></td><td>A text-based interface that uses commands to interact with a computer</td></tr>
+<tr><td><strong>Compliance</strong></td><td>Adhering to internal standards and external regulations</td></tr>
+<tr><td><strong>Computer virus</strong></td><td>Malicious code that attaches to programs/documents and spreads, damaging data/software</td></tr>
+<tr><td><strong>Cryptographic attack</strong></td><td>An attack affecting secure communication between sender and recipient</td></tr>
+<tr><td><strong>Data breach</strong></td><td>An incident exposing confidential or protected information</td></tr>
+<tr><td><strong>Database</strong></td><td>An organized collection of information or data</td></tr>
+<tr><td><strong>Encoding</strong></td><td>Using a public algorithm to convert data for compatibility between systems</td></tr>
+<tr><td><strong>Encryption</strong></td><td>Converting readable data into cryptographically encoded, unreadable format</td></tr>
+<tr><td><strong>FedRAMP®</strong></td><td>U.S. federal program standardizing security assessment of cloud services</td></tr>
+<tr><td><strong>Firewall</strong></td><td>A device used to monitor and filter incoming/outgoing network traffic</td></tr>
+<tr><td><strong>GDPR</strong></td><td>E.U. law protecting personal data processing and privacy rights of E.U. residents</td></tr>
+<tr><td><strong>Hacker</strong></td><td>Any person who uses computers to gain access to systems, networks, or data</td></tr>
+<tr><td><strong>Hacktivist</strong></td><td>A threat actor driven by a political agenda</td></tr>
+<tr><td><strong>HIPAA</strong></td><td>U.S. law protecting patients' health information (PHI)</td></tr>
+<tr><td><strong>Insider threat</strong></td><td>An internal actor abusing authorized access to harm an organization</td></tr>
+<tr><td><strong>Internal threat</strong></td><td>A current/former employee, vendor, or partner who poses a security risk</td></tr>
+<tr><td><strong>Intrusion Detection System (IDS)</strong></td><td>Monitors system/network activity and alerts on possible intrusions</td></tr>
+<tr><td><strong>Linux</strong></td><td>An open-source operating system using a command-line interface</td></tr>
+<tr><td><strong>Log</strong></td><td>A record of events occurring within an organization's systems</td></tr>
+<tr><td><strong>Malware</strong></td><td>Software designed to harm devices or networks</td></tr>
+<tr><td><strong>NIST CSF</strong></td><td>Voluntary U.S. framework of standards/guidelines for managing cybersecurity risk</td></tr>
+<tr><td><strong>NIST RMF</strong></td><td>A structured risk-management process, often used by U.S. federal systems</td></tr>
+<tr><td><strong>Open source</strong></td><td>Code available to the public for use and contribution</td></tr>
+<tr><td><strong>Operating system</strong></td><td>The interface between computer hardware and the user</td></tr>
+<tr><td><strong>Order of volatility</strong></td><td>The prioritized sequence for preserving data, most fragile first</td></tr>
+<tr><td><strong>Password attack</strong></td><td>An attempt to access password-secured devices, systems, networks, or data</td></tr>
+<tr><td><strong>PCI DSS</strong></td><td>International standard for securely handling credit card information</td></tr>
+<tr><td><strong>Penetration testing</strong></td><td>A simulated attack that identifies vulnerabilities in systems and processes</td></tr>
+<tr><td><strong>Personally Identifiable Information (PII)</strong></td><td>Information used to infer an individual's identity</td></tr>
+<tr><td><strong>Phishing</strong></td><td>Digital communication used to trick people into revealing data or deploying malware</td></tr>
+<tr><td><strong>Physical attack</strong></td><td>A security incident affecting physical, not just digital, environments</td></tr>
+<tr><td><strong>Playbook</strong></td><td>A manual detailing steps for a specific detection or operational action</td></tr>
+<tr><td><strong>Programming</strong></td><td>Creating instructions for a computer to execute tasks</td></tr>
+<tr><td><strong>Python</strong></td><td>A programming language used to automate repetitive security tasks</td></tr>
+<tr><td><strong>Rainbow table</strong></td><td>A precomputed table used to reverse cryptographic hash functions</td></tr>
+<tr><td><strong>Ransomware</strong></td><td>Malware that encrypts data and demands payment for restored access</td></tr>
+<tr><td><strong>Security control</strong></td><td>A safeguard designed to reduce a specific security risk</td></tr>
+<tr><td><strong>Security framework</strong></td><td>Guidelines for building plans to mitigate risks to data and privacy</td></tr>
+<tr><td><strong>Security posture</strong></td><td>An organization's ability to defend assets and react to change</td></tr>
+<tr><td><strong>Sensitive Personally Identifiable Information (SPII)</strong></td><td>PII under stricter handling guidelines (SSNs, medical, biometric data)</td></tr>
+<tr><td><strong>SIEM</strong></td><td>An application that collects/analyzes log data to monitor critical activity</td></tr>
+<tr><td><strong>Smishing</strong></td><td>Phishing via text message</td></tr>
+<tr><td><strong>Social engineering</strong></td><td>Manipulation exploiting human error to gain private info, access, or valuables</td></tr>
+<tr><td><strong>Spear phishing</strong></td><td>A targeted phishing email appearing to come from a trusted source</td></tr>
+<tr><td><strong>Spyware</strong></td><td>Malware used to gather and sell information without consent</td></tr>
+<tr><td><strong>SQL</strong></td><td>A programming language for creating, interacting with, and querying databases</td></tr>
+<tr><td><strong>Supply-chain attack</strong></td><td>An attack targeting a vulnerability across systems, apps, hardware, or software vendors</td></tr>
+<tr><td><strong>Threat</strong></td><td>Any circumstance or event that can negatively impact assets</td></tr>
+<tr><td><strong>Threat actor</strong></td><td>Any person or group who presents a security risk</td></tr>
+<tr><td><strong>Vigilante</strong></td><td>A non-law-enforcement person who decides to stop a crime on their own</td></tr>
+<tr><td><strong>Vishing</strong></td><td>Phishing via voice/phone call</td></tr>
+<tr><td><strong>Watering hole attack</strong></td><td>Compromising a website frequently visited by a target group</td></tr>
+<tr><td><strong>Web vulnerability</strong></td><td>A flaw in a web application exploitable for unauthorized access or data theft</td></tr>
+<tr><td><strong>Whaling</strong></td><td>Spear phishing targeting company executives</td></tr>
+<tr><td><strong>Worm</strong></td><td>Self-replicating malware that spreads across systems without user action</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ============================================================
+     MASTER CHEAT SHEET
+     ============================================================ -->
+<h2 class="module-head" id="course-cheatsheet"><span class="tag">Reference</span>Master Cheat Sheet &amp; Revision Checklist</h2>
+
+<h4>Revision Checklist</h4>
+<div class="quiz" style="background:var(--paper-dim);">
+  <p>Before moving to Course II, confirm you can do all of the following from memory:</p>
+  <ul>
+    <li>☐ Define cybersecurity and name the three parts of the CIA triad with an example of each</li>
+    <li>☐ Explain the difference between a threat, threat actor, and internal threat</li>
+    <li>☐ Explain the difference between PII and SPII with two examples of each</li>
+    <li>☐ Name at least four named compliance frameworks/laws and what each protects</li>
+    <li>☐ List the eight CISSP domains in your own words</li>
+    <li>☐ Name the four types of malware and how each spreads differently</li>
+    <li>☐ Name the five types of phishing and their distinguishing target/method</li>
+    <li>☐ Explain why counterattacking is illegal in the U.S.</li>
+    <li>☐ Name the three technical languages/tools introduced (Linux, SQL, Python) and what each is for</li>
+    <li>☐ Describe at least one portfolio hosting option and why you'd choose it</li>
+  </ul>
+</div>
+
+<h4>Cybersecurity Terms Cheat Sheet — By Category</h4>
+<div class="table-wrap">
+<table>
+<tbody>
+<tr><td><strong>Core Goals</strong></td><td>Confidentiality, Integrity, Availability</td></tr>
+<tr><td><strong>Risk Vocabulary</strong></td><td>Threat, Vulnerability, Risk, Threat Actor, Internal Threat, Asset</td></tr>
+<tr><td><strong>Data Sensitivity</strong></td><td>PII, SPII, PHI</td></tr>
+<tr><td><strong>Governance</strong></td><td>Framework, Control, Posture, Compliance, Security Lifecycle</td></tr>
+<tr><td><strong>Named Frameworks/Laws</strong></td><td>NIST CSF, NIST RMF, GDPR, HIPAA, PCI DSS, FedRAMP, CIS, ISO, SOC 1/2</td></tr>
+<tr><td><strong>CISSP Domains</strong></td><td>Security &amp; Risk Mgmt, Asset Security, Architecture &amp; Engineering, Network Security, IAM, Assessment &amp; Testing, Security Operations, Software Development Security</td></tr>
+<tr><td><strong>Malware Types</strong></td><td>Virus, Worm, Ransomware, Spyware</td></tr>
+<tr><td><strong>Phishing Types</strong></td><td>BEC, Spear Phishing, Whaling, Vishing, Smishing</td></tr>
+<tr><td><strong>Social Engineering Techniques</strong></td><td>Social Media Phishing, Watering Hole, USB Baiting, Physical Social Engineering</td></tr>
+<tr><td><strong>Threat Actor Types</strong></td><td>APT, Insider Threat, Hacktivist</td></tr>
+<tr><td><strong>Hacker Types</strong></td><td>Ethical (authorized), Researcher (semi-authorized), Unethical (unauthorized)</td></tr>
+<tr><td><strong>Tools</strong></td><td>SIEM (Splunk, Chronicle), IDS, Packet Sniffer (Wireshark, tcpdump), Antivirus</td></tr>
+<tr><td><strong>Languages</strong></td><td>Linux (OS/CLI), SQL (database queries), Python (automation)</td></tr>
+<tr><td><strong>Forensics</strong></td><td>Chain of Custody, Order of Volatility, Playbook</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="summary-block">
+  <h4>Where to Go Next</h4>
+  <ul>
+    <li><strong>Course II — Play It Safe: Manage Security Risks</strong> builds directly on the CISSP domains and NIST frameworks introduced here, going deep on risk assessment methodologies and security controls.</li>
+    <li>Keep your portfolio skeleton from Lab 4.1 open — you'll add your first real artifacts in Course II.</li>
+    <li>Revisit this glossary once more in one week using spaced repetition before starting Course II.</li>
+  </ul>
+</div>
+
+<div class="endmark">— End of Course I: Foundations of Cybersecurity —</div>
+
+</div>
+</main>
+
+<script>
+// progress bar
+window.addEventListener('scroll', function(){
+  var h = document.documentElement;
+  var scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+  document.getElementById('progress-fill').style.width = scrolled + '%';
+});
+
+// TOC drawer
+var drawer = document.getElementById('toc-drawer');
+var scrim = document.getElementById('scrim');
+document.getElementById('toc-toggle').addEventListener('click', function(){
+  drawer.classList.add('open'); scrim.classList.add('show');
+  this.setAttribute('aria-expanded','true');
+});
+document.getElementById('toc-close').addEventListener('click', closeDrawer);
+scrim.addEventListener('click', closeDrawer);
+function closeDrawer(){
+  drawer.classList.remove('open'); scrim.classList.remove('show');
+  document.getElementById('toc-toggle').setAttribute('aria-expanded','false');
+}
+
+// flashcards
+document.querySelectorAll('.flash').forEach(function(card){
+  function flip(){
+    card.classList.toggle('flipped');
+    card.setAttribute('aria-pressed', card.classList.contains('flipped'));
+  }
+  card.addEventListener('click', flip);
+  card.addEventListener('keypress', function(e){ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); flip(); } });
+});
+
+// quiz
+function checkAnswer(btn, isCorrect){
+  var quiz = btn.closest('.quiz');
+  var opts = quiz.querySelectorAll('.opt');
+  opts.forEach(function(o){ o.disabled = true; });
+  if(isCorrect){ btn.classList.add('correct'); }
+  else { btn.classList.add('wrong'); }
+  quiz.querySelector('.fb').classList.add('show');
+}
+
+// copy code
+function copyCode(btn){
+  var code = btn.closest('.code-block').querySelector('pre').innerText;
+  navigator.clipboard.writeText(code).then(function(){
+    var old = btn.innerText; btn.innerText = 'Copied!';
+    setTimeout(function(){ btn.innerText = old; }, 1500);
+  });
+}
+
+// scroll-spy for TOC + spine
+var spySections = document.querySelectorAll('[id]');
+var tocLinks = document.querySelectorAll('#toc-drawer a[href^="#"]');
+var spineTabs = document.querySelectorAll('#spine .spine-tab');
+var moduleIds = ['module-1','module-2','module-3','module-4'];
+window.addEventListener('scroll', function(){
+  var current = '';
+  spySections.forEach(function(sec){
+    var rect = sec.getBoundingClientRect();
+    if(rect.top < 150) current = sec.id;
+  });
+  tocLinks.forEach(function(link){
+    link.classList.remove('current');
+    if(link.getAttribute('href') === '#' + current) link.classList.add('current');
+  });
+  // determine which module we're currently in for the spine rail
+  var currentModule = 'module-1';
+  moduleIds.forEach(function(mid){
+    var el = document.getElementById(mid);
+    if(el && el.getBoundingClientRect().top < 150) currentModule = mid;
+  });
+  spineTabs.forEach(function(tab){
+    tab.classList.remove('active');
+    if(tab.getAttribute('href') === '#' + currentModule) tab.classList.add('active');
+  });
+});
+</script>
+
+  <script src="../../js/storage.js" defer></script>
+  <script src="../../js/reader.js" defer></script>
+</body>
+</html>

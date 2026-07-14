@@ -1,0 +1,2173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course IV · Tools of the Trade — Linux and SQL — Complete Course (Modules 1–4)</title>
+<style>
+/* ============================================================
+   DESIGN SYSTEM — "CASE FILE" — SOC Reference Book
+   Palette: ink #0B0F14, paper #F7F5F0, panel #16202B, signal teal #2DD4BF,
+            warning amber #F59E0B, critical red #EF4444, wire blue #5B8DEF
+   Type: display = geometric sans, body = humanist serif, mono = code/log
+   ============================================================ */
+:root{
+  --ink:#0B0F14;
+  --paper:#F7F5F0;
+  --paper-dim:#EDE9E0;
+  --panel:#16202B;
+  --panel-2:#1E2B38;
+  --line:#D8D2C4;
+  --line-dark:#2A3A48;
+  --signal:#0F9E93;
+  --signal-bright:#2DD4BF;
+  --warn:#B4700A;
+  --warn-bright:#F59E0B;
+  --crit:#C4342A;
+  --crit-bright:#EF4444;
+  --wire:#3457B2;
+  --wire-bright:#5B8DEF;
+  --ink-soft:#3A4650;
+  --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
+  --sans: -apple-system, 'Segoe UI', 'Inter', Avenir, Helvetica, Arial, sans-serif;
+  --mono: 'SF Mono', 'JetBrains Mono', Consolas, 'Courier New', monospace;
+  --maxw: 780px;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:17px;
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+
+::selection{background:var(--signal-bright); color:var(--ink);}
+
+/* ---------- progress bar (signal-strength style) ---------- */
+#progress-track{
+  position:fixed; top:0; left:0; right:0; height:4px; z-index:500;
+  background:var(--paper-dim);
+  border-bottom:1px solid var(--line);
+}
+#progress-fill{
+  height:100%; width:0%;
+  background:repeating-linear-gradient(90deg, var(--signal) 0 6px, var(--signal-bright) 6px 12px);
+  transition:width .1s linear;
+}
+
+/* ---------- spine rail (left nav) ---------- */
+#spine{
+  position:fixed; top:0; left:0; bottom:0; width:64px; z-index:400;
+  background:var(--ink);
+  border-right:1px solid var(--line-dark);
+  display:flex; flex-direction:column; align-items:center;
+  padding-top:24px; gap:4px;
+  font-family:var(--mono);
+}
+#spine .spine-mark{
+  writing-mode:vertical-rl; text-orientation:mixed;
+  color:var(--signal-bright); font-size:11px; letter-spacing:.15em;
+  margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid var(--line-dark);
+  text-transform:uppercase;
+}
+#spine .spine-tab{
+  width:40px; height:40px; border-radius:3px;
+  display:flex; align-items:center; justify-content:center;
+  color:#6B7A85; font-size:13px; font-weight:700;
+  border:1px solid transparent; cursor:pointer; text-decoration:none;
+  transition:all .15s ease;
+}
+#spine .spine-tab:hover{border-color:var(--line-dark); color:var(--paper);}
+#spine .spine-tab.active{background:var(--panel-2); color:var(--signal-bright); border-color:var(--signal);}
+#toc-toggle{
+  margin-top:auto; margin-bottom:20px; width:40px; height:40px;
+  border-radius:3px; border:1px solid var(--line-dark); background:none;
+  color:#6B7A85; cursor:pointer; font-size:16px;
+}
+#toc-toggle:hover{color:var(--signal-bright); border-color:var(--signal);}
+
+@media (max-width: 860px){
+  #spine{width:44px; padding-top:16px;}
+  #spine .spine-mark{display:none;}
+  #spine .spine-tab{width:30px; height:30px; font-size:11px;}
+}
+
+/* ---------- TOC drawer ---------- */
+#toc-drawer{
+  position:fixed; top:0; left:-380px; bottom:0; width:340px; z-index:450;
+  background:var(--panel); color:var(--paper);
+  padding:32px 28px; overflow-y:auto;
+  transition:left .25s ease;
+  box-shadow:8px 0 30px rgba(0,0,0,.35);
+  font-family:var(--sans);
+}
+#toc-drawer.open{left:64px;}
+@media (max-width:860px){ #toc-drawer.open{left:44px;} }
+#toc-drawer h3{
+  font-family:var(--mono); text-transform:uppercase; letter-spacing:.12em;
+  font-size:12px; color:var(--signal-bright); margin:0 0 18px;
+  border-bottom:1px solid var(--line-dark); padding-bottom:12px;
+}
+#toc-drawer .toc-course{font-size:13px; font-weight:700; margin:18px 0 6px; color:#9FB1BE;}
+#toc-drawer ol{list-style:none; margin:0 0 8px; padding:0;}
+#toc-drawer li a{
+  display:block; padding:7px 8px; border-radius:4px; color:#C9D3DA;
+  text-decoration:none; font-size:13.5px; line-height:1.4;
+  border-left:2px solid transparent;
+}
+#toc-drawer li a:hover{background:var(--panel-2); border-left-color:var(--signal-bright); color:#fff;}
+#toc-drawer li a.current{border-left-color:var(--signal-bright); color:var(--signal-bright); background:var(--panel-2);}
+#toc-close{
+  position:absolute; top:28px; right:24px; background:none; border:none;
+  color:#9FB1BE; font-size:20px; cursor:pointer;
+}
+#scrim{position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:440; display:none;}
+#scrim.show{display:block;}
+
+/* ---------- layout ---------- */
+main{margin-left:64px; padding:0 24px 120px;}
+@media (max-width:860px){ main{margin-left:44px; padding:0 16px 100px;} }
+.page{max-width:var(--maxw); margin:0 auto; padding-top:56px;}
+
+/* ---------- cover ---------- */
+.cover{
+  min-height:92vh; display:flex; flex-direction:column; justify-content:center;
+  border-bottom:3px solid var(--ink); padding-bottom:48px; margin-bottom:56px;
+}
+.cover-eyebrow{
+  font-family:var(--mono); font-size:12.5px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--signal); margin-bottom:18px; display:flex; align-items:center; gap:10px;
+}
+.cover-eyebrow::before{content:"";width:28px;height:2px;background:var(--signal-bright);display:inline-block;}
+.cover h1{
+  font-family:var(--sans); font-size:clamp(2.4rem, 6vw, 4rem); font-weight:800;
+  line-height:1.05; margin:0 0 14px; letter-spacing:-.02em; color:var(--ink);
+}
+.cover .subtitle{
+  font-family:var(--serif); font-style:italic; font-size:1.35rem; color:var(--ink-soft);
+  margin:0 0 36px; max-width:640px;
+}
+.cover-svg-wrap{margin:8px 0 40px;}
+.cover-meta{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:0;
+  border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+}
+.cover-meta div{padding:16px 18px; border-right:1px solid var(--line);}
+.cover-meta div:last-child{border-right:none;}
+.cover-meta .k{font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.1em; color:#8A8272; margin-bottom:5px;}
+.cover-meta .v{font-family:var(--sans); font-size:14.5px; font-weight:700; color:var(--ink);}
+
+.cover-block{margin-top:36px;}
+.cover-block h4{
+  font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.12em;
+  color:var(--signal); margin:0 0 10px;
+}
+.cover-block ul{margin:0; padding-left:20px;}
+.cover-block li{margin-bottom:6px; font-size:15.5px;}
+
+/* ---------- headings ---------- */
+h2.module-head{
+  font-family:var(--sans); font-size:2.1rem; font-weight:800; letter-spacing:-.01em;
+  margin:64px 0 6px; padding-top:40px; border-top:3px solid var(--ink);
+  page-break-before:always;
+}
+h2.module-head .tag{
+  display:block; font-family:var(--mono); font-size:12px; letter-spacing:.15em;
+  text-transform:uppercase; color:var(--signal); font-weight:700; margin-bottom:10px;
+}
+h3{
+  font-family:var(--sans); font-size:1.42rem; font-weight:800; margin:42px 0 14px;
+  color:var(--ink); letter-spacing:-.005em;
+  display:flex; align-items:baseline; gap:10px;
+}
+h3::before{
+  content:attr(data-n); font-family:var(--mono); font-size:.65em; color:var(--signal);
+  font-weight:700;
+}
+h4{font-family:var(--sans); font-weight:700; font-size:1.08rem; margin:28px 0 10px; color:var(--ink);}
+p{margin:0 0 16px;}
+strong{color:var(--ink); font-weight:700;}
+a{color:var(--wire);}
+
+/* ---------- objectives box ---------- */
+.objectives{
+  background:var(--ink); color:var(--paper); border-radius:6px; padding:28px 30px;
+  margin:24px 0 40px; font-family:var(--sans);
+}
+.objectives h4{
+  font-family:var(--mono); color:var(--signal-bright); text-transform:uppercase;
+  letter-spacing:.12em; font-size:12px; margin:0 0 16px;
+}
+.objectives ul{margin:0; padding-left:0; list-style:none;}
+.objectives li{
+  position:relative; padding-left:26px; margin-bottom:10px; font-size:15px; color:#DCE3E8;
+}
+.objectives li::before{content:"▸"; position:absolute; left:0; color:var(--signal-bright);}
+
+/* ---------- callouts: "case-file ticket" signature element ---------- */
+.ticket{
+  border:1.5px solid var(--ink); border-radius:4px; margin:26px 0; position:relative;
+  background:#fff; overflow:hidden; font-family:var(--sans);
+}
+.ticket-head{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:9px 16px; font-family:var(--mono); font-size:11px; letter-spacing:.08em;
+  text-transform:uppercase; font-weight:700; color:#fff;
+}
+.ticket-id{opacity:.85; font-weight:400;}
+.ticket-body{padding:16px 18px; font-size:15px; line-height:1.6;}
+.ticket-body p:last-child{margin-bottom:0;}
+.ticket.def .ticket-head{background:var(--wire);}
+.ticket.important .ticket-head{background:var(--ink);}
+.ticket.remember .ticket-head{background:#6B4FBB;}
+.ticket.interview .ticket-head{background:var(--signal);}
+.ticket.warning .ticket-head{background:var(--warn);}
+.ticket.alert .ticket-head{background:var(--crit);}
+.ticket.industry .ticket-head{background:#8A5A2B;}
+.ticket.bestpractice .ticket-head{background:#1E7A4C;}
+.ticket.compliance .ticket-head{background:#3A5A78;}
+.ticket.examtip .ticket-head{background:#B0862B;}
+.ticket.soc .ticket-head{background:#0F5E6B;}
+.ticket.threatintel .ticket-head{background:#7A1F3D;}
+.ticket.blueteam .ticket-head{background:#1D4E89;}
+.ticket.redteam .ticket-head{background:#8C1C1C;}
+.ticket.quickrev .ticket-head{background:#4C6444;}
+.ticket.deepdive .ticket-head{background:#2C2C54;}
+.ticket.expert .ticket-head{background:#5C4033;}
+.ticket.incident .ticket-head{background:#7A1F3D;}
+.ticket .icon{margin-right:6px;}
+
+/* ---------- ELI5 ---------- */
+.eli5{
+  border-left:4px solid var(--warn-bright); background:#FFF8ED; border-radius:0 6px 6px 0;
+  padding:18px 22px; margin:22px 0; font-family:var(--serif);
+}
+.eli5 .eli5-tag{
+  font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.1em;
+  color:var(--warn); font-weight:700; margin-bottom:8px; display:block;
+}
+
+/* ---------- multi-level explanation ---------- */
+.levels{margin:26px 0; border:1px solid var(--line); border-radius:6px; overflow:hidden;}
+.level{padding:16px 20px; border-bottom:1px solid var(--line);}
+.level:last-child{border-bottom:none;}
+.level .lv-tag{
+  font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.1em;
+  font-weight:700; margin-bottom:6px; display:inline-block; padding:2px 8px; border-radius:3px;
+}
+.level.l1{background:#FFF8ED;} .level.l1 .lv-tag{background:var(--warn-bright); color:#3A2A00;}
+.level.l2{background:#F2F7FF;} .level.l2 .lv-tag{background:var(--wire-bright); color:#0A1A3A;}
+.level.l3{background:#EFFAF8;} .level.l3 .lv-tag{background:var(--signal-bright); color:#00302B;}
+.level.l4{background:#F7F0FA;} .level.l4 .lv-tag{background:#B27FE0; color:#2A0A3A;}
+.level p{margin:0; font-size:15px;}
+
+/* ---------- tables ---------- */
+.table-wrap{overflow-x:auto; margin:24px 0;}
+table{width:100%; border-collapse:collapse; font-family:var(--sans); font-size:14px;}
+caption{
+  caption-side:top; text-align:left; font-family:var(--mono); font-size:11px;
+  text-transform:uppercase; letter-spacing:.1em; color:var(--signal); margin-bottom:8px; font-weight:700;
+}
+th{
+  background:var(--ink); color:var(--paper); text-align:left; padding:10px 14px;
+  font-weight:700; font-size:12.5px; text-transform:uppercase; letter-spacing:.04em;
+}
+td{padding:10px 14px; border-bottom:1px solid var(--line); vertical-align:top;}
+tr:nth-child(even) td{background:var(--paper-dim);}
+
+/* ---------- code blocks ---------- */
+.code-block{margin:22px 0; border-radius:6px; overflow:hidden; border:1px solid var(--line-dark);}
+.code-head{
+  background:var(--panel); color:#9FB1BE; font-family:var(--mono); font-size:11.5px;
+  padding:8px 14px; display:flex; justify-content:space-between; align-items:center;
+  border-bottom:1px solid var(--line-dark);
+}
+.code-head .lang{color:var(--signal-bright); text-transform:uppercase; letter-spacing:.08em;}
+.copy-btn{
+  background:var(--panel-2); border:1px solid var(--line-dark); color:#C9D3DA;
+  font-family:var(--mono); font-size:11px; padding:3px 10px; border-radius:3px; cursor:pointer;
+}
+.copy-btn:hover{border-color:var(--signal-bright); color:var(--signal-bright);}
+pre{
+  margin:0; background:var(--ink); color:#D9E4EA; padding:16px 18px; overflow-x:auto;
+  font-family:var(--mono); font-size:13.5px; line-height:1.6;
+}
+pre code{counter-reset:line;}
+.code-note{
+  background:var(--paper-dim); border-top:1px solid var(--line); padding:10px 16px;
+  font-family:var(--sans); font-size:13px; color:var(--ink-soft);
+}
+
+/* ---------- svg figure ---------- */
+figure{margin:28px 0; text-align:center;}
+figure svg{max-width:100%; height:auto;}
+figcaption{
+  font-family:var(--mono); font-size:11.5px; color:var(--ink-soft); margin-top:10px;
+  text-transform:uppercase; letter-spacing:.06em;
+}
+
+/* ---------- flashcards ---------- */
+.flash-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin:24px 0;}
+.flash{
+  border:1px solid var(--line); border-radius:6px; padding:16px; cursor:pointer;
+  background:#fff; min-height:96px; position:relative; font-family:var(--sans);
+  transition:box-shadow .15s;
+}
+.flash:hover{box-shadow:0 4px 14px rgba(0,0,0,.08);}
+.flash .front{font-weight:700; font-size:14.5px;}
+.flash .back{
+  display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);
+  font-family:var(--serif); font-size:14px; color:var(--ink-soft);
+}
+.flash.flipped .back{display:block;}
+.flash .hint{
+  position:absolute; top:12px; right:12px; font-family:var(--mono); font-size:9.5px;
+  color:#B0A996; text-transform:uppercase;
+}
+
+/* ---------- accordion ---------- */
+details.acc{border:1px solid var(--line); border-radius:6px; margin:12px 0; overflow:hidden;}
+details.acc summary{
+  padding:13px 18px; cursor:pointer; font-family:var(--sans); font-weight:700; font-size:14.5px;
+  background:var(--paper-dim); list-style:none; display:flex; justify-content:space-between;
+}
+details.acc summary::-webkit-details-marker{display:none;}
+details.acc summary::after{content:"+"; color:var(--signal); font-size:18px;}
+details.acc[open] summary::after{content:"–";}
+details.acc .acc-body{padding:16px 18px; font-size:15px;}
+
+/* ---------- MCQ / practice ---------- */
+.quiz{border:1px solid var(--line); border-radius:6px; padding:18px 20px; margin:16px 0; background:#fff;}
+.quiz .q{font-weight:700; font-family:var(--sans); margin-bottom:10px; font-size:14.5px;}
+.quiz .opt{
+  display:block; width:100%; text-align:left; padding:9px 12px; margin-bottom:6px;
+  border:1px solid var(--line); border-radius:4px; background:var(--paper); cursor:pointer;
+  font-family:var(--sans); font-size:14px;
+}
+.quiz .opt:hover{border-color:var(--wire);}
+.quiz .opt.correct{background:#E6F7EE; border-color:var(--signal); font-weight:700;}
+.quiz .opt.wrong{background:#FBEAEA; border-color:var(--crit);}
+.quiz .fb{margin-top:8px; font-size:13.5px; font-family:var(--sans); color:var(--ink-soft); display:none;}
+.quiz .fb.show{display:block;}
+
+/* ---------- summary / takeaway blocks ---------- */
+.summary-block{
+  background:var(--panel); color:var(--paper); border-radius:8px; padding:30px 32px; margin:36px 0;
+  font-family:var(--sans);
+}
+.summary-block h4{color:var(--signal-bright); font-family:var(--mono); text-transform:uppercase; letter-spacing:.1em; font-size:12px;}
+.summary-block ul{padding-left:20px; margin:12px 0 0;}
+.summary-block li{margin-bottom:8px; font-size:14.5px; color:#DCE3E8;}
+
+/* footer nav */
+.module-nav{
+  display:flex; justify-content:space-between; margin-top:60px; padding-top:24px;
+  border-top:1px solid var(--line); font-family:var(--sans); font-size:13.5px;
+}
+.module-nav a{text-decoration:none; color:var(--ink); font-weight:700;}
+.endmark{
+  text-align:center; font-family:var(--mono); font-size:11px; color:#B0A996;
+  letter-spacing:.15em; text-transform:uppercase; margin:80px 0 20px;
+}
+
+/* print */
+@media print{
+  #spine, #toc-drawer, #progress-track, #scrim, .copy-btn{display:none !important;}
+  main{margin-left:0;}
+  body{font-size:12pt;}
+  .ticket, .levels, .objectives, .summary-block{break-inside:avoid;}
+  h2.module-head{page-break-before:always;}
+  a{color:inherit; text-decoration:none;}
+}
+
+/* accessibility */
+:focus-visible{outline:3px solid var(--signal); outline-offset:2px;}
+.skip-link{
+  position:absolute; left:-999px; top:0; background:var(--ink); color:#fff; padding:10px 16px; z-index:900;
+}
+.skip-link:focus{left:70px; top:8px;}
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main-content">Skip to content</a>
+
+<div id="progress-track"><div id="progress-fill"></div></div>
+
+<nav id="spine" aria-label="Course navigation">
+  <div class="spine-mark">COURSE IV</div>
+  <a class="spine-tab" href="#module-1" title="Module 1 · Operating Systems">M1</a>
+  <a class="spine-tab" href="#module-2" title="Module 2 · Linux Distributions &amp; Shell">M2</a>
+  <a class="spine-tab" href="#module-3" title="Module 3 · Linux Commands &amp; Permissions">M3</a>
+  <a class="spine-tab" href="#module-4" title="Module 4 · SQL &amp; Databases">M4</a>
+  <button id="toc-toggle" aria-label="Open table of contents" aria-expanded="false">☰</button>
+</nav>
+
+<div id="scrim"></div>
+<aside id="toc-drawer" aria-label="Table of contents">
+  <button id="toc-close" aria-label="Close table of contents">✕</button>
+  <h3>Course IV — Tools of the Trade</h3>
+  <div class="toc-course">Module 1 · Operating Systems</div>
+  <ol>
+    <li><a href="#module-1" class="current">Cover &amp; Module 1 start</a></li>
+    <li><a href="#sec-1">1.1 What Is an OS? History &amp; Purpose</a></li>
+    <li><a href="#sec-2">1.2 Common Operating Systems Compared</a></li>
+    <li><a href="#sec-3">1.3 Legacy OS &amp; Vulnerability Resources</a></li>
+    <li><a href="#sec-4">1.4 Booting: BIOS/UEFI &amp; the Bootloader</a></li>
+    <li><a href="#sec-5">1.5 The Four-Part Task Completion Process</a></li>
+    <li><a href="#sec-6">1.6 Virtual Machines &amp; Hypervisors</a></li>
+    <li><a href="#sec-7">1.7 GUI vs. CLI</a></li>
+    <li><a href="#labs">Labs &amp; Exercises</a></li>
+    <li><a href="#interview">Interview Prep</a></li>
+    <li><a href="#practice">Practice Section</a></li>
+    <li><a href="#revision">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Module 2 · Linux Distributions &amp; Shell</div>
+  <ol>
+    <li><a href="#module-2">Module 2 start</a></li>
+    <li><a href="#sec-2-1">2.1 The Origins of Linux</a></li>
+    <li><a href="#sec-2-2">2.2 Linux Architecture: 6 Components</a></li>
+    <li><a href="#sec-2-3">2.3 Linux Distributions &amp; Security Distros</a></li>
+    <li><a href="#sec-2-4">2.4 Package Managers: APT, YUM, RPM, dpkg</a></li>
+    <li><a href="#sec-2-5">2.5 The Shell &amp; Shell Types</a></li>
+    <li><a href="#sec-2-6">2.6 Standard Input, Output &amp; Error</a></li>
+    <li><a href="#labs-2">Labs &amp; Exercises</a></li>
+    <li><a href="#interview-2">Interview Prep</a></li>
+    <li><a href="#practice-2">Practice Section</a></li>
+    <li><a href="#revision-2">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary-2">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Module 3 · Linux Commands &amp; Permissions</div>
+  <ol>
+    <li><a href="#module-3">Module 3 start</a></li>
+    <li><a href="#sec-3-1">3.1 The FHS &amp; File Paths</a></li>
+    <li><a href="#sec-3-2">3.2 Navigation Commands: pwd, ls, cd</a></li>
+    <li><a href="#sec-3-3">3.3 Reading Files: cat, head, tail, less</a></li>
+    <li><a href="#sec-3-4">3.4 Filtering: grep, Piping &amp; find</a></li>
+    <li><a href="#sec-3-5">3.5 Managing Files &amp; Directories</a></li>
+    <li><a href="#sec-3-6">3.6 File Permissions &amp; chmod</a></li>
+    <li><a href="#sec-3-7">3.7 Users, sudo &amp; chown</a></li>
+    <li><a href="#sec-3-8">3.8 Getting Help: man, whatis, apropos</a></li>
+    <li><a href="#labs-3">Labs &amp; Exercises</a></li>
+    <li><a href="#interview-3">Interview Prep</a></li>
+    <li><a href="#practice-3">Practice Section</a></li>
+    <li><a href="#revision-3">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary-3">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Module 4 · SQL &amp; Databases</div>
+  <ol>
+    <li><a href="#module-4">Module 4 start</a></li>
+    <li><a href="#sec-4-1">4.1 Relational Databases, Keys &amp; SQL</a></li>
+    <li><a href="#sec-4-2">4.2 SELECT, FROM &amp; ORDER BY</a></li>
+    <li><a href="#sec-4-3">4.3 Filtering with WHERE &amp; LIKE</a></li>
+    <li><a href="#sec-4-4">4.4 Numeric &amp; Date Filtering, BETWEEN</a></li>
+    <li><a href="#sec-4-5">4.5 Logical Operators: AND, OR, NOT</a></li>
+    <li><a href="#sec-4-6">4.6 Aggregate Functions</a></li>
+    <li><a href="#sec-4-7">4.7 SQL Joins: INNER, LEFT, RIGHT, FULL OUTER</a></li>
+    <li><a href="#labs-4">Labs &amp; Exercises</a></li>
+    <li><a href="#interview-4">Interview Prep</a></li>
+    <li><a href="#practice-4">Practice Section</a></li>
+    <li><a href="#revision-4">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary-4">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Course Reference</div>
+  <ol>
+    <li><a href="#course-summary">Course Summary</a></li>
+    <li><a href="#course-glossary">Full Glossary (Weeks 1–4)</a></li>
+    <li><a href="#course-cheatsheet">Master Cheat Sheet</a></li>
+  </ol>
+</aside>
+
+<main id="main-content">
+<div class="page" id="course-page">
+
+<!-- ================= COVER ================= -->
+<section class="cover">
+  <div class="cover-eyebrow">Google Cybersecurity Certificate · Premium Edition</div>
+  <h1>Course IV<br>Tools of the Trade: Linux and SQL</h1>
+  <p class="subtitle">This is where theory becomes muscle memory — a terminal prompt, a query, and the two languages every SOC runs on.</p>
+
+  <div class="cover-svg-wrap">
+    <svg viewBox="0 0 700 220" width="100%" role="img" aria-label="Illustration of a terminal window with a command prompt on the left and a database table icon on the right, connected by a line representing the relationship between Linux and SQL">
+      <rect x="0" y="0" width="700" height="220" fill="#F7F5F0"/>
+      <!-- terminal window -->
+      <rect x="40" y="40" width="280" height="150" rx="8" fill="#0B0F14"/>
+      <circle cx="60" cy="58" r="5" fill="#EF4444"/><circle cx="76" cy="58" r="5" fill="#F59E0B"/><circle cx="92" cy="58" r="5" fill="#2DD4BF"/>
+      <text x="58" y="90" font-family="monospace" font-size="12" fill="#2DD4BF">$ ls -la</text>
+      <text x="58" y="110" font-family="monospace" font-size="12" fill="#D9E4EA">drwxr-xr-x  logs</text>
+      <text x="58" y="130" font-family="monospace" font-size="12" fill="#D9E4EA">-rw-r--r--  report.txt</text>
+      <text x="58" y="150" font-family="monospace" font-size="12" fill="#2DD4BF">$ grep OS report.txt</text>
+      <text x="58" y="170" font-family="monospace" font-size="11" fill="#F59E0B">_</text>
+      <!-- database table -->
+      <rect x="400" y="50" width="260" height="130" rx="6" fill="#3457B2"/>
+      <line x1="400" y1="80" x2="660" y2="80" stroke="#F7F5F0" stroke-width="1.5"/>
+      <line x1="400" y1="110" x2="660" y2="110" stroke="#F7F5F0" stroke-width="1"/>
+      <line x1="400" y1="140" x2="660" y2="140" stroke="#F7F5F0" stroke-width="1"/>
+      <line x1="530" y1="50" x2="530" y2="180" stroke="#F7F5F0" stroke-width="1"/>
+      <text x="465" y="72" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#fff">employee_id</text>
+      <text x="595" y="72" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#fff">device_id</text>
+      <line x1="320" y1="115" x2="400" y2="115" stroke="#8A8272" stroke-width="2" stroke-dasharray="4 3"/>
+    </svg>
+  </div>
+
+  <div class="cover-meta">
+    <div><div class="k">Reading Time</div><div class="v">~4.5 hrs / module</div></div>
+    <div><div class="k">Difficulty</div><div class="v">Intermediate</div></div>
+    <div><div class="k">Prerequisites</div><div class="v">Courses I–III</div></div>
+    <div><div class="k">Modules</div><div class="v">4 (Weeks 1–4)</div></div>
+  </div>
+
+  <div class="cover-block">
+    <h4>Learning Objectives — Whole Course</h4>
+    <ul>
+      <li>Explain how operating systems, virtual machines, and hypervisors work together.</li>
+      <li>Navigate Linux distributions, the shell, and package managers with confidence.</li>
+      <li>Use core Bash commands to navigate, read, filter, and manage files and permissions.</li>
+      <li>Manage users and authorization safely using sudo, useradd, userdel, and chown.</li>
+      <li>Write SQL queries to select, filter, sort, and join relational database tables.</li>
+      <li>Apply aggregate functions and logical operators to real security-log-style data.</li>
+    </ul>
+  </div>
+
+  <div class="cover-block">
+    <h4>Skills Gained</h4>
+    <ul>
+      <li>Bash command-line fluency: navigation, filtering, file management, permissions</li>
+      <li>Linux distribution literacy: Kali, Ubuntu, Parrot, Red Hat, CentOS</li>
+      <li>User/permission administration: chmod, sudo, useradd, userdel, chown</li>
+      <li>SQL query writing: SELECT/FROM/WHERE/ORDER BY, joins, aggregate functions</li>
+      <li>Cross-tool judgment: knowing when to filter in Linux vs. query in SQL</li>
+    </ul>
+  </div>
+
+  <div class="cover-block">
+    <h4>Career Relevance</h4>
+    <p>Nearly every SOC Analyst technical screening includes a live or take-home exercise: "find all failed logins for this user in this log" or "write a query to join these two tables." This course is the most directly, immediately testable material in the entire certificate — expect it to come up in almost every technical interview.</p>
+  </div>
+</section>
+
+<!-- ================= PREFACE ================= -->
+<h2 class="module-head"><span class="tag">Preface</span>How to Use This Course</h2>
+
+<p>Everything before this course was conceptual. This course is different: it's a toolkit you build by typing, not just reading. The commands and queries here are things you'll run dozens of times a week in almost any entry-level security role — treat this course as practice, not just study.</p>
+
+<div class="ticket deepdive">
+  <div class="ticket-head"><span><span class="icon">🧭</span>Deep Dive</span><span class="ticket-id">DD-300</span></div>
+  <div class="ticket-body">
+    <p><strong>Recommended study strategy:</strong> Don't just read the commands in this course — type every single one into an actual terminal (a free cloud Linux VM, WSL on Windows, or macOS's built-in Terminal all work). Muscle memory matters more than definitional recall here.</p>
+    <p><strong>Lab recommendation:</strong> Set aside extra time for Modules 3 and 4 — permissions/chmod and SQL joins are the two topics students most often need to revisit multiple times before they click. That's normal, not a sign you're behind.</p>
+    <p><strong>Interview preparation:</strong> Be ready to write a simple SQL query live, on the spot, from a plain-English description ("find all customers in the USA who logged in after 6pm"). This is one of the single most common entry-level technical screening exercises.</p>
+    <p><strong>Certification preparation:</strong> This course maps closely onto CompTIA Linux+ fundamentals and the database/scripting-adjacent objectives touched on in Security+.</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODULE 1 · WEEK 1 — OPERATING SYSTEMS
+     ============================================================ -->
+<h2 class="module-head" id="module-1"><span class="tag">Module 1 · Week 1</span>The Wonderful World of Operating Systems</h2>
+
+<div class="objectives" id="objectives">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Define an operating system and explain its role as the intermediary between hardware and users.</li>
+    <li>Compare Windows, macOS, Linux, ChromeOS, Android, and iOS across openness and use case.</li>
+    <li>Explain legacy operating systems and why they remain a security risk.</li>
+    <li>Describe the boot process: BIOS/UEFI and the bootloader.</li>
+    <li>Trace the four-part process — user, application, OS, hardware — for completing a computer task.</li>
+    <li>Explain virtual machines, virtualization, and hypervisors, and their security benefits and risks.</li>
+    <li>Compare GUI and CLI, and explain why CLI is preferred for security analyst work.</li>
+  </ul>
+</div>
+
+<h3 id="sec-1" data-n="1.1">What Is an Operating System? History &amp; Purpose</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-301</span></div>
+  <div class="ticket-body"><p><strong>Operating system (OS):</strong> The vital intermediary between a computer's hardware components and the user, ensuring optimal performance while enhancing user-friendliness.</p></div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Restaurant</span>
+  <p>Ordering at a restaurant, you say "a small soup, very hot" and you get exactly that — but you never see what happens in the kitchen. The operating system is the kitchen: your applications place the order, hardware components do the cooking, and the OS is what makes sure the right request reaches the right place and comes back correctly, without you ever needing to understand what's happening behind the scenes.</p>
+</div>
+
+<p>In the 1950s, computers could run only one program at a time — users had to power off, reset, and reload for every new task. Modern operating systems solved this: they support running multiple applications concurrently and interacting seamlessly with peripherals like printers, keyboards, and mice. The OS also bridges the gap between human communication and computers, which fundamentally speak only <strong>binary</strong> (0s and 1s).</p>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-301</span></div>
+  <div class="ticket-body"><p><strong>OS security</strong> encompasses securing files, managing data access, and implementing robust authentication — collectively protecting against viruses, worms, and malware. As a security analyst, tasks like configuring firewalls, establishing security policies, enabling virus protection, and performing auditing/logging all require a solid understanding of how operating systems actually work.</p></div>
+</div>
+
+<h3 id="sec-2" data-n="1.2">Common Operating Systems Compared</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Common Operating Systems</caption>
+<thead><tr><th>OS</th><th>Introduced</th><th>Openness</th><th>Primary Use</th></tr></thead>
+<tbody>
+<tr><td><strong>Windows</strong></td><td>1985</td><td>Closed source</td><td>Personal &amp; enterprise computers</td></tr>
+<tr><td><strong>macOS</strong></td><td>1984</td><td>Partially open source (kernel is open; other components closed)</td><td>Personal &amp; enterprise computers</td></tr>
+<tr><td><strong>Linux</strong></td><td>1991</td><td>Completely open source</td><td>Servers, security work, cloud infrastructure</td></tr>
+<tr><td><strong>ChromeOS</strong></td><td>2011</td><td>Partially open source (derived from fully open Chromium OS)</td><td>Education-focused devices</td></tr>
+<tr><td><strong>Android</strong></td><td>2008</td><td>Open source</td><td>Mobile devices</td></tr>
+<tr><td><strong>iOS</strong></td><td>2007</td><td>Partially open source</td><td>Mobile devices</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket redteam">
+  <div class="ticket-head"><span><span class="icon">🗡️</span>Blue Team Tip</span><span class="ticket-id">BT-301</span></div>
+  <div class="ticket-body"><p>Linux's complete open-source nature is precisely why it matters so much to security work: anyone can inspect the source code, and specialized security-focused distributions exist specifically for penetration testing and digital forensics — no other OS on this list offers that level of transparency and customization.</p></div>
+</div>
+
+<h3 id="sec-3" data-n="1.3">Legacy Operating Systems &amp; Vulnerability Resources</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-302</span></div>
+  <div class="ticket-body"><p><strong>Legacy operating system:</strong> An operating system that is outdated but still in use, often because dependent software (sometimes embedded software inside equipment) is incompatible with newer systems.</p></div>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning</span><span class="ticket-id">WRN-301</span></div>
+  <div class="ticket-body"><p>Legacy OSes are vulnerable precisely because they're no longer supported or patched — new threats emerge, and there's no vendor fix coming. Even fully updated, current operating systems can still become vulnerable, which is why staying current on vulnerability disclosures matters regardless of OS age.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Vulnerability Disclosure Resources</caption>
+<thead><tr><th>Resource</th><th>Covers</th></tr></thead>
+<tbody>
+<tr><td>Microsoft Security Response Center (MSRC)</td><td>Known vulnerabilities in Microsoft products/services</td></tr>
+<tr><td>Apple Security Updates</td><td>Security updates for macOS, iOS, and other Apple products</td></tr>
+<tr><td>CVE Report for Ubuntu</td><td>Known vulnerabilities affecting the Ubuntu Linux distribution</td></tr>
+<tr><td>Google Cloud Security Bulletin</td><td>Known vulnerabilities in Google Cloud products/services</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-4" data-n="1.4">Booting the Computer: BIOS/UEFI &amp; the Bootloader</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-303</span></div>
+  <div class="ticket-body">
+    <p><strong>BIOS (Basic Input-Output System):</strong> A microchip containing loading instructions for the computer, standard until 2007, prevalent in older systems.</p>
+    <p><strong>UEFI (Unified Extensible Firmware Interface):</strong> The modern replacement for BIOS, offering enhanced security features.</p>
+    <p><strong>Bootloader:</strong> A software program activated by the final BIOS/UEFI instruction, responsible for booting the operating system itself.</p>
+  </div>
+</div>
+
+<figure>
+<svg viewBox="0 0 640 160" width="100%" role="img" aria-label="Diagram of the boot process: power button, BIOS or UEFI, bootloader, then operating system ready for use">
+  <rect x="0" y="0" width="640" height="160" fill="#F7F5F0"/>
+  <g font-family="sans-serif" font-size="11.5" font-weight="700" fill="#fff">
+    <rect x="20" y="55" width="130" height="45" rx="5" fill="#0B0F14"/><text x="85" y="82" text-anchor="middle">Power Button</text>
+    <rect x="185" y="55" width="130" height="45" rx="5" fill="#3457B2"/><text x="250" y="82" text-anchor="middle">BIOS / UEFI</text>
+    <rect x="350" y="55" width="130" height="45" rx="5" fill="#0F9E93"/><text x="415" y="82" text-anchor="middle">Bootloader</text>
+    <rect x="515" y="55" width="105" height="45" rx="5" fill="#B4700A"/><text x="567" y="82" text-anchor="middle">OS Ready</text>
+  </g>
+  <line x1="150" y1="77" x2="185" y2="77" stroke="#0B0F14" stroke-width="2"/>
+  <line x1="315" y1="77" x2="350" y2="77" stroke="#0B0F14" stroke-width="2"/>
+  <line x1="480" y1="77" x2="515" y2="77" stroke="#0B0F14" stroke-width="2"/>
+  <text x="320" y="130" text-anchor="middle" font-family="monospace" font-size="11" fill="#3A4650">BIOS is rarely scanned by antivirus — a known blind spot in early boot security</text>
+</svg>
+<figcaption>Figure 1.1 — The boot process, from power button to ready OS</figcaption>
+</figure>
+
+<div class="ticket redteam">
+  <div class="ticket-head"><span><span class="icon">🗡️</span>Threat Intelligence</span><span class="ticket-id">TI-301</span></div>
+  <div class="ticket-body"><p>The boot process is a known vulnerability surface precisely because <strong>BIOS is often not scanned by antivirus software</strong>, making it a target for specialized malware (bootkits/rootkits) that persist below the operating system's normal detection layer.</p></div>
+</div>
+
+<h3 id="sec-5" data-n="1.5">The Four-Part Task Completion Process</h3>
+
+<div class="table-wrap">
+<table>
+<caption>User → Application → OS → Hardware</caption>
+<thead><tr><th>Stage</th><th>Role</th></tr></thead>
+<tbody>
+<tr><td><strong>User</strong></td><td>Initiates the process by having something they want to accomplish</td></tr>
+<tr><td><strong>Application</strong></td><td>The software program the user interacts with to complete the task</td></tr>
+<tr><td><strong>Operating system</strong></td><td>Receives the request from the application, interprets it, and directs its flow to hardware</td></tr>
+<tr><td><strong>Hardware</strong></td><td>Performs the actual processing (e.g., CPU calculates, hard drive saves), then sends output back through the OS to the application</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>SOC Example — Downloading a File</span><span class="ticket-id">SOC-301</span></div>
+  <div class="ticket-body"><p>A user clicks "download" in their browser (application). The browser communicates this to the OS. The OS routes the request to the appropriate hardware, which begins downloading. The OS relays progress back to the browser, which informs the user once complete. Understanding this flow matters for incident response: tracing exactly where in this chain a compromise occurred (malicious application, OS-level exploit, or hardware-level tampering) determines your investigation path.</p></div>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-304</span></div>
+  <div class="ticket-body"><p><strong>RAM (Random Access Memory):</strong> A hardware component for short-term memory; data is deleted from RAM once a program closes and is entirely inaccessible after power-off. Contrast with the <strong>hard drive</strong>, which retains data across power cycles.</p></div>
+</div>
+
+<h3 id="sec-6" data-n="1.6">Virtual Machines &amp; Hypervisors</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-305</span></div>
+  <div class="ticket-body">
+    <p><strong>Virtual machine (VM):</strong> A virtual version of a physical computer — code that simulates hardware without using dedicated physical components.</p>
+    <p><strong>Virtualization:</strong> The process of using software to create virtual representations of physical machines.</p>
+    <p><strong>Hypervisor:</strong> Software that manages multiple virtual machines and connects virtual and physical hardware, allocating shared physical resources.</p>
+  </div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The City Bus</span>
+  <p>Running several VMs on one physical machine is like riding a city bus instead of everyone driving separate cars — one bus (physical machine) efficiently carries many passengers (virtual machines) that would otherwise each need their own vehicle (dedicated hardware).</p>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-301</span></div>
+  <div class="ticket-body"><p>VMs provide a security benefit through isolation: guest VMs are separate from the host and from each other, so a malware-infected VM can be studied or discarded without risking the rest of the system. Security professionals can even deliberately place malware on a VM specifically to examine it safely.</p></div>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning</span><span class="ticket-id">WRN-302</span></div>
+  <div class="ticket-body"><p>Never fully trust virtualized systems. A malicious program can, in rare cases, escape virtualization and access the host machine — a "VM escape." Isolation reduces risk substantially; it does not eliminate it.</p></div>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-306</span></div>
+  <div class="ticket-body"><p><strong>Kernel-based Virtual Machine (KVM):</strong> An open-source hypervisor built into the Linux kernel and supported by most major Linux distributions, letting you create VMs on any Linux machine without extra software.</p></div>
+</div>
+
+<h3 id="sec-7" data-n="1.7">GUI vs. CLI</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-307</span></div>
+  <div class="ticket-body">
+    <p><strong>Graphical User Interface (GUI):</strong> A user interface using icons, graphics, and menus to manage computer tasks.</p>
+    <p><strong>Command-Line Interface (CLI):</strong> A text-based user interface relying on typed commands, more flexible and powerful than a GUI, and the standard interface for security analyst work.</p>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>GUI vs. CLI</caption>
+<thead><tr><th>Feature</th><th>GUI</th><th>CLI</th></tr></thead>
+<tbody>
+<tr><td><strong>Display</strong></td><td>Icons and graphics</td><td>Text only, resembling code</td></tr>
+<tr><td><strong>Function</strong></td><td>One request at a time</td><td>Multiple requests at once</td></tr>
+<tr><td><strong>Beginner-friendliness</strong></td><td>Easier to navigate initially</td><td>Steeper learning curve, faster once mastered</td></tr>
+<tr><td><strong>History file</strong></td><td>Actions not necessarily recorded</td><td>Records a history of all commands entered — valuable for playbook verification and tracing an attacker's actions</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>SOC Insight</span><span class="ticket-id">SOC-302</span></div>
+  <div class="ticket-body"><p>The CLI's history file is a genuinely underrated security feature. If you're following a playbook during an incident and something goes wrong, you can review exactly which commands were run, in what order — and if you suspect an attacker compromised the system, that same history file may reveal their actions directly.</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 1.1 — OS Classification Drill</summary>
+  <div class="acc-body">
+    <p>Classify each OS as fully open source, partially open source, or closed source: Windows, Linux, macOS, ChromeOS.</p>
+    <p><strong>Answer key:</strong> Windows — closed source. Linux — fully open source. macOS — partially open source (kernel open, other components closed). ChromeOS — partially open source (derived from fully open Chromium OS).</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 1.2 — Trace the Task Flow</summary>
+  <div class="acc-body">
+    <p>A user opens a calculator app and computes 45 × 12. Walk through all four stages of the task completion process for this action.</p>
+    <p><strong>Answer:</strong> User initiates the calculation request. Application (calculator) captures the input and communicates with the OS. OS directs the request to the CPU (hardware). CPU performs the calculation and returns the result through the OS back to the calculator application, which displays it to the user.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Scenario Challenge 1.1 — Legacy OS Risk Assessment</summary>
+  <div class="acc-body">
+    <p>An organization still runs a 2009-era OS on manufacturing equipment because the control software isn't compatible with anything newer. What's your recommendation as a security analyst?</p>
+    <p><strong>Answer guidance:</strong> Since replacing the OS isn't feasible short-term, recommend network segmentation/isolation for that equipment (recall Course III), strict access controls, and continuous monitoring — mitigating the legacy OS's lack of patching rather than assuming the risk away.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Beginner Question</span><span class="ticket-id">INT-301</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Why do security analysts generally prefer the CLI over a GUI?</strong></p>
+    <p><strong>Ideal answer:</strong> "The CLI can handle multiple requests simultaneously, which is more efficient for repetitive tasks like creating many files or running batches of commands. It also keeps a history file of every command entered, which is valuable for verifying playbook steps during incident response and for tracing an attacker's actions if a system is suspected to be compromised."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Security Engineer Question</span><span class="ticket-id">INT-302</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: What's a security risk associated with virtual machines, and how would you mitigate it?</strong></p>
+    <p><strong>Ideal answer:</strong> "The main risk is a VM escape — a malicious program breaking out of virtualization to access the host machine. I'd mitigate this by keeping hypervisors patched, avoiding running untrusted code with elevated privileges inside VMs, and never treating a VM as a perfectly airtight security boundary, even though it substantially reduces risk compared to running the same code directly on the host."</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which microchip replaced BIOS on most modern computers?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Bootloader</button>
+  <button class="opt" onclick="checkAnswer(this,true)">UEFI</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Kernel</button>
+  <div class="fb">Correct — UEFI replaced BIOS on most systems after 2007, offering enhanced security.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: Data in RAM is retained after the computer powers off.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — RAM is short-term memory only; the hard drive retains data across power cycles.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. What is the term for software managing multiple virtual machines on one host?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Bootloader</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Hypervisor</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Kernel</button>
+  <div class="fb">Correct — a hypervisor manages VMs and allocates shared host resources to them.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-301</span></div>
+  <div class="ticket-body"><p>OS = intermediary between hardware and user. Windows/macOS/Linux/ChromeOS/Android/iOS vary by openness. Legacy OSes are risky because they're unpatched. Boot: BIOS/UEFI → bootloader → OS ready. Task completion: User → Application → OS → Hardware. VMs provide isolation (security benefit) but carry VM-escape risk. CLI &gt; GUI for security work due to multitasking and the history file.</p></div>
+</div>
+
+<div class="summary-block" id="summary">
+  <h4>Module Summary</h4>
+  <p>This module built the conceptual foundation for everything else in this course — what an OS actually does, how a computer boots and completes tasks, how virtualization provides isolation with real (if small) risk, and why the CLI is the security analyst's tool of choice.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>The OS is the essential intermediary translating user/application requests into hardware actions.</li>
+    <li>Legacy operating systems remain in use for compatibility reasons but carry real, unpatched security risk.</li>
+    <li>The boot process (BIOS/UEFI → bootloader → OS) has a known blind spot: BIOS is rarely scanned by antivirus.</li>
+    <li>Virtual machines provide isolation-based security benefits but are not a perfectly airtight boundary.</li>
+    <li>CLI's multitasking capability and history file make it the preferred interface for security analyst work.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives">◂ Back to Module 1 Objectives</a>
+  <a href="#module-2">Module 2 · Linux Distributions &amp; Shell ▸</a>
+</div>
+
+<div class="endmark">— End of Module 1 —</div>
+<!-- ============================================================
+     MODULE 2 · WEEK 2 — LINUX DISTRIBUTIONS & SHELL
+     ============================================================ -->
+<h2 class="module-head" id="module-2"><span class="tag">Module 2 · Week 2</span>Linux Distributions &amp; the Shell</h2>
+
+<div class="objectives" id="objectives-2">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Explain the origins of Linux and its open-source philosophy.</li>
+    <li>Trace the six components of Linux architecture: user, applications, shell, FHS, kernel, hardware.</li>
+    <li>Compare major Linux distributions: Kali, Ubuntu, Parrot, Red Hat, CentOS.</li>
+    <li>Explain package managers and package management tools: RPM, dpkg, APT, YUM.</li>
+    <li>Explain the shell's role and compare Bash to other shell types.</li>
+    <li>Describe standard input, standard output, and standard error.</li>
+  </ul>
+</div>
+
+<h3 id="sec-2-1" data-n="2.1">The Origins of Linux</h3>
+
+<div class="ticket industry">
+  <div class="ticket-head"><span><span class="icon">🏢</span>Industry Insight — The Birth of Linux</span><span class="ticket-id">IND-301</span></div>
+  <div class="ticket-body"><p>Linux emerged from two independent projects in the early 1990s. <strong>Linus Torvalds</strong>, inspired by UNIX, created the open-source <strong>Linux kernel</strong>. Separately, <strong>Richard Stallman</strong> was building GNU, a UNIX-based OS focused on freedom and accessibility — but GNU was missing a kernel. Combining Torvalds' kernel with the GNU project produced what we know as Linux today.</p></div>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-308</span></div>
+  <div class="ticket-body"><p><strong>Linux:</strong> An open-source operating system licensed under the GNU Public License, letting anyone use, share, and modify it freely — fostering a large, collaborative developer community and over 600 distributions.</p></div>
+</div>
+
+<h3 id="sec-2-2" data-n="2.2">Linux Architecture: Six Components</h3>
+
+<p>A request to complete a task flows through six components, in order: user → applications → shell → FHS → kernel → hardware.</p>
+
+<figure>
+<svg viewBox="0 0 640 200" width="100%" role="img" aria-label="Diagram of the six components of Linux architecture in flow order: user, applications, shell, filesystem hierarchy standard, kernel, hardware">
+  <rect x="0" y="0" width="640" height="200" fill="#F7F5F0"/>
+  <text x="320" y="24" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#0B0F14">Linux Architecture — 6 Components</text>
+  <g font-family="sans-serif" font-size="10.5" font-weight="700" fill="#fff">
+    <rect x="10" y="60" width="95" height="50" rx="5" fill="#3457B2"/><text x="57" y="88" text-anchor="middle">User</text>
+    <rect x="115" y="60" width="95" height="50" rx="5" fill="#0F9E93"/><text x="162" y="82" text-anchor="middle">Applica-</text><text x="162" y="94" text-anchor="middle">tions</text>
+    <rect x="220" y="60" width="95" height="50" rx="5" fill="#B4700A"/><text x="267" y="88" text-anchor="middle">Shell</text>
+    <rect x="325" y="60" width="95" height="50" rx="5" fill="#6B4FBB"/><text x="372" y="88" text-anchor="middle">FHS</text>
+    <rect x="430" y="60" width="95" height="50" rx="5" fill="#7A1F3D"/><text x="477" y="88" text-anchor="middle">Kernel</text>
+    <rect x="535" y="60" width="95" height="50" rx="5" fill="#0B0F14"/><text x="582" y="82" text-anchor="middle">Hard-</text><text x="582" y="94" text-anchor="middle">ware</text>
+  </g>
+  <path d="M105 85 L115 85" stroke="#0B0F14" stroke-width="2" marker-end="url(#a4a)"/>
+  <path d="M210 85 L220 85" stroke="#0B0F14" stroke-width="2" marker-end="url(#a4a)"/>
+  <path d="M315 85 L325 85" stroke="#0B0F14" stroke-width="2" marker-end="url(#a4a)"/>
+  <path d="M420 85 L430 85" stroke="#0B0F14" stroke-width="2" marker-end="url(#a4a)"/>
+  <path d="M525 85 L535 85" stroke="#0B0F14" stroke-width="2" marker-end="url(#a4a)"/>
+  <defs><marker id="a4a" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#0B0F14"/></marker></defs>
+  <text x="320" y="150" text-anchor="middle" font-family="monospace" font-size="11" fill="#3A4650">Example: create a new file → shell interprets → FHS assigns location → kernel writes → hardware stores</text>
+</svg>
+<figcaption>Figure 2.1 — Linux architecture's six-component flow</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<caption>The Six Components of Linux Architecture</caption>
+<thead><tr><th>Component</th><th>Role</th></tr></thead>
+<tbody>
+<tr><td><strong>User</strong></td><td>The person interacting with the computer; Linux supports multiple simultaneous users</td></tr>
+<tr><td><strong>Applications</strong></td><td>Programs performing specific tasks, often distributed via package managers</td></tr>
+<tr><td><strong>Shell</strong></td><td>The command-line interpreter — translates user commands to the kernel and returns results</td></tr>
+<tr><td><strong>Filesystem Hierarchy Standard (FHS)</strong></td><td>Organizes and structures where data is stored</td></tr>
+<tr><td><strong>Kernel</strong></td><td>Manages processes and memory, communicates with hardware via drivers</td></tr>
+<tr><td><strong>Hardware</strong></td><td>Physical components — CPU, RAM, hard drive, peripherals</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-309</span></div>
+  <div class="ticket-body">
+    <p><strong>Peripheral devices:</strong> Hardware attached/controlled by the system but not core to running it — monitors, printers, keyboard, mouse.</p>
+    <p><strong>Internal hardware:</strong> Components required to run the computer — the motherboard and everything attached to it, including the CPU and RAM.</p>
+  </div>
+</div>
+
+<h3 id="sec-2-3" data-n="2.3">Linux Distributions &amp; Security Distros</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-310</span></div>
+  <div class="ticket-body"><p><strong>Linux distribution (distro):</strong> A customized version of Linux built around the shared Linux kernel, offering a unique combination of preinstalled programs, interfaces, and configurations.</p></div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Vehicle Analogy</span>
+  <p>The Linux kernel is like an engine. Manufacturers use the same basic engine design to build trucks, cars, and buses — each suited for a different purpose. Linux distributions work the same way: developers take the shared, open-source kernel and build it into different "vehicles" (Kali for penetration testing, Ubuntu for general use, Red Hat for enterprise) suited to different needs.</p>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Major Linux Distributions</caption>
+<thead><tr><th>Distribution</th><th>Parent</th><th>Best For</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><strong>Kali Linux</strong></td><td>Debian</td><td>Penetration testing, digital forensics</td><td>Pre-installed with Metasploit, Burp Suite, John the Ripper, tcpdump, Wireshark, Autopsy</td></tr>
+<tr><td><strong>Ubuntu</strong></td><td>Debian</td><td>General use, cloud computing</td><td>User-friendly, has both CLI and GUI, huge community support</td></tr>
+<tr><td><strong>Parrot</strong></td><td>Debian</td><td>Security work with easier GUI</td><td>Similar tools to Kali, considered more beginner-friendly</td></tr>
+<tr><td><strong>Red Hat Enterprise Linux</strong></td><td>—</td><td>Enterprise use</td><td>Subscription-based, not free, dedicated support team</td></tr>
+<tr><td><strong>CentOS</strong></td><td>Red Hat</td><td>Enterprise-style use without the subscription cost</td><td>Community-supported, not enterprise-supported</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket redteam">
+  <div class="ticket-head"><span><span class="icon">🗡️</span>Red Team Tip</span><span class="ticket-id">RT-301</span></div>
+  <div class="ticket-body"><p>Kali Linux's powerful penetration testing tools mean it should almost always run inside a virtual machine — this protects your physical system, and lets you use VM snapshots to revert to a known-clean state between tests or investigations.</p></div>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-311</span></div>
+  <div class="ticket-body">
+    <p><strong>Penetration testing:</strong> A simulated attack identifying vulnerabilities in systems, networks, applications, and processes.</p>
+    <p><strong>Digital forensics:</strong> Collecting and analyzing data to determine what happened after an attack.</p>
+  </div>
+</div>
+
+<h3 id="sec-2-4" data-n="2.4">Package Managers: RPM, dpkg, APT, YUM</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-312</span></div>
+  <div class="ticket-body">
+    <p><strong>Package:</strong> A piece of software combinable with other packages to form an application.</p>
+    <p><strong>Package manager:</strong> A tool helping users install, manage, and remove packages/applications, resolving dependency issues.</p>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Package Managers &amp; Tools by Distribution Family</caption>
+<thead><tr><th>Family</th><th>Package Manager</th><th>File Extension</th><th>Management Tool</th></tr></thead>
+<tbody>
+<tr><td><strong>Debian-derived</strong> (Kali, Ubuntu, Parrot)</td><td>dpkg</td><td>.deb</td><td>APT (Advanced Package Tool)</td></tr>
+<tr><td><strong>Red Hat-derived</strong> (Red Hat, CentOS)</td><td>RPM (Red Hat Package Manager)</td><td>.rpm</td><td>YUM (Yellowdog Updater Modified)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-302</span></div>
+  <div class="ticket-body"><p>Always use the most recent version of a package when possible — it carries the most up-to-date bug fixes and security patches, directly reducing your attack surface (recalling Course III's hardening principles).</p></div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Bash</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>sudo apt update
+sudo apt install tcpdump</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Updates the local package index, then installs tcpdump using APT on a Debian-derived distribution.<br><strong>Real SOC usage:</strong> Installing network security tools like tcpdump or Suricata is a common early setup step in a new analyst environment.<br><strong>Common mistake:</strong> Forgetting <code>sudo update</code> first — installing without updating the package index can pull an outdated version.</div>
+</div>
+
+<h3 id="sec-2-5" data-n="2.5">The Shell &amp; Shell Types</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-313</span></div>
+  <div class="ticket-body"><p><strong>Shell:</strong> The command-line interpreter — a translator between the user and the operating system, processing commands and returning results.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Types of Linux Shells</caption>
+<thead><tr><th>Shell</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><strong>Bash (Bourne-Again Shell)</strong></td><td>Default shell for most Linux distributions; user-friendly; the most popular shell in cybersecurity — used throughout this course</td></tr>
+<tr><td><strong>C Shell (csh)</strong></td><td>Early Unix shell with C-like syntax; less popular today</td></tr>
+<tr><td><strong>Korn Shell (ksh)</strong></td><td>Compatible with both Bourne Shell and C Shell; efficient scripting</td></tr>
+<tr><td><strong>Enhanced C Shell (tcsh)</strong></td><td>Adds command-line editing and programmable completion to csh</td></tr>
+<tr><td><strong>Z Shell (zsh)</strong></td><td>Highly customizable; context-sensitive tab completion, spell correction, plugin support</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket examtip">
+  <div class="ticket-head"><span><span class="icon">🎯</span>Exam Tip</span><span class="ticket-id">EXM-301</span></div>
+  <div class="ticket-body"><p>Notice the prompt symbol difference: <code>ksh</code> and <code>bash</code> use the dollar sign (<code>$</code>); <code>zsh</code> uses the percent sign (<code>%</code>). This small detail can help you quickly identify which shell you're working in from a screenshot or terminal capture.</p></div>
+</div>
+
+<h3 id="sec-2-6" data-n="2.6">Standard Input, Output &amp; Error</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-314</span></div>
+  <div class="ticket-body">
+    <p><strong>Standard input (stdin):</strong> Data conveyed to the OS through the command line — what you type.</p>
+    <p><strong>Standard output (stdout):</strong> Information the OS returns through the shell — the computer's response.</p>
+    <p><strong>Standard error (stderr):</strong> Error messages delivered when the system can't understand or execute a command.</p>
+  </div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Bash</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>$ echo hello
+hello</code></pre>
+  <div class="code-note"><strong>What this does:</strong> <code>echo hello</code> is standard input; <code>hello</code> printed back is standard output.<br><strong>Execution explanation:</strong> The <code>echo</code> command displays a specified string of text as output — this is the simplest possible input/output round trip in the shell.</div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Bash — Error Example</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>$ eco hello
+bash: eco: command not found</code></pre>
+  <div class="code-note"><strong>What this shows:</strong> A misspelled command (<code>eco</code> instead of <code>echo</code>) produces a standard error message — the shell couldn't understand the request.<br><strong>Common mistake:</strong> Reading an error message too quickly and assuming a permissions issue when it's actually a typo — always read the exact error text.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs-2">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 2.1 — Distribution Matching Drill</summary>
+  <div class="acc-body">
+    <p>Match each scenario to the best-fit distribution: (1) a penetration tester needs pre-installed exploitation tools, (2) a company wants enterprise support with a paid subscription, (3) a general-purpose cloud server with strong community support.</p>
+    <p><strong>Answer key:</strong> 1 — Kali Linux, 2 — Red Hat Enterprise Linux, 3 — Ubuntu.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 2.2 — Package Manager Identification</summary>
+  <div class="acc-body">
+    <p>You find a file named <code>suricata-6.0.1-1.x86_64.rpm</code>. Which distribution family is this package intended for, and which management tool would typically install it?</p>
+    <p><strong>Answer:</strong> Red Hat-derived (the .rpm extension confirms this); YUM would typically be used to install it.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Portfolio Project 2.1 — Document Your Lab Environment</summary>
+  <div class="acc-body">
+    <p>Choose a Linux distribution to install (as a VM, if possible) for your own practice environment going forward in this course. Document your choice and reasoning in one paragraph — this becomes part of your growing portfolio, demonstrating hands-on setup experience.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview-2">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Beginner Question</span><span class="ticket-id">INT-303</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: What's the difference between a package manager and a package management tool, like RPM vs. YUM?</strong></p>
+    <p><strong>Ideal answer:</strong> "RPM is the actual package manager — it handles the low-level installation, tracking, and removal of .rpm packages. YUM is a management tool built on top that makes those same tasks easier to perform from the shell, letting you search, install, and update packages with simpler commands."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>SOC Analyst Question</span><span class="ticket-id">INT-304</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Why would a security team choose Kali Linux over Ubuntu for an investigation?</strong></p>
+    <p><strong>Ideal answer:</strong> "Kali comes pre-installed with specialized penetration testing and digital forensics tools like Metasploit, Wireshark, and Autopsy, saving setup time for security-specific tasks. Ubuntu is more general-purpose and better suited to everyday operations rather than dedicated security tooling — though both are Debian-derived and share core Linux fundamentals."</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice-2">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which Linux distribution is built specifically for enterprise use with paid support?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Kali Linux</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Red Hat Enterprise Linux</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Parrot</button>
+  <div class="fb">Correct — Red Hat is subscription-based and built for enterprise support.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: Bash is the default shell for most Linux distributions.</div>
+  <button class="opt" onclick="checkAnswer(this,true)">True</button>
+  <button class="opt" onclick="checkAnswer(this,false)">False</button>
+  <div class="fb">True — Bash (Bourne-Again Shell) is both the default and the most popular shell in cybersecurity.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. What kind of message does the shell return when it can't understand or execute a command?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Standard input</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Standard output</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Standard error</button>
+  <div class="fb">Correct — standard error (stderr) handles cases where a command isn't understood or fails.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision-2">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-302</span></div>
+  <div class="ticket-body"><p>Linux architecture flows: user → applications → shell → FHS → kernel → hardware. Distros: Kali/Ubuntu/Parrot (Debian-derived), Red Hat/CentOS (Red Hat-derived). Package managers: dpkg (.deb) + APT vs. RPM (.rpm) + YUM. Bash is the default, most popular shell. stdin (input) → shell → stdout (output) or stderr (error).</p></div>
+</div>
+
+<div class="summary-block" id="summary-2">
+  <h4>Module Summary</h4>
+  <p>This module took Linux from an abstract "open-source OS" into a concrete architecture — six components, a family tree of distributions each suited to different needs, package managers that install software safely, and the shell's input/output/error communication model.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>Linux's architecture flows predictably: user → applications → shell → FHS → kernel → hardware.</li>
+    <li>Most security-relevant distributions (Kali, Parrot) derive from Debian, alongside general-purpose Ubuntu.</li>
+    <li>Package manager choice (dpkg/APT vs. RPM/YUM) is determined by which distribution family you're using.</li>
+    <li>Bash is the default and most widely used shell in the security profession.</li>
+    <li>Every shell interaction is a cycle of standard input, standard output, and (when something goes wrong) standard error.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives-2">◂ Back to Module 2 Objectives</a>
+  <a href="#module-3">Module 3 · Linux Commands &amp; Permissions ▸</a>
+</div>
+
+<div class="endmark">— End of Module 2 —</div>
+<!-- ============================================================
+     MODULE 3 · WEEK 3 — LINUX COMMANDS & PERMISSIONS
+     ============================================================ -->
+<h2 class="module-head" id="module-3"><span class="tag">Module 3 · Week 3</span>Linux Commands, Permissions &amp; User Management</h2>
+
+<div class="objectives" id="objectives-3">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Explain the Filesystem Hierarchy Standard and distinguish absolute from relative file paths.</li>
+    <li>Navigate the file system using pwd, ls, and cd.</li>
+    <li>Read file content using cat, head, tail, and less.</li>
+    <li>Filter and search using grep, piping, and find.</li>
+    <li>Create, modify, move, and remove files and directories.</li>
+    <li>Read and change file permissions using ls -l and chmod, applying the principle of least privilege.</li>
+    <li>Manage users and authorization safely using sudo, useradd, userdel, usermod, and chown.</li>
+    <li>Get help from the command line using man, whatis, and apropos.</li>
+  </ul>
+</div>
+
+<h3 id="sec-3-1" data-n="3.1">The FHS &amp; File Paths</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-315</span></div>
+  <div class="ticket-body">
+    <p><strong>Root directory:</strong> The highest-level directory in Linux, represented by a single forward slash (<code>/</code>); all other directories branch from it.</p>
+    <p><strong>Absolute file path:</strong> The full file path starting from root (e.g., <code>/home/analyst/projects</code>).</p>
+    <p><strong>Relative file path:</strong> A file path starting from the user's current directory, optionally using <code>.</code> (current directory) or <code>..</code> (parent directory).</p>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Standard FHS Directories</caption>
+<thead><tr><th>Directory</th><th>Contains</th></tr></thead>
+<tbody>
+<tr><td><strong>/home</strong></td><td>Each user's personal home directory</td></tr>
+<tr><td><strong>/bin</strong></td><td>Binary files and executables</td></tr>
+<tr><td><strong>/etc</strong></td><td>System configuration files</td></tr>
+<tr><td><strong>/tmp</strong></td><td>Temporary files — commonly targeted by attackers since anyone can modify data here</td></tr>
+<tr><td><strong>/mnt</strong></td><td>Mounted media, such as USB drives and external hard drives</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket redteam">
+  <div class="ticket-head"><span><span class="icon">🗡️</span>Threat Intelligence</span><span class="ticket-id">TI-302</span></div>
+  <div class="ticket-body"><p><code>/tmp</code> deserves special attention during investigations — because any user can write to it, it's a favored staging location for attacker tools and payloads. Checking <code>/tmp</code> for unexpected files is a common early step in a compromise investigation.</p></div>
+</div>
+
+<div class="ticket examtip">
+  <div class="ticket-head"><span><span class="icon">🎯</span>Exam Tip</span><span class="ticket-id">EXM-302</span></div>
+  <div class="ticket-body"><p>The tilde (<code>~</code>) represents the current user's home directory. <code>/home/analyst/logs</code> and <code>~/logs</code> (when logged in as <code>analyst</code>) refer to the exact same location — a shorthand worth using constantly.</p></div>
+</div>
+
+<h3 id="sec-3-2" data-n="3.2">Navigation Commands: pwd, ls, cd</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Core Navigation Commands</caption>
+<thead><tr><th>Command</th><th>Function</th></tr></thead>
+<tbody>
+<tr><td><code>pwd</code></td><td>Print Working Directory — shows the absolute path of your current location</td></tr>
+<tr><td><code>ls</code></td><td>Lists files and directories in the current (or specified) directory</td></tr>
+<tr><td><code>cd</code></td><td>Change Directory — navigates to a specified directory</td></tr>
+<tr><td><code>whoami</code></td><td>Returns the username of the current user</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Bash</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>$ pwd
+/home/analyst
+$ ls
+logs  projects  updates.txt
+$ cd projects
+$ pwd
+/home/analyst/projects
+$ cd ..
+$ pwd
+/home/analyst</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Prints the current directory, lists its contents, navigates into <code>projects</code>, confirms the new location, then navigates back up one level using <code>..</code>.<br><strong>Common mistake:</strong> Forgetting that <code>cd</code> with no arguments returns you to your home directory — useful, but surprising if you expected to stay put.</div>
+</div>
+
+<h3 id="sec-3-3" data-n="3.3">Reading Files: cat, head, tail, less</h3>
+
+<div class="table-wrap">
+<table>
+<caption>File-Reading Commands</caption>
+<thead><tr><th>Command</th><th>Function</th></tr></thead>
+<tbody>
+<tr><td><code>cat</code></td><td>Displays the full content of a file</td></tr>
+<tr><td><code>head</code></td><td>Displays the beginning of a file (default: first 10 lines)</td></tr>
+<tr><td><code>tail</code></td><td>Displays the end of a file (default: last 10 lines) — ideal for reading the most recent log entries</td></tr>
+<tr><td><code>less</code></td><td>Displays content one page at a time, navigable with space bar, b, arrow keys, and q to quit</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Bash</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>$ tail -n 5 auth.log
+$ head -n 20 auth.log</code></pre>
+  <div class="code-note"><strong>What this does:</strong> The <code>-n</code> option overrides the default 10-line count — here, the last 5 lines and first 20 lines of <code>auth.log</code>, respectively.<br><strong>Real SOC usage:</strong> <code>tail</code> is the go-to command for checking the most recent activity in a live log file during an active investigation.</div>
+</div>
+
+<h3 id="sec-3-4" data-n="3.4">Filtering: grep, Piping &amp; find</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-316</span></div>
+  <div class="ticket-body">
+    <p><strong>Filtering:</strong> Selecting data matching a certain condition.</p>
+    <p><strong>grep:</strong> Searches a specified file and returns all lines containing a specified string.</p>
+    <p><strong>Piping (|):</strong> Redirects the standard output of one command as standard input to another, for further processing.</p>
+    <p><strong>find:</strong> Searches for directories/files meeting specified criteria (name pattern, size, modification time).</p>
+  </div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Bash</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>$ grep OS updates.txt
+$ ls /home/analyst/reports | grep users
+$ find /home/analyst/projects -iname "*log*"
+$ find /home/analyst/projects -mtime -3</code></pre>
+  <div class="code-note"><strong>What each does:</strong> Line 1 finds lines containing "OS" in <code>updates.txt</code>. Line 2 pipes <code>ls</code> output into <code>grep</code> to find filenames containing "users." Line 3 finds files/directories with "log" in the name, case-insensitively. Line 4 finds anything modified within the last 3 days.<br><strong>Security implication:</strong> <code>-mtime</code> searches are useful for narrowing an investigation to files touched around the time of a suspected incident.<br><strong>Common mistake:</strong> Using <code>-name</code> when you meant <code>-iname</code> — case sensitivity will silently exclude valid matches.</div>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-302</span></div>
+  <div class="ticket-body"><p>The asterisk (<code>*</code>) is a <strong>wildcard</strong> representing zero or more unknown characters — <code>"*log*"</code> matches any filename containing "log" anywhere, with any characters before or after. <code>-mtime -3</code> means "modified less than 3 days ago"; <code>-mtime +1</code> means "modified more than 1 day ago" — the sign matters.</p></div>
+</div>
+
+<h3 id="sec-3-5" data-n="3.5">Managing Files &amp; Directories</h3>
+
+<div class="table-wrap">
+<table>
+<caption>File &amp; Directory Management Commands</caption>
+<thead><tr><th>Command</th><th>Function</th></tr></thead>
+<tbody>
+<tr><td><code>mkdir</code></td><td>Creates a new directory</td></tr>
+<tr><td><code>rmdir</code></td><td>Removes an empty directory (errors if it contains files/subdirectories)</td></tr>
+<tr><td><code>touch</code></td><td>Creates a new, empty file</td></tr>
+<tr><td><code>rm</code></td><td>Removes/deletes a file — difficult to recover afterward, use carefully</td></tr>
+<tr><td><code>mv</code></td><td>Moves a file/directory to a new location (also used to rename)</td></tr>
+<tr><td><code>cp</code></td><td>Copies a file/directory, keeping the original in place</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-317</span></div>
+  <div class="ticket-body"><p><strong>nano:</strong> A beginner-friendly, command-line text editor available by default in many Linux distributions. Save with <code>Ctrl+O</code>; exit with <code>Ctrl+X</code>.</p></div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Bash</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>echo "last updated date" >> permissions.txt
+echo "time" > permissions.txt</code></pre>
+  <div class="code-note"><strong>What this does:</strong> The first line <em>appends</em> text to the end of <code>permissions.txt</code> using <code>&gt;&gt;</code>. The second line <em>overwrites</em> the entire file with new content using <code>&gt;</code>.<br><strong>Security implication:</strong> <code>&gt;</code> is destructive and hard to undo — a common accidental-data-loss vector when a security analyst means to append but types a single bracket instead of two.</div>
+</div>
+
+<h3 id="sec-3-6" data-n="3.6">File Permissions &amp; chmod</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-318</span></div>
+  <div class="ticket-body">
+    <p><strong>Read permission:</strong> On files, ability to read contents; on directories, ability to list contents.</p>
+    <p><strong>Write permission:</strong> On files, ability to modify contents; on directories, ability to create new files within it.</p>
+    <p><strong>Execute permission:</strong> On files, ability to run it as a program; on directories, ability to enter it and access its files.</p>
+  </div>
+</div>
+
+<p>Permissions apply to three owner types: <strong>user</strong> (the file's owner), <strong>group</strong> (a larger set the owner belongs to), and <strong>other</strong> (everyone else on the system).</p>
+
+<figure>
+<svg viewBox="0 0 640 160" width="100%" role="img" aria-label="Diagram breaking down the 10-character Linux permission string drwxrwxrwx into file type, user permissions, group permissions, and other permissions">
+  <rect x="0" y="0" width="640" height="160" fill="#F7F5F0"/>
+  <text x="320" y="24" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#0B0F14">Reading the 10-Character Permission String</text>
+  <g font-family="monospace" font-size="22" font-weight="700">
+    <text x="70" y="80" fill="#0B0F14">d</text>
+    <text x="105" y="80" fill="#3457B2">rwx</text>
+    <text x="200" y="80" fill="#0F9E93">rwx</text>
+    <text x="295" y="80" fill="#B4700A">rwx</text>
+  </g>
+  <g font-family="sans-serif" font-size="10.5" fill="#3A4650">
+    <text x="70" y="105" text-anchor="middle">type</text>
+    <text x="140" y="105" text-anchor="middle" fill="#3457B2">user</text>
+    <text x="235" y="105" text-anchor="middle" fill="#0F9E93">group</text>
+    <text x="330" y="105" text-anchor="middle" fill="#B4700A">other</text>
+  </g>
+  <text x="480" y="70" font-family="monospace" font-size="12" fill="#3A4650">d = directory</text>
+  <text x="480" y="90" font-family="monospace" font-size="12" fill="#3A4650">- = regular file</text>
+  <text x="480" y="110" font-family="monospace" font-size="12" fill="#3A4650">- = permission absent</text>
+</svg>
+<figcaption>Figure 3.1 — Decoding a permission string like drwxrwxrwx</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<caption>chmod Symbolic Mode Syntax</caption>
+<thead><tr><th>Character</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>u</code></td><td>User (owner)</td></tr>
+<tr><td><code>g</code></td><td>Group</td></tr>
+<tr><td><code>o</code></td><td>Other</td></tr>
+<tr><td><code>+</code></td><td>Adds the specified permission(s)</td></tr>
+<tr><td><code>-</code></td><td>Removes the specified permission(s)</td></tr>
+<tr><td><code>=</code></td><td>Assigns permissions exactly, overwriting existing ones</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Bash</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>$ ls -l bonuses.txt
+-rw-rw---- 1 hrrep1 hr 2048 Jun 3 09:15 bonuses.txt
+$ chmod g-rw bonuses.txt
+$ ls -l bonuses.txt
+-rw------- 1 hrrep1 hr 2048 Jun 3 09:15 bonuses.txt</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Removes read and write permissions from the group owner type on <code>bonuses.txt</code>, leaving only the file owner (<code>hrrep1</code>) with access.<br><strong>Real SOC usage:</strong> This exact scenario — an HR file the group no longer needs access to — is the textbook application of the principle of least privilege.<br><strong>Security implication:</strong> Before this change, every member of the <code>hr</code> group could read and write confidential bonus data; after, only the specific owner can.</div>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-319</span></div>
+  <div class="ticket-body"><p><strong>Principle of least privilege:</strong> Granting only the minimal access and authorization required to complete a task — not following it creates real security risk, since excess access is excess exposure if an account is ever compromised.</p></div>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning</span><span class="ticket-id">WRN-303</span></div>
+  <div class="ticket-body"><p><strong>World-writable files</strong> — files where "other" has write permission — are a significant security risk, since literally any user on the system can modify them. Always audit for unintentionally world-writable files, especially in shared or public-facing directories.</p></div>
+</div>
+
+<h3 id="sec-3-7" data-n="3.7">Users, sudo &amp; chown</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-320</span></div>
+  <div class="ticket-body">
+    <p><strong>Root user (superuser):</strong> A user with elevated privileges to modify the entire system.</p>
+    <p><strong>sudo (super-user-do):</strong> Temporarily grants elevated permissions to specific, authorized users, rather than requiring a full root login.</p>
+  </div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Hotel Master Key</span>
+  <p>A hotel's master key opens every room. A janitor needs it briefly to clean, scanning their ID badge each time — they don't get to keep it permanently. If a stranger stole that badge and key, they could access every room in the building. <code>sudo</code> works the same way: it hands out temporary, tracked elevated access rather than letting everyone carry an all-powerful key at all times.</p>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning</span><span class="ticket-id">WRN-304</span></div>
+  <div class="ticket-body"><p>Never log in directly as root. It's a prime target for attackers, makes irreversible mistakes easy, and destroys accountability since the system can't distinguish which real person ran a given command. <code>sudo</code> exists specifically to avoid all three problems.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>User Management Commands</caption>
+<thead><tr><th>Command</th><th>Function</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td><code>useradd</code></td><td>Adds a new user</td><td><code>sudo useradd -g security fgarcia</code></td></tr>
+<tr><td><code>usermod</code></td><td>Modifies an existing user's account</td><td><code>sudo usermod -a -G marketing fgarcia</code></td></tr>
+<tr><td><code>userdel</code></td><td>Deletes a user</td><td><code>sudo userdel -r fgarcia</code></td></tr>
+<tr><td><code>chown</code></td><td>Changes user or group ownership of a file/directory</td><td><code>sudo chown :security access.txt</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-303</span></div>
+  <div class="ticket-body"><p>With <code>usermod -G</code>, forgetting the <code>-a</code> option <strong>replaces</strong> all of a user's existing supplemental groups rather than adding to them. Always include <code>-a</code> when you intend to add a group without removing others — this is a well-known, easy-to-make mistake.</p></div>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-303</span></div>
+  <div class="ticket-body"><p>Rather than deleting a departing user outright, consider <code>usermod -L</code> to lock their account. This prevents login while preserving their file ownership records — useful when you need to reassign ownership of their files to someone else before fully removing the account.</p></div>
+</div>
+
+<h3 id="sec-3-8" data-n="3.8">Getting Help: man, whatis, apropos</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Built-In Help Commands</caption>
+<thead><tr><th>Command</th><th>Function</th></tr></thead>
+<tbody>
+<tr><td><code>man</code></td><td>Displays the full manual page for a command, including options and detailed usage</td></tr>
+<tr><td><code>whatis</code></td><td>Displays a single-line description of a command — a quick reminder, not a full manual</td></tr>
+<tr><td><code>apropos</code></td><td>Searches manual page descriptions for a keyword — useful when you don't know the exact command name</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Bash</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>$ man chown
+$ whatis nano
+$ apropos -a graph editor</code></pre>
+  <div class="code-note"><strong>What each does:</strong> Line 1 opens the full manual for <code>chown</code>. Line 2 gives a one-line description of <code>nano</code>. Line 3 searches man page descriptions for entries containing both "graph" and "editor."</div>
+</div>
+
+<div class="ticket blueteam">
+  <div class="ticket-head"><span><span class="icon">🛡️</span>Blue Team Tip</span><span class="ticket-id">BT-302</span></div>
+  <div class="ticket-body"><p>Beyond built-in help, the <strong>Unix and Linux Stack Exchange</strong> is a trusted, community-vetted resource where answers are ranked by quality — a good habit to build early rather than relying solely on unranked search results.</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs-3">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 3.1 — Permission String Decoding</summary>
+  <div class="acc-body">
+    <p>Decode this permission string: <code>-rwxr-xr--</code>. What file type is it, and what can the user, group, and other each do?</p>
+    <p><strong>Answer:</strong> It's a regular file (<code>-</code>). User: read, write, execute. Group: read, execute (no write). Other: read only (no write, no execute).</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 3.2 — Log Investigation with grep and tail</summary>
+  <div class="acc-body">
+    <div class="code-block">
+      <div class="code-head"><span class="lang">Log Analysis</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+      <pre><code>Jun 3 09:01:14 host sshd: Failed password for root from 203.0.113.9
+Jun 3 09:01:15 host sshd: Failed password for root from 203.0.113.9
+Jun 3 09:01:16 host sshd: Failed password for admin from 203.0.113.9
+Jun 3 09:01:17 host sshd: Accepted password for analyst from 10.0.0.5</code></pre>
+    </div>
+    <p><strong>Task:</strong> Write a single command combining <code>grep</code> and piping to count how many "Failed password" lines exist in a file called <code>auth.log</code>.</p>
+    <p><strong>Answer:</strong> <code>grep "Failed password" auth.log | wc -l</code> — this pipes grep's matching lines into <code>wc -l</code>, which counts them.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Scenario Challenge 3.1 — Least Privilege in Practice</summary>
+  <div class="acc-body">
+    <p>An intern's account was accidentally added to the <code>finance</code> supplemental group. How would you remove them from just that group without affecting their other group memberships?</p>
+    <p><strong>Answer guidance:</strong> Use <code>usermod</code> carefully — since there's no direct single-group removal flag as simple as adding one, the safe approach is to review current groups with <code>id username</code>, then use <code>usermod -G</code> with the full corrected list of groups (excluding finance) to reset supplemental group membership precisely.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview-3">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Beginner Question</span><span class="ticket-id">INT-305</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Why is running commands as the root user discouraged?</strong></p>
+    <p><strong>Ideal answer:</strong> "Running as root is risky for three reasons: it's a high-value target if an attacker compromises the account, it makes irreversible mistakes easy since there are no restrictions, and it destroys accountability because the system can't tell which specific person ran a command. sudo solves all three by granting temporary, tracked elevated access only when needed."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Scenario Question</span><span class="ticket-id">INT-306</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: You find a world-writable file containing sensitive configuration data. Walk me through your response.</strong></p>
+    <p><strong>Ideal answer:</strong> "First, I'd check who actually needs access using <code>ls -l</code> to see current ownership, then use <code>chmod</code> to remove write (and likely read) permissions from 'other' and possibly 'group,' applying the principle of least privilege. I'd also investigate how the file became world-writable in the first place — whether it was a misconfiguration or something more concerning — and document the finding."</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice-3">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which command displays only the last lines of a file, useful for checking recent log activity?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">head</button>
+  <button class="opt" onclick="checkAnswer(this,true)">tail</button>
+  <button class="opt" onclick="checkAnswer(this,false)">cat</button>
+  <div class="fb">Correct — tail shows the end of a file, ideal for the most recent log entries.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: chmod u+rwx,g+rwx,o+rwx grants full permissions to user, group, and other.</div>
+  <button class="opt" onclick="checkAnswer(this,true)">True</button>
+  <button class="opt" onclick="checkAnswer(this,false)">False</button>
+  <div class="fb">True — the + operator adds read, write, and execute permissions to all three owner types.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. Which command searches man page descriptions for a keyword when you don't know the exact command name?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">whatis</button>
+  <button class="opt" onclick="checkAnswer(this,true)">apropos</button>
+  <button class="opt" onclick="checkAnswer(this,false)">man</button>
+  <div class="fb">Correct — apropos searches descriptions by keyword, unlike man (needs the exact command) or whatis (needs the exact command too).</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision-3">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-303</span></div>
+  <div class="ticket-body"><p>Navigate: pwd/ls/cd. Read: cat/head/tail/less. Filter: grep, piping (|), find. Manage: mkdir/rmdir/touch/rm/mv/cp. Permissions: 10-char string (type + user/group/other × rwx); chmod with u/g/o + +/-/= . Users: sudo, useradd, usermod, userdel, chown — never log in as root. Help: man (full), whatis (one line), apropos (keyword search).</p></div>
+</div>
+
+<div class="summary-block" id="summary-3">
+  <h4>Module Summary</h4>
+  <p>This module is the practical heart of the course: navigating and reading the file system, filtering data efficiently, managing files and directories, controlling access through permissions and user management, and knowing where to get help when you're stuck.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>The FHS organizes everything under root (/), with absolute and relative paths as two ways to reference locations.</li>
+    <li>grep, piping, and find together cover nearly every filtering need a security analyst has.</li>
+    <li>The 10-character permission string and chmod's symbolic mode let you precisely enforce least privilege.</li>
+    <li>sudo, not direct root login, is the correct way to handle elevated privileges — for security, accountability, and safety.</li>
+    <li>man, whatis, and apropos mean you never have to memorize every command's full syntax.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives-3">◂ Back to Module 3 Objectives</a>
+  <a href="#module-4">Module 4 · SQL &amp; Databases ▸</a>
+</div>
+
+<div class="endmark">— End of Module 3 —</div>
+<!-- ============================================================
+     MODULE 4 · WEEK 4 — SQL & DATABASES
+     ============================================================ -->
+<h2 class="module-head" id="module-4"><span class="tag">Module 4 · Week 4</span>SQL &amp; Relational Databases</h2>
+
+<div class="objectives" id="objectives-4">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Define relational databases, primary keys, and foreign keys.</li>
+    <li>Write basic SQL queries using SELECT, FROM, and ORDER BY.</li>
+    <li>Filter query results using WHERE, comparison operators, LIKE, and wildcards.</li>
+    <li>Filter numeric and date/time data, including the BETWEEN operator.</li>
+    <li>Combine conditions using the logical operators AND, OR, and NOT.</li>
+    <li>Use aggregate functions (COUNT, AVG, SUM) to summarize data.</li>
+    <li>Join tables using INNER JOIN, LEFT JOIN, RIGHT JOIN, and FULL OUTER JOIN.</li>
+    <li>Explain when to use SQL versus Linux filtering for a given security task.</li>
+  </ul>
+</div>
+
+<h3 id="sec-4-1" data-n="4.1">Relational Databases, Keys &amp; SQL</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-321</span></div>
+  <div class="ticket-body">
+    <p><strong>Database:</strong> An organized collection of information or data — more powerful than a spreadsheet, supporting simultaneous multi-user access and complex operations.</p>
+    <p><strong>Relational database:</strong> A database consisting of related tables, each with fields (columns) and records (rows).</p>
+    <p><strong>Primary key:</strong> A column with unique, non-empty values for every row, uniquely identifying each row. A table can have only one.</p>
+    <p><strong>Foreign key:</strong> A column in one table that serves as the primary key in another table, connecting the two — can have duplicates or empty values, and a table can have several.</p>
+    <p><strong>SQL (Structured Query Language):</strong> The programming language used to create, interact with, and retrieve data from relational databases.</p>
+  </div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Library Catalog</span>
+  <p>Picture a library's catalog system as two connected lists: one list of books (with a unique catalog number for each — the primary key) and one list of borrowers (each borrower's card also has a unique ID). When a borrower checks out a book, the checkout record notes both IDs — that checkout record's reference to the borrower's ID is a foreign key, linking the two lists together without duplicating all their information.</p>
+</div>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>SOC Insight — SQL's Role</span><span class="ticket-id">SOC-401</span></div>
+  <div class="ticket-body"><p>SQL is essential for retrieving and analyzing logs efficiently — reviewing anomalies, misconfigurations, or malicious activity across potentially millions of rows. It also supports basic data analytics: identifying outdated software versions, or determining optimal patch-deployment windows based on usage patterns.</p></div>
+</div>
+
+<h3 id="sec-4-2" data-n="4.2">SELECT, FROM &amp; ORDER BY</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-322</span></div>
+  <div class="ticket-body">
+    <p><strong>SELECT:</strong> Specifies which columns to return.</p>
+    <p><strong>FROM:</strong> Specifies which table to query.</p>
+    <p><strong>ORDER BY:</strong> Sequences returned records by a specified column, ascending by default or descending with <code>DESC</code>.</p>
+  </div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">SQL</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>SELECT customerid, city, country
+FROM customers
+ORDER BY country, city;</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Returns three columns from the customers table, sorted first by country, then by city within each country.<br><strong>Execution explanation:</strong> SQL keywords aren't case-sensitive, but uppercase is conventional for readability. The semicolon marks the end of the statement.<br><strong>Common mistake:</strong> Using <code>SELECT *</code> on very large tables — it can be slow and produce output too large to easily interpret; naming specific columns is better practice.</div>
+</div>
+
+<h3 id="sec-4-3" data-n="4.3">Filtering with WHERE &amp; LIKE</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-323</span></div>
+  <div class="ticket-body">
+    <p><strong>WHERE:</strong> Specifies a filtering condition for a query.</p>
+    <p><strong>LIKE:</strong> Used with WHERE to search for a pattern in a column, combined with wildcards.</p>
+    <p><strong>Wildcard:</strong> A special character substitutable for other characters — <code>%</code> substitutes any number of characters, <code>_</code> substitutes exactly one.</p>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Wildcard Pattern Examples</caption>
+<thead><tr><th>Pattern</th><th>Could Match</th></tr></thead>
+<tbody>
+<tr><td><code>'a%'</code></td><td>apple123, art, a</td></tr>
+<tr><td><code>'a_'</code></td><td>as, an, a7</td></tr>
+<tr><td><code>'%a'</code></td><td>pizza, Z6ra, a</td></tr>
+<tr><td><code>'%a%'</code></td><td>Again, back, a</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">SQL</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>SELECT lastname, firstname, title, email
+FROM employees
+WHERE title LIKE 'IT%';</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Returns employees whose title starts with "IT" — matching both "IT Staff" and "IT Manager."<br><strong>Real SOC usage:</strong> Pattern matching like this is common when searching logs for partial matches — e.g., all usernames beginning with a department prefix.</div>
+</div>
+
+<h3 id="sec-4-4" data-n="4.4">Numeric &amp; Date Filtering, BETWEEN</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Comparison Operators</caption>
+<thead><tr><th>Operator</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>&lt;</code></td><td>Less than (exclusive)</td></tr>
+<tr><td><code>&gt;</code></td><td>Greater than (exclusive)</td></tr>
+<tr><td><code>=</code></td><td>Equal to</td></tr>
+<tr><td><code>&lt;=</code></td><td>Less than or equal to (inclusive)</td></tr>
+<tr><td><code>&gt;=</code></td><td>Greater than or equal to (inclusive)</td></tr>
+<tr><td><code>&lt;&gt;</code> or <code>!=</code></td><td>Not equal to</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-324</span></div>
+  <div class="ticket-body">
+    <p><strong>Exclusive operator:</strong> An operator that does not include the value of comparison (e.g., <code>&gt;</code>).</p>
+    <p><strong>Inclusive operator:</strong> An operator that includes the value of comparison (e.g., <code>&gt;=</code>).</p>
+    <p><strong>BETWEEN:</strong> Filters for numeric or date/time values within a range — inclusive of both endpoints.</p>
+  </div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">SQL</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>SELECT *
+FROM machines
+WHERE OS_patch_date BETWEEN '2021-03-01' AND '2021-09-01';</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Returns all machines patched between March 1 and September 1, 2021, inclusive of both dates.<br><strong>Security implication:</strong> This exact query pattern is how you'd audit which machines received a specific patch window — critical for confirming remediation after a vulnerability disclosure.</div>
+</div>
+
+<h3 id="sec-4-5" data-n="4.5">Logical Operators: AND, OR, NOT</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-325</span></div>
+  <div class="ticket-body">
+    <p><strong>AND:</strong> Requires both conditions to be true simultaneously.</p>
+    <p><strong>OR:</strong> Requires at least one of the conditions to be true.</p>
+    <p><strong>NOT:</strong> Negates a single condition, returning records that don't match it.</p>
+  </div>
+</div>
+
+<figure>
+<svg viewBox="0 0 640 200" width="100%" role="img" aria-label="Three Venn diagrams illustrating AND (intersection only), OR (either or both circles), and NOT (everything outside one circle)">
+  <rect x="0" y="0" width="640" height="200" fill="#F7F5F0"/>
+  <g>
+    <circle cx="90" cy="90" r="45" fill="#3457B2" opacity="0.4"/>
+    <circle cx="130" cy="90" r="45" fill="#0F9E93" opacity="0.4"/>
+    <text x="110" y="95" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#0B0F14">AND</text>
+    <text x="110" y="160" text-anchor="middle" font-family="monospace" font-size="10" fill="#3A4650">intersection only</text>
+  </g>
+  <g>
+    <circle cx="300" cy="90" r="45" fill="#3457B2" opacity="0.4"/>
+    <circle cx="340" cy="90" r="45" fill="#0F9E93" opacity="0.4"/>
+    <text x="320" y="95" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#0B0F14">OR</text>
+    <text x="320" y="160" text-anchor="middle" font-family="monospace" font-size="10" fill="#3A4650">either or both circles</text>
+  </g>
+  <g>
+    <circle cx="510" cy="90" r="45" fill="#3457B2" opacity="0.15"/>
+    <text x="510" y="95" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#0B0F14">NOT</text>
+    <text x="510" y="160" text-anchor="middle" font-family="monospace" font-size="10" fill="#3A4650">everything outside</text>
+  </g>
+</svg>
+<figcaption>Figure 4.1 — AND, OR, and NOT as Venn diagrams</figcaption>
+</figure>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">SQL</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>SELECT firstname, lastname, email, country, supportrepid
+FROM customers
+WHERE supportrepid = 5 AND country = 'USA';</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Returns only customers who satisfy both conditions at once — support rep ID 5 AND country USA.<br><strong>Common mistake:</strong> Using OR when AND was intended — this silently returns a much larger, incorrect result set instead of erroring, which can lead to acting on the wrong data during an investigation.</div>
+</div>
+
+<div class="ticket examtip">
+  <div class="ticket-head"><span><span class="icon">🎯</span>Exam Tip</span><span class="ticket-id">EXM-303</span></div>
+  <div class="ticket-body"><p><code>WHERE NOT country = 'USA'</code>, <code>WHERE country &lt;&gt; 'USA'</code>, and <code>WHERE country != 'USA'</code> are all functionally identical — three different syntaxes for the same negation. Recognizing all three matters when reading queries someone else wrote.</p></div>
+</div>
+
+<h3 id="sec-4-6" data-n="4.6">Aggregate Functions</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-326</span></div>
+  <div class="ticket-body"><p><strong>Aggregate functions:</strong> Functions performing a calculation over multiple data points and returning a single result — the actual underlying data is not returned. Common examples: <code>COUNT</code> (number of rows), <code>AVG</code> (average of numeric data), <code>SUM</code> (total of numeric data).</p></div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">SQL</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>SELECT COUNT(firstname)
+FROM customers
+WHERE country = 'USA';</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Returns a single number — the count of customers where country equals USA.<br><strong>Real SOC usage:</strong> Aggregate functions are how you'd quickly answer "how many failed login attempts occurred today" without manually counting rows.</div>
+</div>
+
+<h3 id="sec-4-7" data-n="4.7">SQL Joins: INNER, LEFT, RIGHT, FULL OUTER</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-327</span></div>
+  <div class="ticket-body"><p><strong>INNER JOIN:</strong> Returns only rows with matching values in a specified column across both tables.</p></div>
+</div>
+
+<figure>
+<svg viewBox="0 0 640 260" width="100%" role="img" aria-label="Four Venn diagrams showing INNER JOIN as the intersection only, LEFT JOIN as the entire left circle plus intersection, RIGHT JOIN as the entire right circle plus intersection, and FULL OUTER JOIN as both entire circles">
+  <rect x="0" y="0" width="640" height="260" fill="#F7F5F0"/>
+  <g>
+    <circle cx="80" cy="70" r="38" fill="none" stroke="#8A8272" stroke-width="1.5"/>
+    <circle cx="115" cy="70" r="38" fill="#3457B2" opacity="0.5" stroke="#8A8272" stroke-width="1.5"/>
+    <circle cx="80" cy="70" r="38" fill="#3457B2" opacity="0" stroke="#8A8272" stroke-width="1.5"/>
+    <path d="M97 40 A38 38 0 0 1 97 100 A38 38 0 0 1 97 40 Z" fill="#0F9E93"/>
+    <text x="97" y="130" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#0B0F14">INNER JOIN</text>
+  </g>
+  <g>
+    <circle cx="270" cy="70" r="38" fill="#0F9E93"/>
+    <circle cx="305" cy="70" r="38" fill="none" stroke="#8A8272" stroke-width="1.5"/>
+    <path d="M287 40 A38 38 0 0 1 287 100 A38 38 0 0 1 287 40 Z" fill="#0F9E93"/>
+    <text x="287" y="130" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#0B0F14">LEFT JOIN</text>
+  </g>
+  <g>
+    <circle cx="440" cy="70" r="38" fill="none" stroke="#8A8272" stroke-width="1.5"/>
+    <circle cx="475" cy="70" r="38" fill="#0F9E93"/>
+    <text x="457" y="130" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#0B0F14">RIGHT JOIN</text>
+  </g>
+  <g>
+    <circle cx="530" cy="70" r="38" fill="#0F9E93"/>
+    <circle cx="565" cy="70" r="38" fill="#0F9E93"/>
+    <text x="547" y="130" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="700" fill="#0B0F14">FULL OUTER</text>
+  </g>
+</svg>
+<figcaption>Figure 4.2 — Four join types visualized as Venn diagrams</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<caption>Comparison — SQL Join Types</caption>
+<thead><tr><th>Join Type</th><th>Returns</th></tr></thead>
+<tbody>
+<tr><td><strong>INNER JOIN</strong></td><td>Only rows with a match in both tables</td></tr>
+<tr><td><strong>LEFT JOIN</strong></td><td>All rows from the left (first) table, plus matches from the right; unmatched right columns show NULL</td></tr>
+<tr><td><strong>RIGHT JOIN</strong></td><td>All rows from the right (second) table, plus matches from the left; unmatched left columns show NULL</td></tr>
+<tr><td><strong>FULL OUTER JOIN</strong></td><td>All rows from both tables; unmatched columns from either side show NULL</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-328</span></div>
+  <div class="ticket-body"><p><strong>NULL:</strong> Represents missing or unknown data in SQL — appears in outer join results when no matching row exists on the other side.</p></div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">SQL</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>SELECT username, operating_system, employees.device_id
+FROM employees
+INNER JOIN machines ON employees.device_id = machines.device_id;</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Joins the employees and machines tables on matching device_id values, returning only rows present in both.<br><strong>Execution explanation:</strong> Because <code>device_id</code> exists in both tables, it must be qualified with the table name (<code>employees.device_id</code>) to avoid ambiguity — columns unique to one table (like <code>username</code>) don't need this prefix.<br><strong>Common mistake:</strong> Forgetting to qualify a shared column name — SQL will throw an ambiguity error rather than guessing which table you meant.</div>
+</div>
+
+<div class="ticket blueteam">
+  <div class="ticket-head"><span><span class="icon">🛡️</span>Blue Team Tip</span><span class="ticket-id">BT-303</span></div>
+  <div class="ticket-body"><p>A LEFT JOIN that returns NULLs in the right table's columns is itself a useful security signal — for example, joining employees against machines could reveal employees with no assigned device (a possible provisioning gap) or, run the other way, devices with no assigned employee (a possible unaccounted-for or rogue asset).</p></div>
+</div>
+
+<h4>SQL vs. Linux Filtering: When to Use Which</h4>
+<div class="table-wrap">
+<table>
+<caption>Comparison — SQL Filtering vs. Linux Filtering</caption>
+<thead><tr><th>Factor</th><th>SQL</th><th>Linux (grep/find)</th></tr></thead>
+<tbody>
+<tr><td><strong>Structure</strong></td><td>Highly structured — data in columns/rows</td><td>Free-form text, no inherent structure</td></tr>
+<tr><td><strong>Joining data</strong></td><td>Can join multiple related tables</td><td>Cannot connect data across separate files natively</td></tr>
+<tr><td><strong>Best for</strong></td><td>Data already stored in database format</td><td>Text files, logs not stored in a database format</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs-4">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 4.1 — Write a Query From a Plain-English Request</summary>
+  <div class="acc-body">
+    <p><strong>Request:</strong> "Find the first name, last name, and email of every customer in Canada whose support rep ID is not 4."</p>
+    <div class="code-block">
+      <div class="code-head"><span class="lang">SQL</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+      <pre><code>SELECT firstname, lastname, email
+FROM customers
+WHERE country = 'Canada' AND NOT supportrepid = 4;</code></pre>
+    </div>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 4.2 — Join Type Selection Drill</summary>
+  <div class="acc-body">
+    <p>You want a report showing every employee, including those with no assigned device (showing NULL for device fields). Which join type do you need, and in what table order?</p>
+    <p><strong>Answer:</strong> LEFT JOIN, with <code>employees</code> as the left (first) table and <code>machines</code> as the right (second) table — this guarantees every employee appears, with NULLs where no matching device exists.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Portfolio Project 4.1 — Build a Mini Query Reference Sheet</summary>
+  <div class="acc-body">
+    <p>Create a one-page personal SQL reference sheet with one example query for each of: SELECT/FROM/ORDER BY, WHERE with LIKE, BETWEEN, AND/OR/NOT, an aggregate function, and one join type. Save this to your portfolio — it doubles as fast interview prep material.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview-4">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Beginner Question</span><span class="ticket-id">INT-307</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: What's the difference between a primary key and a foreign key?</strong></p>
+    <p><strong>Ideal answer:</strong> "A primary key uniquely identifies each row in its own table and can't have duplicates or empty values. A foreign key is a column in one table that references a primary key in another table, creating a relationship between them — and unlike a primary key, it can have duplicates or empty values."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Live Coding Question</span><span class="ticket-id">INT-308</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Write a query that finds all login attempts after 6pm from IP addresses that aren't in the 10.0.0.0 range.</strong></p>
+    <p><strong>Ideal answer approach:</strong> "I'd use <code>SELECT * FROM login_attempts WHERE time &gt; '18:00' AND ip_address NOT LIKE '10.0.0%'</code> — combining a comparison operator on time with NOT LIKE and a wildcard on the IP address pattern." Talking through your reasoning out loud, not just producing the final answer, is usually what interviewers are actually evaluating.</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice-4">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which SQL clause specifies which table to query?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">SELECT</button>
+  <button class="opt" onclick="checkAnswer(this,true)">FROM</button>
+  <button class="opt" onclick="checkAnswer(this,false)">WHERE</button>
+  <div class="fb">Correct — FROM specifies the table; SELECT specifies the columns.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: The BETWEEN operator excludes both endpoint values.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — BETWEEN is inclusive of both endpoints.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. Which join returns all rows from both tables, with NULLs where no match exists?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">INNER JOIN</button>
+  <button class="opt" onclick="checkAnswer(this,false)">LEFT JOIN</button>
+  <button class="opt" onclick="checkAnswer(this,true)">FULL OUTER JOIN</button>
+  <div class="fb">Correct — FULL OUTER JOIN returns every row from both tables regardless of matches.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision-4">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-304</span></div>
+  <div class="ticket-body"><p>SELECT (columns) + FROM (table) + ORDER BY (sort). WHERE + LIKE + wildcards (%/_) for pattern filtering. Comparison operators + BETWEEN (inclusive) for numeric/date filtering. AND/OR/NOT combine conditions. Aggregate functions (COUNT/AVG/SUM) summarize data. Joins: INNER (matches only), LEFT (all left + matches), RIGHT (all right + matches), FULL OUTER (everything). Use SQL for structured databases; Linux filtering for unstructured text files.</p></div>
+</div>
+
+<div class="summary-block" id="summary-4">
+  <h4>Module Summary</h4>
+  <p>This module closed Course IV by giving you the second essential language of security work — SQL — covering everything from basic queries to joins, and clarifying exactly when SQL is the right tool versus when Linux filtering is.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>SELECT, FROM, and WHERE form the backbone of nearly every SQL query you'll write.</li>
+    <li>Wildcards (% and _) combined with LIKE enable flexible pattern-based filtering.</li>
+    <li>Comparison operators and BETWEEN handle numeric and date/time filtering precisely — mind inclusive vs. exclusive.</li>
+    <li>Joins let you combine related tables — INNER for matches only, outer joins (LEFT/RIGHT/FULL) for preserving unmatched rows.</li>
+    <li>SQL excels at structured, database-stored data; Linux filtering remains essential for unstructured text files and logs.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives-4">◂ Back to Module 4 Objectives</a>
+  <a href="#course-summary">Course Summary ▸</a>
+</div>
+
+<div class="endmark">— End of Module 4 —</div>
+
+<!-- ============================================================
+     COURSE SUMMARY
+     ============================================================ -->
+<h2 class="module-head" id="course-summary"><span class="tag">Course Summary</span>Tools of the Trade: Linux and SQL — Complete</h2>
+
+<p>Course IV converted concepts into muscle memory. You now understand how operating systems, virtual machines, and the boot process work; how Linux is organized, distributed, and navigated from the command line; how permissions and user management enforce least privilege; and how SQL lets you query, filter, and join structured data at scale.</p>
+
+<div class="table-wrap">
+<table>
+<caption>Course IV — Module-by-Module Recap</caption>
+<thead><tr><th>Module</th><th>Core Theme</th><th>Signature Concepts</th></tr></thead>
+<tbody>
+<tr><td><strong>1. Operating Systems</strong></td><td>Foundations of OS, virtualization, and interfaces</td><td>OS role, legacy OS risk, boot process, VMs/hypervisors, GUI vs. CLI</td></tr>
+<tr><td><strong>2. Linux Distributions &amp; Shell</strong></td><td>Linux's structure and ecosystem</td><td>6-component architecture, distros (Kali/Ubuntu/Red Hat), package managers, shell types, stdin/stdout/stderr</td></tr>
+<tr><td><strong>3. Linux Commands &amp; Permissions</strong></td><td>Hands-on command-line proficiency</td><td>Navigation, filtering (grep/find), file management, chmod, sudo/useradd/chown, man/whatis/apropos</td></tr>
+<tr><td><strong>4. SQL &amp; Databases</strong></td><td>Structured data querying</td><td>SELECT/FROM/WHERE, LIKE/wildcards, BETWEEN, AND/OR/NOT, aggregate functions, joins</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket expert">
+  <div class="ticket-head"><span><span class="icon">🎓</span>Expert Note</span><span class="ticket-id">EXP-301</span></div>
+  <div class="ticket-body"><p>If you remember only five things from Course IV going into an interview: (1) be able to write a chmod command from a plain-English permission request without hesitation; (2) know the difference between sudo and root login cold; (3) write a basic SQL query with WHERE and at least one operator live, on the spot; (4) explain the difference between INNER and LEFT JOIN with a concrete example; (5) know when to reach for grep/find versus SQL — that judgment call itself is a signal of real experience.</p></div>
+</div>
+
+<!-- ============================================================
+     FULL COURSE GLOSSARY
+     ============================================================ -->
+<h2 class="module-head" id="course-glossary"><span class="tag">Reference</span>Full Glossary — Weeks 1–4</h2>
+
+<div class="table-wrap">
+<table>
+<caption>Complete Course IV Glossary</caption>
+<thead><tr><th>Term</th><th>Definition</th></tr></thead>
+<tbody>
+<tr><td><strong>Absolute file path</strong></td><td>The full file path starting from the root directory</td></tr>
+<tr><td><strong>Aggregate functions</strong></td><td>SQL functions performing a calculation over multiple rows, returning a single result (COUNT, AVG, SUM)</td></tr>
+<tr><td><strong>APT (Advanced Package Tool)</strong></td><td>A package management tool for Debian-derived distributions</td></tr>
+<tr><td><strong>BETWEEN</strong></td><td>An inclusive SQL operator filtering for values within a range</td></tr>
+<tr><td><strong>BIOS</strong></td><td>Basic Input-Output System; a microchip with boot instructions, standard until 2007</td></tr>
+<tr><td><strong>chmod</strong></td><td>The Linux command for changing file/directory permissions</td></tr>
+<tr><td><strong>chown</strong></td><td>The Linux command for changing user or group ownership of a file/directory</td></tr>
+<tr><td><strong>CLI (Command-Line Interface)</strong></td><td>A text-based interface using typed commands to interact with the OS</td></tr>
+<tr><td><strong>Filesystem Hierarchy Standard (FHS)</strong></td><td>The Linux component organizing and structuring data storage</td></tr>
+<tr><td><strong>Foreign key</strong></td><td>A column in one table serving as the primary key in another, linking tables</td></tr>
+<tr><td><strong>grep</strong></td><td>A command searching a file for lines containing a specified string</td></tr>
+<tr><td><strong>GUI (Graphical User Interface)</strong></td><td>An interface using icons, graphics, and menus to manage tasks</td></tr>
+<tr><td><strong>Hypervisor</strong></td><td>Software managing multiple VMs and allocating shared physical resources</td></tr>
+<tr><td><strong>INNER JOIN</strong></td><td>Returns only rows with matching values in a specified column across both tables</td></tr>
+<tr><td><strong>Kernel</strong></td><td>The Linux component managing processes, memory, and hardware communication</td></tr>
+<tr><td><strong>LEFT JOIN</strong></td><td>Returns all rows from the left table plus matching rows from the right table</td></tr>
+<tr><td><strong>Legacy operating system</strong></td><td>An outdated but still-used OS, often vulnerable due to lack of ongoing support</td></tr>
+<tr><td><strong>LIKE</strong></td><td>A SQL operator for pattern-based filtering, used with wildcards</td></tr>
+<tr><td><strong>Linux distribution (distro)</strong></td><td>A customized version of Linux built around the shared kernel</td></tr>
+<tr><td><strong>man</strong></td><td>Displays the full manual page for a Linux command</td></tr>
+<tr><td><strong>NULL</strong></td><td>Represents missing or unknown data in SQL</td></tr>
+<tr><td><strong>Package manager</strong></td><td>A tool for installing, managing, and removing software packages</td></tr>
+<tr><td><strong>Peripheral devices</strong></td><td>Hardware attached/controlled by the system but not core to running it</td></tr>
+<tr><td><strong>Piping (|)</strong></td><td>Redirects standard output of one command as standard input to another</td></tr>
+<tr><td><strong>Primary key</strong></td><td>A column with unique, non-empty values that uniquely identifies each row</td></tr>
+<tr><td><strong>Principle of least privilege</strong></td><td>Granting only minimal necessary access to complete a task</td></tr>
+<tr><td><strong>Relational database</strong></td><td>A database consisting of related tables with fields and records</td></tr>
+<tr><td><strong>RIGHT JOIN</strong></td><td>Returns all rows from the right table plus matching rows from the left table</td></tr>
+<tr><td><strong>Root directory</strong></td><td>The highest-level Linux directory, represented by a single forward slash</td></tr>
+<tr><td><strong>Root user (superuser)</strong></td><td>A user with elevated privileges to modify the entire system</td></tr>
+<tr><td><strong>RPM (Red Hat Package Manager)</strong></td><td>The package manager for Red Hat-derived distributions</td></tr>
+<tr><td><strong>Shell</strong></td><td>The command-line interpreter translating user commands to the kernel</td></tr>
+<tr><td><strong>SQL (Structured Query Language)</strong></td><td>The language used to create, interact with, and retrieve data from databases</td></tr>
+<tr><td><strong>Standard error (stderr)</strong></td><td>Error messages delivered when the system can't execute a command</td></tr>
+<tr><td><strong>Standard input (stdin)</strong></td><td>Data conveyed to the OS through the command line</td></tr>
+<tr><td><strong>Standard output (stdout)</strong></td><td>Information the OS returns through the shell</td></tr>
+<tr><td><strong>sudo</strong></td><td>Temporarily grants elevated permissions to specific, authorized users</td></tr>
+<tr><td><strong>UEFI</strong></td><td>Unified Extensible Firmware Interface; the modern, more secure BIOS replacement</td></tr>
+<tr><td><strong>useradd / userdel / usermod</strong></td><td>Commands for adding, deleting, and modifying user accounts</td></tr>
+<tr><td><strong>Virtual machine (VM)</strong></td><td>A virtual version of a physical computer, simulating hardware in software</td></tr>
+<tr><td><strong>WHERE</strong></td><td>The SQL keyword specifying a filtering condition</td></tr>
+<tr><td><strong>Wildcard</strong></td><td>A special character substitutable for other characters in pattern matching (% or _)</td></tr>
+<tr><td><strong>World-writable files</strong></td><td>Files where the "other" owner type has write permission — a significant security risk</td></tr>
+<tr><td><strong>YUM (Yellowdog Updater Modified)</strong></td><td>A package management tool for Red Hat-derived distributions</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ============================================================
+     MASTER CHEAT SHEET
+     ============================================================ -->
+<h2 class="module-head" id="course-cheatsheet"><span class="tag">Reference</span>Master Cheat Sheet &amp; Revision Checklist</h2>
+
+<h4>Revision Checklist</h4>
+<div class="quiz" style="background:var(--paper-dim);">
+  <p>Before moving to Course V, confirm you can do all of the following from memory:</p>
+  <ul>
+    <li>☐ Explain the four-part task completion process (user → application → OS → hardware)</li>
+    <li>☐ Name the six components of Linux architecture in order</li>
+    <li>☐ Match at least 3 Linux distributions to their best-fit use case</li>
+    <li>☐ Write a command combining grep, piping, and find for a filtering task</li>
+    <li>☐ Decode a 10-character permission string and modify it with chmod</li>
+    <li>☐ Explain why sudo is preferred over logging in as root</li>
+    <li>☐ Write a basic SQL query using SELECT, FROM, WHERE, and ORDER BY</li>
+    <li>☐ Explain the difference between % and _ wildcards</li>
+    <li>☐ Distinguish INNER JOIN from the three outer join types</li>
+    <li>☐ Explain when to use SQL vs. Linux filtering for a given task</li>
+  </ul>
+</div>
+
+<h4>Linux Command Reference</h4>
+<div class="table-wrap">
+<table>
+<tbody>
+<tr><td><strong>Navigation</strong></td><td>pwd, ls, cd, whoami</td></tr>
+<tr><td><strong>Reading Files</strong></td><td>cat, head, tail, less</td></tr>
+<tr><td><strong>Filtering</strong></td><td>grep, | (piping), find, -name/-iname, -mtime</td></tr>
+<tr><td><strong>File/Directory Management</strong></td><td>mkdir, rmdir, touch, rm, mv, cp, nano</td></tr>
+<tr><td><strong>Permissions</strong></td><td>ls -l, ls -la, chmod (u/g/o, +/-/=)</td></tr>
+<tr><td><strong>Users &amp; Ownership</strong></td><td>sudo, useradd, userdel, usermod, chown</td></tr>
+<tr><td><strong>Getting Help</strong></td><td>man, whatis, apropos</td></tr>
+<tr><td><strong>Redirection</strong></td><td>&gt; (overwrite), &gt;&gt; (append)</td></tr>
+</tbody>
+</table>
+</div>
+
+<h4>SQL Reference</h4>
+<div class="table-wrap">
+<table>
+<tbody>
+<tr><td><strong>Basic Query</strong></td><td>SELECT columns FROM table;</td></tr>
+<tr><td><strong>Sorting</strong></td><td>ORDER BY column [DESC];</td></tr>
+<tr><td><strong>Filtering</strong></td><td>WHERE condition;</td></tr>
+<tr><td><strong>Pattern Matching</strong></td><td>LIKE 'pattern%' or LIKE 'pattern_'</td></tr>
+<tr><td><strong>Comparison Operators</strong></td><td>&lt;, &gt;, =, &lt;=, &gt;=, &lt;&gt;/!=</td></tr>
+<tr><td><strong>Range Filtering</strong></td><td>BETWEEN value1 AND value2 (inclusive)</td></tr>
+<tr><td><strong>Logical Operators</strong></td><td>AND, OR, NOT</td></tr>
+<tr><td><strong>Aggregate Functions</strong></td><td>COUNT(), AVG(), SUM()</td></tr>
+<tr><td><strong>Joins</strong></td><td>INNER JOIN, LEFT JOIN, RIGHT JOIN, FULL OUTER JOIN</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="summary-block">
+  <h4>Where to Go Next</h4>
+  <ul>
+    <li><strong>Course V — Assets, Threats, and Vulnerabilities</strong> applies these Linux and SQL skills directly to asset inventories, vulnerability assessments, and threat modeling — the practical toolkit you just built becomes the lens for everything that follows.</li>
+    <li>Add your Course IV portfolio artifacts (lab environment notes, SQL reference sheet) to your growing collection.</li>
+    <li>Revisit chmod syntax and SQL join types one week from now using spaced repetition — both take real repetition to feel automatic.</li>
+  </ul>
+</div>
+
+<div class="endmark">— End of Course IV: Tools of the Trade — Linux and SQL —</div>
+</div>
+</main>
+<script>
+// progress bar
+window.addEventListener('scroll', function(){
+  var h = document.documentElement;
+  var scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+  document.getElementById('progress-fill').style.width = scrolled + '%';
+});
+
+// TOC drawer
+var drawer = document.getElementById('toc-drawer');
+var scrim = document.getElementById('scrim');
+document.getElementById('toc-toggle').addEventListener('click', function(){
+  drawer.classList.add('open'); scrim.classList.add('show');
+  this.setAttribute('aria-expanded','true');
+});
+document.getElementById('toc-close').addEventListener('click', closeDrawer);
+scrim.addEventListener('click', closeDrawer);
+function closeDrawer(){
+  drawer.classList.remove('open'); scrim.classList.remove('show');
+  document.getElementById('toc-toggle').setAttribute('aria-expanded','false');
+}
+
+// flashcards
+document.querySelectorAll('.flash').forEach(function(card){
+  function flip(){
+    card.classList.toggle('flipped');
+    card.setAttribute('aria-pressed', card.classList.contains('flipped'));
+  }
+  card.addEventListener('click', flip);
+  card.addEventListener('keypress', function(e){ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); flip(); } });
+});
+
+// quiz
+function checkAnswer(btn, isCorrect){
+  var quiz = btn.closest('.quiz');
+  var opts = quiz.querySelectorAll('.opt');
+  opts.forEach(function(o){ o.disabled = true; });
+  if(isCorrect){ btn.classList.add('correct'); }
+  else { btn.classList.add('wrong'); }
+  quiz.querySelector('.fb').classList.add('show');
+}
+
+// copy code
+function copyCode(btn){
+  var code = btn.closest('.code-block').querySelector('pre').innerText;
+  navigator.clipboard.writeText(code).then(function(){
+    var old = btn.innerText; btn.innerText = 'Copied!';
+    setTimeout(function(){ btn.innerText = old; }, 1500);
+  });
+}
+
+// scroll-spy for TOC + spine
+var spySections = document.querySelectorAll('[id]');
+var tocLinks = document.querySelectorAll('#toc-drawer a[href^="#"]');
+var spineTabs = document.querySelectorAll('#spine .spine-tab');
+var moduleIds = ['module-1','module-2','module-3','module-4'];
+window.addEventListener('scroll', function(){
+  var current = '';
+  spySections.forEach(function(sec){
+    var rect = sec.getBoundingClientRect();
+    if(rect.top < 150) current = sec.id;
+  });
+  tocLinks.forEach(function(link){
+    link.classList.remove('current');
+    if(link.getAttribute('href') === '#' + current) link.classList.add('current');
+  });
+  // determine which module we're currently in for the spine rail
+  var currentModule = 'module-1';
+  moduleIds.forEach(function(mid){
+    var el = document.getElementById(mid);
+    if(el && el.getBoundingClientRect().top < 150) currentModule = mid;
+  });
+  spineTabs.forEach(function(tab){
+    tab.classList.remove('active');
+    if(tab.getAttribute('href') === '#' + currentModule) tab.classList.add('active');
+  });
+});
+</script>
+
+  <script src="../../js/storage.js" defer></script>
+  <script src="../../js/reader.js" defer></script>
+</body>
+</html>

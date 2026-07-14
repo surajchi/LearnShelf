@@ -1,0 +1,99 @@
+===========================================================
+  LearnShelf — How to add a new HTML chapter and push to Git
+===========================================================
+
+Every YouTube video becomes ONE .html chapter file.
+Follow these steps each time.
+
+-----------------------------------------------------------
+STEP 1 — Make the HTML chapter
+-----------------------------------------------------------
+- Take video transcript.
+- Give to Claude. Get beautiful HTML chapter back.
+- Save it inside the correct course folder:
+
+      courses/<course>/<chapter-name>.html
+
+  Example:
+      courses/linux/networking.html
+
+  Use lowercase file names, no spaces. Use - instead of space.
+      good:  process-management.html
+      bad:   Process Management.html
+
+
+-----------------------------------------------------------
+STEP 2 — Register chapter in course.json
+-----------------------------------------------------------
+- Open the course's file:
+
+      courses/<course>/course.json
+
+- Add ONE new entry inside the "chapters" list:
+
+      {
+        "title": "Linux Networking",
+        "file": "networking.html",
+        "duration": "35 mins",
+        "tags": ["linux", "networking"]
+      }
+
+- Put a comma after the entry before it. Keep JSON valid.
+
+
+-----------------------------------------------------------
+STEP 3 — (NEW COURSE ONLY) register the course
+-----------------------------------------------------------
+Skip this if course already exists.
+
+For a brand new course:
+1. Make folder:      courses/<course>/
+2. Make file:        courses/<course>/course.json
+3. Add at least one chapter .html file.
+4. Add the folder name to the manifest:
+
+      courses/courses.json
+
+   Add the slug to the "courses" list. Example:
+
+      "courses": [
+        "linux",
+        "docker",
+        "golang"        <-- new one
+      ]
+
+
+-----------------------------------------------------------
+STEP 4 — Push to Git
+-----------------------------------------------------------
+Open terminal in the project folder. Run:
+
+      git add .
+      git commit -m "Add <chapter name> chapter"
+      git push
+
+Example:
+      git add .
+      git commit -m "Add Linux Networking chapter"
+      git push
+
+
+-----------------------------------------------------------
+STEP 5 — Done
+-----------------------------------------------------------
+- GitHub Pages updates automatically.
+- Open LearnShelf. New chapter shows up by itself.
+- No code changes needed. Cards, progress, search all auto.
+
+
+-----------------------------------------------------------
+Run locally (to preview before push)
+-----------------------------------------------------------
+Browser blocks JSON over file://. Use small server:
+
+      python -m http.server 8000
+
+Then open:
+      http://localhost:8000
+
+===========================================================

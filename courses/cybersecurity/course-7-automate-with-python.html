@@ -1,0 +1,2209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course VII · Automate Cybersecurity Tasks with Python — Complete Course (Modules 1–4)</title>
+<style>
+/* ============================================================
+   DESIGN SYSTEM — "CASE FILE" — SOC Reference Book
+   Palette: ink #0B1120, paper #F7F5F0, panel #131C2E, signal teal #2E9E5B,
+            warning amber #C97A2E, critical red #C9432D, wire blue #4A7FB5
+   Type: display = geometric sans, body = humanist serif, mono = code/log
+   ============================================================ */
+:root{
+  --ink:#0B1120;
+  --paper:#F7F5F0;
+  --paper-dim:#EFEBE2;
+  --panel:#131C2E;
+  --panel-2:#1A2332;
+  --line:#DAD4C4;
+  --line-dark:#26314A;
+  --signal:#1F7A44;
+  --signal-bright:#2E9E5B;
+  --warn:#9A5A1F;
+  --warn-bright:#C97A2E;
+  --crit:#A5301D;
+  --crit-bright:#C9432D;
+  --wire:#2E5C8A;
+  --wire-bright:#4A7FB5;
+  --ink-soft:#3A4456;
+  --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
+  --sans: -apple-system, 'Segoe UI', 'Inter', Avenir, Helvetica, Arial, sans-serif;
+  --mono: 'SF Mono', 'JetBrains Mono', Consolas, 'Courier New', monospace;
+  --maxw: 780px;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:17px;
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+
+::selection{background:var(--signal-bright); color:var(--ink);}
+
+/* ---------- progress bar (signal-strength style) ---------- */
+#progress-track{
+  position:fixed; top:0; left:0; right:0; height:4px; z-index:500;
+  background:var(--paper-dim);
+  border-bottom:1px solid var(--line);
+}
+#progress-fill{
+  height:100%; width:0%;
+  background:repeating-linear-gradient(90deg, var(--signal) 0 6px, var(--signal-bright) 6px 12px);
+  transition:width .1s linear;
+}
+
+/* ---------- spine rail (left nav) ---------- */
+#spine{
+  position:fixed; top:0; left:0; bottom:0; width:64px; z-index:400;
+  background:var(--ink);
+  border-right:1px solid var(--line-dark);
+  display:flex; flex-direction:column; align-items:center;
+  padding-top:24px; gap:4px;
+  font-family:var(--mono);
+}
+#spine .spine-mark{
+  writing-mode:vertical-rl; text-orientation:mixed;
+  color:var(--signal-bright); font-size:11px; letter-spacing:.15em;
+  margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid var(--line-dark);
+  text-transform:uppercase;
+}
+#spine .spine-tab{
+  width:40px; height:40px; border-radius:3px;
+  display:flex; align-items:center; justify-content:center;
+  color:#6B7A85; font-size:13px; font-weight:700;
+  border:1px solid transparent; cursor:pointer; text-decoration:none;
+  transition:all .15s ease;
+}
+#spine .spine-tab:hover{border-color:var(--line-dark); color:var(--paper);}
+#spine .spine-tab.active{background:var(--panel-2); color:var(--signal-bright); border-color:var(--signal);}
+#toc-toggle{
+  margin-top:auto; margin-bottom:20px; width:40px; height:40px;
+  border-radius:3px; border:1px solid var(--line-dark); background:none;
+  color:#6B7A85; cursor:pointer; font-size:16px;
+}
+#toc-toggle:hover{color:var(--signal-bright); border-color:var(--signal);}
+
+@media (max-width: 860px){
+  #spine{width:44px; padding-top:16px;}
+  #spine .spine-mark{display:none;}
+  #spine .spine-tab{width:30px; height:30px; font-size:11px;}
+}
+
+/* ---------- TOC drawer ---------- */
+#toc-drawer{
+  position:fixed; top:0; left:-380px; bottom:0; width:340px; z-index:450;
+  background:var(--panel); color:var(--paper);
+  padding:32px 28px; overflow-y:auto;
+  transition:left .25s ease;
+  box-shadow:8px 0 30px rgba(0,0,0,.35);
+  font-family:var(--sans);
+}
+#toc-drawer.open{left:64px;}
+@media (max-width:860px){ #toc-drawer.open{left:44px;} }
+#toc-drawer h3{
+  font-family:var(--mono); text-transform:uppercase; letter-spacing:.12em;
+  font-size:12px; color:var(--signal-bright); margin:0 0 18px;
+  border-bottom:1px solid var(--line-dark); padding-bottom:12px;
+}
+#toc-drawer .toc-course{font-size:13px; font-weight:700; margin:18px 0 6px; color:#9FB1BE;}
+#toc-drawer ol{list-style:none; margin:0 0 8px; padding:0;}
+#toc-drawer li a{
+  display:block; padding:7px 8px; border-radius:4px; color:#C9D3DA;
+  text-decoration:none; font-size:13.5px; line-height:1.4;
+  border-left:2px solid transparent;
+}
+#toc-drawer li a:hover{background:var(--panel-2); border-left-color:var(--signal-bright); color:#fff;}
+#toc-drawer li a.current{border-left-color:var(--signal-bright); color:var(--signal-bright); background:var(--panel-2);}
+#toc-close{
+  position:absolute; top:28px; right:24px; background:none; border:none;
+  color:#9FB1BE; font-size:20px; cursor:pointer;
+}
+#scrim{position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:440; display:none;}
+#scrim.show{display:block;}
+
+/* ---------- layout ---------- */
+main{margin-left:64px; padding:0 24px 120px;}
+@media (max-width:860px){ main{margin-left:44px; padding:0 16px 100px;} }
+.page{max-width:var(--maxw); margin:0 auto; padding-top:56px;}
+
+/* ---------- cover ---------- */
+.cover{
+  min-height:92vh; display:flex; flex-direction:column; justify-content:center;
+  border-bottom:3px solid var(--ink); padding-bottom:48px; margin-bottom:56px;
+}
+.cover-eyebrow{
+  font-family:var(--mono); font-size:12.5px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--signal); margin-bottom:18px; display:flex; align-items:center; gap:10px;
+}
+.cover-eyebrow::before{content:"";width:28px;height:2px;background:var(--signal-bright);display:inline-block;}
+.cover h1{
+  font-family:var(--sans); font-size:clamp(2.4rem, 6vw, 4rem); font-weight:800;
+  line-height:1.05; margin:0 0 14px; letter-spacing:-.02em; color:var(--ink);
+}
+.cover .subtitle{
+  font-family:var(--serif); font-style:italic; font-size:1.35rem; color:var(--ink-soft);
+  margin:0 0 36px; max-width:640px;
+}
+.cover-svg-wrap{margin:8px 0 40px;}
+.cover-meta{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:0;
+  border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+}
+.cover-meta div{padding:16px 18px; border-right:1px solid var(--line);}
+.cover-meta div:last-child{border-right:none;}
+.cover-meta .k{font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.1em; color:#8A8272; margin-bottom:5px;}
+.cover-meta .v{font-family:var(--sans); font-size:14.5px; font-weight:700; color:var(--ink);}
+
+.cover-block{margin-top:36px;}
+.cover-block h4{
+  font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.12em;
+  color:var(--signal); margin:0 0 10px;
+}
+.cover-block ul{margin:0; padding-left:20px;}
+.cover-block li{margin-bottom:6px; font-size:15.5px;}
+
+/* ---------- headings ---------- */
+h2.module-head{
+  font-family:var(--sans); font-size:2.1rem; font-weight:800; letter-spacing:-.01em;
+  margin:64px 0 6px; padding-top:40px; border-top:3px solid var(--ink);
+  page-break-before:always;
+}
+h2.module-head .tag{
+  display:block; font-family:var(--mono); font-size:12px; letter-spacing:.15em;
+  text-transform:uppercase; color:var(--signal); font-weight:700; margin-bottom:10px;
+}
+h3{
+  font-family:var(--sans); font-size:1.42rem; font-weight:800; margin:42px 0 14px;
+  color:var(--ink); letter-spacing:-.005em;
+  display:flex; align-items:baseline; gap:10px;
+}
+h3::before{
+  content:attr(data-n); font-family:var(--mono); font-size:.65em; color:var(--signal);
+  font-weight:700;
+}
+h4{font-family:var(--sans); font-weight:700; font-size:1.08rem; margin:28px 0 10px; color:var(--ink);}
+p{margin:0 0 16px;}
+strong{color:var(--ink); font-weight:700;}
+a{color:var(--wire);}
+
+/* ---------- objectives box ---------- */
+.objectives{
+  background:var(--ink); color:var(--paper); border-radius:6px; padding:28px 30px;
+  margin:24px 0 40px; font-family:var(--sans);
+}
+.objectives h4{
+  font-family:var(--mono); color:var(--signal-bright); text-transform:uppercase;
+  letter-spacing:.12em; font-size:12px; margin:0 0 16px;
+}
+.objectives ul{margin:0; padding-left:0; list-style:none;}
+.objectives li{
+  position:relative; padding-left:26px; margin-bottom:10px; font-size:15px; color:#DCE3E8;
+}
+.objectives li::before{content:"▸"; position:absolute; left:0; color:var(--signal-bright);}
+
+/* ---------- callouts: "case-file ticket" signature element ---------- */
+.ticket{
+  border:1.5px solid var(--ink); border-radius:4px; margin:26px 0; position:relative;
+  background:#fff; overflow:hidden; font-family:var(--sans);
+}
+.ticket-head{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:9px 16px; font-family:var(--mono); font-size:11px; letter-spacing:.08em;
+  text-transform:uppercase; font-weight:700; color:#fff;
+}
+.ticket-id{opacity:.85; font-weight:400;}
+.ticket-body{padding:16px 18px; font-size:15px; line-height:1.6;}
+.ticket-body p:last-child{margin-bottom:0;}
+.ticket.def .ticket-head{background:var(--wire);}
+.ticket.important .ticket-head{background:var(--ink);}
+.ticket.remember .ticket-head{background:#6B4FBB;}
+.ticket.interview .ticket-head{background:var(--signal);}
+.ticket.warning .ticket-head{background:var(--warn);}
+.ticket.alert .ticket-head{background:var(--crit);}
+.ticket.industry .ticket-head{background:#8A5A2B;}
+.ticket.bestpractice .ticket-head{background:#1E7A4C;}
+.ticket.compliance .ticket-head{background:#3A5A78;}
+.ticket.examtip .ticket-head{background:#B0862B;}
+.ticket.soc .ticket-head{background:#0F5E6B;}
+.ticket.threatintel .ticket-head{background:#7A1F3D;}
+.ticket.blueteam .ticket-head{background:#1D4E89;}
+.ticket.redteam .ticket-head{background:#8C1C1C;}
+.ticket.quickrev .ticket-head{background:#4C6444;}
+.ticket.deepdive .ticket-head{background:#2C2C54;}
+.ticket.expert .ticket-head{background:#5C4033;}
+.ticket.incident .ticket-head{background:#7A1F3D;}
+.ticket .icon{margin-right:6px;}
+
+/* ---------- ELI5 ---------- */
+.eli5{
+  border-left:4px solid var(--warn-bright); background:#FFF8ED; border-radius:0 6px 6px 0;
+  padding:18px 22px; margin:22px 0; font-family:var(--serif);
+}
+.eli5 .eli5-tag{
+  font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.1em;
+  color:var(--warn); font-weight:700; margin-bottom:8px; display:block;
+}
+
+/* ---------- multi-level explanation ---------- */
+.levels{margin:26px 0; border:1px solid var(--line); border-radius:6px; overflow:hidden;}
+.level{padding:16px 20px; border-bottom:1px solid var(--line);}
+.level:last-child{border-bottom:none;}
+.level .lv-tag{
+  font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.1em;
+  font-weight:700; margin-bottom:6px; display:inline-block; padding:2px 8px; border-radius:3px;
+}
+.level.l1{background:#FFF8ED;} .level.l1 .lv-tag{background:var(--warn-bright); color:#3A2A00;}
+.level.l2{background:#F2F7FF;} .level.l2 .lv-tag{background:var(--wire-bright); color:#0A1A3A;}
+.level.l3{background:#EFFAF8;} .level.l3 .lv-tag{background:var(--signal-bright); color:#00302B;}
+.level.l4{background:#F7F0FA;} .level.l4 .lv-tag{background:#B27FE0; color:#2A0A3A;}
+.level p{margin:0; font-size:15px;}
+
+/* ---------- tables ---------- */
+.table-wrap{overflow-x:auto; margin:24px 0;}
+table{width:100%; border-collapse:collapse; font-family:var(--sans); font-size:14px;}
+caption{
+  caption-side:top; text-align:left; font-family:var(--mono); font-size:11px;
+  text-transform:uppercase; letter-spacing:.1em; color:var(--signal); margin-bottom:8px; font-weight:700;
+}
+th{
+  background:var(--ink); color:var(--paper); text-align:left; padding:10px 14px;
+  font-weight:700; font-size:12.5px; text-transform:uppercase; letter-spacing:.04em;
+}
+td{padding:10px 14px; border-bottom:1px solid var(--line); vertical-align:top;}
+tr:nth-child(even) td{background:var(--paper-dim);}
+
+/* ---------- code blocks ---------- */
+.code-block{margin:22px 0; border-radius:6px; overflow:hidden; border:1px solid var(--line-dark);}
+.code-head{
+  background:var(--panel); color:#9FB1BE; font-family:var(--mono); font-size:11.5px;
+  padding:8px 14px; display:flex; justify-content:space-between; align-items:center;
+  border-bottom:1px solid var(--line-dark);
+}
+.code-head .lang{color:var(--signal-bright); text-transform:uppercase; letter-spacing:.08em;}
+.copy-btn{
+  background:var(--panel-2); border:1px solid var(--line-dark); color:#C9D3DA;
+  font-family:var(--mono); font-size:11px; padding:3px 10px; border-radius:3px; cursor:pointer;
+}
+.copy-btn:hover{border-color:var(--signal-bright); color:var(--signal-bright);}
+pre{
+  margin:0; background:var(--ink); color:#D9E4EA; padding:16px 18px; overflow-x:auto;
+  font-family:var(--mono); font-size:13.5px; line-height:1.6;
+}
+pre code{counter-reset:line;}
+.code-note{
+  background:var(--paper-dim); border-top:1px solid var(--line); padding:10px 16px;
+  font-family:var(--sans); font-size:13px; color:var(--ink-soft);
+}
+
+/* ---------- svg figure ---------- */
+figure{margin:28px 0; text-align:center;}
+figure svg{max-width:100%; height:auto;}
+figcaption{
+  font-family:var(--mono); font-size:11.5px; color:var(--ink-soft); margin-top:10px;
+  text-transform:uppercase; letter-spacing:.06em;
+}
+
+/* ---------- flashcards ---------- */
+.flash-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin:24px 0;}
+.flash{
+  border:1px solid var(--line); border-radius:6px; padding:16px; cursor:pointer;
+  background:#fff; min-height:96px; position:relative; font-family:var(--sans);
+  transition:box-shadow .15s;
+}
+.flash:hover{box-shadow:0 4px 14px rgba(0,0,0,.08);}
+.flash .front{font-weight:700; font-size:14.5px;}
+.flash .back{
+  display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);
+  font-family:var(--serif); font-size:14px; color:var(--ink-soft);
+}
+.flash.flipped .back{display:block;}
+.flash .hint{
+  position:absolute; top:12px; right:12px; font-family:var(--mono); font-size:9.5px;
+  color:#B0A996; text-transform:uppercase;
+}
+
+/* ---------- accordion ---------- */
+details.acc{border:1px solid var(--line); border-radius:6px; margin:12px 0; overflow:hidden;}
+details.acc summary{
+  padding:13px 18px; cursor:pointer; font-family:var(--sans); font-weight:700; font-size:14.5px;
+  background:var(--paper-dim); list-style:none; display:flex; justify-content:space-between;
+}
+details.acc summary::-webkit-details-marker{display:none;}
+details.acc summary::after{content:"+"; color:var(--signal); font-size:18px;}
+details.acc[open] summary::after{content:"–";}
+details.acc .acc-body{padding:16px 18px; font-size:15px;}
+
+/* ---------- MCQ / practice ---------- */
+.quiz{border:1px solid var(--line); border-radius:6px; padding:18px 20px; margin:16px 0; background:#fff;}
+.quiz .q{font-weight:700; font-family:var(--sans); margin-bottom:10px; font-size:14.5px;}
+.quiz .opt{
+  display:block; width:100%; text-align:left; padding:9px 12px; margin-bottom:6px;
+  border:1px solid var(--line); border-radius:4px; background:var(--paper); cursor:pointer;
+  font-family:var(--sans); font-size:14px;
+}
+.quiz .opt:hover{border-color:var(--wire);}
+.quiz .opt.correct{background:#E6F7EE; border-color:var(--signal); font-weight:700;}
+.quiz .opt.wrong{background:#FBEAEA; border-color:var(--crit);}
+.quiz .fb{margin-top:8px; font-size:13.5px; font-family:var(--sans); color:var(--ink-soft); display:none;}
+.quiz .fb.show{display:block;}
+
+/* ---------- summary / takeaway blocks ---------- */
+.summary-block{
+  background:var(--panel); color:var(--paper); border-radius:8px; padding:30px 32px; margin:36px 0;
+  font-family:var(--sans);
+}
+.summary-block h4{color:var(--signal-bright); font-family:var(--mono); text-transform:uppercase; letter-spacing:.1em; font-size:12px;}
+.summary-block ul{padding-left:20px; margin:12px 0 0;}
+.summary-block li{margin-bottom:8px; font-size:14.5px; color:#DCE3E8;}
+
+/* footer nav */
+.module-nav{
+  display:flex; justify-content:space-between; margin-top:60px; padding-top:24px;
+  border-top:1px solid var(--line); font-family:var(--sans); font-size:13.5px;
+}
+.module-nav a{text-decoration:none; color:var(--ink); font-weight:700;}
+.endmark{
+  text-align:center; font-family:var(--mono); font-size:11px; color:#B0A996;
+  letter-spacing:.15em; text-transform:uppercase; margin:80px 0 20px;
+}
+
+/* print */
+@media print{
+  #spine, #toc-drawer, #progress-track, #scrim, .copy-btn{display:none !important;}
+  main{margin-left:0;}
+  body{font-size:12pt;}
+  .ticket, .levels, .objectives, .summary-block{break-inside:avoid;}
+  h2.module-head{page-break-before:always;}
+  a{color:inherit; text-decoration:none;}
+}
+
+/* accessibility */
+:focus-visible{outline:3px solid var(--signal); outline-offset:2px;}
+.skip-link{
+  position:absolute; left:-999px; top:0; background:var(--ink); color:#fff; padding:10px 16px; z-index:900;
+}
+.skip-link:focus{left:70px; top:8px;}
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main-content">Skip to content</a>
+
+<div id="progress-track"><div id="progress-fill"></div></div>
+
+<nav id="spine" aria-label="Course navigation">
+  <div class="spine-mark">COURSE VII</div>
+  <a class="spine-tab" href="#module-1" title="Module 1 · Python Fundamentals">M1</a>
+  <a class="spine-tab" href="#module-2" title="Module 2 · Functions &amp; the Python Community">M2</a>
+  <a class="spine-tab" href="#module-3" title="Module 3 · Strings, Lists &amp; Regex">M3</a>
+  <a class="spine-tab" href="#module-4" title="Module 4 · Files, Debugging &amp; Automation">M4</a>
+  <button id="toc-toggle" aria-label="Open table of contents" aria-expanded="false">☰</button>
+</nav>
+
+<div id="scrim"></div>
+<aside id="toc-drawer" aria-label="Table of contents">
+  <button id="toc-close" aria-label="Close table of contents">✕</button>
+  <h3>Course VII — Automate with Python</h3>
+  <div class="toc-course">Module 1 · Python Fundamentals</div>
+  <ol>
+    <li><a href="#module-1" class="current">Cover &amp; Module 1 start</a></li>
+    <li><a href="#sec-1">1.1 Python in Cybersecurity</a></li>
+    <li><a href="#sec-2">1.2 Python Environments</a></li>
+    <li><a href="#sec-3">1.3 Data Types: String, Numeric, Boolean, List</a></li>
+    <li><a href="#sec-4">1.4 Additional Data Types: Tuple, Dictionary, Set</a></li>
+    <li><a href="#sec-5">1.5 Variables &amp; Naming Conventions</a></li>
+    <li><a href="#sec-6">1.6 Conditional Statements: if/elif/else</a></li>
+    <li><a href="#sec-7">1.7 For Loops &amp; While Loops</a></li>
+    <li><a href="#sec-8">1.8 Loop Control: break &amp; continue</a></li>
+    <li><a href="#labs">Labs &amp; Exercises</a></li>
+    <li><a href="#interview">Interview Prep</a></li>
+    <li><a href="#practice">Practice Section</a></li>
+    <li><a href="#revision">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Module 2 · Functions &amp; the Python Community</div>
+  <ol>
+    <li><a href="#module-2">Module 2 start</a></li>
+    <li><a href="#sec-2-1">2.1 Defining &amp; Calling Functions</a></li>
+    <li><a href="#sec-2-2">2.2 Parameters, Arguments &amp; Return Statements</a></li>
+    <li><a href="#sec-2-3">2.3 Global vs. Local Variables</a></li>
+    <li><a href="#sec-2-4">2.4 Built-in Functions: print, type, max, min, sorted</a></li>
+    <li><a href="#sec-2-5">2.5 Modules &amp; Libraries</a></li>
+    <li><a href="#sec-2-6">2.6 The Python Standard Library</a></li>
+    <li><a href="#sec-2-7">2.7 PEP 8, Comments &amp; Readability</a></li>
+    <li><a href="#labs-2">Labs &amp; Exercises</a></li>
+    <li><a href="#interview-2">Interview Prep</a></li>
+    <li><a href="#practice-2">Practice Section</a></li>
+    <li><a href="#revision-2">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary-2">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Module 3 · Strings, Lists &amp; Regex</div>
+  <ol>
+    <li><a href="#module-3">Module 3 start</a></li>
+    <li><a href="#sec-3-1">3.1 String Indices &amp; Bracket Notation</a></li>
+    <li><a href="#sec-3-2">3.2 String Functions &amp; Methods</a></li>
+    <li><a href="#sec-3-3">3.3 List Indices, Slices &amp; Mutability</a></li>
+    <li><a href="#sec-3-4">3.4 List Methods: insert, remove, append, index</a></li>
+    <li><a href="#sec-3-5">3.5 Designing a Simple Algorithm</a></li>
+    <li><a href="#sec-3-6">3.6 Regular Expressions: Symbols &amp; Patterns</a></li>
+    <li><a href="#sec-3-7">3.7 Building Complex Regex Patterns</a></li>
+    <li><a href="#labs-3">Labs &amp; Exercises</a></li>
+    <li><a href="#interview-3">Interview Prep</a></li>
+    <li><a href="#practice-3">Practice Section</a></li>
+    <li><a href="#revision-3">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary-3">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Module 4 · Files, Debugging &amp; Automation</div>
+  <ol>
+    <li><a href="#module-4">Module 4 start</a></li>
+    <li><a href="#sec-4-1">4.1 Python for Automation: Real Scenarios</a></li>
+    <li><a href="#sec-4-2">4.2 Opening &amp; Reading Files: with, open(), read()</a></li>
+    <li><a href="#sec-4-3">4.3 Writing &amp; Appending to Files</a></li>
+    <li><a href="#sec-4-4">4.4 Parsing with split() and join()</a></li>
+    <li><a href="#sec-4-5">4.5 Building a Login-Check Algorithm</a></li>
+    <li><a href="#sec-4-6">4.6 Debugging: Syntax Errors, Logic Errors, Exceptions</a></li>
+    <li><a href="#sec-4-7">4.7 Debugging Strategies &amp; Tools</a></li>
+    <li><a href="#labs-4">Labs &amp; Exercises</a></li>
+    <li><a href="#interview-4">Interview Prep</a></li>
+    <li><a href="#practice-4">Practice Section</a></li>
+    <li><a href="#revision-4">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary-4">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Course Reference</div>
+  <ol>
+    <li><a href="#course-summary">Course Summary</a></li>
+    <li><a href="#course-glossary">Full Glossary (Weeks 1–4)</a></li>
+    <li><a href="#course-cheatsheet">Master Cheat Sheet</a></li>
+  </ol>
+</aside>
+
+<main id="main-content">
+<div class="page" id="course-page">
+
+<!-- ================= COVER ================= -->
+<section class="cover">
+  <div class="cover-eyebrow">Google Cybersecurity Certificate · Premium Edition</div>
+  <h1>Course VII<br>Automate Cybersecurity Tasks with Python</h1>
+  <p class="subtitle">Every skill from the last six courses, but faster — this is the book that teaches a computer to do the repetitive parts for you.</p>
+
+  <div class="cover-svg-wrap">
+    <svg viewBox="0 0 700 220" width="100%" role="img" aria-label="Illustration of a gear mechanism connected to lines of code, representing automation of repetitive tasks with Python">
+      <rect x="0" y="0" width="700" height="220" fill="#F7F5F0"/>
+      <!-- gear -->
+      <g transform="translate(160,110)">
+        <circle r="55" fill="#1F7A44"/>
+        <circle r="22" fill="#F7F5F0"/>
+        <g fill="#1F7A44">
+          <rect x="-7" y="-70" width="14" height="20" rx="3"/>
+          <rect x="-7" y="50" width="14" height="20" rx="3"/>
+          <rect x="-70" y="-7" width="20" height="14" rx="3"/>
+          <rect x="50" y="-7" width="20" height="14" rx="3"/>
+          <rect x="-52" y="-52" width="14" height="20" rx="3" transform="rotate(45 -45 -45)"/>
+          <rect x="38" y="38" width="14" height="20" rx="3" transform="rotate(45 45 45)"/>
+          <rect x="-52" y="38" width="14" height="20" rx="3" transform="rotate(-45 -45 45)"/>
+          <rect x="38" y="-52" width="14" height="20" rx="3" transform="rotate(-45 45 -45)"/>
+        </g>
+      </g>
+      <!-- code terminal -->
+      <rect x="320" y="45" width="330" height="140" rx="8" fill="#0B1120"/>
+      <circle cx="340" cy="62" r="4" fill="#C9432D"/><circle cx="354" cy="62" r="4" fill="#C97A2E"/><circle cx="368" cy="62" r="4" fill="#2E9E5B"/>
+      <text x="336" y="90" font-family="monospace" font-size="12" fill="#2E9E5B">for line in log:</text>
+      <text x="336" y="108" font-family="monospace" font-size="12" fill="#F7F5F0">&#160;&#160;if "Failed" in line:</text>
+      <text x="336" y="126" font-family="monospace" font-size="12" fill="#C97A2E">&#160;&#160;&#160;&#160;flag(line)</text>
+      <text x="336" y="150" font-family="monospace" font-size="11" fill="#9FB1BE"># automated in 4 lines</text>
+    </svg>
+  </div>
+
+  <div class="cover-meta">
+    <div><div class="k">Reading Time</div><div class="v">~4 hrs / module</div></div>
+    <div><div class="k">Difficulty</div><div class="v">Beginner–Intermediate</div></div>
+    <div><div class="k">Prerequisites</div><div class="v">Courses I–VI</div></div>
+    <div><div class="k">Modules</div><div class="v">4 (Weeks 1–4)</div></div>
+  </div>
+
+  <div class="cover-block">
+    <h4>Learning Objectives — Whole Course</h4>
+    <ul>
+      <li>Write Python code using variables, data types, conditionals, and loops.</li>
+      <li>Define and call functions, and understand parameters, arguments, and return values.</li>
+      <li>Work with strings and lists using indices, slices, and built-in methods.</li>
+      <li>Write regular expressions to search log data for patterns like IPs and emails.</li>
+      <li>Read, write, and parse text files programmatically.</li>
+      <li>Debug Python code by identifying syntax errors, logic errors, and exceptions.</li>
+    </ul>
+  </div>
+
+  <div class="cover-block">
+    <h4>Skills Gained</h4>
+    <ul>
+      <li>Core Python syntax: data types, variables, conditionals, loops, functions</li>
+      <li>String/list manipulation for log and data analysis</li>
+      <li>Regular expression pattern-building for security log searching</li>
+      <li>File I/O for reading and parsing real security logs</li>
+      <li>Debugging discipline: reading error messages, using print statements and debuggers</li>
+    </ul>
+  </div>
+
+  <div class="cover-block">
+    <h4>Career Relevance</h4>
+    <p>Python fluency is what separates candidates who can only describe security concepts from those who can build small tools to act on them. Entry-level interviews increasingly include a short live-coding exercise — parsing a log file or writing a simple regex — drawn directly from this course's material.</p>
+  </div>
+</section>
+
+<!-- ================= PREFACE ================= -->
+<h2 class="module-head"><span class="tag">Preface</span>How to Use This Course</h2>
+
+<p>This course teaches you to write real code — not just read about it. Every concept here directly automates something you've already learned to do manually in Courses I through VI: filtering logs, checking access lists, flagging suspicious activity. Type every example yourself; Python is a skill built by doing, not by reading.</p>
+
+<div class="ticket deepdive">
+  <div class="ticket-head"><span><span class="icon">🧭</span>Deep Dive</span><span class="ticket-id">DD-600</span></div>
+  <div class="ticket-body">
+    <p><strong>Recommended study strategy:</strong> Use a notebook environment (Jupyter Notebook or Google Colab) as you go — running each code block yourself, and deliberately breaking it to see what error messages look like, builds far more durable understanding than reading output alone.</p>
+    <p><strong>Lab recommendation:</strong> By Module 4, try building a small end-to-end project: read a fake log file, parse it, flag suspicious entries with a regex, and write the results to a new file. This single exercise touches nearly everything in the course.</p>
+    <p><strong>Interview preparation:</strong> Be ready to write a short function live — something like "count failed logins for a given user in a list" — and to explain, out loud, the difference between a parameter and an argument.</p>
+    <p><strong>Certification preparation:</strong> While Python isn't a major focus of CompTIA Security+, it directly supports scripting and automation objectives increasingly emphasized in Security+ and more advanced certifications like GCIH and OSCP.</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODULE 1 · WEEK 1 — PYTHON FUNDAMENTALS
+     ============================================================ -->
+<h2 class="module-head" id="module-1"><span class="tag">Module 1 · Week 1</span>Introduction to Python Programming</h2>
+
+<div class="objectives" id="objectives">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Explain why Python is widely used for cybersecurity automation.</li>
+    <li>Describe Python environments: notebooks, IDEs, and the command line.</li>
+    <li>Identify and use Python's core data types: string, integer, float, Boolean, list.</li>
+    <li>Describe additional data types: tuple, dictionary, and set.</li>
+    <li>Assign and reassign variables following Python naming best practices.</li>
+    <li>Write conditional statements using if, elif, else, and logical operators.</li>
+    <li>Write for loops and while loops, and control them using break and continue.</li>
+  </ul>
+</div>
+
+<h3 id="sec-1" data-n="1.1">Python in Cybersecurity</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-601</span></div>
+  <div class="ticket-body">
+    <p><strong>Programming:</strong> A process used to create a specific set of instructions for a computer to execute tasks.</p>
+    <p><strong>Python:</strong> A general-purpose programming language, valued for its readability and simplicity, widely used for web development, data analysis, artificial intelligence, and — most relevantly here — automation.</p>
+    <p><strong>Interpreter:</strong> A computer program that translates Python code into runnable instructions, line by line.</p>
+  </div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Vending Machine</span>
+  <p>Programming is like operating a vending machine: you provide specific instructions (insert money, press a button) and receive a specific, predictable outcome (a snack, some change). Python just gives you a much more powerful, flexible "vending machine" for telling a computer exactly what to do.</p>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Areas of Cybersecurity Where Python Automates Tasks</caption>
+<thead><tr><th>Area</th><th>Example Task</th></tr></thead>
+<tbody>
+<tr><td><strong>Log analysis</strong></td><td>Sifting through thousands of log entries for suspicious patterns</td></tr>
+<tr><td><strong>Malware analysis</strong></td><td>Automating repetitive parts of examining suspicious files</td></tr>
+<tr><td><strong>Access control list management</strong></td><td>Updating allow/deny lists programmatically</td></tr>
+<tr><td><strong>Intrusion detection</strong></td><td>Flagging anomalous network activity automatically</td></tr>
+<tr><td><strong>Compliance checks</strong></td><td>Verifying configurations against a policy at scale</td></tr>
+<tr><td><strong>Network scanning</strong></td><td>Automating discovery of devices and open ports</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-601</span></div>
+  <div class="ticket-body"><p>There are multiple versions of Python, and syntax differs between them. This course (and the vast majority of security work today) uses <strong>Python 3</strong>. Always confirm which version a codebase or example expects.</p></div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code># Print a greeting message
+print("Hello Python!")</code></pre>
+  <div class="code-note"><strong>What this does:</strong> The <code>print()</code> function outputs a specified object to the screen — here, the string "Hello Python!" enclosed in quotation marks.<br><strong>Syntax note:</strong> Quotation marks around string data are a core Python syntax rule — omitting them causes an error.<br><strong>Best practice:</strong> Starting a script with a comment (the <code>#</code> symbol) explaining its purpose is good practice, since comments document intent for future readers, including yourself.</div>
+</div>
+
+<h3 id="sec-2" data-n="1.2">Python Environments</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Three Ways to Run Python</caption>
+<thead><tr><th>Environment</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><strong>Notebooks</strong></td><td>An online interface for writing, storing, and running code, combining code cells (for running code) and markdown cells (for documenting it) — e.g., Jupyter Notebook, Google Colaboratory</td></tr>
+<tr><td><strong>Integrated Development Environment (IDE)</strong></td><td>A software application for writing code with built-in editing assistance and error correction, offering a GUI for customization</td></tr>
+<tr><td><strong>Command line</strong></td><td>Text-based access to files, directories, and Python execution directly through the CLI</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-602</span></div>
+  <div class="ticket-body">
+    <p><strong>Notebook:</strong> An online interface for writing, storing, and running code, which also allows documentation of the code.</p>
+    <p><strong>Code cells:</strong> Notebook sections meant for writing and running code.</p>
+    <p><strong>Markdown cells:</strong> Notebook sections meant for describing code using the Markdown formatting language.</p>
+  </div>
+</div>
+
+<h3 id="sec-3" data-n="1.3">Data Types: String, Numeric, Boolean, List</h3>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — Kitchen Ingredients</span>
+  <p>Just as a kitchen categorizes ingredients (spices, vegetables, dairy) because each category is handled differently, Python categorizes data into types because each type supports different operations. You can't "multiply" two names together any more than you can season a dish with a carrot.</p>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Core Python Data Types</caption>
+<thead><tr><th>Type</th><th>Example</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><strong>String</strong></td><td><code>"20%"</code>, <code>""</code> (empty string)</td><td>Ordered sequence of characters; must be in quotation marks (single or double)</td></tr>
+<tr><td><strong>Integer</strong></td><td><code>-100</code>, <code>0</code>, <code>500</code></td><td>Whole numbers, no decimal point, no quotation marks</td></tr>
+<tr><td><strong>Float</strong></td><td><code>-2.2</code>, <code>0.34</code></td><td>Numbers with a decimal point</td></tr>
+<tr><td><strong>Boolean</strong></td><td><code>True</code>, <code>False</code></td><td>Only two possible values, no quotation marks</td></tr>
+<tr><td><strong>List</strong></td><td><code>[12, 36, 1]</code>, <code>[]</code> (empty list)</td><td>Sequential collection, elements in square brackets, comma-separated, mixed types allowed</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python — Numeric Division</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>print(1/4)
+print(1//4)</code></pre>
+  <div class="code-note"><strong>Output:</strong> <code>0.25</code> then <code>0</code>.<br><strong>What's happening:</strong> The single slash (<code>/</code>) always returns a float, even when dividing two integers evenly. The double slash (<code>//</code>) is floor division — it rounds down to the nearest whole number, useful when you need a strictly integer result.</div>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-603</span></div>
+  <div class="ticket-body"><p><strong>Type Error:</strong> Occurs when an operation is attempted with incompatible data types — for example, adding a string to a number.</p></div>
+</div>
+
+<h3 id="sec-4" data-n="1.4">Additional Data Types: Tuple, Dictionary, Set</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Three Additional Data Types</caption>
+<thead><tr><th>Type</th><th>Syntax</th><th>Key Trait</th><th>Security Use Case</th></tr></thead>
+<tbody>
+<tr><td><strong>Tuple</strong></td><td>Parentheses: <code>("wjaffrey", "arutley")</code></td><td>Immutable — cannot be changed after creation; more memory-efficient than lists</td><td>Storing software identifiers so an access control list can't be accidentally altered</td></tr>
+<tr><td><strong>Dictionary</strong></td><td>Curly braces with key:value pairs: <code>{1: "East", 2: "West"}</code></td><td>Maps keys to values for predictable lookup</td><td>Mapping device IDs to device names</td></tr>
+<tr><td><strong>Set</strong></td><td>Curly braces: <code>{"jlansky", "drosas"}</code></td><td>Unordered, no duplicate values allowed</td><td>Storing a unique list of usernames with no accidental repeats</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket examtip">
+  <div class="ticket-head"><span><span class="icon">🎯</span>Exam Tip</span><span class="ticket-id">EXM-601</span></div>
+  <div class="ticket-body"><p>Remember the bracket-type mnemonic: <strong>Lists</strong> use square <code>[ ]</code>, <strong>Tuples</strong> use round <code>( )</code>, <strong>Dictionaries and Sets</strong> both use curly <code>{ }</code> — the difference between dictionaries and sets is that dictionaries always contain colon-separated key:value pairs, while sets contain single, unique values.</p></div>
+</div>
+
+<h3 id="sec-5" data-n="1.5">Variables &amp; Naming Conventions</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-604</span></div>
+  <div class="ticket-body"><p><strong>Variable:</strong> A named container that stores data in a computer's memory, whose value can change over time through reassignment.</p></div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code># Update username
+username = "nzhao"
+old_username = username
+username = "zhao2"
+
+# Display the previous and current username
+print("Previous Username:", old_username)
+print("Current Username:", username)</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Assigns <code>"nzhao"</code> to <code>username</code>, copies that value into <code>old_username</code>, then reassigns <code>username</code> to <code>"zhao2"</code> — demonstrating that reassignment doesn't retroactively change a variable that already copied the old value.<br><strong>Output:</strong> <code>Previous Username: nzhao</code> then <code>Current Username: zhao2</code>.</div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Variable Naming Rules &amp; Style Guidelines</caption>
+<thead><tr><th>Rule</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td>Use only letters, numbers, and underscores</td><td><code>date_3</code>, <code>interval2</code></td></tr>
+<tr><td>Start with a letter or underscore, never a number</td><td><code>_login</code>, not <code>2login</code></td></tr>
+<tr><td>Variable names are case-sensitive</td><td><code>time</code>, <code>Time</code>, <code>TIME</code> are all different</td></tr>
+<tr><td>Never use Python's built-in keywords</td><td>Don't name a variable <code>True</code>, <code>False</code>, or <code>if</code></td></tr>
+<tr><td>Separate words with underscores (style)</td><td><code>login_attempts</code>, not <code>loginattempts</code></td></tr>
+<tr><td>Avoid confusingly similar names (style)</td><td>Don't use <code>start_time</code> and <code>starting_time</code> together</td></tr>
+<tr><td>Names should describe the data (style)</td><td><code>num_login_attempts</code>, not <code>x</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-6" data-n="1.6">Conditional Statements: if/elif/else</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-605</span></div>
+  <div class="ticket-body"><p><strong>Conditional statement:</strong> A construct evaluating code to determine whether it meets specified conditions, executing the associated action only when the condition evaluates to <code>True</code>.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Comparison Operators</caption>
+<thead><tr><th>Operator</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>&gt;</code></td><td>Greater than</td></tr>
+<tr><td><code>&lt;</code></td><td>Less than</td></tr>
+<tr><td><code>&gt;=</code></td><td>Greater than or equal to</td></tr>
+<tr><td><code>&lt;=</code></td><td>Less than or equal to</td></tr>
+<tr><td><code>==</code></td><td>Equal to</td></tr>
+<tr><td><code>!=</code></td><td>Not equal to</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>if status == 200:
+    print("OK")
+elif status == 400:
+    print("Bad Request")
+elif status == 500:
+    print("Internal Server Error")
+else:
+    print("check other status")</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Checks the <code>status</code> variable against three specific values in order, printing a matching message; if none match, the <code>else</code> block runs as a catch-all.<br><strong>Syntax rule:</strong> Every header (<code>if</code>/<code>elif</code>/<code>else</code>) must end with a colon, and the body must be indented consistently — Python uses indentation, not braces, to define code blocks.</div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Logical Operators for Multiple Conditions</caption>
+<thead><tr><th>Operator</th><th>Requires</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td><code>and</code></td><td>Both conditions True</td><td><code>if status &gt;= 200 and status &lt;= 226:</code></td></tr>
+<tr><td><code>or</code></td><td>At least one condition True</td><td><code>if status == 100 or status == 102:</code></td></tr>
+<tr><td><code>not</code></td><td>Negates a condition</td><td><code>if not (status &gt;= 200 and status &lt;= 226):</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-7" data-n="1.7">For Loops &amp; While Loops</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-606</span></div>
+  <div class="ticket-body">
+    <p><strong>Iterative statement:</strong> Code that repeatedly executes a set of instructions.</p>
+    <p><strong>Loop variable:</strong> A variable controlling the iterations of a loop.</p>
+  </div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python — For Loop</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>computer_assets = ["laptop1", "desktop20", "smartphone03"]
+for asset in computer_assets:
+    print(asset)</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Iterates through each element of the <code>computer_assets</code> list, printing each one in turn.<br><strong>Syntax:</strong> The loop header (<code>for asset in computer_assets:</code>) ends with a colon; the body must be indented.</div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python — range()</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>for i in range(0, 5, 1):
+    print(i)</code></pre>
+  <div class="code-note"><strong>What this does:</strong> <code>range(start, stop, step)</code> generates a sequence — here, 0 through 4. The start point is inclusive; the stop point is exclusive.<br><strong>Shortcut:</strong> <code>range(5)</code> alone produces the identical sequence, since start defaults to 0 and step defaults to 1.</div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python — While Loop</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>login_attempts = 0
+while login_attempts < 5:
+    print("Login attempts:", login_attempts)
+    login_attempts = login_attempts + 1</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Continues looping as long as <code>login_attempts &lt; 5</code> evaluates to True, incrementing the counter each iteration until the condition becomes False.<br><strong>Key difference from for loops:</strong> The loop variable (<code>login_attempts</code>) is assigned <em>before</em> the loop, not within the loop header itself.</div>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning</span><span class="ticket-id">WRN-601</span></div>
+  <div class="ticket-body"><p>An <strong>infinite loop</strong> occurs when a while loop's condition never becomes False — for example, forgetting to increment the loop variable. If this happens, press <code>Ctrl+C</code> or <code>Ctrl+Z</code> to force-stop execution.</p></div>
+</div>
+
+<h3 id="sec-8" data-n="1.8">Loop Control: break &amp; continue</h3>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python — break vs. continue</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>computer_assets = ["laptop1", "desktop20", "smartphone03"]
+
+# break: exits the loop entirely
+for asset in computer_assets:
+    if asset == "desktop20":
+        break
+    print(asset)
+# Output: laptop1
+
+# continue: skips just this iteration
+for asset in computer_assets:
+    if asset == "desktop20":
+        continue
+    print(asset)
+# Output: laptop1, smartphone03</code></pre>
+  <div class="code-note"><strong>Key difference:</strong> <code>break</code> stops the loop entirely the moment its condition is met — nothing after it in the sequence gets processed. <code>continue</code> only skips the current iteration, then resumes normally with the next item.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 1.1 — Data Type Identification</summary>
+  <div class="acc-body">
+    <p>Identify the data type of each: <code>"192.168.1.1"</code>, <code>404</code>, <code>3.14</code>, <code>True</code>, <code>[1, 2, 3]</code>, <code>("a", "b")</code>, <code>{"key": "value"}</code>.</p>
+    <p><strong>Answer key:</strong> String, Integer, Float, Boolean, List, Tuple, Dictionary — in that order.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 1.2 — Write a Conditional</summary>
+  <div class="acc-body">
+    <p>Write a conditional statement that prints "Account locked" if <code>failed_attempts</code> is greater than or equal to 5, and "OK" otherwise.</p>
+    <div class="code-block">
+      <div class="code-head"><span class="lang">Python</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+      <pre><code>if failed_attempts >= 5:
+    print("Account locked")
+else:
+    print("OK")</code></pre>
+    </div>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Scenario Challenge 1.1 — Loop Selection</summary>
+  <div class="acc-body">
+    <p>You need to print every username in a list of exactly 10 known usernames. Separately, you need to keep prompting a user for a password until they enter the correct one. Which loop type fits each scenario, and why?</p>
+    <p><strong>Answer:</strong> The first scenario (a known, fixed sequence) fits a <strong>for loop</strong>. The second scenario (unknown number of iterations, dependent on a condition) fits a <strong>while loop</strong>.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Beginner Question</span><span class="ticket-id">INT-601</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: When would you use a for loop instead of a while loop?</strong></p>
+    <p><strong>Ideal answer:</strong> "A for loop is best when you're iterating through a known sequence — a list, a string, or a range of numbers. A while loop is best when the number of iterations depends on a condition that isn't known in advance, like repeating an action until a user's login attempts are exhausted."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Live Coding Question</span><span class="ticket-id">INT-602</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Write a loop that prints only the even numbers from 0 to 10.</strong></p>
+    <p><strong>Ideal answer:</strong> <code>for i in range(0, 11, 2): print(i)</code> — using the step parameter of <code>range()</code> to increment by 2 is more elegant than looping through every number and using a conditional to filter odds.</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which data type is immutable, unlike a list?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Dictionary</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Tuple</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Set</button>
+  <div class="fb">Correct — tuples cannot be changed after creation, unlike lists.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: The condition in a for loop header determines how many times the loop runs.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — a for loop runs once per item in its sequence; a while loop runs based on a condition.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. What does the `continue` keyword do inside a loop?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Exits the loop entirely</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Skips the current iteration and moves to the next</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Restarts the loop from the beginning</button>
+  <div class="fb">Correct — continue skips just the current iteration, unlike break which exits entirely.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-601</span></div>
+  <div class="ticket-body"><p>Python runs in notebooks, IDEs, or the command line. Core data types: string, integer, float, Boolean, list; additional: tuple (immutable), dictionary (key:value), set (unique, unordered). Variables are assigned with <code>=</code>; naming uses letters/numbers/underscores, case-sensitive. Conditionals: if/elif/else with comparison and logical operators (and/or/not). Loops: for (known sequence) vs. while (condition-based); break exits, continue skips.</p></div>
+</div>
+
+<div class="summary-block" id="summary">
+  <h4>Module Summary</h4>
+  <p>This module built the absolute foundation of Python: the data types that categorize information, the variables that store it, and the conditional and iterative statements that let a program make decisions and repeat actions automatically.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>Python's five core data types (string, integer, float, Boolean, list) cover most day-to-day security scripting needs.</li>
+    <li>Tuples, dictionaries, and sets each solve a specific problem: immutability, key-based lookup, and uniqueness respectively.</li>
+    <li>Consistent variable naming (letters/numbers/underscores, descriptive, case-sensitive) prevents subtle bugs.</li>
+    <li>Conditional statements (if/elif/else) combined with logical operators (and/or/not) let code make decisions.</li>
+    <li>For loops handle known sequences; while loops handle condition-based repetition; break and continue give fine-grained control over both.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives">◂ Back to Module 1 Objectives</a>
+  <a href="#module-2">Module 2 · Functions &amp; the Python Community ▸</a>
+</div>
+
+<div class="endmark">— End of Module 1 —</div>
+<!-- ============================================================
+     MODULE 2 · WEEK 2 — FUNCTIONS & THE PYTHON COMMUNITY
+     ============================================================ -->
+<h2 class="module-head" id="module-2"><span class="tag">Module 2 · Week 2</span>Write Effective Python Code: Functions &amp; the Community</h2>
+
+<div class="objectives" id="objectives-2">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Define and call user-defined functions using proper header and body syntax.</li>
+    <li>Use parameters, arguments, and return statements to pass data into and out of functions.</li>
+    <li>Distinguish global from local variables and explain best practices for each.</li>
+    <li>Use built-in functions: print(), type(), max(), min(), sorted().</li>
+    <li>Import modules and libraries from the Python Standard Library and external sources.</li>
+    <li>Apply PEP 8 style guidelines for comments, indentation, and readable code.</li>
+  </ul>
+</div>
+
+<h3 id="sec-2-1" data-n="2.1">Defining &amp; Calling Functions</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-607</span></div>
+  <div class="ticket-body"><p><strong>Function:</strong> A reusable block of code that performs a specific task, helping organize code and making it more readable and modular.</p></div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>def display_investigation_message():
+    print("investigate activity")
+
+# Calling the function
+display_investigation_message()</code></pre>
+  <div class="code-note"><strong>What this does:</strong> The <code>def</code> keyword starts a function definition, naming it <code>display_investigation_message</code>. The indented line below is the function body. Calling the function (writing its name followed by parentheses) actually executes it.<br><strong>Naming tip:</strong> Give functions names that describe what they do — it makes calling them later much easier to remember.</div>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning</span><span class="ticket-id">WRN-602</span></div>
+  <div class="ticket-body"><p>Calling a function from within its own definition (recursion) without a condition that eventually stops it creates an <strong>infinite loop</strong>. For example, <code>def func1(): func1()</code> will call itself forever once invoked.</p></div>
+</div>
+
+<h3 id="sec-2-2" data-n="2.2">Parameters, Arguments &amp; Return Statements</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-608</span></div>
+  <div class="ticket-body">
+    <p><strong>Parameter:</strong> An object included in a function definition for use inside that function.</p>
+    <p><strong>Argument:</strong> The actual data passed into a function when it's called.</p>
+    <p><strong>Return statement:</strong> Uses the <code>return</code> keyword to send information back from a function to wherever it was called.</p>
+  </div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>def remaining_login_attempts(maximum_attempts, total_attempts):
+    return maximum_attempts - total_attempts
+
+remaining_attempts = remaining_login_attempts(3, 3)
+
+if remaining_attempts <= 0:
+    print("Your account is locked")</code></pre>
+  <div class="code-note"><strong>What this does:</strong> <code>maximum_attempts</code> and <code>total_attempts</code> are parameters. When called with <code>(3, 3)</code>, those integers become the arguments — 3 passes into <code>maximum_attempts</code>, 3 passes into <code>total_attempts</code>. The function returns 0, stored in <code>remaining_attempts</code>, which then triggers the "locked" message.<br><strong>Important:</strong> The <code>return</code> keyword is not a function — never place parentheses after it. Once Python executes a return statement, it immediately exits the function; any code after it inside the function never runs.</div>
+</div>
+
+<h3 id="sec-2-3" data-n="2.3">Global vs. Local Variables</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Comparison — Global vs. Local Variables</caption>
+<thead><tr><th>Type</th><th>Defined</th><th>Accessible</th></tr></thead>
+<tbody>
+<tr><td><strong>Global variable</strong></td><td>Outside any function</td><td>Everywhere in the program, including inside functions</td></tr>
+<tr><td><strong>Local variable</strong></td><td>Inside a function (including its parameters)</td><td>Only within that function's body; deleted from memory once the function finishes running</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python — Variable Scope</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>username = "elarson"
+print("1:" + username)
+
+def greet():
+    username = "bmoreno"
+    print("2:" + username)
+
+greet()
+print("3:" + username)</code></pre>
+  <div class="code-note"><strong>Output:</strong> <code>1:elarson</code>, then <code>2:bmoreno</code>, then <code>3:elarson</code>.<br><strong>What's happening:</strong> Reusing the name <code>username</code> inside the function creates a separate <em>local</em> variable that shadows the global one only within the function — the global variable's value is never actually changed.</div>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-601</span></div>
+  <div class="ticket-body"><p>Avoid combining global and local variables with the same name — it's confusing and error-prone. If you want a function to work with different values each time, use a <strong>parameter</strong> instead of relying on (and potentially reassigning) a global variable.</p></div>
+</div>
+
+<h3 id="sec-2-4" data-n="2.4">Built-in Functions: print, type, max, min, sorted</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Five Essential Built-in Functions</caption>
+<thead><tr><th>Function</th><th>Purpose</th><th>Accepts</th></tr></thead>
+<tbody>
+<tr><td><code>print()</code></td><td>Outputs an object to the screen</td><td>Any number of arguments, any data type, comma-separated</td></tr>
+<tr><td><code>type()</code></td><td>Returns the data type of its argument</td><td>Exactly one argument, any data type</td></tr>
+<tr><td><code>max()</code></td><td>Returns the largest numeric input</td><td>Multiple numeric values or one iterable</td></tr>
+<tr><td><code>min()</code></td><td>Returns the smallest numeric input</td><td>Multiple numeric values or one iterable</td></tr>
+<tr><td><code>sorted()</code></td><td>Returns a sorted list from an iterable</td><td>One iterable of a single consistent data type</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>time_list = [12, 2, 32, 19, 57, 22, 14]
+
+print(min(time_list))
+print(max(time_list))
+print(sorted(time_list))</code></pre>
+  <div class="code-note"><strong>Output:</strong> <code>2</code>, then <code>57</code>, then <code>[2, 12, 14, 19, 22, 32, 57]</code>.<br><strong>Security use case:</strong> Finding the shortest and longest login sessions for a user, or sorting session lengths for a report.<br><strong>Important:</strong> <code>sorted()</code> does not modify the original list — it returns a new, sorted one.</div>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-602</span></div>
+  <div class="ticket-body"><p><code>sorted()</code> cannot sort a list containing mixed, incompatible data types — a list like <code>[1, 2, "hello"]</code> will raise an error, since Python can't determine a consistent ordering between numbers and strings.</p></div>
+</div>
+
+<h3 id="sec-2-5" data-n="2.5">Modules &amp; Libraries</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-609</span></div>
+  <div class="ticket-body">
+    <p><strong>Module:</strong> A Python file containing functions, variables, classes, and other runnable code.</p>
+    <p><strong>Library:</strong> A collection of modules that provide code users can incorporate into their own programs.</p>
+  </div>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Toolbox and the Warehouse</span>
+  <p>A module is like a single toolbox — a saved collection of useful tools (functions) for one kind of job. A library is like an entire warehouse full of these toolboxes, organized by purpose, that you can pull from whenever a project needs them.</p>
+</div>
+
+<h3 id="sec-2-6" data-n="2.6">The Python Standard Library</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Key Python Standard Library Modules for Security Work</caption>
+<thead><tr><th>Module</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><strong>re</strong></td><td>Pattern searching in log files (regular expressions — Module 3)</td></tr>
+<tr><td><strong>csv</strong></td><td>Reading from and writing to CSV files</td></tr>
+<tr><td><strong>glob</strong> / <strong>os</strong></td><td>Interacting with the command line and file system</td></tr>
+<tr><td><strong>time</strong> / <strong>datetime</strong></td><td>Working with timestamps and time-based operations</td></tr>
+<tr><td><strong>statistics</strong></td><td>Calculating statistics like mean and median on numeric data</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python — Importing a Full Module</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>import statistics
+
+monthly_failed_attempts = [20, 17, 178, 33, 15, 21, 19, 29, 32, 15, 25, 19]
+
+mean_failed_attempts = statistics.mean(monthly_failed_attempts)
+print("mean:", mean_failed_attempts)</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Imports the entire <code>statistics</code> module, then calls <code>mean()</code> from it — prefixed with <code>statistics.</code> since the full module was imported.<br><strong>Output:</strong> <code>mean: 35.25</code>.</div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python — Importing Specific Functions</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>from statistics import mean, median
+
+monthly_failed_attempts = [20, 17, 178, 33, 15, 21, 19, 29, 32, 15, 25, 19]
+
+mean_failed_attempts = mean(monthly_failed_attempts)
+median_failed_attempts = median(monthly_failed_attempts)
+print("mean:", mean_failed_attempts, "median:", median_failed_attempts)</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Imports only <code>mean</code> and <code>median</code> from <code>statistics</code> — since only specific functions were imported, no module prefix is needed when calling them.</div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>External Libraries Relevant to Security</caption>
+<thead><tr><th>Library</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><strong>Beautiful Soup (bs4)</strong></td><td>Parsing HTML website files</td></tr>
+<tr><td><strong>NumPy</strong></td><td>Arrays and mathematical computations</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python — Installing an External Library</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>%pip install numpy
+import numpy</code></pre>
+  <div class="code-note"><strong>What this does:</strong> In a notebook environment, <code>%pip install</code> installs a library not already bundled with Python before it can be imported and used.</div>
+</div>
+
+<h3 id="sec-2-7" data-n="2.7">PEP 8, Comments &amp; Readability</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-610</span></div>
+  <div class="ticket-body">
+    <p><strong>Style guide:</strong> A manual providing guidelines for writing, formatting, and designing documents to promote clean, consistent output.</p>
+    <p><strong>PEP 8 style guide:</strong> "Python Enhancement Proposal 8" — the standard stylistic guideline for Python code. Not mandatory, but ensures consistency and readability across the community.</p>
+    <p><strong>Comment:</strong> A note programmers make about the intention behind their code, marked with <code>#</code> for single-line comments.</p>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>PEP 8's Core Recommendations</caption>
+<thead><tr><th>Guideline</th><th>Specification</th></tr></thead>
+<tbody>
+<tr><td>Line length</td><td>Keep lines under 79 characters, including comments</td></tr>
+<tr><td>Indentation</td><td>Use four spaces per indentation level</td></tr>
+<tr><td>Comments</td><td>Start code with a comment describing overall purpose; comment complex sections</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python — Multi-line Comments</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code># remaining_login_attempts() function takes two integer parameters,
+# the maximum login attempts allowed and the total attempts made,
+# and it returns an integer representing remaining login attempts
+
+def remaining_login_attempts(maximum_attempts, total_attempts):
+    return maximum_attempts - total_attempts</code></pre>
+  <div class="code-note"><strong>Alternative style:</strong> A <strong>docstring</strong> — triple-quoted text (<code>"""..."""</code>) — can achieve the same multi-line documentation, and is the more common convention for documenting functions specifically.</div>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important — Common Syntax Errors</span><span class="ticket-id">IMP-603</span></div>
+  <div class="ticket-body"><p>The most common Python syntax mistakes involve: missing quotation marks around strings, incorrectly using quotation marks around integers/floats/Booleans, missing commas in lists, and missing colons at the end of conditional/loop/function headers. Reviewing these four spots first when debugging a syntax error resolves the majority of cases quickly.</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs-2">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 2.1 — Write a Function with Return</summary>
+  <div class="acc-body">
+    <p>Write a function called <code>fail_percentage()</code> that takes <code>total_attempts</code> and <code>failed_attempts</code> as parameters and returns the percentage of failed attempts.</p>
+    <div class="code-block">
+      <div class="code-head"><span class="lang">Python</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+      <pre><code>def fail_percentage(total_attempts, failed_attempts):
+    return (failed_attempts / total_attempts) * 100</code></pre>
+    </div>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 2.2 — Import and Use a Module</summary>
+  <div class="acc-body">
+    <p>Given a list of login durations in minutes, import the <code>statistics</code> module and print both the mean and the median.</p>
+    <div class="code-block">
+      <div class="code-head"><span class="lang">Python</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+      <pre><code>import statistics
+durations = [5, 12, 8, 45, 6, 9, 11]
+print("mean:", statistics.mean(durations))
+print("median:", statistics.median(durations))</code></pre>
+    </div>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Scenario Challenge 2.1 — Global vs. Local Debugging</summary>
+  <div class="acc-body">
+    <p>A colleague's function modifies a variable inside itself but complains the change isn't reflected outside the function. What's the most likely cause, and how would you explain it?</p>
+    <p><strong>Answer guidance:</strong> The variable inside the function is almost certainly a local variable (even if it shares a name with a global variable) — Python creates a separate local copy rather than modifying the global one. The fix is either to use a parameter/return value to pass data in and out explicitly, or (rarely recommended) use the <code>global</code> keyword.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview-2">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Beginner Question</span><span class="ticket-id">INT-603</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: What's the difference between a parameter and an argument?</strong></p>
+    <p><strong>Ideal answer:</strong> "A parameter is the placeholder variable defined in a function's header, used inside the function body. An argument is the actual value passed in when the function is called. So in <code>def greet(name):</code>, name is a parameter; in <code>greet("Alice")</code>, "Alice" is the argument."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Code Review Question</span><span class="ticket-id">INT-604</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Why does PEP 8 matter if it's not mandatory?</strong></p>
+    <p><strong>Ideal answer:</strong> "Code is read far more often than it's written, especially on a security team where multiple analysts maintain the same scripts. PEP 8 ensures everyone's code looks and reads consistently, which reduces onboarding time for new team members and makes bugs easier to spot at a glance."</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice-2">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. What keyword is used to send information back from a function to its caller?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">def</button>
+  <button class="opt" onclick="checkAnswer(this,true)">return</button>
+  <button class="opt" onclick="checkAnswer(this,false)">import</button>
+  <div class="fb">Correct — the return keyword sends a value back to wherever the function was called.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: A local variable can be accessed from outside the function where it's defined.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — local variables only exist within the function's scope and are deleted once it finishes running.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. According to PEP 8, how many spaces should be used for one level of indentation?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">2</button>
+  <button class="opt" onclick="checkAnswer(this,true)">4</button>
+  <button class="opt" onclick="checkAnswer(this,false)">8</button>
+  <div class="fb">Correct — PEP 8 recommends four spaces per indentation level.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision-2">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-602</span></div>
+  <div class="ticket-body"><p>Functions: <code>def name(parameters):</code> header + indented body; call with <code>name(arguments)</code>. Parameters are placeholders; arguments are actual values; return sends data back. Global variables: accessible everywhere; local variables: only inside their function. Built-ins: print/type/max/min/sorted. Modules (single files) vs. libraries (collections of modules); import full module or specific functions with <code>from...import</code>. PEP 8: 79-char lines, 4-space indents, meaningful comments.</p></div>
+</div>
+
+<div class="summary-block" id="summary-2">
+  <h4>Module Summary</h4>
+  <p>This module turned individual lines of Python into reusable, well-organized code — functions with parameters and return values, the global/local variable distinction, the Standard Library's most useful modules, and the PEP 8 conventions that keep code readable across an entire team.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>Functions reduce repetition by encapsulating reusable logic behind a name, parameters, and (optionally) a return value.</li>
+    <li>Global variables are accessible everywhere; local variables exist only within their function — mixing the two carelessly causes bugs.</li>
+    <li>The Python Standard Library (re, csv, os, glob, time, datetime, statistics) covers most common security scripting needs without external installation.</li>
+    <li>External libraries like Beautiful Soup and NumPy extend Python further, but require installation before import.</li>
+    <li>PEP 8 style — comments, four-space indentation, sub-80-character lines — makes code maintainable across a team, even though it's not strictly enforced.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives-2">◂ Back to Module 2 Objectives</a>
+  <a href="#module-3">Module 3 · Strings, Lists &amp; Regex ▸</a>
+</div>
+
+<div class="endmark">— End of Module 2 —</div>
+<!-- ============================================================
+     MODULE 3 · WEEK 3 — STRINGS, LISTS & REGEX
+     ============================================================ -->
+<h2 class="module-head" id="module-3"><span class="tag">Module 3 · Week 3</span>Work with Strings, Lists &amp; Regular Expressions</h2>
+
+<div class="objectives" id="objectives-3">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Use bracket notation to access string characters via indices and slices.</li>
+    <li>Use string functions and methods: str(), len(), .upper(), .lower(), .index().</li>
+    <li>Use bracket notation to access, change, and slice list elements.</li>
+    <li>Use list methods: .insert(), .remove(), .append(), .index().</li>
+    <li>Design a simple algorithm combining strings, lists, and loops.</li>
+    <li>Write regular expressions using character-type and quantifier symbols.</li>
+    <li>Use the re module's findall() function to search text for patterns.</li>
+  </ul>
+</div>
+
+<h3 id="sec-3-1" data-n="3.1">String Indices &amp; Bracket Notation</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-611</span></div>
+  <div class="ticket-body">
+    <p><strong>Index:</strong> A number assigned to every element in a sequence indicating its position — indices start at 0 in Python.</p>
+    <p><strong>Bracket notation:</strong> Indices placed in square brackets after a string or list to extract a specific element or slice.</p>
+    <p><strong>Substring:</strong> A continuous sequence of characters within a larger string.</p>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Indexing the String "h32rb17"</caption>
+<thead><tr><th>Character</th><th>h</th><th>3</th><th>2</th><th>r</th><th>b</th><th>1</th><th>7</th></tr></thead>
+<tbody>
+<tr><td>Positive Index</td><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td></tr>
+<tr><td>Negative Index</td><td>-7</td><td>-6</td><td>-5</td><td>-4</td><td>-3</td><td>-2</td><td>-1</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python — Slicing</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>device_id = "h32rb17"
+print(device_id[0])
+print(device_id[0:3])</code></pre>
+  <div class="code-note"><strong>Output:</strong> <code>h</code>, then <code>h32</code>.<br><strong>Slicing rule:</strong> A slice's first index is inclusive; its second index is exclusive. <code>[0:3]</code> returns indices 0, 1, and 2 — stopping one position before index 3.</div>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-604</span></div>
+  <div class="ticket-body"><p>Strings are <strong>immutable</strong> in Python — once created, individual characters cannot be reassigned. Attempting <code>device_id[0] = "x"</code> raises an error. If you need to "change" a string, you must build and assign an entirely new one.</p></div>
+</div>
+
+<h3 id="sec-3-2" data-n="3.2">String Functions &amp; Methods</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Core String Functions &amp; Methods</caption>
+<thead><tr><th>Function/Method</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>str()</code></td><td>Converts its input object into a string</td></tr>
+<tr><td><code>len()</code></td><td>Returns the number of elements (characters) in a string</td></tr>
+<tr><td><code>.upper()</code></td><td>Returns a copy of the string in all uppercase</td></tr>
+<tr><td><code>.lower()</code></td><td>Returns a copy of the string in all lowercase</td></tr>
+<tr><td><code>.index()</code></td><td>Returns the index of the first occurrence of a character or substring</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python — Extracting a URL's Domain Extension</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>url = "https://exampleURL1.com"
+
+ind = url.index(".com")
+
+print(ind)
+print(url[ind:ind+4])
+print(url[8:ind])</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Finds the starting index of ".com" (19), then uses that index to slice out ".com" itself and, separately, the website name between index 8 (right after "https://") and the found index.<br><strong>Output:</strong> <code>19</code>, then <code>.com</code>, then <code>exampleURL1</code>.<br><strong>Common mistake:</strong> Using <code>.index()</code> to search for a short substring like "ts" when you meant a longer one like "tshah" — Python returns the <em>first</em> match, which may not be the one you intended.</div>
+</div>
+
+<h3 id="sec-3-3" data-n="3.3">List Indices, Slices &amp; Mutability</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Comparison — String vs. List Mutability</caption>
+<thead><tr><th>Type</th><th>Mutable?</th><th>Implication</th></tr></thead>
+<tbody>
+<tr><td><strong>String</strong></td><td>No</td><td>Cannot reassign individual characters after creation</td></tr>
+<tr><td><strong>List</strong></td><td>Yes</td><td>Elements can be freely changed, added, or removed</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python — Changing a List Element</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>username_list = ["elarson", "fgarcia", "tshah", "sgilmore"]
+print("Before:", username_list)
+
+username_list[1] = "bmoreno"
+print("After:", username_list)</code></pre>
+  <div class="code-note"><strong>Output:</strong> <code>['elarson', 'fgarcia', 'tshah', 'sgilmore']</code> then <code>['elarson', 'bmoreno', 'tshah', 'sgilmore']</code>.<br><strong>What's happening:</strong> Unlike a string, list elements can be reassigned in place through bracket notation — this is the key mutability difference between the two data types.</div>
+</div>
+
+<h3 id="sec-3-4" data-n="3.4">List Methods: insert, remove, append, index</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Four Core List Methods</caption>
+<thead><tr><th>Method</th><th>Parameters</th><th>Effect</th></tr></thead>
+<tbody>
+<tr><td><code>.insert(index, element)</code></td><td>Position, then element</td><td>Adds an element at a specific position, shifting others down</td></tr>
+<tr><td><code>.remove(element)</code></td><td>Element to remove</td><td>Removes the first occurrence of that element</td></tr>
+<tr><td><code>.append(element)</code></td><td>Element to add</td><td>Adds an element to the end of the list</td></tr>
+<tr><td><code>.index(element)</code></td><td>Element to find</td><td>Returns the index of the first occurrence</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python — Building a List with append() in a Loop</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>numbers_list = []
+print("Before:", numbers_list)
+
+for i in range(10):
+    numbers_list.append(i)
+print("After:", numbers_list)</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Starts with an empty list, then uses a for loop with <code>.append()</code> to populate it — a very common pattern for building results as you iterate.<br><strong>Output:</strong> <code>[]</code> then <code>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]</code>.</div>
+</div>
+
+<div class="ticket examtip">
+  <div class="ticket-head"><span><span class="icon">🎯</span>Exam Tip</span><span class="ticket-id">EXM-602</span></div>
+  <div class="ticket-body"><p>Note the parameter order difference: <code>.insert(index, element)</code> takes the position first, but <code>.remove(element)</code> and <code>.append(element)</code> only take the element itself — there's no index parameter for either. Mixing up this asymmetry is a common source of bugs.</p></div>
+</div>
+
+<h3 id="sec-3-5" data-n="3.5">Designing a Simple Algorithm</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-612</span></div>
+  <div class="ticket-body"><p><strong>Algorithm:</strong> A set of rules that solves a problem — steps that take input, perform tasks, and produce output.</p></div>
+</div>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>SOC Example — Extracting IP Address Prefixes</span><span class="ticket-id">SOC-601</span></div>
+  <div class="ticket-body">
+    <p><strong>Problem:</strong> A security analyst needs the first three digits of multiple IP addresses to identify associated networks.</p>
+    <p><strong>Algorithm breakdown:</strong> For one IP address, use string slicing to extract the first three characters. For multiple IP addresses stored in a list, wrap that slicing logic in a for loop and collect the results with <code>.append()</code>.</p>
+  </div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python — Extracting Prefixes from Multiple IPs</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>ip_addresses = ["192.168.1.15", "10.0.4.201", "172.16.9.4"]
+prefixes = []
+
+for ip in ip_addresses:
+    prefixes.append(ip[0:3])
+
+print(prefixes)</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Iterates through each IP address, slices out its first three characters, and appends the result to a new list — combining strings, lists, and loops into one small, reusable algorithm.</div>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-602</span></div>
+  <div class="ticket-body"><p>Designing algorithms is easier when you break the problem into smaller pieces first — solve for a single input, then wrap that solution in a loop to handle multiple inputs. Trying to write the multi-input version directly is a common source of unnecessary confusion.</p></div>
+</div>
+
+<h3 id="sec-3-6" data-n="3.6">Regular Expressions: Symbols &amp; Patterns</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-613</span></div>
+  <div class="ticket-body"><p><strong>Regular expression (regex):</strong> A sequence of characters forming a pattern, used to search for matches within strings — extremely useful for finding IP addresses, emails, or device IDs in log files without knowing the exact values in advance.</p></div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python — Basic re.findall()</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>import re
+
+re.findall("ts", "tsnow, tshah, bmoreno")</code></pre>
+  <div class="code-note"><strong>Output:</strong> <code>['ts', 'ts']</code>.<br><strong>What's happening:</strong> <code>re.findall(pattern, string)</code> returns a list of every match. Without special symbols, the pattern is treated as a literal substring to find.</div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Regex Symbols for Character Types</caption>
+<thead><tr><th>Symbol</th><th>Matches</th></tr></thead>
+<tbody>
+<tr><td><code>\w</code></td><td>Any alphanumeric character (letters, digits, and underscore)</td></tr>
+<tr><td><code>\d</code></td><td>Any single digit (0–9)</td></tr>
+<tr><td><code>\s</code></td><td>Any single whitespace character</td></tr>
+<tr><td><code>.</code></td><td>Any character at all, including symbols</td></tr>
+<tr><td><code>\.</code></td><td>A literal period character (backslash "escapes" its special meaning)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Regex Symbols to Quantify Occurrences</caption>
+<thead><tr><th>Symbol</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>+</code></td><td>One or more occurrences of the preceding character</td></tr>
+<tr><td><code>*</code></td><td>Zero, one, or more occurrences of the preceding character</td></tr>
+<tr><td><code>{n}</code></td><td>Exactly n occurrences</td></tr>
+<tr><td><code>{n,m}</code></td><td>Between n and m occurrences (inclusive)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python — Quantifiers in Action</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>import re
+
+print(re.findall("\d+", "h32rb17"))
+print(re.findall("\d{2}", "h32rb17 k825t0m c2994eh"))
+print(re.findall("\d{1,3}", "h32rb17 k825t0m c2994eh"))</code></pre>
+  <div class="code-note"><strong>Output, line by line:</strong> <code>['32', '17']</code> — one or more consecutive digits. <code>['32', '17', '82', '29', '94']</code> — exactly two consecutive digits (a third digit in a row starts a new match). <code>['32', '17', '825', '0', '299', '4']</code> — between one and three consecutive digits.<br><strong>Note:</strong> Python scans left to right; once a match completes, scanning resumes fresh from the next character, which is why three-in-a-row digit sequences split unexpectedly with <code>{2}</code>.</div>
+</div>
+
+<h3 id="sec-3-7" data-n="3.7">Building Complex Regex Patterns</h3>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>SOC Example — Extracting Username:Attempts Pairs</span><span class="ticket-id">SOC-602</span></div>
+  <div class="ticket-body">
+    <p><strong>Problem:</strong> Extract each username and login-attempt count from a string, ignoring employee IDs and department names.</p>
+    <p><strong>Breaking it down:</strong> A username is <code>\w+</code> (varying alphanumeric characters), followed by a literal colon <code>:</code>, a space <code>\s</code>, then the attempt count <code>\d+</code> (varying digits).</p>
+  </div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python — Combining Symbols into a Pattern</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>import re
+
+pattern = "\w+:\s\d+"
+
+employee_logins_string = "1001 bmoreno: 12 Marketing 1002 tshah: 7 Human Resources 1003 sgilmore: 5 Finance"
+
+print(re.findall(pattern, employee_logins_string))</code></pre>
+  <div class="code-note"><strong>Output:</strong> <code>['bmoreno: 12', 'tshah: 7', 'sgilmore: 5']</code>.<br><strong>What's happening:</strong> Each regex component targets exactly one part of the pattern being searched for — the employee IDs and department names never match the pattern, so they're correctly excluded.</div>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning</span><span class="ticket-id">WRN-603</span></div>
+  <div class="ticket-body"><p>Regex patterns can easily return too much or too little. Always test a regex pattern against representative sample data before relying on it for a real investigation — an overly broad pattern can silently miss the exact entries you actually need.</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs-3">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 3.1 — String Slicing Practice</summary>
+  <div class="acc-body">
+    <p>Given <code>employee_id = "EMP-4471-IT"</code>, write code to extract just the numeric portion ("4471").</p>
+    <div class="code-block">
+      <div class="code-head"><span class="lang">Python</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+      <pre><code>employee_id = "EMP-4471-IT"
+print(employee_id[4:8])</code></pre>
+    </div>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 3.2 — Write a Regex for IP Addresses</summary>
+  <div class="acc-body">
+    <p>Write a simplified regex pattern that matches sequences of 1–3 digits separated by periods (a rough IPv4 matcher — not fully RFC-precise, but good practice).</p>
+    <div class="code-block">
+      <div class="code-head"><span class="lang">Python</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+      <pre><code>import re
+pattern = "\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"
+print(re.findall(pattern, "Connection from 192.168.1.15 and 10.0.4.201"))</code></pre>
+    </div>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Portfolio Project 3.1 — Build a Log-Parsing Snippet</summary>
+  <div class="acc-body">
+    <p>Write a short Python snippet (10–15 lines) that takes a sample string of fake log data, uses a regex to extract all email addresses from it, and prints the resulting list. Save this to your portfolio as a concrete, working code artifact.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview-3">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Beginner Question</span><span class="ticket-id">INT-605</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Why are strings immutable in Python, and how does that affect how you work with them?</strong></p>
+    <p><strong>Ideal answer:</strong> "Once created, a string's individual characters can't be reassigned — trying to do so raises an error. In practice, this means if I need to 'modify' a string, I build a new one, often using slicing or concatenation, rather than editing characters in place. Lists don't have this restriction, which is a key reason to choose one data type over the other."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Live Coding Question</span><span class="ticket-id">INT-606</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Write a regex pattern that matches any alphanumeric string of at least 5 characters.</strong></p>
+    <p><strong>Ideal answer:</strong> <code>\w{5,}</code> — using the character-type symbol for alphanumeric characters combined with a quantifier specifying a minimum of 5 occurrences with no upper bound (omitting the second number in the curly braces).</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice-3">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. What does the slice `"HELLO"[1:4]` return?</div>
+  <button class="opt" onclick="checkAnswer(this,true)">ELL</button>
+  <button class="opt" onclick="checkAnswer(this,false)">ELLO</button>
+  <button class="opt" onclick="checkAnswer(this,false)">HELL</button>
+  <div class="fb">Correct — the slice starts at index 1 (E) and stops before index 4, returning "ELL".</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: The .remove() list method takes an index as its argument.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — .remove() takes the element itself, not its index (unlike .insert(), which does take an index).</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. Which regex symbol matches zero, one, or more occurrences of the preceding character?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">+</button>
+  <button class="opt" onclick="checkAnswer(this,true)">*</button>
+  <button class="opt" onclick="checkAnswer(this,false)">\d</button>
+  <div class="fb">Correct — the asterisk matches zero or more occurrences, unlike + which requires at least one.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision-3">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-603</span></div>
+  <div class="ticket-body"><p>Strings: indexed from 0, immutable, bracket notation for slicing; str()/len()/.upper()/.lower()/.index(). Lists: mutable, bracket notation to change elements; .insert(index,el)/.remove(el)/.append(el)/.index(el). Algorithms: solve for one input, then wrap in a loop for many. Regex: \w (alphanumeric), \d (digit), \s (space), \. (literal period); + (1+), * (0+), {n}/{n,m} (exact/range counts). re.findall(pattern, string) returns all matches as a list.</p></div>
+</div>
+
+<div class="summary-block" id="summary-3">
+  <h4>Module Summary</h4>
+  <p>This module gave you the tools to actually search and reshape text data — string and list indexing/slicing, the core methods for each, a simple algorithm design pattern, and regular expressions for finding patterns in log data without knowing exact values in advance.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>Bracket notation and slicing work similarly for strings and lists, but only lists allow in-place modification.</li>
+    <li>List methods (.insert, .remove, .append, .index) cover nearly every common list manipulation need.</li>
+    <li>Good algorithm design starts with solving for a single input before generalizing to a loop over many.</li>
+    <li>Regex character-type symbols (\w, \d, \s) combine with quantifiers (+, *, {n,m}) to build precise search patterns.</li>
+    <li>re.findall() is the workhorse function for extracting all pattern matches from a string as a list.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives-3">◂ Back to Module 3 Objectives</a>
+  <a href="#module-4">Module 4 · Files, Debugging &amp; Automation ▸</a>
+</div>
+
+<div class="endmark">— End of Module 3 —</div>
+<!-- ============================================================
+     MODULE 4 · WEEK 4 — FILES, DEBUGGING & AUTOMATION
+     ============================================================ -->
+<h2 class="module-head" id="module-4"><span class="tag">Module 4 · Week 4</span>Files, Debugging &amp; Python in Practice</h2>
+
+<div class="objectives" id="objectives-4">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Explain real-world automation scenarios where Python solves security problems.</li>
+    <li>Open and read text files using with, open(), and .read().</li>
+    <li>Write and append to files using "w" and "a" modes and .write().</li>
+    <li>Parse file contents using .split() and reconstruct strings using .join().</li>
+    <li>Build a complete login-check algorithm combining files, loops, conditionals, and functions.</li>
+    <li>Identify the three error types: syntax errors, logic errors, and exceptions.</li>
+    <li>Apply debugging strategies: reading error messages, print statements, and debuggers.</li>
+  </ul>
+</div>
+
+<h3 id="sec-4-1" data-n="4.1">Python for Automation: Real Scenarios</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Three Real-World Automation Scenarios</caption>
+<thead><tr><th>Scenario</th><th>Python's Role</th></tr></thead>
+<tbody>
+<tr><td><strong>Database timeout policy</strong> (healthcare company)</td><td>Lock out a user who spends more than three minutes attempting to log in — extended login time can indicate password guessing</td></tr>
+<tr><td><strong>Login tracking</strong> (law firm)</td><td>Analyze timestamps, IP addresses, and locations to flag odd-hour logins, unauthorized locations, or simultaneous logins from different IPs</td></tr>
+<tr><td><strong>Password attempt monitoring</strong> (large organization)</td><td>Parse a static log file, structure the data, and flag users with more than three login failures in the last 30 minutes</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-605</span></div>
+  <div class="ticket-body"><p>Every one of these scenarios draws on the same core toolkit: <strong>variables</strong> (store data), <strong>conditional statements</strong> (check for suspicious patterns), <strong>iterative statements</strong> (process each log entry), <strong>functions</strong> (make the logic reusable), and <strong>string/list techniques</strong> (extract and structure the data). This module adds the final piece: working with files.</p></div>
+</div>
+
+<h3 id="sec-4-2" data-n="4.2">Opening &amp; Reading Files: with, open(), read()</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-614</span></div>
+  <div class="ticket-body">
+    <p><strong>File path:</strong> The location of a file or directory. An absolute file path starts from the root directory.</p>
+    <p><strong>with:</strong> A keyword that handles errors and manages external resources, automatically closing a file once its indented block finishes.</p>
+    <p><strong>open():</strong> Opens a file, taking the file name/path as its first parameter and a mode ("r", "w", or "a") as its second.</p>
+  </div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python — Reading a File</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>with open("update_log.txt", "r") as file:
+    updates = file.read()
+print(updates)</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Opens <code>update_log.txt</code> in read mode ("r"), reads its full content into the string variable <code>updates</code> via <code>.read()</code>, then prints it. The file automatically closes once the indented <code>with</code> block ends.<br><strong>Once read into a string:</strong> All the string techniques from Module 3 (slicing, .index(), len()) apply directly to file contents.</div>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-606</span></div>
+  <div class="ticket-body"><p>If a file is in the same directory as your Python script, only its name is needed. If it's elsewhere, you must specify the <strong>absolute file path</strong> — e.g., <code>with open("/home/analyst/logs/access_log.txt", "r") as file:</code>.</p></div>
+</div>
+
+<h3 id="sec-4-3" data-n="4.3">Writing &amp; Appending to Files</h3>
+
+<div class="table-wrap">
+<table>
+<caption>File Open Modes</caption>
+<thead><tr><th>Mode</th><th>Effect</th></tr></thead>
+<tbody>
+<tr><td><code>"r"</code></td><td>Read — the file must already exist</td></tr>
+<tr><td><code>"w"</code></td><td>Write — replaces existing content entirely, or creates a new file if it doesn't exist</td></tr>
+<tr><td><code>"a"</code></td><td>Append — adds new content to the end without deleting existing content</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python — Appending to a File</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>line = "jrafael,192.168.243.140,4:56:27,True"
+with open("access_log.txt", "a") as file:
+    file.write(line)</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Opens <code>access_log.txt</code> in append mode and writes the new <code>line</code> to the end, preserving all existing content.<br><strong>Warning:</strong> Calling <code>.write()</code> without the <code>with</code> keyword risks incomplete writes if the file isn't properly closed afterward — always prefer the <code>with</code> pattern.</div>
+</div>
+
+<h3 id="sec-4-4" data-n="4.4">Parsing with split() and join()</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-615</span></div>
+  <div class="ticket-body">
+    <p><strong>Parsing:</strong> The process of converting data into a more readable, usable format.</p>
+    <p><strong>.split():</strong> Converts a string into a list, separating it at a specified character (or any whitespace, if no argument is given).</p>
+    <p><strong>.join():</strong> Concatenates the elements of an iterable (like a list) back into a single string, using a specified separator.</p>
+  </div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python — split() and join()</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>approved_users = "elarson,bmoreno,tshah,sgilmore,eraab"
+print("before .split():", approved_users)
+
+approved_users = approved_users.split(",")
+print("after .split():", approved_users)
+
+approved_users = ",".join(approved_users)
+print("after .join():", approved_users)</code></pre>
+  <div class="code-note"><strong>Output:</strong> A comma-separated string → a list of five usernames → back to the original comma-separated string.<br><strong>Syntax difference:</strong> <code>.split()</code> is appended to the string being split. <code>.join()</code> is appended to the <em>separator</em> string, with the list to join passed in as its argument — the reverse pattern from most other methods you've learned.</div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python — Reading, Parsing, then Rewriting a File</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>with open("update_log.txt", "r") as file:
+    updates = file.read()
+updates = updates.split()
+
+# ... perform operations on the updates list ...
+
+updates = " ".join(updates)
+with open("update_log.txt", "w") as file:
+    file.write(updates)</code></pre>
+  <div class="code-note"><strong>What this does:</strong> Reads a file into a string, splits it into a list for easier processing, then joins it back into a string before writing the (presumably modified) content back to the file.<br><strong>Note the indentation:</strong> The <code>.split()</code> line isn't indented under the first <code>with</code> block — the file is deliberately closed as soon as its contents are captured, which is good practice.</div>
+</div>
+
+<h3 id="sec-4-5" data-n="4.5">Building a Login-Check Algorithm</h3>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>SOC Example — Full Login-Check Algorithm</span><span class="ticket-id">SOC-603</span></div>
+  <div class="ticket-body"><p><strong>Goal:</strong> Given a log file of failed login usernames, flag any user with three or more failed attempts as locked out.</p></div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python — Complete Login-Check Function</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>def login_check(login_list, current_user):
+    count = 0
+    for username in login_list:
+        if username == current_user:
+            count = count + 1
+    if count >= 3:
+        print("Account locked")
+    else:
+        print("Login allowed")
+
+with open("failed_logins.txt", "r") as file:
+    usernames = file.read()
+usernames = usernames.split()
+
+login_check(usernames, "bmoreno")</code></pre>
+  <div class="code-note"><strong>What this does, step by step:</strong> (1) Reads and splits the log file into a list of usernames. (2) Defines <code>login_check()</code>, taking the full list and a specific username to check as parameters. (3) Loops through the list, incrementing a counter each time the target username appears. (4) Uses a final conditional to print the appropriate message.<br><strong>This single example</strong> combines every major concept from all four modules of this course: files, loops, conditionals, functions, parameters, and string/list methods.</div>
+</div>
+
+<h3 id="sec-4-6" data-n="4.6">Debugging: Syntax Errors, Logic Errors, Exceptions</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-616</span></div>
+  <div class="ticket-body"><p><strong>Debugging:</strong> The practice of identifying and fixing errors in code.</p></div>
+</div>
+
+<figure>
+<svg viewBox="0 0 640 200" width="100%" role="img" aria-label="Diagram of the three types of Python errors: syntax errors caught before running, logic errors that run but produce wrong output, and exceptions that stop execution midway">
+  <rect x="0" y="0" width="640" height="200" fill="#F7F5F0"/>
+  <text x="320" y="24" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#0B1120">Three Types of Python Errors</text>
+  <g font-family="sans-serif" font-size="12" font-weight="700" fill="#fff">
+    <rect x="20" y="55" width="180" height="90" rx="6" fill="#A5301D"/><text x="110" y="90" text-anchor="middle">Syntax Errors</text><text x="110" y="108" text-anchor="middle" font-weight="400" font-size="10">Invalid Python usage;</text><text x="110" y="122" text-anchor="middle" font-weight="400" font-size="10">code won't even run</text>
+    <rect x="230" y="55" width="180" height="90" rx="6" fill="#9A5A1F"/><text x="320" y="90" text-anchor="middle">Logic Errors</text><text x="320" y="108" text-anchor="middle" font-weight="400" font-size="10">Runs, but produces</text><text x="320" y="122" text-anchor="middle" font-weight="400" font-size="10">unintended results</text>
+    <rect x="440" y="55" width="180" height="90" rx="6" fill="#1F7A44"/><text x="530" y="90" text-anchor="middle">Exceptions</text><text x="530" y="108" text-anchor="middle" font-weight="400" font-size="10">Correct syntax, but</text><text x="530" y="122" text-anchor="middle" font-weight="400" font-size="10">fails during execution</text>
+  </g>
+  <text x="320" y="175" text-anchor="middle" font-family="monospace" font-size="11" fill="#3A4456">Python reports errors one at a time, starting with the first it encounters</text>
+</svg>
+<figcaption>Figure 4.1 — The three types of Python errors</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<caption>Syntax Errors, Logic Errors &amp; Exceptions Compared</caption>
+<thead><tr><th>Error Type</th><th>Definition</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td><strong>Syntax error</strong></td><td>Invalid usage of the Python language</td><td>Forgetting a colon after a function header; a missing closing quotation mark</td></tr>
+<tr><td><strong>Logic error</strong></td><td>Code runs without an error message but produces unintended results</td><td>Using <code>&gt;=</code> instead of <code>&gt;</code> in a comparison</td></tr>
+<tr><td><strong>Exception</strong></td><td>Syntactically correct code that fails during execution</td><td>Dividing by zero; referencing an undefined variable</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Common Exception Types</caption>
+<thead><tr><th>Exception</th><th>Cause</th></tr></thead>
+<tbody>
+<tr><td><strong>NameError</strong></td><td>A variable or function name is used before being defined, often due to a typo</td></tr>
+<tr><td><strong>IndexError</strong></td><td>An index in bracket notation doesn't exist in the referenced sequence</td></tr>
+<tr><td><strong>TypeError</strong></td><td>An operation is attempted with an incompatible data type</td></tr>
+<tr><td><strong>FileNotFoundError</strong></td><td>Attempting to open a file that doesn't exist at the specified location</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-4-7" data-n="4.7">Debugging Strategies &amp; Tools</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Debugging Strategies by Error Type</caption>
+<thead><tr><th>Error Type</th><th>Strategy</th></tr></thead>
+<tbody>
+<tr><td><strong>Syntax errors</strong></td><td>Read the error message — it identifies the line number and describes the issue</td></tr>
+<tr><td><strong>Logic errors</strong></td><td>Insert temporary print statements to trace execution, or use a debugger with breakpoints</td></tr>
+<tr><td><strong>Exceptions</strong></td><td>Read the error message for the exception type, then use print statements or a debugger to isolate the cause</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-617</span></div>
+  <div class="ticket-body"><p><strong>Debugger:</strong> A software tool that helps locate the source of an error and assess its causes, often using <strong>breakpoints</strong> — markers on specific lines that let you run and inspect code section by section, including checking variable values as they change.</p></div>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Python — Debugging with Print Statements</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>new_users = ["sgilmore", "bmoreno"]
+approved_users = ["bmoreno", "tshah", "elarson"]
+
+def add_users():
+    for user in new_users:
+        print("line 5 - inside for loop")
+        if user in approved_users:
+            print("line 7 - inside if statement")
+            print(user, "already in list")
+        print("line 9 - before .append method")
+        approved_users.append(user)
+
+add_users()
+print(approved_users)</code></pre>
+  <div class="code-note"><strong>What the print statements reveal:</strong> "line 9" prints twice, meaning <code>.append()</code> runs for both usernames — even the one already in the list. This isolates the bug: the append call should be inside an <code>else</code> block, not running unconditionally after the if statement.<br><strong>The fix:</strong> Move <code>approved_users.append(user)</code> into an <code>else</code> clause so it only runs when the user isn't already present.</div>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-603</span></div>
+  <div class="ticket-body"><p>Python reports errors <strong>one at a time</strong>, starting with the first it encounters. If your code has multiple errors, expect to fix them incrementally, rerunning after each fix — don't be discouraged if a new error appears after resolving the previous one; that's the normal debugging cycle, not a sign something is more broken than before.</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs-4">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 4.1 — Identify the Error Type</summary>
+  <div class="acc-body">
+    <p>Classify each: (1) forgetting a colon after an <code>if</code> header; (2) a program that runs but always prints "access granted" even for locked accounts because of a flipped comparison operator; (3) code that references a variable named <code>usr_name</code> when it was actually defined as <code>user_name</code>.</p>
+    <p><strong>Answer key:</strong> 1 — Syntax error. 2 — Logic error. 3 — Exception (specifically a NameError).</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 4.2 — Write a File-Reading Snippet</summary>
+  <div class="acc-body">
+    <p>Write code that opens a file called <code>blocked_ips.txt</code>, reads its contents, splits it into a list by newline, and prints the total count of blocked IPs.</p>
+    <div class="code-block">
+      <div class="code-head"><span class="lang">Python</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+      <pre><code>with open("blocked_ips.txt", "r") as file:
+    ips = file.read()
+ips = ips.split()
+print(len(ips))</code></pre>
+    </div>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Portfolio Project 4.1 — Full Automation Script</summary>
+  <div class="acc-body">
+    <p>Combine everything from this course into one script: read a sample log file (you can create a small fake one), use a regex to extract all IP addresses, count how many times each IP appears using a dictionary, and write a summary report to a new file. Save this to your portfolio as your capstone Python artifact — it demonstrates fluency across the entire course.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview-4">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Beginner Question</span><span class="ticket-id">INT-607</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: What's the difference between a logic error and an exception?</strong></p>
+    <p><strong>Ideal answer:</strong> "A logic error is syntactically valid code that runs without any error message, but produces the wrong result — like using the wrong comparison operator. An exception is also syntactically valid, but the code fails during execution for a specific reason, like dividing by zero or referencing an undefined variable, and Python raises a specific error message identifying the exception type."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Live Coding Question</span><span class="ticket-id">INT-608</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Walk me through how you'd debug a function that's supposed to count failed logins but keeps returning zero.</strong></p>
+    <p><strong>Ideal answer:</strong> "I'd first confirm the function is even being called correctly by adding a print statement right at the top of it. Then I'd check the loop — printing the loop variable each iteration to confirm it's actually iterating through the expected data. Next I'd check the conditional inside the loop, printing both sides of the comparison to catch a mismatch, like a data type difference or a typo in a string comparison. This step-by-step print-statement approach usually isolates exactly where the logic diverges from what's intended."</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice-4">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which file open mode should you use to add new data without deleting existing content?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">"r"</button>
+  <button class="opt" onclick="checkAnswer(this,false)">"w"</button>
+  <button class="opt" onclick="checkAnswer(this,true)">"a"</button>
+  <div class="fb">Correct — "a" (append) adds new content while preserving what's already there.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: The .join() method is called on the list you want to convert into a string.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — .join() is called on the separator string, with the list passed in as its argument (the reverse of most methods).</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. Which exception occurs when code references an index that doesn't exist in a list?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">NameError</button>
+  <button class="opt" onclick="checkAnswer(this,true)">IndexError</button>
+  <button class="opt" onclick="checkAnswer(this,false)">TypeError</button>
+  <div class="fb">Correct — IndexError occurs when an index falls outside the sequence's valid range.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision-4">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-604</span></div>
+  <div class="ticket-body"><p>Files: <code>with open(path, mode) as file:</code> — "r"/"w"/"a" modes, .read()/.write(). Parsing: .split() (string→list), .join() (list→string, called on the separator). Real automation combines files + loops + conditionals + functions + string/list methods. 3 error types: syntax (won't run), logic (wrong result, no error message), exceptions (fails during execution — NameError/IndexError/TypeError/FileNotFoundError). Debug with: reading error messages, print statements, or a debugger with breakpoints.</p></div>
+</div>
+
+<div class="summary-block" id="summary-4">
+  <h4>Module Summary</h4>
+  <p>This module closed Course VII by adding the final piece — reading, writing, and parsing files — then combined every prior concept into one complete login-check algorithm, and equipped you to debug your own code confidently across all three error categories.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>with, open(), and .read()/.write() form the standard pattern for safely working with files in Python.</li>
+    <li>.split() and .join() are inverse operations, converting between strings and lists as needed for processing.</li>
+    <li>A complete automation script typically combines files, loops, conditionals, functions, and string/list techniques together.</li>
+    <li>Syntax errors, logic errors, and exceptions each require a different debugging approach.</li>
+    <li>Print statements and debuggers with breakpoints are the two primary tools for isolating logic errors and exceptions.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives-4">◂ Back to Module 4 Objectives</a>
+  <a href="#course-summary">Course Summary ▸</a>
+</div>
+
+<div class="endmark">— End of Module 4 —</div>
+
+<!-- ============================================================
+     COURSE SUMMARY
+     ============================================================ -->
+<h2 class="module-head" id="course-summary"><span class="tag">Course Summary</span>Automate Cybersecurity Tasks with Python — Complete</h2>
+
+<p>Course VII turned six courses of conceptual security knowledge into a genuine, executable skill. You now understand Python's core data types and control flow, how to write reusable functions, how to manipulate strings and lists (including with regular expressions), and how to read, write, and parse real files — closing with the debugging discipline every working script eventually needs.</p>
+
+<div class="table-wrap">
+<table>
+<caption>Course VII — Module-by-Module Recap</caption>
+<thead><tr><th>Module</th><th>Core Theme</th><th>Signature Concepts</th></tr></thead>
+<tbody>
+<tr><td><strong>1. Python Fundamentals</strong></td><td>The basic building blocks</td><td>Data types, variables, conditionals (if/elif/else), loops (for/while), break/continue</td></tr>
+<tr><td><strong>2. Functions &amp; the Python Community</strong></td><td>Reusable, well-organized code</td><td>Functions, parameters/arguments/return, global/local scope, built-ins, modules/libraries, PEP 8</td></tr>
+<tr><td><strong>3. Strings, Lists &amp; Regex</strong></td><td>Searching and reshaping data</td><td>Indices/slices, string/list methods, simple algorithm design, regex symbols and quantifiers</td></tr>
+<tr><td><strong>4. Files, Debugging &amp; Automation</strong></td><td>Real scripts, real errors</td><td>with/open()/read()/write(), split()/join(), a full login-check algorithm, 3 error types, debugging strategies</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket expert">
+  <div class="ticket-head"><span><span class="icon">🎓</span>Expert Note</span><span class="ticket-id">EXP-601</span></div>
+  <div class="ticket-body"><p>If you remember only five things from Course VII going into an interview: (1) be able to write a function with parameters and a return statement live, without hesitation; (2) know the difference between a parameter and an argument precisely; (3) write a basic regex pattern combining a character-type symbol with a quantifier; (4) explain the with/open()/read() file-reading pattern; (5) confidently name and distinguish all three error types. Python fluency, more than any single fact, is what interviewers use to separate candidates who can talk about security from those who can build something.</p></div>
+</div>
+
+<!-- ============================================================
+     FULL COURSE GLOSSARY
+     ============================================================ -->
+<h2 class="module-head" id="course-glossary"><span class="tag">Reference</span>Full Glossary — Weeks 1–4</h2>
+
+<div class="table-wrap">
+<table>
+<caption>Complete Course VII Glossary</caption>
+<thead><tr><th>Term</th><th>Definition</th></tr></thead>
+<tbody>
+<tr><td><strong>Algorithm</strong></td><td>A set of rules that solves a problem, taking input, performing tasks, and producing output</td></tr>
+<tr><td><strong>Argument</strong></td><td>The actual data passed into a function when it's called</td></tr>
+<tr><td><strong>Boolean data</strong></td><td>Data that can only be True or False</td></tr>
+<tr><td><strong>Bracket notation</strong></td><td>Indices placed in square brackets to extract elements or slices from a string/list</td></tr>
+<tr><td><strong>Built-in function</strong></td><td>A function that exists within Python and can be called directly, e.g., print(), type()</td></tr>
+<tr><td><strong>Comment</strong></td><td>A note programmers make about the intention behind their code, starting with #</td></tr>
+<tr><td><strong>Conditional statement</strong></td><td>Code that evaluates whether specified conditions are met before executing actions</td></tr>
+<tr><td><strong>Debugger</strong></td><td>A software tool that helps locate the source of an error using breakpoints</td></tr>
+<tr><td><strong>Debugging</strong></td><td>The practice of identifying and fixing errors in code</td></tr>
+<tr><td><strong>Dictionary data</strong></td><td>Data consisting of key-value pairs, placed in curly brackets</td></tr>
+<tr><td><strong>Docstring</strong></td><td>A multi-line comment written using triple quotation marks, documenting a function</td></tr>
+<tr><td><strong>Exception</strong></td><td>An error involving syntactically correct code that cannot execute successfully</td></tr>
+<tr><td><strong>Float data</strong></td><td>Numeric data with a decimal point</td></tr>
+<tr><td><strong>Function</strong></td><td>A reusable block of code that performs a specific task</td></tr>
+<tr><td><strong>Global variable</strong></td><td>A variable available throughout the entire program, assigned outside any function</td></tr>
+<tr><td><strong>Index</strong></td><td>A number indicating an element's position in a sequence, starting at 0</td></tr>
+<tr><td><strong>IndexError</strong></td><td>An exception occurring when an index doesn't exist in the referenced sequence</td></tr>
+<tr><td><strong>Indentation</strong></td><td>Spaces at the beginning of a line, required to define code blocks in Python</td></tr>
+<tr><td><strong>Integer data</strong></td><td>Numeric data without a decimal point</td></tr>
+<tr><td><strong>Iterative statement</strong></td><td>Code that repeatedly executes a set of instructions (for/while loops)</td></tr>
+<tr><td><strong>Library</strong></td><td>A collection of modules providing code users can incorporate into their programs</td></tr>
+<tr><td><strong>List data</strong></td><td>A mutable, sequential data structure enclosed in square brackets</td></tr>
+<tr><td><strong>Local variable</strong></td><td>A variable assigned within a function, inaccessible outside it</td></tr>
+<tr><td><strong>Logic error</strong></td><td>An error where code produces unintended results without an error message</td></tr>
+<tr><td><strong>Loop variable</strong></td><td>A variable controlling the iterations of a loop</td></tr>
+<tr><td><strong>Method</strong></td><td>A function that belongs to a specific data type, e.g., .upper() for strings</td></tr>
+<tr><td><strong>Module</strong></td><td>A Python file containing functions, variables, classes, and runnable code</td></tr>
+<tr><td><strong>NameError</strong></td><td>An exception occurring when a variable/function name is used before being defined</td></tr>
+<tr><td><strong>Parameter</strong></td><td>An object included in a function definition for use inside that function</td></tr>
+<tr><td><strong>Parsing</strong></td><td>The process of converting data into a more readable format</td></tr>
+<tr><td><strong>PEP 8 style guide</strong></td><td>The standard Python style guide for readable, consistent code</td></tr>
+<tr><td><strong>Python Standard Library</strong></td><td>An extensive collection of Python code often bundled with Python installations</td></tr>
+<tr><td><strong>Regular expression (regex)</strong></td><td>A sequence of characters forming a pattern, used to search strings</td></tr>
+<tr><td><strong>Return statement</strong></td><td>Uses the return keyword to send information back from a function</td></tr>
+<tr><td><strong>Set data</strong></td><td>An unordered collection of unique values, placed in curly brackets</td></tr>
+<tr><td><strong>Slice</strong></td><td>An extraction of multiple elements from a string or list using two indices</td></tr>
+<tr><td><strong>String data</strong></td><td>An ordered sequence of characters, enclosed in quotation marks</td></tr>
+<tr><td><strong>Substring</strong></td><td>A continuous sequence of characters within a larger string</td></tr>
+<tr><td><strong>Syntax error</strong></td><td>An error involving invalid usage of the Python language</td></tr>
+<tr><td><strong>Tuple data</strong></td><td>An immutable, sequential data structure enclosed in parentheses</td></tr>
+<tr><td><strong>Type error</strong></td><td>An exception resulting from an operation attempted with an incompatible data type</td></tr>
+<tr><td><strong>User-defined function</strong></td><td>A function programmers create for their own specific needs</td></tr>
+<tr><td><strong>Variable</strong></td><td>A named container that stores data, assignable and reassignable</td></tr>
+<tr><td><strong>While loop</strong></td><td>A loop that repeats based on a condition rather than a fixed sequence</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ============================================================
+     MASTER CHEAT SHEET
+     ============================================================ -->
+<h2 class="module-head" id="course-cheatsheet"><span class="tag">Reference</span>Master Cheat Sheet &amp; Revision Checklist</h2>
+
+<h4>Revision Checklist</h4>
+<div class="quiz" style="background:var(--paper-dim);">
+  <p>Before moving to Course VIII, confirm you can do all of the following from memory:</p>
+  <ul>
+    <li>☐ Name Python's 5 core data types plus tuple, dictionary, and set</li>
+    <li>☐ Write a conditional statement using if/elif/else and at least one logical operator</li>
+    <li>☐ Write both a for loop and a while loop from scratch</li>
+    <li>☐ Define a function with parameters and a return statement</li>
+    <li>☐ Explain global vs. local variable scope with an example</li>
+    <li>☐ Import a module both fully and via from...import</li>
+    <li>☐ Slice a string or list using bracket notation</li>
+    <li>☐ Write a regex pattern combining a character-type symbol and a quantifier</li>
+    <li>☐ Read a file into a string and parse it into a list using .split()</li>
+    <li>☐ Name and distinguish syntax errors, logic errors, and exceptions</li>
+  </ul>
+</div>
+
+<h4>Python Quick Reference</h4>
+<div class="table-wrap">
+<table>
+<tbody>
+<tr><td><strong>Data Types</strong></td><td>str, int, float, bool, list, tuple, dict, set</td></tr>
+<tr><td><strong>Conditionals</strong></td><td>if / elif / else; and / or / not</td></tr>
+<tr><td><strong>Loops</strong></td><td>for x in sequence: / while condition: ; break / continue</td></tr>
+<tr><td><strong>Functions</strong></td><td>def name(parameters): ... return value</td></tr>
+<tr><td><strong>Built-ins</strong></td><td>print(), type(), max(), min(), sorted(), len(), str()</td></tr>
+<tr><td><strong>String Methods</strong></td><td>.upper(), .lower(), .index(), slicing [start:stop]</td></tr>
+<tr><td><strong>List Methods</strong></td><td>.insert(i, el), .remove(el), .append(el), .index(el)</td></tr>
+<tr><td><strong>Regex Symbols</strong></td><td>\w \d \s . \. | + * {n} {n,m}</td></tr>
+<tr><td><strong>Regex Function</strong></td><td>import re; re.findall(pattern, string)</td></tr>
+<tr><td><strong>File Modes</strong></td><td>"r" read, "w" write/overwrite, "a" append</td></tr>
+<tr><td><strong>File Pattern</strong></td><td>with open(path, mode) as file: ... file.read() / file.write()</td></tr>
+<tr><td><strong>Parsing</strong></td><td>string.split(sep) → list; sep.join(list) → string</td></tr>
+<tr><td><strong>Error Types</strong></td><td>SyntaxError, Logic Error (no message), NameError, IndexError, TypeError, FileNotFoundError</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="summary-block">
+  <h4>Where to Go Next</h4>
+  <ul>
+    <li><strong>Course VIII — Put It to Work: Prepare for Cybersecurity Jobs</strong> is the final course — shifting from technical skill-building to career readiness: resumes, portfolios, interviews, and landing your first role.</li>
+    <li>Add your Course VII portfolio artifact (the full automation script) to your growing collection — it's likely your single strongest technical artifact across the entire certificate.</li>
+    <li>Revisit regex symbols and the file-reading pattern one week from now using spaced repetition — both are common live-coding interview topics.</li>
+  </ul>
+</div>
+
+<div class="endmark">— End of Course VII: Automate Cybersecurity Tasks with Python —</div>
+</div>
+</main>
+<script>
+// progress bar
+window.addEventListener('scroll', function(){
+  var h = document.documentElement;
+  var scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+  document.getElementById('progress-fill').style.width = scrolled + '%';
+});
+
+// TOC drawer
+var drawer = document.getElementById('toc-drawer');
+var scrim = document.getElementById('scrim');
+document.getElementById('toc-toggle').addEventListener('click', function(){
+  drawer.classList.add('open'); scrim.classList.add('show');
+  this.setAttribute('aria-expanded','true');
+});
+document.getElementById('toc-close').addEventListener('click', closeDrawer);
+scrim.addEventListener('click', closeDrawer);
+function closeDrawer(){
+  drawer.classList.remove('open'); scrim.classList.remove('show');
+  document.getElementById('toc-toggle').setAttribute('aria-expanded','false');
+}
+
+// flashcards
+document.querySelectorAll('.flash').forEach(function(card){
+  function flip(){
+    card.classList.toggle('flipped');
+    card.setAttribute('aria-pressed', card.classList.contains('flipped'));
+  }
+  card.addEventListener('click', flip);
+  card.addEventListener('keypress', function(e){ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); flip(); } });
+});
+
+// quiz
+function checkAnswer(btn, isCorrect){
+  var quiz = btn.closest('.quiz');
+  var opts = quiz.querySelectorAll('.opt');
+  opts.forEach(function(o){ o.disabled = true; });
+  if(isCorrect){ btn.classList.add('correct'); }
+  else { btn.classList.add('wrong'); }
+  quiz.querySelector('.fb').classList.add('show');
+}
+
+// copy code
+function copyCode(btn){
+  var code = btn.closest('.code-block').querySelector('pre').innerText;
+  navigator.clipboard.writeText(code).then(function(){
+    var old = btn.innerText; btn.innerText = 'Copied!';
+    setTimeout(function(){ btn.innerText = old; }, 1500);
+  });
+}
+
+// scroll-spy for TOC + spine
+var spySections = document.querySelectorAll('[id]');
+var tocLinks = document.querySelectorAll('#toc-drawer a[href^="#"]');
+var spineTabs = document.querySelectorAll('#spine .spine-tab');
+var moduleIds = ['module-1','module-2','module-3','module-4'];
+window.addEventListener('scroll', function(){
+  var current = '';
+  spySections.forEach(function(sec){
+    var rect = sec.getBoundingClientRect();
+    if(rect.top < 150) current = sec.id;
+  });
+  tocLinks.forEach(function(link){
+    link.classList.remove('current');
+    if(link.getAttribute('href') === '#' + current) link.classList.add('current');
+  });
+  // determine which module we're currently in for the spine rail
+  var currentModule = 'module-1';
+  moduleIds.forEach(function(mid){
+    var el = document.getElementById(mid);
+    if(el && el.getBoundingClientRect().top < 150) currentModule = mid;
+  });
+  spineTabs.forEach(function(tab){
+    tab.classList.remove('active');
+    if(tab.getAttribute('href') === '#' + currentModule) tab.classList.add('active');
+  });
+});
+</script>
+
+  <script src="../../js/storage.js" defer></script>
+  <script src="../../js/reader.js" defer></script>
+</body>
+</html>
