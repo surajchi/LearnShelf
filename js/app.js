@@ -319,8 +319,6 @@
 
     // Named sections render as collapsible accordions; root (untitled) chapters
     // render inline as before. A plain flat course looks exactly as it used to.
-    var counter = 0;
-
     course.sections.forEach(function (sec) {
       if (!sec.chapters.length) return;
 
@@ -333,8 +331,8 @@
         target = group.body;
       }
 
-      sec.chapters.forEach(function (ch) {
-        var i = counter++;
+      // Numbering restarts at 1 within each section.
+      sec.chapters.forEach(function (ch, i) {
         var id = chapterId(course.slug, ch.file);
         var row = window.UI.chapterRow({
           course: course, chapter: ch, index: i, chapterId: id,
