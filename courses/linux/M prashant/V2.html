@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtualization &amp; Virtual Machines &mdash; An Interactive Engineering Textbook</title>
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   Palette: white paper, engineering-notebook navy ink,
+   yellow roadmap cards, blue connector lines (per brief)
+   ============================================================ */
+:root{
+  --bg:#ffffff;
+  --bg-alt:#f6f8fb;
+  --paper-line:#e7ecf3;
+  --ink:#16202e;
+  --ink-soft:#4a5872;
+  --ink-faint:#8895ab;
+  --blue:#1955c9;
+  --blue-dark:#0e3a8c;
+  --blue-tint:#eaf1ff;
+  --yellow:#ffcd3c;
+  --yellow-deep:#f0a500;
+  --yellow-tint:#fff8e1;
+  --green:#1c8a5c;
+  --green-tint:#e6f6ee;
+  --red:#c8402c;
+  --red-tint:#fdeceb;
+  --border:#dce3ee;
+  --radius:14px;
+  --sans: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --serif: Georgia, "Cambria", "Times New Roman", serif;
+  --mono: ui-monospace, "Cascadia Mono", "Consolas", "SFMono-Regular", Menlo, monospace;
+  --shadow: 0 1px 2px rgba(20,30,50,.04), 0 8px 24px rgba(20,30,50,.06);
+  --maxw: 880px;
+}
+html.dark{
+  --bg:#0f1420;
+  --bg-alt:#161d2c;
+  --paper-line:#232c40;
+  --ink:#e9edf6;
+  --ink-soft:#aab4c9;
+  --ink-faint:#71809a;
+  --blue:#5b9bff;
+  --blue-dark:#8fb8ff;
+  --blue-tint:#152241;
+  --yellow:#ffcd3c;
+  --yellow-deep:#ffb703;
+  --yellow-tint:#2b2410;
+  --green:#3fcf8e;
+  --green-tint:#0f2a20;
+  --red:#ff7a68;
+  --red-tint:#331714;
+  --border:#28324a;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  line-height:1.65;
+  transition:background .25s ease, color .25s ease;
+}
+::selection{background:var(--yellow); color:#16202e;}
+img,svg{max-width:100%;}
+a{color:var(--blue);}
+h1,h2,h3,h4{font-family:var(--serif); color:var(--ink); line-height:1.25; letter-spacing:.2px;}
+code, .mono{font-family:var(--mono);}
+.wrap{max-width:var(--maxw); margin:0 auto; padding:0 24px;}
+.eyebrow{
+  display:inline-block; font-family:var(--mono); font-size:11.5px; letter-spacing:1.5px;
+  text-transform:uppercase; color:var(--blue-dark); background:var(--blue-tint);
+  padding:4px 10px; border-radius:20px; font-weight:700;
+}
+
+/* ============================================================
+   TOP BAR / PROGRESS
+   ============================================================ */
+#progress-track{position:fixed; top:0; left:0; right:0; height:3px; background:var(--paper-line); z-index:100;}
+#progress-bar{height:100%; width:0%; background:linear-gradient(90deg,var(--blue),var(--yellow)); transition:width .2s ease;}
+
+header.topbar{
+  position:sticky; top:3px; z-index:90; background:var(--bg);
+  border-bottom:1px solid var(--border); backdrop-filter:blur(6px);
+}
+.topbar-inner{
+  max-width:var(--maxw); margin:0 auto; padding:12px 24px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.brand{display:flex; align-items:center; gap:9px; font-family:var(--serif); font-weight:700; font-size:17px; white-space:nowrap;}
+.brand .tux{width:22px;height:22px;flex:none;}
+.topbar-inner input[type=search]{
+  flex:1; min-width:120px; padding:8px 12px; border-radius:9px; border:1px solid var(--border);
+  background:var(--bg-alt); color:var(--ink); font-family:var(--sans); font-size:13.5px;
+}
+.topbar-inner input[type=search]:focus{outline:2px solid var(--blue); outline-offset:1px;}
+.tbtn{
+  border:1px solid var(--border); background:var(--bg-alt); color:var(--ink-soft);
+  border-radius:9px; padding:8px 11px; font-size:13px; cursor:pointer; font-family:var(--sans);
+  display:inline-flex; align-items:center; gap:6px; white-space:nowrap;
+}
+.tbtn:hover{border-color:var(--blue); color:var(--blue-dark);}
+.tbtn:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible{
+  outline:2px solid var(--blue); outline-offset:2px;
+}
+#progress-label{font-size:12px; color:var(--ink-faint); font-family:var(--mono); white-space:nowrap;}
+
+nav.chnav{display:flex; gap:4px; overflow-x:auto; padding:10px 24px 12px; max-width:var(--maxw); margin:0 auto;}
+nav.chnav a{
+  font-size:12.5px; color:var(--ink-soft); text-decoration:none; padding:6px 10px; border-radius:8px;
+  white-space:nowrap; border:1px solid transparent; font-family:var(--mono);
+}
+nav.chnav a.active{background:var(--blue-tint); color:var(--blue-dark); border-color:var(--blue);}
+nav.chnav a:hover{background:var(--bg-alt);}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero{padding:64px 24px 40px; max-width:var(--maxw); margin:0 auto;}
+.hero h1{font-size:42px; margin:14px 0 10px; max-width:16ch;}
+.hero p.lede{font-size:17px; color:var(--ink-soft); max-width:58ch; margin:0 0 26px;}
+.hero-meta{display:flex; gap:18px; flex-wrap:wrap; font-size:13px; color:var(--ink-faint); font-family:var(--mono);}
+.hero-meta span{display:flex; align-items:center; gap:6px;}
+
+/* ============================================================
+   ROADMAP  (yellow cards + blue connectors — signature element)
+   ============================================================ */
+.roadmap-section{padding:10px 24px 56px; max-width:var(--maxw); margin:0 auto;}
+.roadmap-section h2{font-size:13px; text-transform:uppercase; letter-spacing:2px; color:var(--ink-faint); font-family:var(--mono); margin-bottom:22px;}
+.roadmap{position:relative; padding-left:26px;}
+.roadmap::before{
+  content:""; position:absolute; left:10px; top:10px; bottom:10px; width:3px;
+  background:repeating-linear-gradient(180deg, var(--blue) 0 8px, transparent 8px 14px);
+  border-radius:3px;
+}
+.rnode{position:relative; margin-bottom:14px;}
+.rnode::before{
+  content:""; position:absolute; left:-26px; top:18px; width:13px; height:13px; border-radius:50%;
+  background:var(--blue); border:3px solid var(--bg); box-shadow:0 0 0 2px var(--blue);
+}
+.rnode a{
+  display:flex; align-items:center; gap:12px; text-decoration:none; color:var(--ink);
+  background:var(--yellow-tint); border:1.5px solid var(--yellow-deep); border-radius:var(--radius);
+  padding:13px 16px; transition:transform .15s ease, box-shadow .15s ease;
+}
+.rnode a:hover{transform:translateX(3px); box-shadow:var(--shadow);}
+.rnode .num{
+  font-family:var(--mono); font-weight:700; font-size:12px; color:#7a5900;
+  background:var(--yellow); padding:3px 8px; border-radius:6px; flex:none;
+}
+html.dark .rnode .num{color:#241c00;}
+.rnode .rtxt{flex:1;}
+.rnode .rtxt b{display:block; font-family:var(--serif); font-size:15.5px;}
+.rnode .rtxt small{color:var(--ink-soft); font-size:12.5px;}
+.rnode .check{width:20px; height:20px; border-radius:50%; border:2px solid var(--yellow-deep); flex:none;}
+.rnode.done .check{background:var(--green); border-color:var(--green);}
+.rnode.done a{opacity:.75;}
+
+/* ============================================================
+   CHAPTER STRUCTURE
+   ============================================================ */
+.chapter{max-width:var(--maxw); margin:0 auto; padding:26px 24px 8px; border-top:1px solid var(--border);}
+.chapter-head{display:flex; align-items:flex-start; gap:14px; margin-bottom:4px;}
+.chapter-head .ch-num{
+  font-family:var(--mono); font-weight:800; font-size:14px; color:var(--blue);
+  background:var(--blue-tint); border-radius:8px; padding:6px 10px; flex:none; margin-top:4px;
+}
+.chapter-head h2{font-size:26px; margin:0 0 4px;}
+.chapter-head .ch-sub{color:var(--ink-soft); font-size:14.5px; margin:0;}
+.chapter-tools{display:flex; align-items:center; gap:10px; margin-left:auto; flex:none;}
+.markdone{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink-faint); cursor:pointer; font-family:var(--mono); white-space:nowrap;}
+.markdone input{accent-color:var(--green); width:15px; height:15px;}
+.collapse-toggle{
+  border:1px solid var(--border); background:var(--bg-alt); border-radius:8px; width:30px; height:30px;
+  cursor:pointer; color:var(--ink-soft); font-size:14px; flex:none;
+}
+.chapter-body{padding-top:14px; overflow:hidden;}
+.chapter-body.collapsed{display:none;}
+
+/* step block (problem -> why -> analogy -> ...) */
+.step{
+  border-left:3px solid var(--border); padding:2px 0 2px 18px; margin:20px 0;
+}
+.step .step-label{
+  font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:1.4px;
+  color:var(--blue-dark); font-weight:700; margin-bottom:5px; display:block;
+}
+.step p{margin:6px 0; color:var(--ink); font-size:15.5px;}
+.step p.soft{color:var(--ink-soft);}
+
+.analogy-card{
+  background:var(--yellow-tint); border:1px solid var(--yellow-deep); border-radius:var(--radius);
+  padding:16px 18px; margin:16px 0; display:flex; gap:12px;
+}
+.analogy-card .ico{font-size:22px; flex:none;}
+.analogy-card b{display:block; font-family:var(--serif); margin-bottom:4px;}
+
+.note{
+  background:var(--blue-tint); border-left:4px solid var(--blue); border-radius:0 10px 10px 0;
+  padding:12px 16px; margin:16px 0; font-size:14.5px;
+}
+.note b{color:var(--blue-dark);}
+.correction{
+  background:var(--red-tint); border-left:4px solid var(--red); border-radius:0 10px 10px 0;
+  padding:12px 16px; margin:16px 0; font-size:14.5px;
+}
+.correction b{color:var(--red);}
+.source-tag{font-family:var(--mono); font-size:10.5px; letter-spacing:.5px; text-transform:uppercase; color:var(--ink-faint); border:1px solid var(--border); border-radius:5px; padding:1px 6px; margin-left:6px;}
+
+/* ============================================================
+   DIAGRAMS
+   ============================================================ */
+.diagram-wrap{
+  background:var(--bg-alt); border:1px solid var(--border); border-radius:var(--radius);
+  padding:22px; margin:20px 0; break-inside:avoid;
+}
+.diagram-wrap .cap{font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); text-align:center; margin-top:10px;}
+
+/* generic box+arrow flow */
+.flow{display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap;}
+.flow .box{
+  background:var(--bg); border:1.5px solid var(--blue); border-radius:10px; padding:12px 16px;
+  font-size:13.5px; text-align:center; font-family:var(--mono); color:var(--ink); min-width:110px;
+}
+.flow .box.yellow{border-color:var(--yellow-deep); background:var(--yellow-tint);}
+.flow .arrow{color:var(--blue); font-size:20px; padding:0 10px; flex:none;}
+@media (max-width:520px){ .flow{flex-direction:column;} .flow .arrow{transform:rotate(90deg);} }
+
+/* layered stack diagram */
+.stack-diagram{display:flex; flex-direction:column; align-items:center; gap:0;}
+.stack-layer{
+  width:100%; max-width:460px; text-align:center; padding:14px; border-radius:10px;
+  font-family:var(--mono); font-size:13.5px; border:1.5px solid var(--border); background:var(--bg);
+}
+.stack-layer.apps{border-color:var(--blue); color:var(--blue-dark);}
+.stack-layer.hyper{border-color:var(--yellow-deep); background:var(--yellow-tint); font-weight:700;}
+.stack-layer.os{border-color:var(--green); color:var(--green);}
+.stack-layer.hw{border-color:var(--ink-faint); color:var(--ink-soft);}
+.stack-conn{width:2px; height:20px; background:var(--blue);}
+
+/* host machine -> VM split diagram */
+.split-diagram{display:flex; align-items:center; justify-content:center; gap:22px; flex-wrap:wrap;}
+.host-box{
+  border:2px solid var(--blue); border-radius:12px; padding:16px; text-align:center; min-width:170px;
+  background:var(--bg);
+}
+.host-box .htitle{font-family:var(--serif); font-weight:700; font-size:15px; margin-bottom:4px;}
+.host-box .hres{font-family:var(--mono); font-size:12px; color:var(--ink-soft);}
+.vm-stack{display:flex; flex-direction:column; gap:12px;}
+.vm-box{
+  border:1.5px solid var(--yellow-deep); background:var(--yellow-tint); border-radius:10px;
+  padding:11px 14px; font-family:var(--mono); font-size:12px; text-align:center; min-width:150px;
+}
+.vm-box b{display:block; font-size:12.5px; color:#7a5900; margin-bottom:2px;}
+html.dark .vm-box b{color:var(--yellow);}
+
+/* request-travel style animation */
+.travel-track{position:relative; height:46px; background:var(--bg); border:1.5px dashed var(--border); border-radius:30px; margin:18px 0 6px;}
+.travel-dot{
+  position:absolute; top:50%; left:6px; transform:translateY(-50%);
+  width:26px; height:26px; border-radius:50%; background:var(--blue); color:#fff; font-size:12px;
+  display:flex; align-items:center; justify-content:center; font-family:var(--mono);
+  animation:travel 3.2s ease-in-out infinite;
+}
+@keyframes travel{
+  0%{left:6px;} 45%{left:calc(50% - 13px);} 55%{left:calc(50% - 13px);} 100%{left:calc(100% - 32px);}
+}
+@media (prefers-reduced-motion:reduce){ .travel-dot{animation:none; left:calc(50% - 13px);} }
+.travel-ends{display:flex; justify-content:space-between; font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); padding:0 4px;}
+
+/* ============================================================
+   COMPARISON TABLE
+   ============================================================ */
+.cmp-table{width:100%; border-collapse:separate; border-spacing:0; margin:18px 0; font-size:14px; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;}
+.cmp-table th{background:var(--blue); color:#fff; text-align:left; padding:11px 14px; font-family:var(--mono); font-size:12.5px; letter-spacing:.4px;}
+.cmp-table td{padding:11px 14px; border-top:1px solid var(--border); vertical-align:top;}
+.cmp-table tr:nth-child(even) td{background:var(--bg-alt);}
+.cmp-table td:first-child{font-weight:700; color:var(--blue-dark); white-space:nowrap;}
+
+/* ============================================================
+   CARDS: examples / industry / job roles
+   ============================================================ */
+.card-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin:18px 0;}
+.info-card{background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow);}
+.info-card h4{margin:0 0 6px; font-size:15.5px; display:flex; align-items:center; gap:8px;}
+.info-card p{margin:0; font-size:13.5px; color:var(--ink-soft);}
+.info-card .tag{display:inline-block; font-family:var(--mono); font-size:10.5px; background:var(--green-tint); color:var(--green); padding:2px 7px; border-radius:6px; margin-top:8px;}
+
+/* ============================================================
+   INTERVIEW / MISTAKES / MEMORY TRICK
+   ============================================================ */
+details.qa{border:1px solid var(--border); border-radius:10px; margin:9px 0; background:var(--bg);}
+details.qa summary{padding:12px 15px; cursor:pointer; font-weight:600; font-size:14.5px; list-style:none; display:flex; gap:10px; align-items:flex-start;}
+details.qa summary::before{content:"Q"; font-family:var(--mono); font-size:11px; background:var(--blue-tint); color:var(--blue-dark); border-radius:5px; padding:2px 7px; flex:none;}
+details.qa[open] summary{border-bottom:1px solid var(--border);}
+details.qa .ans{padding:12px 15px 15px 42px; color:var(--ink-soft); font-size:14px;}
+
+.mistake-row{display:flex; gap:10px; align-items:flex-start; margin:10px 0; font-size:14px;}
+.mistake-row .x{color:var(--red); font-weight:800; flex:none;}
+.mistake-row .ok{color:var(--green); font-weight:800; flex:none;}
+
+.trick{
+  background:var(--yellow-tint); border:1px dashed var(--yellow-deep); border-radius:10px;
+  padding:12px 16px; margin:14px 0; font-size:14px;
+}
+.trick b{font-family:var(--mono); font-size:11.5px; text-transform:uppercase; color:#7a5900;}
+html.dark .trick b{color:var(--yellow);}
+
+/* ============================================================
+   QUIZ / FLASHCARDS
+   ============================================================ */
+.quiz-q{border:1px solid var(--border); border-radius:var(--radius); padding:15px 16px; margin:12px 0; background:var(--bg);}
+.quiz-q p.qtext{font-weight:600; margin:0 0 10px;}
+.quiz-opts{display:grid; gap:8px;}
+.quiz-opt{
+  text-align:left; border:1px solid var(--border); background:var(--bg-alt); border-radius:8px;
+  padding:9px 12px; cursor:pointer; font-size:13.5px; color:var(--ink); font-family:var(--sans);
+}
+.quiz-opt:hover{border-color:var(--blue);}
+.quiz-opt.correct{background:var(--green-tint); border-color:var(--green); font-weight:700;}
+.quiz-opt.wrong{background:var(--red-tint); border-color:var(--red);}
+.quiz-feedback{font-size:12.5px; margin-top:8px; font-family:var(--mono); display:none;}
+
+.flash-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin:16px 0;}
+.flashcard{perspective:1000px; height:120px; cursor:pointer;}
+.flashcard-inner{position:relative; width:100%; height:100%; transition:transform .5s; transform-style:preserve-3d;}
+.flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+.flashcard-face{
+  position:absolute; inset:0; backface-visibility:hidden; border-radius:12px;
+  display:flex; align-items:center; justify-content:center; text-align:center; padding:14px;
+  font-size:13.5px; border:1.5px solid var(--border);
+}
+.flashcard-front{background:var(--blue-tint); color:var(--blue-dark); font-weight:700;}
+.flashcard-back{background:var(--yellow-tint); color:#5c4400; transform:rotateY(180deg); border-color:var(--yellow-deep);}
+html.dark .flashcard-back{color:var(--yellow-tint);}
+
+/* ============================================================
+   REVISION / KEY POINTS
+   ============================================================ */
+.keypoints{padding-left:0; list-style:none; display:grid; gap:8px; margin:16px 0;}
+.keypoints li{display:flex; gap:10px; align-items:flex-start; font-size:14.5px;}
+.keypoints li .kn{
+  font-family:var(--mono); font-size:11px; font-weight:800; background:var(--blue); color:#fff;
+  width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex:none; margin-top:2px;
+}
+
+/* ============================================================
+   NOTES
+   ============================================================ */
+.notes-area{width:100%; min-height:80px; resize:vertical; border:1px solid var(--border); border-radius:10px; padding:12px; font-family:var(--sans); font-size:13.5px; background:var(--bg-alt); color:var(--ink);}
+.notes-status{font-size:11.5px; color:var(--ink-faint); font-family:var(--mono); margin-top:5px; height:14px;}
+
+/* ============================================================
+   NAV FOOTER / BACK TO TOP
+   ============================================================ */
+.chnav-footer{display:flex; justify-content:space-between; gap:12px; max-width:var(--maxw); margin:10px auto 0; padding:0 24px;}
+.chnav-footer a{
+  border:1px solid var(--border); border-radius:10px; padding:10px 14px; text-decoration:none; color:var(--ink);
+  font-size:13px; flex:1; max-width:48%;
+}
+.chnav-footer a.next{text-align:right;}
+.chnav-footer a small{display:block; color:var(--ink-faint); font-family:var(--mono); font-size:10.5px;}
+.chnav-footer a:hover{border-color:var(--blue);}
+
+#backtotop{
+  position:fixed; bottom:22px; right:22px; width:42px; height:42px; border-radius:50%;
+  background:var(--blue); color:#fff; border:none; cursor:pointer; font-size:16px; box-shadow:var(--shadow);
+  opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:80;
+}
+#backtotop.show{opacity:1; pointer-events:auto;}
+
+.site-footer{text-align:center; padding:50px 24px 70px; color:var(--ink-faint); font-size:12.5px; font-family:var(--mono);}
+.kbd{font-family:var(--mono); background:var(--bg-alt); border:1px solid var(--border); border-radius:5px; padding:1px 6px; font-size:11px;}
+
+mark.hit{background:var(--yellow); color:#16202e; border-radius:3px;}
+.hidden-by-search{display:none !important;}
+
+/* ============================================================
+   PRINT
+   ============================================================ */
+@media print{
+  header.topbar, nav.chnav, #progress-track, #backtotop, .chapter-tools, .notes-area, .notes-status{display:none !important;}
+  body{background:#fff; color:#000;}
+  .chapter{break-before:page; border-top:none;}
+  .chapter-body.collapsed{display:block !important;}
+  .diagram-wrap, .analogy-card, .cmp-table, .quiz-q, details.qa, .flashcard{break-inside:avoid;}
+  a{color:#000; text-decoration:none;}
+}
+</style>
+</head>
+<body>
+
+<div id="progress-track"><div id="progress-bar"></div></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <svg class="tux" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="12" rx="2" stroke="var(--blue)" stroke-width="1.5"/><rect x="7" y="7" width="4.5" height="6" rx="1" fill="var(--yellow)"/><rect x="12.5" y="7" width="4.5" height="6" rx="1" fill="var(--yellow)" opacity=".6"/><path d="M8 20h8M12 16v4" stroke="var(--blue)" stroke-width="1.5"/></svg>
+      Virtualization &amp; VMs
+    </div>
+    <input type="search" id="searchbox" placeholder="Search this book&hellip;  ( / )" aria-label="Search chapters">
+    <span id="progress-label">0 / 9 chapters</span>
+    <button class="tbtn" id="expandAllBtn">Expand all</button>
+    <button class="tbtn" id="darkToggle" aria-label="Toggle dark mode">🌙 Dark</button>
+  </div>
+  <nav class="chnav" id="chnav" aria-label="Chapter navigation">
+    <a href="#ch1">1. Machine Layers</a>
+    <a href="#ch2">2. The Problem</a>
+    <a href="#ch3">3. Virtualization</a>
+    <a href="#ch4">4. Hypervisor</a>
+    <a href="#ch5">5. How It Works</a>
+    <a href="#ch6">6. Virtual Machine</a>
+    <a href="#ch7">7. Type 2 Hosted</a>
+    <a href="#ch8">8. Type 1 Bare Metal</a>
+    <a href="#ch9">9. Why Companies Use It</a>
+    <a href="#revision">Revision</a>
+  </nav>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <span class="eyebrow">Chapter 02 &middot; Virtualization &amp; Virtual Machines</span>
+  <h1>One physical machine, many computers running inside it</h1>
+  <p class="lede">This chapter builds, from first principles, one of the most commonly used ideas in the IT industry: how a single laptop or server can be split into several independent "computers" — each running its own operating system — using <em>virtualization</em>, a <em>hypervisor</em>, and <em>virtual machines</em>.</p>
+  <div class="hero-meta">
+    <span>📺 Source: Virtualization &amp; Virtual Machines lecture (Hindi/English)</span>
+    <span>⏱ ~7 min transcript &rarr; full chapter</span>
+    <span>🧠 Assumes zero prior knowledge</span>
+  </div>
+</section>
+
+<!-- ================= ROADMAP ================= -->
+<section class="roadmap-section">
+  <h2>Your roadmap through this chapter</h2>
+  <div class="roadmap" id="roadmap">
+    <div class="rnode" data-ch="ch1"><a href="#ch1"><span class="num">01</span><span class="rtxt"><b>The Layers of a Computer</b><small>Hardware &rarr; Operating System &rarr; Applications</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch2"><a href="#ch2"><span class="num">02</span><span class="rtxt"><b>The Problem: testing on many OS</b><small>Why one machine, one OS, isn't enough</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch3"><a href="#ch3"><span class="num">03</span><span class="rtxt"><b>What is Virtualization?</b><small>The extra layer that runs many OS on one machine</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch4"><a href="#ch4"><span class="num">04</span><span class="rtxt"><b>What is a Hypervisor?</b><small>The software that creates and runs virtual machines</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch5"><a href="#ch5"><span class="num">05</span><span class="rtxt"><b>How a Hypervisor Works</b><small>Sharing &amp; dividing the host's real resources</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch6"><a href="#ch6"><span class="num">06</span><span class="rtxt"><b>What is a Virtual Machine?</b><small>A mini computer that needs its own OS &amp; runs isolated</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch7"><a href="#ch7"><span class="num">07</span><span class="rtxt"><b>Type 2 &mdash; Hosted Hypervisor</b><small>Runs on top of a host OS (e.g. VirtualBox)</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch8"><a href="#ch8"><span class="num">08</span><span class="rtxt"><b>Type 1 &mdash; Bare Metal Hypervisor</b><small>Installs directly on hardware, no host OS</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch9"><a href="#ch9"><span class="num">09</span><span class="rtxt"><b>Why Companies &amp; Clouds Use It</b><small>Cheap, scalable, less maintenance headache</small></span><span class="check"></span></a></div>
+  </div>
+</section>
+
+<main>
+
+<!-- ================= CHAPTER 1 : MACHINE LAYERS ================= -->
+<section class="chapter" id="ch1">
+  <div class="chapter-head">
+    <span class="ch-num">01</span>
+    <div>
+      <h2>The Layers of a Computer</h2>
+      <p class="ch-sub">Prerequisite — you must see these layers before virtualization makes sense</p>
+    </div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch1"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="note"><b>Where this comes from:</b> The lecture opens with a simple use case — "suppose you have a laptop or desktop" — and lists its components. We expand that opening into a clear layered model, because every later idea (virtualization, hypervisor, VM) is described as <i>a layer added on top of these</i>. <span class="source-tag">from transcript, expanded</span></div>
+
+    <div class="step">
+      <span class="step-label">1 &middot; The starting picture</span>
+      <p>Take any ordinary laptop or desktop. The lecture asks us to look at its components in order, from the bottom up. There are three layers stacked on each other.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">2 &middot; Layer one — Hardware</span>
+      <p>At the very bottom is the <b>hardware</b>: the physical parts you could touch. The transcript names <b>RAM</b>, <b>CPU</b>, and <b>hard disk / storage</b>. These are the real, physical resources — the machine's actual "muscle."</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">2b &middot; What are RAM, CPU, and hard disk?</span>
+      <p><b>CPU</b> (Central Processing Unit) is the "brain" that does the calculations. <b>RAM</b> (Random Access Memory) is fast, temporary working memory the CPU uses while programs run. The <b>hard disk</b> is permanent storage that keeps your files even after the machine is switched off.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">3 &middot; Layer two — Operating System</span>
+      <p>On top of the hardware sits an <b>operating system</b> (OS) — for example Windows. As covered in Chapter 1 of this course, the OS is the software that lets applications talk to the hardware.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">4 &middot; Layer three — Applications &amp; the people who build them</span>
+      <p>On top of the OS run <b>applications</b>. The lecture gives a concrete scenario: suppose you are a <b>software engineer</b> who builds an application, and this software has <b>target users</b> who will run it.</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="stack-diagram">
+        <div class="stack-layer apps">Applications — the software an engineer builds &amp; ships</div>
+        <div class="stack-conn"></div>
+        <div class="stack-layer os">Operating System — e.g. Windows</div>
+        <div class="stack-conn"></div>
+        <div class="stack-layer hw">Hardware — RAM, CPU, Hard Disk / Storage</div>
+      </div>
+      <div class="cap">Fig 1.1 — The three normal layers of a computer: hardware at the bottom, OS in the middle, apps on top</div>
+    </div>
+
+    <div class="analogy-card">
+      <span class="ico">🏢</span>
+      <div><b>Real-life analogy</b>Think of a building: the <b>foundation</b> is the hardware, the <b>structure and utilities</b> are the operating system, and the <b>offices and people working inside</b> are the applications and their users. Each layer rests on the one below it.</div>
+    </div>
+
+    <div class="trick"><b>Memory trick</b><br>Bottom to top: <b>H-O-A</b> — <b>H</b>ardware holds the <b>O</b>S, the OS holds the <b>A</b>pps.</div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>A normal computer is three stacked layers: hardware, then one operating system, then applications. The catch is that this gives you exactly <i>one</i> operating system per machine. The next chapter shows why that single-OS limit becomes a real problem.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 2 : THE PROBLEM ================= -->
+<section class="chapter" id="ch2">
+  <div class="chapter-head">
+    <span class="ch-num">02</span>
+    <div><h2>The Problem: needing more than one OS</h2><p class="ch-sub">Why "one machine, one operating system" isn't enough</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch2"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="step">
+      <span class="step-label">1 &middot; The problem the lecture raises</span>
+      <p>Our software engineer built an app, and it has target users. But those users don't all run the same operating system — some are on Windows, some may be on other operating systems. So the engineer needs to <b>test the application</b> on more than one OS to be sure it works for everyone.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">2 &middot; Why this is hard the naive way</span>
+      <p>Your machine already has Windows installed as its single OS. To test on a different OS the obvious options are painful: buy a second physical computer, or wipe and reinstall a different OS over your current one — losing your existing setup.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">3 &middot; What happens if we don't solve this</span>
+      <p class="soft">Without a better option, every extra operating system you want to try means extra hardware to buy, more desk space, more cost, and a real risk of breaking the primary OS you depend on every day.</p>
+    </div>
+
+    <div class="analogy-card">
+      <span class="ico">🚪</span>
+      <div><b>Real-life analogy</b>Imagine you only have one room, but you need to host three separate private meetings at the same time. Buying three more houses is wasteful. What you really want is a way to <i>partition the single room</i> into three sealed, independent rooms — instantly, and for free. That is exactly what the next idea gives us.</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>We need to run several different operating systems on the <i>same</i> physical machine, safely and cheaply, without buying new hardware or endangering the OS we already use. The solution is a new layer called <b>virtualization</b>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 3 : VIRTUALIZATION ================= -->
+<section class="chapter" id="ch3">
+  <div class="chapter-head">
+    <span class="ch-num">03</span>
+    <div><h2>What is Virtualization?</h2><p class="ch-sub">The extra layer that lets one machine run many operating systems</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch3"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="step">
+      <span class="step-label">5 &middot; Simple explanation (from the transcript)</span>
+      <p>The lecture says: on top of your existing operating system (e.g. Windows), a new <b>layer of virtualization</b> is added. On top of <i>that</i> layer, you can set up whatever operating system you require — and not just one, you can set up <b>multiple different operating systems</b> at the same time.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">6 &middot; Technical explanation</span>
+      <p><b>Virtualization</b> is the technique of using software to create "virtual" versions of a computer on top of one real, physical computer — so a single machine can run several independent operating systems together, each believing it has a computer to itself.</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="stack-diagram">
+        <div class="stack-layer apps" style="border-color:var(--green); color:var(--green);">Required OS #1 &nbsp;·&nbsp; Required OS #2 &nbsp;·&nbsp; Required OS #3</div>
+        <div class="stack-conn"></div>
+        <div class="stack-layer hyper">Virtualization Layer</div>
+        <div class="stack-conn"></div>
+        <div class="stack-layer os">Host Operating System — e.g. Windows</div>
+        <div class="stack-conn"></div>
+        <div class="stack-layer hw">Hardware — RAM, CPU, Hard Disk</div>
+      </div>
+      <div class="cap">Fig 3.1 — Virtualization adds a new layer above the host OS; many required operating systems sit on top of it</div>
+    </div>
+
+    <div class="note"><b>The key win:</b> the transcript stresses "one more thing — you can set up not just one, but multiple types of operating systems using virtualization." One physical machine, several operating systems, all at once. <span class="source-tag">from transcript</span></div>
+
+    <div class="step">
+      <span class="step-label">2 &middot; So what actually <i>is</i> that layer?</span>
+      <p>Naturally the next question is: how does this virtualization layer actually work — what is that layer, in reality? The transcript answers with a single word, and it is the heart of this whole topic: the <b>hypervisor</b>. That's the next chapter.</p>
+    </div>
+
+    <div class="trick"><b>Memory trick</b><br><b>Virtual</b>ization = a <b>virtual</b> (not-physical) copy of a computer, made by software, on top of a real one.</div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>Virtualization is a software layer placed above your host OS that lets one physical machine run many operating systems at once. To understand how that layer really works, we need to meet the software that <i>is</i> that layer — the hypervisor.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 4 : HYPERVISOR ================= -->
+<section class="chapter" id="ch4">
+  <div class="chapter-head">
+    <span class="ch-num">04</span>
+    <div><h2>What is a Hypervisor?</h2><p class="ch-sub">The software that creates and runs virtual machines</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch4"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="step">
+      <span class="step-label">5 &middot; Simple explanation (from the transcript)</span>
+      <p>The virtualization layer, in reality, is a piece of software called the <b>hypervisor</b>. The transcript's exact definition: <b>"A hypervisor is a software that creates and runs virtual machines."</b></p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">6 &middot; What it does for you</span>
+      <p>On top of your main machine, the hypervisor is what actually sets up virtualization, <b>builds</b> the virtual machines, and <b>maintains</b> them. Without a hypervisor, there is no virtualization layer at all.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">7 &middot; The simple use case</span>
+      <p>Practically: on your main machine you simply <b>install the hypervisor</b> (it's just a software), and with its help you create separate virtual machines — and inside each one you can set up different types of operating systems, one or many.</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="flow">
+        <div class="box">Main Machine</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box yellow">Install Hypervisor</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box">Create many VMs, each with its own OS</div>
+      </div>
+      <div class="cap">Fig 4.1 — The hypervisor is installed on the main machine, then used to create and run virtual machines</div>
+    </div>
+
+    <div class="analogy-card">
+      <span class="ico">🏗️</span>
+      <div><b>Real-life analogy</b>The hypervisor is like a <b>building contractor</b> hired for an empty plot: you bring them in once, and they construct several independent apartments on the same land, each of which a different family can live in without disturbing the others.</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">9 &middot; Example named in the transcript</span>
+      <p>A concrete example is <b>Oracle VirtualBox</b> — an <b>open-source</b> tool. Recall from Chapter 1 of this course: "open source" means it's free to use, study, and modify. You can simply download it from <b>virtualbox.org</b> and start using it.</p>
+    </div>
+
+    <div class="card-grid">
+      <div class="info-card"><h4>📦 Oracle VirtualBox</h4><p>Open-source hypervisor. Download from virtualbox.org, install on your existing machine, and create VMs for free.</p><span class="tag">Open source · beginner friendly</span></div>
+    </div>
+
+    <div class="trick"><b>Memory trick</b><br><b>Hyper</b>visor = the "super-<b>visor</b>" that <b>supervises</b> many virtual machines on one host.</div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>A hypervisor is the software that creates and runs virtual machines — it <i>is</i> the virtualization layer. VirtualBox is a free, open-source example. Next we open the hood: how does the hypervisor actually give each VM its resources?</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 5 : HOW IT WORKS ================= -->
+<section class="chapter" id="ch5">
+  <div class="chapter-head">
+    <span class="ch-num">05</span>
+    <div><h2>How a Hypervisor Works — Sharing Resources</h2><p class="ch-sub">Dividing the host's real RAM &amp; disk into smaller "mini computers"</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch5"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="step">
+      <span class="step-label">1 &middot; The question</span>
+      <p>What does the hypervisor do that lets us use different operating systems? The transcript's answer in one line: <b>it simply shares hardware resources from the host operating system.</b></p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">5 &middot; What "shares hardware resources" means</span>
+      <p>The transcript walks through a diagram, and we'll follow it exactly. Your <b>main computer</b> has real resources — the example given is <b>8 GB of RAM</b> and <b>100 GB of hard disk</b>. You install a hypervisor on it (e.g. VirtualBox).</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">7 &middot; Internal working — the division</span>
+      <p>The hypervisor takes those available resources (8 GB &amp; 100 GB) and <b>divides</b> them to create small "mini computers." In the transcript's example it carves out one mini computer with <b>2 GB RAM + 20 GB disk</b>, and another with <b>2 GB RAM + 10 GB disk</b>. Each mini computer is a <b>virtual machine</b>.</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="split-diagram">
+        <div class="host-box">
+          <div class="htitle">🖥️ Main Computer</div>
+          <div class="hres">8 GB RAM<br>100 GB Hard Disk</div>
+          <div class="hres" style="margin-top:8px; color:var(--yellow-deep);">+ Hypervisor<br>(e.g. VirtualBox)</div>
+        </div>
+        <div style="font-size:26px; color:var(--blue);">&rarr;</div>
+        <div class="vm-stack">
+          <div class="vm-box"><b>Virtual Machine 1</b>2 GB RAM · 20 GB disk</div>
+          <div class="vm-box"><b>Virtual Machine 2</b>2 GB RAM · 10 GB disk</div>
+        </div>
+      </div>
+      <div class="cap">Fig 5.1 — The hypervisor divides the main computer's real 8 GB / 100 GB into smaller "mini computers" (VMs)</div>
+    </div>
+
+    <div class="note"><b>Important point from the transcript:</b> the resources inside a VM are <b>real, actual resources</b> — they are genuinely shared out from the main computer's hardware, not imaginary. That's why the two VMs' RAM (2 GB + 2 GB) is taken from the host's real 8 GB. <span class="source-tag">from transcript</span></div>
+
+    <div class="analogy-card">
+      <span class="ico">🍕</span>
+      <div><b>Real-life analogy</b>Think of the host's resources as one large pizza (8 GB). The hypervisor is the person slicing it: it hands a 2-slice portion to one guest and a smaller portion to another. Each guest gets <i>real</i> pizza — just a divided share of the same original pizza.</div>
+    </div>
+
+    <div class="trick"><b>Memory trick</b><br>Hypervisor = a <b>divider</b>. Big real machine in, several small real-resourced machines out.</div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>A hypervisor works by sharing and dividing the host's real hardware resources into smaller mini computers — virtual machines — each with a genuine slice of RAM and disk. But a mini computer with only RAM and disk still can't do anything useful yet. It needs something on top, which is the next chapter.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 6 : VIRTUAL MACHINE ================= -->
+<section class="chapter" id="ch6">
+  <div class="chapter-head">
+    <span class="ch-num">06</span>
+    <div><h2>What is a Virtual Machine?</h2><p class="ch-sub">A software-made "mini computer" that needs its own OS &amp; runs isolated</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch6"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="step">
+      <span class="step-label">5 &middot; Why it's called "virtual"</span>
+      <p>The mini computer the hypervisor built is called a <b>virtual machine (VM)</b>. The transcript explains the name plainly: there is <b>no actual, separate physical machine</b> there — it's made purely with the help of software. Because it isn't a real physical box, we call it a <i>virtual</i> machine.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">6 &middot; A VM needs its own operating system</span>
+      <p>A virtual machine, on its own, won't work without an operating system — just like any real computer. So on top of each VM we <b>set up another operating system</b>. This is why you can end up with, say, Windows as the host and a different OS running inside a VM.</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="stack-diagram">
+        <div class="stack-layer apps" style="border-color:var(--green); color:var(--green);">Guest OS (installed inside the VM)</div>
+        <div class="stack-conn"></div>
+        <div class="stack-layer hyper">Virtual Machine (2 GB RAM · 20 GB disk)</div>
+        <div class="stack-conn"></div>
+        <div class="stack-layer os">Hypervisor + Host OS</div>
+        <div class="stack-conn"></div>
+        <div class="stack-layer hw">Host Hardware</div>
+      </div>
+      <div class="cap">Fig 6.1 — Each VM gets its own guest operating system installed on top of it</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">10 &middot; Real-world benefits (from the transcript)</span>
+      <p>To learn or use a new operating system, you <b>don't need to buy a new machine</b>. You can easily test and try your application on different operating systems, at no extra hardware cost.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">11 &middot; The key benefit — isolation</span>
+      <p>The transcript stresses this as an important point: every VM runs in its own <b>isolated environment</b>. So there is <b>no risk of any issues to your primary operating system</b> — whatever happens inside a VM (a crash, a bad install, even a virus) stays inside that VM and doesn't affect the host or the other VMs.</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="travel-track">
+        <div class="travel-dot">app</div>
+      </div>
+      <div class="travel-ends"><span>📦 App inside a VM</span><span>🖥️ Host hardware (via hypervisor)</span></div>
+      <div class="cap">Fig 6.2 — A VM's programs reach the real hardware only through the hypervisor, which keeps each VM sealed off from the others</div>
+    </div>
+
+    <div class="mistake-row"><span class="x">✗</span><span>Thinking a virus or crash inside one VM will damage your main Windows install.</span></div>
+    <div class="mistake-row"><span class="ok">✓</span><span>Each VM is isolated — problems inside a VM stay inside that VM, protecting your primary OS.</span></div>
+
+    <table class="cmp-table">
+      <tr><th>Aspect</th><th>Physical Machine</th><th>Virtual Machine</th></tr>
+      <tr><td>Existence</td><td>A real, physical box you can touch</td><td>Made purely by software — no separate hardware</td></tr>
+      <tr><td>Resources</td><td>Has its own dedicated hardware</td><td>Gets a real, divided share of the host's hardware</td></tr>
+      <tr><td>Cost to add one</td><td>Buy a whole new computer</td><td>Just create another VM in the hypervisor</td></tr>
+      <tr><td>Safety</td><td>A bad OS problem affects that whole machine</td><td>Isolated — a problem stays inside that VM</td></tr>
+    </table>
+
+    <div class="trick"><b>Memory trick</b><br>VM = a <b>V</b>ery real <b>M</b>ini computer, born from software, kept in its own sealed room.</div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>A virtual machine is a software-created mini computer with a real slice of the host's resources; it needs its own operating system, and it runs isolated so it can't harm your primary OS. Next, an important distinction: <i>where</i> the hypervisor itself sits — on top of an OS, or directly on the hardware.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 7 : TYPE 2 HOSTED ================= -->
+<section class="chapter" id="ch7">
+  <div class="chapter-head">
+    <span class="ch-num">07</span>
+    <div><h2>Type 2 &mdash; the Hosted Hypervisor</h2><p class="ch-sub">A hypervisor that runs on top of a normal host OS</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch7"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="step">
+      <span class="step-label">5 &middot; What we've seen so far <i>is</i> Type 2</span>
+      <p>The whole example up to now — installing VirtualBox on top of your existing Windows — is a <b>hosted hypervisor</b>, also called <b>Type 2</b>. The transcript notes the host OS in the example (it points to something like VMware Workstation running over the host OS) sits on top of the primary OS.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">6 &middot; Why it's called "hosted"</span>
+      <p>It's called <b>hosted</b> because the hypervisor is used <b>on top of the host / primary operating system</b>. There is a full normal OS underneath it (like Windows), and the hypervisor is just another program running on that OS.</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="stack-diagram">
+        <div class="stack-layer apps" style="border-color:var(--green); color:var(--green);">Guest OS 1 &nbsp;·&nbsp; Guest OS 2 (inside VMs)</div>
+        <div class="stack-conn"></div>
+        <div class="stack-layer hyper">Type 2 Hypervisor (e.g. VirtualBox / VMware Workstation)</div>
+        <div class="stack-conn"></div>
+        <div class="stack-layer os">Host OS — e.g. Windows</div>
+        <div class="stack-conn"></div>
+        <div class="stack-layer hw">Hardware</div>
+      </div>
+      <div class="cap">Fig 7.1 — Type 2 (hosted): the hypervisor sits on top of a normal host operating system</div>
+    </div>
+
+    <div class="analogy-card">
+      <span class="ico">🏠</span>
+      <div><b>Real-life analogy</b>A hosted hypervisor is like renting out spare rooms <i>inside your own occupied house</i>. You (the host OS) already live there; the guests (VMs) move into rooms built on top of your existing home.</div>
+    </div>
+
+    <div class="trick"><b>Memory trick</b><br>Type <b>2</b> = <b>2</b> operating-system layers stacked (host OS + guest OS). "Hosted" = there's a host OS below.</div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>A Type 2 / hosted hypervisor (like VirtualBox) runs as software on top of a normal host OS. It's the easiest to start with. But there's another kind that removes the host OS entirely — Type 1 — covered next.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 8 : TYPE 1 BARE METAL ================= -->
+<section class="chapter" id="ch8">
+  <div class="chapter-head">
+    <span class="ch-num">08</span>
+    <div><h2>Type 1 &mdash; the Bare Metal Hypervisor</h2><p class="ch-sub">A hypervisor installed directly on the hardware, with no host OS</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch8"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="step">
+      <span class="step-label">5 &middot; Simple explanation (from the transcript)</span>
+      <p><b>Type 1</b>, also called a <b>bare metal hypervisor</b>, is set up (installed) <b>directly on the hardware</b>. It does the same job — creating separate virtual machines by sharing resources — but the key difference is: <b>there is no host operating system</b> underneath it.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">2 &middot; The common confusion the transcript addresses</span>
+      <p>People ask: without any operating system, how can you even install a hypervisor onto hardware? The transcript's answer: a Type 1 / bare metal hypervisor <b>works like a mini operating system itself</b>. Whatever basic requirements are needed to set up on hardware are <b>already built into the hypervisor</b>, so it doesn't need a separate host OS.</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="stack-diagram">
+        <div class="stack-layer apps" style="border-color:var(--green); color:var(--green);">Guest OS 1 &nbsp;·&nbsp; Guest OS 2 &nbsp;·&nbsp; Guest OS 3 (inside VMs)</div>
+        <div class="stack-conn"></div>
+        <div class="stack-layer hyper">Type 1 Bare Metal Hypervisor (acts as its own mini OS)</div>
+        <div class="stack-conn"></div>
+        <div class="stack-layer hw">Hardware — directly, no host OS in between</div>
+      </div>
+      <div class="cap">Fig 8.1 — Type 1 (bare metal): the hypervisor installs straight onto hardware; no host OS layer</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">9 &middot; Examples named in the transcript</span>
+      <p>Real Type 1 / bare metal hypervisors include <b>VMware vSphere</b>, and <b>Citrix XenServer</b>. Also, big <b>cloud service providers</b> such as <b>AWS</b> do exactly this at massive scale.</p>
+    </div>
+
+    <div class="card-grid">
+      <div class="info-card"><h4>🟦 VMware vSphere</h4><p>Enterprise bare-metal virtualization platform for data-center servers.</p><span class="tag">Type 1</span></div>
+      <div class="info-card"><h4>🟧 Citrix XenServer</h4><p>Another bare-metal hypervisor used for server virtualization.</p><span class="tag">Type 1</span></div>
+      <div class="info-card"><h4>☁️ Cloud (e.g. AWS)</h4><p>Huge infrastructure split into many VMs handed to different users &amp; organizations.</p><span class="tag">Type 1 at scale</span></div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">10 &middot; How clouds &amp; big orgs use it</span>
+      <p>Cloud providers own very large infrastructure and servers with lots of resources. Using Type 1 hypervisors they cut this into many small VM segments and simply <b>assign</b> them to different users or organizations. Some organizations also do this <b>in-house</b>: they take one very large machine and divide it into small VMs for different roles, teams, or kinds of work.</p>
+    </div>
+
+    <table class="cmp-table">
+      <tr><th>Aspect</th><th>Type 2 (Hosted)</th><th>Type 1 (Bare Metal)</th></tr>
+      <tr><td>Where it installs</td><td>On top of a host OS</td><td>Directly on the hardware</td></tr>
+      <tr><td>Host OS needed?</td><td>Yes — e.g. Windows underneath</td><td>No — it acts as its own mini OS</td></tr>
+      <tr><td>Typical use</td><td>Personal use, learning, testing</td><td>Data centers, cloud providers, big servers</td></tr>
+      <tr><td>Examples</td><td>Oracle VirtualBox, VMware Workstation</td><td>VMware vSphere, Citrix XenServer, AWS infra</td></tr>
+    </table>
+
+    <div class="trick"><b>Memory trick</b><br>Type <b>1</b> = <b>1</b> less layer (no host OS). "Bare metal" = it touches the bare hardware directly.</div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>A Type 1 / bare metal hypervisor installs straight onto hardware and behaves like its own mini OS, with no host OS below it. It powers data centers and clouds like AWS, which slice giant machines into many VMs for different customers. Finally: why do companies choose all this in the first place?</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 9 : WHY COMPANIES USE IT ================= -->
+<section class="chapter" id="ch9">
+  <div class="chapter-head">
+    <span class="ch-num">09</span>
+    <div><h2>Why Companies &amp; Clouds Use Virtualization</h2><p class="ch-sub">Less headache, cheaper, and scalable</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch9"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="step">
+      <span class="step-label">10 &middot; Reason one — less maintenance headache</span>
+      <p>The transcript's first point: companies get <b>no headache of maintaining and managing</b> the underlying machines. When you use a cloud/virtualization provider, they handle the heavy tasks for you — <b>security</b>, keeping <b>operating systems updated</b>, and all the many maintenance chores that come with running physical servers.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">10b &middot; Reason two — cheaper</span>
+      <p>Virtualization is <b>cheap</b>. Instead of buying a full physical machine for every need, you share one machine's resources across many VMs — far less hardware to purchase and power.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">10c &middot; Reason three — scalable</span>
+      <p>It is <b>scalable</b>. If you need to increase resources — more RAM, more storage — you can simply do that when the need grows, without buying and physically installing new hardware each time.</p>
+    </div>
+
+    <div class="card-grid">
+      <div class="info-card"><h4>🧰 Less maintenance</h4><p>Provider handles security, OS updates, and upkeep of the physical machines.</p></div>
+      <div class="info-card"><h4>💸 Cheaper</h4><p>Share one machine across many VMs instead of buying many physical computers.</p></div>
+      <div class="info-card"><h4>📈 Scalable</h4><p>Grow resources on demand when you need more RAM or storage.</p></div>
+      <div class="info-card"><h4>🏢 In-house too</h4><p>Big orgs split one large machine into VMs for different teams &amp; roles.</p></div>
+    </div>
+
+    <div class="note"><b>From the source:</b> the presenter mentions they personally use virtualization, and that this is exactly why companies and clouds rely on it — the maintenance is handled for you, the cost is low, and you can scale up whenever needed. <span class="source-tag">from transcript</span></div>
+
+    <div class="correction"><b>Currency note:</b> product names and exact tiers in virtualization change over time (for example, VMware's bare-metal product is often referred to by its hypervisor "ESXi" within the vSphere suite). Treat the <i>concepts</i> — Type 1 vs Type 2, host vs guest, resource sharing, isolation — as the durable takeaway, and check a vendor's current official site before choosing a specific tool. <span class="source-tag">background, added for accuracy</span></div>
+
+    <div class="trick"><b>Memory trick</b><br>Why virtualize? <b>C-C-S</b>: <b>C</b>heaper, less <b>C</b>are (maintenance), easily <b>S</b>calable.</div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>Companies and cloud providers use virtualization because it removes maintenance headaches, costs less than buying physical machines, and scales up on demand. From a single engineer testing an app to AWS serving millions, the same idea applies: one real machine, safely divided into many.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= REVISION ================= -->
+<section class="chapter" id="revision">
+  <div class="chapter-head">
+    <span class="ch-num">✓</span>
+    <div><h2>Chapter Revision Kit</h2><p class="ch-sub">Everything you need for a fast, complete review</p></div>
+  </div>
+  <div class="chapter-body">
+
+    <h3>10 Key Points</h3>
+    <ol class="keypoints">
+      <li><span class="kn">1</span>A normal computer has three layers: hardware (RAM, CPU, disk) → operating system → applications.</li>
+      <li><span class="kn">2</span>Problem: one machine normally runs one OS, but you often need to test/use several operating systems.</li>
+      <li><span class="kn">3</span><b>Virtualization</b> is a software layer added above the host OS that lets one machine run many operating systems at once.</li>
+      <li><span class="kn">4</span>A <b>hypervisor</b> is the software that creates and runs virtual machines — it <i>is</i> the virtualization layer.</li>
+      <li><span class="kn">5</span>Oracle <b>VirtualBox</b> is a free, open-source hypervisor (download from virtualbox.org).</li>
+      <li><span class="kn">6</span>A hypervisor works by <b>sharing/dividing the host's real hardware</b> (e.g. 8 GB RAM / 100 GB disk) into smaller mini computers.</li>
+      <li><span class="kn">7</span>A <b>virtual machine (VM)</b> is a software-made mini computer; it needs its own OS and gets a real slice of the host's resources.</li>
+      <li><span class="kn">8</span>Each VM runs <b>isolated</b>, so problems inside it can't harm your primary OS or other VMs.</li>
+      <li><span class="kn">9</span><b>Type 2 (hosted)</b> runs on top of a host OS (VirtualBox); <b>Type 1 (bare metal)</b> installs directly on hardware, acting as its own mini OS (VMware vSphere, Citrix XenServer, AWS).</li>
+      <li><span class="kn">10</span>Companies &amp; clouds use virtualization because it's <b>cheaper</b>, needs <b>less maintenance</b>, and is <b>scalable</b>.</li>
+    </ol>
+
+    <h3 style="margin-top:34px;">5 Interview Questions</h3>
+    <details class="qa"><summary>What is virtualization?</summary><div class="ans">A technique that uses software to run several independent operating systems on one physical machine at the same time, by adding a virtualization layer (a hypervisor) above the hardware/host OS.</div></details>
+    <details class="qa"><summary>What is a hypervisor?</summary><div class="ans">Software that creates and runs virtual machines. It divides the host's real hardware resources into smaller mini computers, and manages them. Examples: VirtualBox, VMware vSphere.</div></details>
+    <details class="qa"><summary>What is a virtual machine, and why is it "virtual"?</summary><div class="ans">A software-created mini computer that gets a real, divided share of the host's RAM and disk and needs its own guest OS. It's called "virtual" because there is no separate physical machine — it exists only through software.</div></details>
+    <details class="qa"><summary>What's the difference between a Type 1 and a Type 2 hypervisor?</summary><div class="ans">Type 2 (hosted) runs on top of a normal host OS, like VirtualBox on Windows. Type 1 (bare metal) installs directly on the hardware with no host OS and acts as its own mini OS — used in data centers and clouds (VMware vSphere, Citrix XenServer, AWS).</div></details>
+    <details class="qa"><summary>Why do companies and cloud providers use virtualization?</summary><div class="ans">It removes the maintenance headache (the provider handles security and OS updates), it's cheaper than buying many physical machines, and it's scalable — resources can be increased on demand. VMs also run isolated, protecting each other.</div></details>
+
+    <h3 style="margin-top:34px;">5 Multiple-Choice Questions</h3>
+    <div class="quiz-q">
+      <p class="qtext">1. What is a hypervisor?</p>
+      <div class="quiz-opts">
+        <button class="quiz-opt" data-correct="false">A physical server</button>
+        <button class="quiz-opt" data-correct="true">Software that creates and runs virtual machines</button>
+        <button class="quiz-opt" data-correct="false">A type of hard disk</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <div class="quiz-q">
+      <p class="qtext">2. Where does a Type 1 (bare metal) hypervisor install?</p>
+      <div class="quiz-opts">
+        <button class="quiz-opt" data-correct="false">On top of a host operating system</button>
+        <button class="quiz-opt" data-correct="true">Directly on the hardware, with no host OS</button>
+        <button class="quiz-opt" data-correct="false">Inside another virtual machine</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <div class="quiz-q">
+      <p class="qtext">3. In the transcript's example, an 8 GB / 100 GB machine is divided into VMs. Those VM resources are:</p>
+      <div class="quiz-opts">
+        <button class="quiz-opt" data-correct="false">Fake / imaginary resources</button>
+        <button class="quiz-opt" data-correct="true">Real resources shared from the host machine</button>
+        <button class="quiz-opt" data-correct="false">Downloaded from the internet</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <div class="quiz-q">
+      <p class="qtext">4. Which is an example of an open-source Type 2 (hosted) hypervisor?</p>
+      <div class="quiz-opts">
+        <button class="quiz-opt" data-correct="true">Oracle VirtualBox</button>
+        <button class="quiz-opt" data-correct="false">Citrix XenServer</button>
+        <button class="quiz-opt" data-correct="false">AWS data center</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <div class="quiz-q">
+      <p class="qtext">5. Why is running each VM in an isolated environment useful?</p>
+      <div class="quiz-opts">
+        <button class="quiz-opt" data-correct="false">It makes the VM run faster</button>
+        <button class="quiz-opt" data-correct="true">Problems inside a VM don't affect the primary OS or other VMs</button>
+        <button class="quiz-opt" data-correct="false">It removes the need for an operating system</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <h3 style="margin-top:34px;">Flashcards <span style="font-size:12px; color:var(--ink-faint); font-family:var(--mono);">(click to flip)</span></h3>
+    <div class="flash-grid">
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">Virtualization</div><div class="flashcard-face flashcard-back">A software layer letting one physical machine run many operating systems at once.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">Hypervisor</div><div class="flashcard-face flashcard-back">Software that creates and runs virtual machines by sharing the host's hardware.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">Virtual Machine</div><div class="flashcard-face flashcard-back">A software-made mini computer with a real slice of host resources; needs its own OS.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">Type 2 / Hosted</div><div class="flashcard-face flashcard-back">Hypervisor that runs on top of a host OS — e.g. VirtualBox.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">Type 1 / Bare Metal</div><div class="flashcard-face flashcard-back">Hypervisor installed directly on hardware, acting as its own mini OS — e.g. VMware vSphere.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">Isolation</div><div class="flashcard-face flashcard-back">Each VM is sealed off, so a problem inside one can't harm the host or other VMs.</div></div></div>
+    </div>
+
+    <h3 style="margin-top:34px;">Common Mistakes</h3>
+    <div class="mistake-row"><span class="x">✗</span><span>"A virtual machine's resources are fake."</span></div>
+    <div class="mistake-row"><span class="ok">✓</span><span>They are real resources — a genuine, divided share of the host's actual RAM and disk.</span></div>
+    <div class="mistake-row"><span class="x">✗</span><span>"A hypervisor and a virtual machine are the same thing."</span></div>
+    <div class="mistake-row"><span class="ok">✓</span><span>The hypervisor is the software that <i>creates</i> VMs; a VM is one of the mini computers it makes.</span></div>
+    <div class="mistake-row"><span class="x">✗</span><span>"A Type 1 hypervisor can't work because there's no OS to install it on."</span></div>
+    <div class="mistake-row"><span class="ok">✓</span><span>A Type 1 hypervisor acts as its own mini OS, so it installs directly on the bare hardware.</span></div>
+
+    <h3 style="margin-top:34px;">One-Page Revision</h3>
+    <div class="diagram-wrap">
+      <p style="margin:0 0 10px;">Normal machine = <b>hardware → OS → apps</b> (one OS only) &rarr; problem: need to run/test many operating systems &rarr; add a <b>virtualization</b> layer &rarr; that layer is a <b>hypervisor</b> (software that creates &amp; runs VMs, e.g. VirtualBox from virtualbox.org) &rarr; it <b>shares/divides</b> the host's real hardware (8 GB / 100 GB → 2 GB/20 GB + 2 GB/10 GB) into <b>virtual machines</b> (mini computers, each needs its own OS, each <b>isolated</b>) &rarr; <b>Type 2 (hosted)</b> = on a host OS (VirtualBox); <b>Type 1 (bare metal)</b> = straight on hardware, own mini OS (VMware vSphere, Citrix XenServer, AWS) &rarr; companies use it: <b>cheaper, less maintenance, scalable</b>.</p>
+    </div>
+
+    <h3 style="margin-top:34px;">Your Notes</h3>
+    <textarea class="notes-area" id="notesArea" placeholder="Jot your own summary or questions here — saved automatically in your browser..."></textarea>
+    <div class="notes-status" id="notesStatus"></div>
+  </div>
+</section>
+
+</main>
+
+<div class="chnav-footer">
+  <a href="#ch1" class="prev"><small>&larr; Back to start</small>The Layers of a Computer</a>
+  <a href="#revision" class="next"><small>Jump to &rarr;</small>Revision Kit</a>
+</div>
+
+<footer class="site-footer">
+  Built as a single offline HTML file &middot; works without internet &middot; prints cleanly as a PDF chapter<br>
+  Shortcuts: <span class="kbd">/</span> search &middot; <span class="kbd">d</span> dark mode &middot; <span class="kbd">t</span> back to top
+</footer>
+
+<button id="backtotop" aria-label="Back to top">&uarr;</button>
+
+<script>
+(function(){
+  "use strict";
+  var STORE_KEY = "virtualization-book-progress-v2";
+  var chapters = Array.prototype.slice.call(document.querySelectorAll(".chapter[id]"));
+
+  function loadState(){
+    try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }catch(e){ return {}; }
+  }
+  function saveState(state){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+  var state = loadState();
+
+  /* ---------- Dark mode ---------- */
+  var darkToggle = document.getElementById("darkToggle");
+  function applyDark(on){
+    document.documentElement.classList.toggle("dark", on);
+    darkToggle.textContent = on ? "☀️ Light" : "🌙 Dark";
+    state.dark = on; saveState(state);
+  }
+  applyDark(!!state.dark);
+  darkToggle.addEventListener("click", function(){ applyDark(!document.documentElement.classList.contains("dark")); });
+
+  /* ---------- Completion checkboxes + progress ---------- */
+  var doneboxes = document.querySelectorAll(".donebox");
+  var totalCh = doneboxes.length;
+  function updateProgressUI(){
+    var doneCount = 0;
+    doneboxes.forEach(function(cb){
+      var ch = cb.getAttribute("data-ch");
+      var isDone = !!(state.done && state.done[ch]);
+      cb.checked = isDone;
+      if(isDone) doneCount++;
+      var rnode = document.querySelector('.rnode[data-ch="'+ch+'"]');
+      if(rnode) rnode.classList.toggle("done", isDone);
+    });
+    var pct = totalCh ? Math.round((doneCount/totalCh)*100) : 0;
+    document.getElementById("progress-bar").style.width = pct + "%";
+    document.getElementById("progress-label").textContent = doneCount + " / " + totalCh + " chapters";
+  }
+  state.done = state.done || {};
+  doneboxes.forEach(function(cb){
+    cb.addEventListener("change", function(){
+      state.done[cb.getAttribute("data-ch")] = cb.checked;
+      saveState(state);
+      updateProgressUI();
+    });
+  });
+  updateProgressUI();
+
+  /* ---------- Collapsible chapters ---------- */
+  document.querySelectorAll(".chapter").forEach(function(section){
+    var btn = section.querySelector(".collapse-toggle");
+    var body = section.querySelector(".chapter-body");
+    if(!btn || !body) return;
+    var id = section.id;
+    if(state.collapsed && state.collapsed[id]){
+      body.classList.add("collapsed"); btn.textContent = "+";
+    }
+    btn.addEventListener("click", function(){
+      var collapsed = body.classList.toggle("collapsed");
+      btn.textContent = collapsed ? "+" : "−";
+      state.collapsed = state.collapsed || {};
+      state.collapsed[id] = collapsed;
+      saveState(state);
+    });
+  });
+  document.getElementById("expandAllBtn").addEventListener("click", function(){
+    var anyCollapsed = document.querySelector(".chapter-body.collapsed");
+    document.querySelectorAll(".chapter-body").forEach(function(b){ b.classList.toggle("collapsed", !anyCollapsed); });
+    document.querySelectorAll(".collapse-toggle").forEach(function(b){ b.textContent = anyCollapsed ? "+" : "−"; });
+    this.textContent = anyCollapsed ? "Expand all" : "Collapse all";
+    state.collapsed = {};
+    if(anyCollapsed){ chapters.forEach(function(c){ state.collapsed[c.id] = true; }); }
+    saveState(state);
+  });
+
+  /* ---------- Scrollspy nav ---------- */
+  var navLinks = document.querySelectorAll("#chnav a");
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        navLinks.forEach(function(l){ l.classList.remove("active"); });
+        var link = document.querySelector('#chnav a[href="#'+entry.target.id+'"]');
+        if(link) link.classList.add("active");
+      }
+    });
+  }, {rootMargin:"-40% 0px -50% 0px"});
+  chapters.concat(document.getElementById("revision")).forEach(function(s){ if(s) observer.observe(s); });
+
+  /* ---------- Search ---------- */
+  var searchbox = document.getElementById("searchbox");
+  var searchableEls = document.querySelectorAll(".chapter p, .chapter li, .chapter td, .chapter .qtext, .chapter summary");
+  var originalHTML = new Map();
+  searchableEls.forEach(function(el){ originalHTML.set(el, el.innerHTML); });
+
+  function clearHighlights(){
+    searchableEls.forEach(function(el){ el.innerHTML = originalHTML.get(el); });
+    chapters.forEach(function(c){ c.classList.remove("hidden-by-search"); });
+  }
+  function runSearch(q){
+    q = q.trim();
+    if(!q){ clearHighlights(); return; }
+    var re;
+    try{ re = new RegExp("("+q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig"); }catch(e){ return; }
+    var matchedChapters = new Set();
+    searchableEls.forEach(function(el){
+      var raw = originalHTML.get(el);
+      if(re.test(raw)){
+        el.innerHTML = raw.replace(re, "<mark class=\"hit\">$1</mark>");
+        var ch = el.closest(".chapter");
+        if(ch) matchedChapters.add(ch.id);
+      } else {
+        el.innerHTML = raw;
+      }
+    });
+    chapters.forEach(function(c){ c.classList.toggle("hidden-by-search", !matchedChapters.has(c.id)); });
+  }
+  searchbox.addEventListener("input", function(){ runSearch(this.value); });
+
+  /* ---------- Keyboard shortcuts ---------- */
+  document.addEventListener("keydown", function(e){
+    var tag = (document.activeElement && document.activeElement.tagName) || "";
+    if(tag === "INPUT" || tag === "TEXTAREA"){
+      if(e.key === "Escape") document.activeElement.blur();
+      return;
+    }
+    if(e.key === "/"){ e.preventDefault(); searchbox.focus(); }
+    if(e.key === "d" || e.key === "D"){ applyDark(!document.documentElement.classList.contains("dark")); }
+    if(e.key === "t" || e.key === "T"){ window.scrollTo({top:0, behavior:"smooth"}); }
+  });
+
+  /* ---------- Back to top ---------- */
+  var backBtn = document.getElementById("backtotop");
+  window.addEventListener("scroll", function(){
+    backBtn.classList.toggle("show", window.scrollY > 700);
+  });
+  backBtn.addEventListener("click", function(){ window.scrollTo({top:0, behavior:"smooth"}); });
+
+  /* ---------- Flashcards ---------- */
+  document.querySelectorAll(".flashcard").forEach(function(card){
+    card.addEventListener("click", function(){ card.classList.toggle("flipped"); });
+  });
+
+  /* ---------- Quiz ---------- */
+  document.querySelectorAll(".quiz-q").forEach(function(q){
+    var opts = q.querySelectorAll(".quiz-opt");
+    var feedback = q.querySelector(".quiz-feedback");
+    opts.forEach(function(opt){
+      opt.addEventListener("click", function(){
+        var correct = opt.getAttribute("data-correct") === "true";
+        opts.forEach(function(o){ o.disabled = true; });
+        opts.forEach(function(o){
+          if(o.getAttribute("data-correct") === "true") o.classList.add("correct");
+        });
+        if(!correct) opt.classList.add("wrong");
+        feedback.style.display = "block";
+        feedback.textContent = correct ? "✓ Correct!" : "✗ Not quite — correct answer highlighted above.";
+        feedback.style.color = correct ? "var(--green)" : "var(--red)";
+      });
+    });
+  });
+
+  /* ---------- Notes autosave ---------- */
+  var notesArea = document.getElementById("notesArea");
+  var notesStatus = document.getElementById("notesStatus");
+  notesArea.value = state.notes || "";
+  var saveTimer;
+  notesArea.addEventListener("input", function(){
+    clearTimeout(saveTimer);
+    notesStatus.textContent = "Saving…";
+    saveTimer = setTimeout(function(){
+      state.notes = notesArea.value;
+      saveState(state);
+      notesStatus.textContent = "Saved to this browser ✓";
+      setTimeout(function(){ notesStatus.textContent = ""; }, 1500);
+    }, 500);
+  });
+})();
+</script>
+</body>
+</html>

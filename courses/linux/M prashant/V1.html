@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linux, From Zero &mdash; An Interactive Engineering Textbook</title>
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   Palette: white paper, engineering-notebook navy ink,
+   yellow roadmap cards, blue connector lines (per brief)
+   ============================================================ */
+:root{
+  --bg:#ffffff;
+  --bg-alt:#f6f8fb;
+  --paper-line:#e7ecf3;
+  --ink:#16202e;
+  --ink-soft:#4a5872;
+  --ink-faint:#8895ab;
+  --blue:#1955c9;
+  --blue-dark:#0e3a8c;
+  --blue-tint:#eaf1ff;
+  --yellow:#ffcd3c;
+  --yellow-deep:#f0a500;
+  --yellow-tint:#fff8e1;
+  --green:#1c8a5c;
+  --green-tint:#e6f6ee;
+  --red:#c8402c;
+  --red-tint:#fdeceb;
+  --border:#dce3ee;
+  --radius:14px;
+  --sans: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --serif: Georgia, "Cambria", "Times New Roman", serif;
+  --mono: ui-monospace, "Cascadia Mono", "Consolas", "SFMono-Regular", Menlo, monospace;
+  --shadow: 0 1px 2px rgba(20,30,50,.04), 0 8px 24px rgba(20,30,50,.06);
+  --maxw: 880px;
+}
+html.dark{
+  --bg:#0f1420;
+  --bg-alt:#161d2c;
+  --paper-line:#232c40;
+  --ink:#e9edf6;
+  --ink-soft:#aab4c9;
+  --ink-faint:#71809a;
+  --blue:#5b9bff;
+  --blue-dark:#8fb8ff;
+  --blue-tint:#152241;
+  --yellow:#ffcd3c;
+  --yellow-deep:#ffb703;
+  --yellow-tint:#2b2410;
+  --green:#3fcf8e;
+  --green-tint:#0f2a20;
+  --red:#ff7a68;
+  --red-tint:#331714;
+  --border:#28324a;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  line-height:1.65;
+  transition:background .25s ease, color .25s ease;
+}
+::selection{background:var(--yellow); color:#16202e;}
+img,svg{max-width:100%;}
+a{color:var(--blue);}
+h1,h2,h3,h4{font-family:var(--serif); color:var(--ink); line-height:1.25; letter-spacing:.2px;}
+code, .mono{font-family:var(--mono);}
+.wrap{max-width:var(--maxw); margin:0 auto; padding:0 24px;}
+.eyebrow{
+  display:inline-block; font-family:var(--mono); font-size:11.5px; letter-spacing:1.5px;
+  text-transform:uppercase; color:var(--blue-dark); background:var(--blue-tint);
+  padding:4px 10px; border-radius:20px; font-weight:700;
+}
+
+/* ============================================================
+   TOP BAR / PROGRESS
+   ============================================================ */
+#progress-track{position:fixed; top:0; left:0; right:0; height:3px; background:var(--paper-line); z-index:100;}
+#progress-bar{height:100%; width:0%; background:linear-gradient(90deg,var(--blue),var(--yellow)); transition:width .2s ease;}
+
+header.topbar{
+  position:sticky; top:3px; z-index:90; background:var(--bg);
+  border-bottom:1px solid var(--border); backdrop-filter:blur(6px);
+}
+.topbar-inner{
+  max-width:var(--maxw); margin:0 auto; padding:12px 24px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.brand{display:flex; align-items:center; gap:9px; font-family:var(--serif); font-weight:700; font-size:17px; white-space:nowrap;}
+.brand .tux{width:22px;height:22px;flex:none;}
+.topbar-inner input[type=search]{
+  flex:1; min-width:120px; padding:8px 12px; border-radius:9px; border:1px solid var(--border);
+  background:var(--bg-alt); color:var(--ink); font-family:var(--sans); font-size:13.5px;
+}
+.topbar-inner input[type=search]:focus{outline:2px solid var(--blue); outline-offset:1px;}
+.tbtn{
+  border:1px solid var(--border); background:var(--bg-alt); color:var(--ink-soft);
+  border-radius:9px; padding:8px 11px; font-size:13px; cursor:pointer; font-family:var(--sans);
+  display:inline-flex; align-items:center; gap:6px; white-space:nowrap;
+}
+.tbtn:hover{border-color:var(--blue); color:var(--blue-dark);}
+.tbtn:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible{
+  outline:2px solid var(--blue); outline-offset:2px;
+}
+#progress-label{font-size:12px; color:var(--ink-faint); font-family:var(--mono); white-space:nowrap;}
+
+nav.chnav{display:flex; gap:4px; overflow-x:auto; padding:10px 24px 12px; max-width:var(--maxw); margin:0 auto;}
+nav.chnav a{
+  font-size:12.5px; color:var(--ink-soft); text-decoration:none; padding:6px 10px; border-radius:8px;
+  white-space:nowrap; border:1px solid transparent; font-family:var(--mono);
+}
+nav.chnav a.active{background:var(--blue-tint); color:var(--blue-dark); border-color:var(--blue);}
+nav.chnav a:hover{background:var(--bg-alt);}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero{padding:64px 24px 40px; max-width:var(--maxw); margin:0 auto;}
+.hero h1{font-size:42px; margin:14px 0 10px; max-width:14ch;}
+.hero p.lede{font-size:17px; color:var(--ink-soft); max-width:58ch; margin:0 0 26px;}
+.hero-meta{display:flex; gap:18px; flex-wrap:wrap; font-size:13px; color:var(--ink-faint); font-family:var(--mono);}
+.hero-meta span{display:flex; align-items:center; gap:6px;}
+
+/* ============================================================
+   ROADMAP  (yellow cards + blue connectors — signature element)
+   ============================================================ */
+.roadmap-section{padding:10px 24px 56px; max-width:var(--maxw); margin:0 auto;}
+.roadmap-section h2{font-size:13px; text-transform:uppercase; letter-spacing:2px; color:var(--ink-faint); font-family:var(--mono); margin-bottom:22px;}
+.roadmap{position:relative; padding-left:26px;}
+.roadmap::before{
+  content:""; position:absolute; left:10px; top:10px; bottom:10px; width:3px;
+  background:repeating-linear-gradient(180deg, var(--blue) 0 8px, transparent 8px 14px);
+  border-radius:3px;
+}
+.rnode{position:relative; margin-bottom:14px;}
+.rnode::before{
+  content:""; position:absolute; left:-26px; top:18px; width:13px; height:13px; border-radius:50%;
+  background:var(--blue); border:3px solid var(--bg); box-shadow:0 0 0 2px var(--blue);
+}
+.rnode a{
+  display:flex; align-items:center; gap:12px; text-decoration:none; color:var(--ink);
+  background:var(--yellow-tint); border:1.5px solid var(--yellow-deep); border-radius:var(--radius);
+  padding:13px 16px; transition:transform .15s ease, box-shadow .15s ease;
+}
+.rnode a:hover{transform:translateX(3px); box-shadow:var(--shadow);}
+.rnode .num{
+  font-family:var(--mono); font-weight:700; font-size:12px; color:#7a5900;
+  background:var(--yellow); padding:3px 8px; border-radius:6px; flex:none;
+}
+html.dark .rnode .num{color:#241c00;}
+.rnode .rtxt{flex:1;}
+.rnode .rtxt b{display:block; font-family:var(--serif); font-size:15.5px;}
+.rnode .rtxt small{color:var(--ink-soft); font-size:12.5px;}
+.rnode .check{width:20px; height:20px; border-radius:50%; border:2px solid var(--yellow-deep); flex:none;}
+.rnode.done .check{background:var(--green); border-color:var(--green);}
+.rnode.done a{opacity:.75;}
+
+/* ============================================================
+   CHAPTER STRUCTURE
+   ============================================================ */
+.chapter{max-width:var(--maxw); margin:0 auto; padding:26px 24px 8px; border-top:1px solid var(--border);}
+.chapter-head{display:flex; align-items:flex-start; gap:14px; margin-bottom:4px;}
+.chapter-head .ch-num{
+  font-family:var(--mono); font-weight:800; font-size:14px; color:var(--blue);
+  background:var(--blue-tint); border-radius:8px; padding:6px 10px; flex:none; margin-top:4px;
+}
+.chapter-head h2{font-size:26px; margin:0 0 4px;}
+.chapter-head .ch-sub{color:var(--ink-soft); font-size:14.5px; margin:0;}
+.chapter-tools{display:flex; align-items:center; gap:10px; margin-left:auto; flex:none;}
+.markdone{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink-faint); cursor:pointer; font-family:var(--mono); white-space:nowrap;}
+.markdone input{accent-color:var(--green); width:15px; height:15px;}
+.collapse-toggle{
+  border:1px solid var(--border); background:var(--bg-alt); border-radius:8px; width:30px; height:30px;
+  cursor:pointer; color:var(--ink-soft); font-size:14px; flex:none;
+}
+.chapter-body{padding-top:14px; overflow:hidden;}
+.chapter-body.collapsed{display:none;}
+
+/* step block (problem -> why -> analogy -> ...) */
+.step{
+  border-left:3px solid var(--border); padding:2px 0 2px 18px; margin:20px 0;
+}
+.step .step-label{
+  font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:1.4px;
+  color:var(--blue-dark); font-weight:700; margin-bottom:5px; display:block;
+}
+.step p{margin:6px 0; color:var(--ink); font-size:15.5px;}
+.step p.soft{color:var(--ink-soft);}
+
+.analogy-card{
+  background:var(--yellow-tint); border:1px solid var(--yellow-deep); border-radius:var(--radius);
+  padding:16px 18px; margin:16px 0; display:flex; gap:12px;
+}
+.analogy-card .ico{font-size:22px; flex:none;}
+.analogy-card b{display:block; font-family:var(--serif); margin-bottom:4px;}
+
+.note{
+  background:var(--blue-tint); border-left:4px solid var(--blue); border-radius:0 10px 10px 0;
+  padding:12px 16px; margin:16px 0; font-size:14.5px;
+}
+.note b{color:var(--blue-dark);}
+.correction{
+  background:var(--red-tint); border-left:4px solid var(--red); border-radius:0 10px 10px 0;
+  padding:12px 16px; margin:16px 0; font-size:14.5px;
+}
+.correction b{color:var(--red);}
+.source-tag{font-family:var(--mono); font-size:10.5px; letter-spacing:.5px; text-transform:uppercase; color:var(--ink-faint); border:1px solid var(--border); border-radius:5px; padding:1px 6px; margin-left:6px;}
+
+/* ============================================================
+   DIAGRAMS
+   ============================================================ */
+.diagram-wrap{
+  background:var(--bg-alt); border:1px solid var(--border); border-radius:var(--radius);
+  padding:22px; margin:20px 0; break-inside:avoid;
+}
+.diagram-wrap .cap{font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); text-align:center; margin-top:10px;}
+
+/* generic box+arrow flow */
+.flow{display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap;}
+.flow .box{
+  background:var(--bg); border:1.5px solid var(--blue); border-radius:10px; padding:12px 16px;
+  font-size:13.5px; text-align:center; font-family:var(--mono); color:var(--ink); min-width:110px;
+}
+.flow .box.yellow{border-color:var(--yellow-deep); background:var(--yellow-tint);}
+.flow .arrow{color:var(--blue); font-size:20px; padding:0 10px; flex:none;}
+@media (max-width:520px){ .flow{flex-direction:column;} .flow .arrow{transform:rotate(90deg);} }
+
+/* kernel <-> hardware <-> apps diagram */
+.stack-diagram{display:flex; flex-direction:column; align-items:center; gap:0;}
+.stack-layer{
+  width:100%; max-width:420px; text-align:center; padding:14px; border-radius:10px;
+  font-family:var(--mono); font-size:13.5px; border:1.5px solid var(--border); background:var(--bg);
+}
+.stack-layer.apps{border-color:var(--blue); color:var(--blue-dark);}
+.stack-layer.kernel{border-color:var(--yellow-deep); background:var(--yellow-tint); font-weight:700;}
+.stack-layer.hw{border-color:var(--ink-faint); color:var(--ink-soft);}
+.stack-conn{width:2px; height:20px; background:var(--blue);}
+
+/* engine analogy diagram */
+.engine-diagram{display:flex; align-items:center; justify-content:center; gap:26px; flex-wrap:wrap;}
+.car-block{text-align:center;}
+.car-svg{width:150px;}
+.car-block .lbl{font-family:var(--mono); font-size:12px; margin-top:8px; color:var(--ink-soft);}
+.engine-pulse{animation:pulse 1.8s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;} 50%{opacity:.45;}}
+@media (prefers-reduced-motion:reduce){ .engine-pulse{animation:none;} }
+
+/* kernel -> distro tree (signature diagram) */
+.tree-diagram{display:flex; flex-direction:column; align-items:center;}
+.tree-root{
+  background:var(--yellow); border:2px solid var(--yellow-deep); border-radius:10px;
+  padding:12px 20px; font-family:var(--mono); font-weight:800; font-size:14px; color:#3a2c00;
+}
+html.dark .tree-root{color:#241c00;}
+.tree-trunk{width:2px; height:26px; background:var(--blue);}
+.tree-branches{display:flex; gap:0; position:relative; width:100%; justify-content:center; flex-wrap:wrap;}
+.tree-h-line{position:absolute; top:0; left:12%; right:12%; height:2px; background:var(--blue);}
+.tree-branch{display:flex; flex-direction:column; align-items:center; padding:0 14px; margin-top:0;}
+.tree-branch .stem{width:2px; height:18px; background:var(--blue);}
+.tree-branch .leaf{
+  background:var(--yellow-tint); border:1.5px solid var(--yellow-deep); border-radius:9px;
+  padding:9px 13px; font-family:var(--mono); font-size:12.5px; text-align:center; min-width:90px;
+}
+@media (max-width:600px){ .tree-h-line{display:none;} .tree-branch .stem{height:10px;} }
+
+/* request-travel style animation (used for kernel mediating hardware calls) */
+.travel-track{position:relative; height:46px; background:var(--bg); border:1.5px dashed var(--border); border-radius:30px; margin:18px 0 6px;}
+.travel-dot{
+  position:absolute; top:50%; left:6px; transform:translateY(-50%);
+  width:26px; height:26px; border-radius:50%; background:var(--blue); color:#fff; font-size:12px;
+  display:flex; align-items:center; justify-content:center; font-family:var(--mono);
+  animation:travel 3.2s ease-in-out infinite;
+}
+@keyframes travel{
+  0%{left:6px;} 45%{left:calc(50% - 13px);} 55%{left:calc(50% - 13px);} 100%{left:calc(100% - 32px);}
+}
+@media (prefers-reduced-motion:reduce){ .travel-dot{animation:none; left:calc(50% - 13px);} }
+.travel-ends{display:flex; justify-content:space-between; font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); padding:0 4px;}
+
+/* ============================================================
+   COMPARISON TABLE
+   ============================================================ */
+.cmp-table{width:100%; border-collapse:separate; border-spacing:0; margin:18px 0; font-size:14px; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;}
+.cmp-table th{background:var(--blue); color:#fff; text-align:left; padding:11px 14px; font-family:var(--mono); font-size:12.5px; letter-spacing:.4px;}
+.cmp-table td{padding:11px 14px; border-top:1px solid var(--border); vertical-align:top;}
+.cmp-table tr:nth-child(even) td{background:var(--bg-alt);}
+.cmp-table td:first-child{font-weight:700; color:var(--blue-dark); white-space:nowrap;}
+
+/* ============================================================
+   CARDS: examples / industry / job roles
+   ============================================================ */
+.card-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin:18px 0;}
+.info-card{background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow);}
+.info-card h4{margin:0 0 6px; font-size:15.5px; display:flex; align-items:center; gap:8px;}
+.info-card p{margin:0; font-size:13.5px; color:var(--ink-soft);}
+.info-card .tag{display:inline-block; font-family:var(--mono); font-size:10.5px; background:var(--green-tint); color:var(--green); padding:2px 7px; border-radius:6px; margin-top:8px;}
+
+/* ============================================================
+   INTERVIEW / MISTAKES / MEMORY TRICK
+   ============================================================ */
+details.qa{border:1px solid var(--border); border-radius:10px; margin:9px 0; background:var(--bg);}
+details.qa summary{padding:12px 15px; cursor:pointer; font-weight:600; font-size:14.5px; list-style:none; display:flex; gap:10px; align-items:flex-start;}
+details.qa summary::before{content:"Q"; font-family:var(--mono); font-size:11px; background:var(--blue-tint); color:var(--blue-dark); border-radius:5px; padding:2px 7px; flex:none;}
+details.qa[open] summary{border-bottom:1px solid var(--border);}
+details.qa .ans{padding:12px 15px 15px 42px; color:var(--ink-soft); font-size:14px;}
+
+.mistake-row{display:flex; gap:10px; align-items:flex-start; margin:10px 0; font-size:14px;}
+.mistake-row .x{color:var(--red); font-weight:800; flex:none;}
+.mistake-row .ok{color:var(--green); font-weight:800; flex:none;}
+
+.trick{
+  background:var(--yellow-tint); border:1px dashed var(--yellow-deep); border-radius:10px;
+  padding:12px 16px; margin:14px 0; font-size:14px;
+}
+.trick b{font-family:var(--mono); font-size:11.5px; text-transform:uppercase; color:#7a5900;}
+html.dark .trick b{color:var(--yellow);}
+
+/* ============================================================
+   QUIZ / FLASHCARDS
+   ============================================================ */
+.quiz-q{border:1px solid var(--border); border-radius:var(--radius); padding:15px 16px; margin:12px 0; background:var(--bg);}
+.quiz-q p.qtext{font-weight:600; margin:0 0 10px;}
+.quiz-opts{display:grid; gap:8px;}
+.quiz-opt{
+  text-align:left; border:1px solid var(--border); background:var(--bg-alt); border-radius:8px;
+  padding:9px 12px; cursor:pointer; font-size:13.5px; color:var(--ink); font-family:var(--sans);
+}
+.quiz-opt:hover{border-color:var(--blue);}
+.quiz-opt.correct{background:var(--green-tint); border-color:var(--green); font-weight:700;}
+.quiz-opt.wrong{background:var(--red-tint); border-color:var(--red);}
+.quiz-feedback{font-size:12.5px; margin-top:8px; font-family:var(--mono); display:none;}
+
+.flash-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin:16px 0;}
+.flashcard{
+  perspective:1000px; height:120px; cursor:pointer;
+}
+.flashcard-inner{position:relative; width:100%; height:100%; transition:transform .5s; transform-style:preserve-3d;}
+.flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+.flashcard-face{
+  position:absolute; inset:0; backface-visibility:hidden; border-radius:12px;
+  display:flex; align-items:center; justify-content:center; text-align:center; padding:14px;
+  font-size:13.5px; border:1.5px solid var(--border);
+}
+.flashcard-front{background:var(--blue-tint); color:var(--blue-dark); font-weight:700;}
+.flashcard-back{background:var(--yellow-tint); color:#5c4400; transform:rotateY(180deg); border-color:var(--yellow-deep);}
+html.dark .flashcard-back{color:var(--yellow-tint);}
+
+/* ============================================================
+   REVISION / KEY POINTS
+   ============================================================ */
+.keypoints{padding-left:0; list-style:none; display:grid; gap:8px; margin:16px 0;}
+.keypoints li{display:flex; gap:10px; align-items:flex-start; font-size:14.5px;}
+.keypoints li .kn{
+  font-family:var(--mono); font-size:11px; font-weight:800; background:var(--blue); color:#fff;
+  width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex:none; margin-top:2px;
+}
+
+/* ============================================================
+   NOTES
+   ============================================================ */
+.notes-area{width:100%; min-height:80px; resize:vertical; border:1px solid var(--border); border-radius:10px; padding:12px; font-family:var(--sans); font-size:13.5px; background:var(--bg-alt); color:var(--ink);}
+.notes-status{font-size:11.5px; color:var(--ink-faint); font-family:var(--mono); margin-top:5px; height:14px;}
+
+/* ============================================================
+   NAV FOOTER / BACK TO TOP
+   ============================================================ */
+.chnav-footer{display:flex; justify-content:space-between; gap:12px; max-width:var(--maxw); margin:10px auto 0; padding:0 24px;}
+.chnav-footer a{
+  border:1px solid var(--border); border-radius:10px; padding:10px 14px; text-decoration:none; color:var(--ink);
+  font-size:13px; flex:1; max-width:48%;
+}
+.chnav-footer a.next{text-align:right;}
+.chnav-footer a small{display:block; color:var(--ink-faint); font-family:var(--mono); font-size:10.5px;}
+.chnav-footer a:hover{border-color:var(--blue);}
+
+#backtotop{
+  position:fixed; bottom:22px; right:22px; width:42px; height:42px; border-radius:50%;
+  background:var(--blue); color:#fff; border:none; cursor:pointer; font-size:16px; box-shadow:var(--shadow);
+  opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:80;
+}
+#backtotop.show{opacity:1; pointer-events:auto;}
+
+.site-footer{text-align:center; padding:50px 24px 70px; color:var(--ink-faint); font-size:12.5px; font-family:var(--mono);}
+.kbd{font-family:var(--mono); background:var(--bg-alt); border:1px solid var(--border); border-radius:5px; padding:1px 6px; font-size:11px;}
+
+mark.hit{background:var(--yellow); color:#16202e; border-radius:3px;}
+.hidden-by-search{display:none !important;}
+
+/* ============================================================
+   PRINT
+   ============================================================ */
+@media print{
+  header.topbar, nav.chnav, #progress-track, #backtotop, .chapter-tools, .notes-area, .notes-status{display:none !important;}
+  body{background:#fff; color:#000;}
+  .chapter{break-before:page; border-top:none;}
+  .chapter-body.collapsed{display:block !important;}
+  .diagram-wrap, .analogy-card, .cmp-table, .quiz-q, details.qa, .flashcard{break-inside:avoid;}
+  a{color:#000; text-decoration:none;}
+}
+</style>
+</head>
+<body>
+
+<div id="progress-track"><div id="progress-bar"></div></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <svg class="tux" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="11" stroke="var(--blue)" stroke-width="1.5"/><path d="M9 9c0-1.5 1.2-2.5 3-2.5s3 1 3 2.5-1 2-1 3.5 1 2 1 3.5c0 1-.9 1.7-3 1.7s-3-.7-3-1.7c0-1.5 1-2 1-3.5s-1-2-1-3.5z" fill="var(--yellow)"/></svg>
+      Linux, From Zero
+    </div>
+    <input type="search" id="searchbox" placeholder="Search this book&hellip;  ( / )" aria-label="Search chapters">
+    <span id="progress-label">0 / 9 chapters</span>
+    <button class="tbtn" id="expandAllBtn">Expand all</button>
+    <button class="tbtn" id="darkToggle" aria-label="Toggle dark mode">🌙 Dark</button>
+  </div>
+  <nav class="chnav" id="chnav" aria-label="Chapter navigation">
+    <a href="#ch1">1. OS</a>
+    <a href="#ch2">2. What is Linux</a>
+    <a href="#ch3">3. Unix</a>
+    <a href="#ch4">4. Linux vs Unix</a>
+    <a href="#ch5">5. Kernel</a>
+    <a href="#ch6">6. Distributions</a>
+    <a href="#ch7">7. Features</a>
+    <a href="#ch8">8. Jobs &amp; Industry</a>
+    <a href="#ch9">9. Which Distro?</a>
+    <a href="#revision">Revision</a>
+  </nav>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <span class="eyebrow">Chapter 01 &middot; Introduction to Linux</span>
+  <h1>What Linux actually is &mdash; from an empty brain to a working mental model</h1>
+  <p class="lede">This chapter rebuilds, from first principles, every idea you need before you can honestly say "I understand Linux": what an operating system is, what a kernel is, why Linux is <em>not</em> an operating system by itself, and how one open-source engine became Ubuntu, CentOS, and Kali Linux at the same time.</p>
+  <div class="hero-meta">
+    <span>📺 Source: Linux fundamentals lecture (Hindi/English)</span>
+    <span>⏱ ~9 min transcript &rarr; full chapter</span>
+    <span>🧠 Assumes zero prior knowledge</span>
+  </div>
+</section>
+
+<!-- ================= ROADMAP ================= -->
+<section class="roadmap-section">
+  <h2>Your roadmap through this chapter</h2>
+  <div class="roadmap" id="roadmap">
+    <div class="rnode" data-ch="ch1"><a href="#ch1"><span class="num">01</span><span class="rtxt"><b>What is an Operating System?</b><small>The prerequisite everything else depends on</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch2"><a href="#ch2"><span class="num">02</span><span class="rtxt"><b>What is Linux?</b><small>Definition, 1991 origin story, why it's called "Linux"</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch3"><a href="#ch3"><span class="num">03</span><span class="rtxt"><b>What is Unix?</b><small>The 1970 Bell Labs ancestor Linux is built on</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch4"><a href="#ch4"><span class="num">04</span><span class="rtxt"><b>Linux vs Unix</b><small>Licensed vs open source, and why commands feel familiar</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch5"><a href="#ch5"><span class="num">05</span><span class="rtxt"><b>"Linux is not an OS" &mdash; the Kernel</b><small>The car-engine idea that unlocks everything</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch6"><a href="#ch6"><span class="num">06</span><span class="rtxt"><b>Linux Distributions</b><small>How Ubuntu, CentOS and Kali come from one kernel</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch7"><a href="#ch7"><span class="num">07</span><span class="rtxt"><b>Features of Linux</b><small>Open source, multi-user, multitasking, secure, portable</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch8"><a href="#ch8"><span class="num">08</span><span class="rtxt"><b>Job Roles &amp; Industry Demand</b><small>Where this skill actually gets used</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch9"><a href="#ch9"><span class="num">09</span><span class="rtxt"><b>Which Distribution Should You Learn?</b><small>A practical recommendation to start with</small></span><span class="check"></span></a></div>
+  </div>
+</section>
+
+<main>
+
+<!-- ================= CHAPTER 1 : OPERATING SYSTEM (prerequisite) ================= -->
+<section class="chapter" id="ch1">
+  <div class="chapter-head">
+    <span class="ch-num">01</span>
+    <div>
+      <h2>What is an Operating System?</h2>
+      <p class="ch-sub">Prerequisite concept — needed before "Linux" makes any sense</p>
+    </div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch1"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="note"><b>Where this comes from:</b> The transcript defines Linux as "an open-source operating system" and briefly defines what an operating system is. Because the whole chapter depends on this idea, it is expanded here into a full first-principles explanation before we touch Linux itself. <span class="source-tag">background, added for understanding</span></div>
+
+    <div class="step">
+      <span class="step-label">1 &middot; The problem</span>
+      <p>A computer is, physically, just electronic components: a processor, memory chips, a disk, a screen. None of these parts speak "human." A processor only understands raw electrical signals. If you had to control a computer by manipulating voltages directly, you could never write an email, open a browser, or even move a mouse pointer.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">2 &middot; Why we need this concept</span>
+      <p>We need one piece of software that sits between "the messy hardware" and "the human/apps," and translates between them, both ways, all the time. That piece of software is the <b>operating system (OS)</b>.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">3 &middot; What happens without it</span>
+      <p class="soft">Every app developer would need to personally write code to control the processor, memory, disk, and screen at the hardware level, for every single device model. Nothing would be reusable. Software as we know it would not exist.</p>
+    </div>
+
+    <div class="analogy-card">
+      <span class="ico">🗣️</span>
+      <div><b>Real-life analogy</b>A translator at a business meeting sits between a Hindi-speaking client and an English-speaking client. Neither side needs to learn the other's language — the translator (the OS) converts each side's requests into something the other side can act on. Your keyboard tap doesn't "mean" anything to the processor until the OS translates it.</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">5 &middot; Simple explanation</span>
+      <p><b>An operating system is a software that communicates with the hardware, and lets you run applications on top of it.</b> This is exactly the one-line definition used in the transcript.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">6 &middot; Technical explanation</span>
+      <p>Formally, an OS is system software that manages hardware resources (CPU time, memory, storage, input/output devices) and provides common services for application programs, through a consistent interface, so that apps don't need to know the hardware's specific details.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">7 &middot; Internal working (behind the scenes)</span>
+      <p class="soft">When you double-click an app icon, the OS: allocates a chunk of memory for that app &rarr; asks the CPU to schedule time for it to run &rarr; lets it request disk/network access through OS-provided rules &rarr; and displays its output on screen through the display driver. All of this happens without you ever seeing it.</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="stack-diagram">
+        <div class="stack-layer apps">Applications — Browser, Word, Games</div>
+        <div class="stack-conn"></div>
+        <div class="stack-layer kernel">Operating System</div>
+        <div class="stack-conn"></div>
+        <div class="stack-layer hw">Hardware — CPU, RAM, Disk, Screen</div>
+      </div>
+      <div class="cap">Fig 1.1 — The Operating System sits between apps and hardware, translating in both directions</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">9 &middot; Example</span>
+      <p>Windows on your laptop, macOS on a MacBook, and Android on your smartphone are all operating systems. Each lets the same kind of apps (say, a calculator or a browser) run on very different underlying hardware.</p>
+    </div>
+
+    <div class="card-grid">
+      <div class="info-card"><h4>🖥️ Windows</h4><p>OS used on most desktops/laptops for general and enterprise use.</p></div>
+      <div class="info-card"><h4>🍎 macOS</h4><p>Apple's OS, built for MacBooks and Mac desktops.</p></div>
+      <div class="info-card"><h4>📱 Android</h4><p>OS running on the majority of the world's smartphones.</p></div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">12 &middot; Interview angle</span>
+      <p class="soft">If asked "what is an OS" in an interview, the strongest one-line answer is: <i>"System software that manages hardware resources and provides a stable interface for applications to run on."</i> Follow up by naming one resource it manages (CPU, memory, or I/O) to show depth.</p>
+    </div>
+
+    <div class="trick"><b>Memory trick</b><br>OS = <b>O</b>ne <b>S</b>oftware between you and your machine's guts.</div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>An operating system is the translator software between hardware and applications. Every device you use — laptop, phone, server — needs one. With this idea fixed, we can now ask: which family of operating systems is Linux, and how does it fit this definition?</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 2 : WHAT IS LINUX ================= -->
+<section class="chapter" id="ch2">
+  <div class="chapter-head">
+    <span class="ch-num">02</span>
+    <div><h2>What is Linux?</h2><p class="ch-sub">Definition &middot; History &middot; Where the name comes from</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch2"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="step">
+      <span class="step-label">1&ndash;3 &middot; Problem, purpose, and what's missing without it</span>
+      <p>By the 1990s, operating systems existed, but the powerful ones (like Unix — see Chapter 3) were commercial and licensed, meaning ordinary programmers, students, and small companies could not freely study, modify, or run them without paying. There was no free, open, community-owned operating system core that anyone could build on.</p>
+    </div>
+
+    <div class="analogy-card">
+      <span class="ico">🍳</span>
+      <div><b>Real-life analogy</b>Imagine a master chef's secret recipe is locked away and you must pay a license just to cook with it. Now imagine someone publishes an equally good recipe for free, and says "anyone can cook this, remix it, and even sell their own version." That free, publishable recipe is what Linux did for operating systems.</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">5 &middot; Simple explanation (from the transcript)</span>
+      <p><b>Linux is an open-source operating system.</b> "Open source" means the source code is freely and publicly available, so anyone — including companies — can use it, study it, and modify it.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">6 &middot; Technical explanation</span>
+      <p>Linux is known for its <b>security</b> and <b>flexible nature</b>. It was created in <b>1991 by Linus Torvalds</b>. Its name comes from <b>"Linus" + "x"</b> — the <b>x</b> signalling that it is a Unix-based / Unix-family system (explained fully in Chapter 3).</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="flow">
+        <div class="box yellow">Linus</div>
+        <div class="arrow">+</div>
+        <div class="box yellow">x <span style="opacity:.7">(Unix)</span></div>
+        <div class="arrow">=</div>
+        <div class="box">Linux</div>
+      </div>
+      <div class="cap">Fig 2.1 — Where the name "Linux" comes from</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">7 &middot; Internal working / where it's used</span>
+      <p>Linux-based operating systems run on ordinary desktop computers <i>and</i> on the large servers and infrastructure that power much of the internet — a rare combination, since some OS families are strong on one side but weak on the other.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">10&ndash;11 &middot; Real-world &amp; industry usage</span>
+      <p>Large cloud companies such as Amazon, Google, and Facebook run huge portions of their infrastructure on Linux, because of its security and flexibility at scale (expanded further in Chapter 8).</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">12 &middot; Interview explanation</span>
+      <p class="soft">A crisp interview answer: <i>"Linux is an open-source, Unix-based kernel, created by Linus Torvalds in 1991, known for security and flexibility, and widely used across desktops and enterprise servers."</i></p>
+    </div>
+
+    <div class="trick"><b>Memory trick</b><br>1991 → the year Linux was <u>b</u>orn. Linus + x = Lin<b>ux</b>.</div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>Linux is a free, open-source, Unix-inspired operating system created in 1991 by Linus Torvalds, valued for security and flexibility, and used everywhere from laptops to enterprise servers. But to really understand Linux, we first need to understand the system it was inspired by: Unix.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 3 : UNIX ================= -->
+<section class="chapter" id="ch3">
+  <div class="chapter-head">
+    <span class="ch-num">03</span>
+    <div><h2>What is Unix? (the prerequisite Linux is built on)</h2><p class="ch-sub">The 1970 ancestor operating system</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch3"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+    <div class="step">
+      <span class="step-label">1&ndash;2 &middot; Problem &amp; why we need this term</span>
+      <p>The transcript's own definition of Linux says it is "based on x." Before continuing, that "x" must be unpacked, otherwise the rest of the chapter is unreadable. The "x" is <b>Unix</b>.</p>
+    </div>
+    <div class="step">
+      <span class="step-label">5&ndash;6 &middot; Simple + technical explanation</span>
+      <p><b>Unix is a powerful, multi-user, multitasking operating system.</b> It is a real, complete operating system in its own right — originally built in <b>1970 at AT&amp;T Bell Laboratories</b>. Many modern operating systems are built on the design foundations that Unix established.</p>
+    </div>
+    <div class="analogy-card">
+      <span class="ico">📜</span>
+      <div><b>Real-life analogy</b>Think of Unix as Latin: an old, foundational language that isn't spoken casually day-to-day anymore, but whose grammar and vocabulary shaped many of today's living languages (Linux, macOS, and others all borrow its "grammar").</div>
+    </div>
+    <div class="step">
+      <span class="step-label">7 &middot; Internal working — what "multi-user, multitasking" means</span>
+      <p><b>Multi-user</b> means several different user accounts can use the same machine, often at the same time (typical on a server). <b>Multitasking</b> means the OS can run many programs seemingly at once by rapidly switching the CPU's attention between them.</p>
+    </div>
+    <div class="step">
+      <span class="step-label">9 &middot; Example</span>
+      <p>A university's central server in the 1970s–80s might have had dozens of students logged in simultaneously from different terminals, each running their own programs — this is exactly the multi-user, multitasking model Unix pioneered.</p>
+    </div>
+    <div class="trick"><b>Memory trick</b><br>Unix → <b>U</b>niversity-style shared computer, <b>1970</b>, Bell Labs, the "parent" of Linux.</div>
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>Unix is the older, powerful, multi-user operating system Linux draws its design from. Now we can meaningfully compare the two.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 4 : LINUX VS UNIX ================= -->
+<section class="chapter" id="ch4">
+  <div class="chapter-head">
+    <span class="ch-num">04</span>
+    <div><h2>Linux vs Unix</h2><p class="ch-sub">If Linux is based on Unix, why not just use Unix directly?</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch4"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+    <div class="step">
+      <span class="step-label">1&ndash;2 &middot; The natural question</span>
+      <p>Since Linux is based on Unix's design, a fair question is: why not just use Unix directly? The transcript's answer is the core difference between the two.</p>
+    </div>
+
+    <table class="cmp-table">
+      <tr><th>Aspect</th><th>Unix</th><th>Linux</th></tr>
+      <tr><td>Licensing</td><td>Licensed — you must purchase a license to use it</td><td>Open source — free to use, study, and modify</td></tr>
+      <tr><td>Origin</td><td>Built 1970, AT&amp;T Bell Labs</td><td>Built 1991, Linus Torvalds, following Unix's design principles</td></tr>
+      <tr><td>Relationship</td><td>The original, powerful OS of its era</td><td>Designed to be just as powerful, on Unix's own design principles</td></tr>
+      <tr><td>Compatibility</td><td>Set the standard for commands/behavior</td><td>Made compatible with Unix software and commands</td></tr>
+    </table>
+
+    <div class="analogy-card">
+      <span class="ico">🎬</span>
+      <div><b>Real-life analogy</b>Unix is like a big-budget studio film only available in paid theatres. Linux is like an independent film made using the same storytelling techniques, released free for anyone to watch, remix, and redistribute — while still feeling familiar to fans of the original.</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">6&ndash;7 &middot; Technical explanation and why it matters practically</span>
+      <p>Because Linux followed Unix's own design principles, it became compatible with Unix software and commands. This is exactly why the commands you will learn in Linux later in this course are described as "Unix-inspired and Unix-compatible."</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">12 &middot; Interview explanation</span>
+      <p class="soft"><i>"Unix is a licensed, commercial OS from 1970; Linux is a free, open-source OS from 1991 built on Unix's design principles, which is why Linux commands are largely compatible with Unix."</i></p>
+    </div>
+
+    <div class="trick"><b>Memory trick</b><br>U for Unix = <b>U</b>nlock with payment. L for Linux = <b>L</b>iberated, free.</div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>Linux isn't Unix, and it isn't a copy of Unix's code — it is a free reimplementation that follows Unix's proven design. This sets up the single most misunderstood idea in the whole topic, covered next: Linux, strictly speaking, is not even a complete operating system.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 5 : KERNEL ================= -->
+<section class="chapter" id="ch5">
+  <div class="chapter-head">
+    <span class="ch-num">05</span>
+    <div><h2>"Linux is not an Operating System" &mdash; understanding the Kernel</h2><p class="ch-sub">The car-engine idea that makes everything else click</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch5"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="note"><b>Important clarification made directly in the transcript:</b> earlier we said "Linux is an operating system." Now the transcript deliberately says <b>"Linux is NOT an operating system."</b> Both statements are true in different senses — this section resolves the apparent contradiction.</div>
+
+    <div class="step">
+      <span class="step-label">1&ndash;2 &middot; The problem &amp; why it matters</span>
+      <p>You cannot download "Linux" by itself and start using it the way you use Windows. Something is missing. Understanding what's missing is the single most important idea in this chapter.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">5 &middot; Simple explanation</span>
+      <p><b>Linux is an open-source kernel</b> — it is not a complete operating system by itself, it <i>is</i> the kernel. And a <b>kernel is the core part of an operating system.</b></p>
+    </div>
+
+    <div class="analogy-card">
+      <span class="ico">🚗</span>
+      <div><b>The car-engine analogy (from the transcript)</b>Think of a car. Its core part is the <b>engine</b> — without the engine, the car doesn't really exist as a functioning car, and all of the car's power and performance ultimately comes from the engine. The <b>Linux kernel is exactly like that car engine</b>: it is open source, so different companies take this same "engine," build their own "car" body and features around it, and give it their own brand name.</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">6&ndash;7 &middot; Technical explanation &amp; internal working</span>
+      <p>Technically, the kernel is the layer of software that talks directly to the hardware: it manages the CPU's time, memory allocation, and device drivers, and it exposes a controlled set of services that the rest of the operating system uses. It is the innermost, most privileged layer — hence "kernel," the same word used for the core/seed of something.</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="engine-diagram">
+        <div class="car-block">
+          <svg class="car-svg" viewBox="0 0 200 110">
+            <rect x="10" y="55" width="180" height="30" rx="8" fill="var(--bg)" stroke="var(--blue)" stroke-width="2"/>
+            <path d="M35 55 L60 30 H140 L165 55 Z" fill="var(--bg)" stroke="var(--blue)" stroke-width="2"/>
+            <circle cx="55" cy="90" r="14" fill="var(--ink-faint)"/>
+            <circle cx="145" cy="90" r="14" fill="var(--ink-faint)"/>
+            <rect x="80" y="60" width="40" height="18" rx="4" class="engine-pulse" fill="var(--yellow)" stroke="var(--yellow-deep)" stroke-width="1.5"/>
+          </svg>
+          <div class="lbl">🟡 Engine = Linux Kernel</div>
+        </div>
+        <div style="font-size:26px; color:var(--blue);">&rarr;</div>
+        <div class="card-grid" style="margin:0;">
+          <div class="info-card"><h4>🚙 "Car" A</h4><p>Ubuntu adds its own body, features &amp; branding around the same engine.</p></div>
+          <div class="info-card"><h4>🚕 "Car" B</h4><p>CentOS adds a different body &amp; feature set around the same engine.</p></div>
+          <div class="info-card"><h4>🏎️ "Car" C</h4><p>Kali Linux adds a security/hacking-focused body around the same engine.</p></div>
+        </div>
+      </div>
+      <div class="cap">Fig 5.1 — One open-source engine (kernel), many different "cars" (distributions) built around it</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">7b &middot; What the kernel mediates, moment to moment</span>
+      <p class="soft">Every time an app needs to read a file, use memory, or talk to the network, that request passes through the kernel, which decides how and when to grant it, and hands the result back.</p>
+    </div>
+    <div class="diagram-wrap">
+      <div class="travel-track">
+        <div class="travel-dot">req</div>
+      </div>
+      <div class="travel-ends"><span>📦 Application</span><span>🖲️ Hardware (via Kernel)</span></div>
+      <div class="cap">Fig 5.2 — A request from an application travels through the kernel to reach hardware, and the result travels back</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">9&ndash;10 &middot; Example &amp; real-world usage</span>
+      <p>This is precisely why "Ubuntu," "CentOS," and "Kali Linux" all exist as separate-feeling operating systems, yet a course that teaches you Linux fundamentals on any one of them transfers almost entirely to the others: they all share the same engine underneath.</p>
+    </div>
+
+    <div class="mistake-row"><span class="x">✗</span><span>Thinking "Linux" and "Ubuntu" are two competing, unrelated operating systems.</span></div>
+    <div class="mistake-row"><span class="ok">✓</span><span>Ubuntu <i>is</i> a Linux distribution — an operating system built using the Linux kernel.</span></div>
+
+    <div class="step">
+      <span class="step-label">12 &middot; Interview explanation</span>
+      <p class="soft"><i>"Linux itself is only the kernel — the core component that manages hardware resources. A full, usable operating system is created by combining this kernel with additional software; that combination is called a distribution."</i></p>
+    </div>
+
+    <div class="trick"><b>Memory trick</b><br>Kernel = <b>K</b>ey <b>ER</b>ngine (engine) of the OS. No engine, no car.</div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>Linux, precisely speaking, is a kernel — the core, hardware-facing part of an operating system, like a car's engine. Different companies build a full, usable operating system around this same kernel. Those complete operating systems are called <b>distributions</b>, covered next.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 6 : DISTRIBUTIONS ================= -->
+<section class="chapter" id="ch6">
+  <div class="chapter-head">
+    <span class="ch-num">06</span>
+    <div><h2>Linux Distributions</h2><p class="ch-sub">How one kernel becomes Ubuntu, CentOS, Kali, and more</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch6"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="step">
+      <span class="step-label">1&ndash;2 &middot; Problem &amp; purpose</span>
+      <p>A kernel alone has no desktop, no file manager, no way to install software, no login screen. Someone has to add all of that around the kernel to make it usable day to day. Different companies and communities did exactly that, in their own ways.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">5 &middot; Simple explanation</span>
+      <p>A <b>Linux distribution</b> (often shortened to <b>"distro"</b>) is <b>an actual, ready-to-use operating system</b> made from a collection of software, which includes the Linux kernel plus, usually, a package management system.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">6 &middot; What is a "package management system"?</span>
+      <p>A <b>package</b> is simply a bundled piece of installable software (like an app or a library). A <b>package management system</b> is the built-in tool a distribution provides for installing, updating, and removing this software cleanly — comparable to an app store, but for the operating system's software.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">7 &middot; Internal working — why distros can differ so much</span>
+      <p>Because the Linux kernel is open source, anyone is free to modify it — add features, adjust settings, bundle different default software. That is exactly what companies do: they take the shared kernel and customize everything around it according to their own priorities (e.g. extra security, or extra ease of use), then release the result under their own name.</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="tree-diagram">
+        <div class="tree-root">🟡 Linux Kernel (open source, shared core)</div>
+        <div class="tree-trunk"></div>
+        <div class="tree-branches">
+          <div class="tree-h-line"></div>
+          <div class="tree-branch"><div class="stem"></div><div class="leaf">Ubuntu<br><span style="opacity:.7">user-friendly, desktop + server</span></div></div>
+          <div class="tree-branch"><div class="stem"></div><div class="leaf">Red Hat<br><span style="opacity:.7">enterprise servers</span></div></div>
+          <div class="tree-branch"><div class="stem"></div><div class="leaf">CentOS<br><span style="opacity:.7">free community version of Red Hat</span></div></div>
+          <div class="tree-branch"><div class="stem"></div><div class="leaf">Kali Linux<br><span style="opacity:.7">security &amp; hacking focus</span></div></div>
+        </div>
+      </div>
+      <div class="cap">Fig 6.1 — Many distributions, one shared kernel underneath</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">9&ndash;10 &middot; Examples named in the transcript</span>
+    </div>
+    <div class="card-grid">
+      <div class="info-card"><h4>🟠 Ubuntu</h4><p>Most user-friendly distro; runs well on both servers and desktops. Frequently updated ("G version" line mentioned in the source refers to its regular numbered releases).</p><span class="tag">Beginner friendly</span></div>
+      <div class="info-card"><h4>🔴 Red Hat</h4><p>A leading enterprise-grade distribution used heavily on business servers.</p><span class="tag">Enterprise</span></div>
+      <div class="info-card"><h4>🟢 CentOS</h4><p>The free, community-driven counterpart to Red Hat — same core, no license cost.</p><span class="tag">Free &amp; practice-ready</span></div>
+      <div class="info-card"><h4>⚫ Kali Linux</h4><p>Distribution focused on security testing and ethical hacking tools.</p><span class="tag">Security</span></div>
+    </div>
+    <p class="soft" style="font-size:13px;">Note: this is a small, representative sample. Hundreds of Linux distributions exist; the transcript deliberately does not attempt to list them all.</p>
+
+    <div class="mistake-row"><span class="x">✗</span><span>Assuming a "distribution" is somehow lesser or unofficial compared to "Linux."</span></div>
+    <div class="mistake-row"><span class="ok">✓</span><span>A distribution <i>is</i> the actual, complete, usable operating system — it's what you install and run.</span></div>
+
+    <div class="step">
+      <span class="step-label">12 &middot; Interview explanation</span>
+      <p class="soft"><i>"A distribution packages the Linux kernel together with a package manager and other software into a complete, installable OS. Examples include Ubuntu, CentOS, and Kali Linux."</i></p>
+    </div>
+
+    <div class="trick"><b>Memory trick</b><br>Kernel = engine (one). Distro = car (many) — different bodies, same engine underneath.</div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>A distribution is a complete operating system built from the Linux kernel plus a package management system and other software. Because the kernel is shared, skills learned on one distro largely transfer to the others. Next: why any of this matters practically — the features that make Linux worth learning.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 7 : FEATURES ================= -->
+<section class="chapter" id="ch7">
+  <div class="chapter-head">
+    <span class="ch-num">07</span>
+    <div><h2>Features of Linux-based Operating Systems</h2><p class="ch-sub">Why this specific OS family is worth learning</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch7"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+    <div class="step">
+      <span class="step-label">2 &middot; Why this section exists</span>
+      <p>Understanding <i>what</i> Linux is naturally raises the question: why is it worth learning at all? These features are the transcript's direct answer.</p>
+    </div>
+
+    <div class="card-grid">
+      <div class="info-card"><h4>🔓 Open source</h4><p>Source code is freely and publicly available, so anyone — including companies — can use, study, and modify it.</p></div>
+      <div class="info-card"><h4>👥 Multi-user</h4><p>Multiple users can access and work on the same server at the same time — essential for shared infrastructure.</p></div>
+      <div class="info-card"><h4>🧵 Multitasking</h4><p>The system can run many processes seemingly simultaneously, which multi-user access depends on heavily.</p></div>
+      <div class="info-card"><h4>🔒 Security</h4><p>Widely regarded as strong on security, a major reason it's trusted for servers.</p></div>
+      <div class="info-card"><h4>📦 Portability</h4><p>Runs across a wide range of hardware — from small devices to huge servers.</p></div>
+    </div>
+
+    <div class="note"><b>How these connect:</b> Multi-user and multitasking work together — a server is only useful to many people at once if the OS can also juggle many running tasks at once. Security and portability are why enterprises and cloud providers standardize on Linux for infrastructure. <span class="source-tag">background, added for understanding</span></div>
+
+    <div class="trick"><b>Memory trick</b><br><b>O</b>pen &middot; <b>M</b>ulti-user &middot; <b>M</b>ultitasking &middot; <b>S</b>ecure &middot; <b>P</b>ortable → "OMMSP" — read it as "Old Machines Made Super Powerful."</div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>Linux's core features — open source, multi-user, multitasking, secure, and portable — are exactly why it dominates server and infrastructure environments, which we look at next.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 8 : JOBS & INDUSTRY ================= -->
+<section class="chapter" id="ch8">
+  <div class="chapter-head">
+    <span class="ch-num">08</span>
+    <div><h2>Job Roles &amp; Industry Demand</h2><p class="ch-sub">Where this knowledge is actually used professionally</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch8"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+    <div class="step">
+      <span class="step-label">10 &middot; Real-world usage — job roles named in the transcript</span>
+    </div>
+    <div class="card-grid">
+      <div class="info-card"><h4>🛠️ System Administrator</h4><p>Manages servers directly — Linux knowledge is core to this role.</p></div>
+      <div class="info-card"><h4>🔁 DevOps Engineer</h4><p>Builds automation pipelines; Linux underpins most of the tooling involved.</p></div>
+      <div class="info-card"><h4>☁️ Cloud Engineer</h4><p>Works with cloud infrastructure, which very commonly runs on Linux.</p></div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">11 &middot; Industry adoption</span>
+      <p>Large cloud-scale companies — <b>Amazon, Google, Facebook</b> — run extremely heavy software workloads where Linux plays a major infrastructural role.</p>
+    </div>
+
+    <div class="note"><b>Practical takeaway from the source:</b> Linux is described as an "almost must-have" additional skill for IT roles today. How deep to go is your choice — a basic working knowledge is broadly useful everywhere, while deeper expertise pays off if you're targeting a specific role like DevOps or Cloud Engineering.</div>
+
+    <div class="trick"><b>Memory trick</b><br>Sys Admin manages the server. DevOps automates around it. Cloud Engineer runs it at scale. All three need Linux.</div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>Linux skills are in demand across System Administration, DevOps, and Cloud Engineering roles, and underpin infrastructure at major cloud companies. The remaining practical question: given so many distributions, which one should you actually start learning on?</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 9 : WHICH DISTRO ================= -->
+<section class="chapter" id="ch9">
+  <div class="chapter-head">
+    <span class="ch-num">09</span>
+    <div><h2>Which Linux Distribution Should You Learn?</h2><p class="ch-sub">A practical, opinionated recommendation</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch9"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+    <div class="step">
+      <span class="step-label">1&ndash;2 &middot; The confusion students face</span>
+      <p>With so many distributions — Ubuntu, CentOS, Red Hat, Kali, and more — beginners commonly feel stuck on which one to pick first.</p>
+    </div>
+    <div class="step">
+      <span class="step-label">6 &middot; The key reassurance</span>
+      <p>Since every mainstream distribution shares the same Linux kernel at its core (Chapter 5), the fundamental concepts and processes you learn on any one distro transfer easily to the others — only small, surface-level differences separate them.</p>
+    </div>
+    <div class="step">
+      <span class="step-label">9&ndash;10 &middot; The transcript's recommendation</span>
+      <p>Focus on the distribution most used in industry: <b>Red Hat</b>, which is common as an enterprise server OS. Since Red Hat itself is licensed, the recommended way to practice is its free community version, <b>CentOS</b> — freely available, and functionally very close to Red Hat. <b>Ubuntu</b> is also a solid choice, and can even be used as your everyday, GUI-based primary OS the way people use Windows.</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="flow">
+        <div class="box">Red Hat<br><span style="opacity:.7">most-used enterprise distro</span></div>
+        <div class="arrow">&rarr;</div>
+        <div class="box yellow">CentOS<br><span style="opacity:.7">its free community version</span></div>
+        <div class="arrow">&rarr;</div>
+        <div class="box">Practice here first</div>
+      </div>
+      <div class="cap">Fig 9.1 — Recommended learning path: aim for Red Hat's ecosystem, practice on the free CentOS</div>
+    </div>
+
+    <div class="note"><b>What's coming next, per the source:</b> for learning purposes, these distributions will be practiced inside <b>virtual machines</b> rather than installed directly, a topic the original lecture says will be covered in the next section. <span class="source-tag">from transcript</span></div>
+
+    <div class="correction"><b>Currency note:</b> Distribution popularity shifts over time within the industry, and package names/versions referenced verbally in a spoken lecture can be imprecise. Treat "CentOS" and "Ubuntu" as the reliable takeaway rather than any specific version number, and always check a distribution's current official site before installing.</div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>Start with CentOS (Red Hat's free twin) if your goal is enterprise/server work, or Ubuntu if you want a friendlier, desktop-capable distro. Either way, the underlying kernel concepts you learn will carry over almost entirely to any other distribution you touch later.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= REVISION ================= -->
+<section class="chapter" id="revision">
+  <div class="chapter-head">
+    <span class="ch-num">✓</span>
+    <div><h2>Chapter Revision Kit</h2><p class="ch-sub">Everything you need for a fast, complete review</p></div>
+  </div>
+  <div class="chapter-body">
+
+    <h3>10 Key Points</h3>
+    <ol class="keypoints">
+      <li><span class="kn">1</span>An operating system is software that lets applications communicate with hardware.</li>
+      <li><span class="kn">2</span>Linux is an open-source operating system created in 1991 by Linus Torvalds.</li>
+      <li><span class="kn">3</span>The name "Linux" comes from "Linus" + "x" (Unix), reflecting its Unix-based design.</li>
+      <li><span class="kn">4</span>Unix is a powerful, multi-user, multitasking OS built in 1970 at AT&amp;T Bell Labs.</li>
+      <li><span class="kn">5</span>Unix is licensed (paid); Linux is open source (free) but follows Unix's design principles.</li>
+      <li><span class="kn">6</span>Strictly, Linux is only the <b>kernel</b> — the core part of an OS — not a complete OS by itself.</li>
+      <li><span class="kn">7</span>The kernel is like a car's engine: the core, powerful, hardware-facing part.</li>
+      <li><span class="kn">8</span>A <b>distribution</b> ("distro") is a full OS made from the Linux kernel + a package management system + other software (e.g. Ubuntu, CentOS, Kali).</li>
+      <li><span class="kn">9</span>Key Linux features: open source, multi-user, multitasking, security, portability.</li>
+      <li><span class="kn">10</span>Linux skills are core to System Admin, DevOps, and Cloud Engineer roles, and power infrastructure at companies like Amazon and Google. Beginners are advised to practice on CentOS or Ubuntu.</li>
+    </ol>
+
+    <h3 style="margin-top:34px;">5 Interview Questions</h3>
+    <details class="qa"><summary>Is Linux itself an operating system?</summary><div class="ans">Strictly speaking, no — Linux is a <b>kernel</b>, the core component of an operating system. A full, usable OS is built by combining the kernel with a package manager and other software; that combination is called a <b>distribution</b> (e.g. Ubuntu, CentOS).</div></details>
+    <details class="qa"><summary>What's the difference between Linux and Unix?</summary><div class="ans">Unix (1970, AT&amp;T Bell Labs) is a licensed, paid operating system. Linux (1991, Linus Torvalds) is a free, open-source system built on Unix's design principles, which is why it's largely compatible with Unix commands and software.</div></details>
+    <details class="qa"><summary>What is a Linux distribution?</summary><div class="ans">A complete, ready-to-use operating system assembled from the Linux kernel plus a package management system and additional software. Different companies customize this differently, producing distros like Ubuntu, Red Hat, CentOS, and Kali Linux.</div></details>
+    <details class="qa"><summary>Why do so many different "versions" of Linux exist?</summary><div class="ans">Because the Linux kernel is open source, any company or community can legally modify and repackage it with their own features, defaults, and branding — resulting in many distributions built on the same shared core.</div></details>
+    <details class="qa"><summary>Why is Linux popular in industry, especially for servers?</summary><div class="ans">Its multi-user and multitasking design suits shared server environments, and it's widely regarded as secure and portable — qualities that made it the backbone of infrastructure at companies like Amazon, Google, and Facebook.</div></details>
+
+    <h3 style="margin-top:34px;">5 Multiple-Choice Questions</h3>
+    <div class="quiz-q">
+      <p class="qtext">1. Who created Linux, and in what year?</p>
+      <div class="quiz-opts">
+        <button class="quiz-opt" data-correct="false">Dennis Ritchie, 1970</button>
+        <button class="quiz-opt" data-correct="true">Linus Torvalds, 1991</button>
+        <button class="quiz-opt" data-correct="false">Ken Thompson, 1983</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <div class="quiz-q">
+      <p class="qtext">2. Precisely speaking, what is Linux?</p>
+      <div class="quiz-opts">
+        <button class="quiz-opt" data-correct="false">A complete operating system</button>
+        <button class="quiz-opt" data-correct="true">A kernel — the core part of an operating system</button>
+        <button class="quiz-opt" data-correct="false">A package manager</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <div class="quiz-q">
+      <p class="qtext">3. What is the key licensing difference between Linux and Unix?</p>
+      <div class="quiz-opts">
+        <button class="quiz-opt" data-correct="false">Both require a paid license</button>
+        <button class="quiz-opt" data-correct="false">Both are entirely free</button>
+        <button class="quiz-opt" data-correct="true">Unix is licensed/paid; Linux is open source/free</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <div class="quiz-q">
+      <p class="qtext">4. Which of these is a Linux distribution, not the kernel itself?</p>
+      <div class="quiz-opts">
+        <button class="quiz-opt" data-correct="false">The Linux kernel source code</button>
+        <button class="quiz-opt" data-correct="true">Ubuntu</button>
+        <button class="quiz-opt" data-correct="false">AT&amp;T Bell Labs Unix</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <div class="quiz-q">
+      <p class="qtext">5. Which of these is NOT one of the core features of Linux described in this chapter?</p>
+      <div class="quiz-opts">
+        <button class="quiz-opt" data-correct="false">Multi-user</button>
+        <button class="quiz-opt" data-correct="false">Open source</button>
+        <button class="quiz-opt" data-correct="true">Requires a paid license to modify</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <h3 style="margin-top:34px;">Flashcards <span style="font-size:12px; color:var(--ink-faint); font-family:var(--mono);">(click to flip)</span></h3>
+    <div class="flash-grid">
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">Kernel</div><div class="flashcard-face flashcard-back">The core part of an OS that talks directly to hardware — like a car's engine.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">Distribution (distro)</div><div class="flashcard-face flashcard-back">A complete OS built from the Linux kernel + package manager + software.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">Open source</div><div class="flashcard-face flashcard-back">Source code is freely public — anyone can use, study, and modify it.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">Multi-user</div><div class="flashcard-face flashcard-back">Multiple users can work on the same system at the same time.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">CentOS</div><div class="flashcard-face flashcard-back">The free community version of Red Hat — great for practice.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">1991 vs 1970</div><div class="flashcard-face flashcard-back">1991 = Linux created. 1970 = Unix created at Bell Labs.</div></div></div>
+    </div>
+
+    <h3 style="margin-top:34px;">Common Mistakes</h3>
+    <div class="mistake-row"><span class="x">✗</span><span>"Linux and Ubuntu are two separate, competing operating systems."</span></div>
+    <div class="mistake-row"><span class="ok">✓</span><span>Ubuntu is <i>built using</i> the Linux kernel — it is a distribution, not a rival.</span></div>
+    <div class="mistake-row"><span class="x">✗</span><span>"Linux and Unix are the same thing."</span></div>
+    <div class="mistake-row"><span class="ok">✓</span><span>Linux is a free, open-source system inspired by Unix's design — not the same codebase, and not licensed like Unix.</span></div>
+    <div class="mistake-row"><span class="x">✗</span><span>"You can install 'Linux' the same way you install Windows."</span></div>
+    <div class="mistake-row"><span class="ok">✓</span><span>You install a <i>distribution</i> (like Ubuntu or CentOS), which already includes the Linux kernel bundled with usable software.</span></div>
+
+    <h3 style="margin-top:34px;">One-Page Revision</h3>
+    <div class="diagram-wrap">
+      <p style="margin:0 0 10px;"><b>OS</b> = software between hardware &amp; apps &rarr; <b>Unix</b> (1970, licensed, powerful) &rarr; <b>Linux</b> (1991, Torvalds, open-source, Unix-inspired) &rarr; strictly a <b>kernel</b> (core/engine) &rarr; companies wrap it into full <b>distributions</b> (Ubuntu, CentOS, Kali) &rarr; features: open source, multi-user, multitasking, secure, portable &rarr; used by Sys Admins / DevOps / Cloud Engineers at companies like Amazon &amp; Google &rarr; beginners should practice on <b>CentOS</b> or <b>Ubuntu</b>.</p>
+    </div>
+
+    <h3 style="margin-top:34px;">Your Notes</h3>
+    <textarea class="notes-area" id="notesArea" placeholder="Jot your own summary or questions here — saved automatically in your browser..."></textarea>
+    <div class="notes-status" id="notesStatus"></div>
+  </div>
+</section>
+
+</main>
+
+<div class="chnav-footer">
+  <a href="#ch1" class="prev"><small>&larr; Back to start</small>What is an Operating System?</a>
+  <a href="#revision" class="next"><small>Jump to &rarr;</small>Revision Kit</a>
+</div>
+
+<footer class="site-footer">
+  Built as a single offline HTML file &middot; works without internet &middot; prints cleanly as a PDF chapter<br>
+  Shortcuts: <span class="kbd">/</span> search &middot; <span class="kbd">d</span> dark mode &middot; <span class="kbd">t</span> back to top
+</footer>
+
+<button id="backtotop" aria-label="Back to top">&uarr;</button>
+
+<script>
+(function(){
+  "use strict";
+  var STORE_KEY = "linux-book-progress-v1";
+  var chapters = Array.prototype.slice.call(document.querySelectorAll(".chapter[id]"));
+
+  function loadState(){
+    try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }catch(e){ return {}; }
+  }
+  function saveState(state){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+  var state = loadState();
+
+  /* ---------- Dark mode ---------- */
+  var darkToggle = document.getElementById("darkToggle");
+  function applyDark(on){
+    document.documentElement.classList.toggle("dark", on);
+    darkToggle.textContent = on ? "☀️ Light" : "🌙 Dark";
+    state.dark = on; saveState(state);
+  }
+  applyDark(!!state.dark);
+  darkToggle.addEventListener("click", function(){ applyDark(!document.documentElement.classList.contains("dark")); });
+
+  /* ---------- Completion checkboxes + progress ---------- */
+  var doneboxes = document.querySelectorAll(".donebox");
+  var totalCh = doneboxes.length;
+  function updateProgressUI(){
+    var doneCount = 0;
+    doneboxes.forEach(function(cb){
+      var ch = cb.getAttribute("data-ch");
+      var isDone = !!(state.done && state.done[ch]);
+      cb.checked = isDone;
+      if(isDone) doneCount++;
+      var rnode = document.querySelector('.rnode[data-ch="'+ch+'"]');
+      if(rnode) rnode.classList.toggle("done", isDone);
+    });
+    var pct = totalCh ? Math.round((doneCount/totalCh)*100) : 0;
+    document.getElementById("progress-bar").style.width = pct + "%";
+    document.getElementById("progress-label").textContent = doneCount + " / " + totalCh + " chapters";
+  }
+  state.done = state.done || {};
+  doneboxes.forEach(function(cb){
+    cb.addEventListener("change", function(){
+      state.done[cb.getAttribute("data-ch")] = cb.checked;
+      saveState(state);
+      updateProgressUI();
+    });
+  });
+  updateProgressUI();
+
+  /* ---------- Collapsible chapters ---------- */
+  document.querySelectorAll(".chapter").forEach(function(section){
+    var btn = section.querySelector(".collapse-toggle");
+    var body = section.querySelector(".chapter-body");
+    if(!btn || !body) return;
+    var id = section.id;
+    if(state.collapsed && state.collapsed[id]){
+      body.classList.add("collapsed"); btn.textContent = "+";
+    }
+    btn.addEventListener("click", function(){
+      var collapsed = body.classList.toggle("collapsed");
+      btn.textContent = collapsed ? "+" : "\u2212";
+      state.collapsed = state.collapsed || {};
+      state.collapsed[id] = collapsed;
+      saveState(state);
+    });
+  });
+  document.getElementById("expandAllBtn").addEventListener("click", function(){
+    var anyCollapsed = document.querySelector(".chapter-body.collapsed");
+    document.querySelectorAll(".chapter-body").forEach(function(b){ b.classList.toggle("collapsed", !anyCollapsed); });
+    document.querySelectorAll(".collapse-toggle").forEach(function(b){ b.textContent = anyCollapsed ? "+" : "\u2212"; });
+    this.textContent = anyCollapsed ? "Expand all" : "Collapse all";
+    state.collapsed = {};
+    if(anyCollapsed){ chapters.forEach(function(c){ state.collapsed[c.id] = true; }); }
+    saveState(state);
+  });
+
+  /* ---------- Scrollspy nav ---------- */
+  var navLinks = document.querySelectorAll("#chnav a");
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        navLinks.forEach(function(l){ l.classList.remove("active"); });
+        var link = document.querySelector('#chnav a[href="#'+entry.target.id+'"]');
+        if(link) link.classList.add("active");
+      }
+    });
+  }, {rootMargin:"-40% 0px -50% 0px"});
+  chapters.concat(document.getElementById("revision")).forEach(function(s){ if(s) observer.observe(s); });
+
+  /* ---------- Search ---------- */
+  var searchbox = document.getElementById("searchbox");
+  var searchableEls = document.querySelectorAll(".chapter p, .chapter li, .chapter td, .chapter .qtext, .chapter summary");
+  var originalHTML = new Map();
+  searchableEls.forEach(function(el){ originalHTML.set(el, el.innerHTML); });
+
+  function clearHighlights(){
+    searchableEls.forEach(function(el){ el.innerHTML = originalHTML.get(el); });
+    chapters.forEach(function(c){ c.classList.remove("hidden-by-search"); });
+  }
+  function runSearch(q){
+    q = q.trim();
+    if(!q){ clearHighlights(); return; }
+    var re;
+    try{ re = new RegExp("("+q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig"); }catch(e){ return; }
+    var matchedChapters = new Set();
+    searchableEls.forEach(function(el){
+      var raw = originalHTML.get(el);
+      if(re.test(raw)){
+        el.innerHTML = raw.replace(re, "<mark class=\"hit\">$1</mark>");
+        var ch = el.closest(".chapter");
+        if(ch) matchedChapters.add(ch.id);
+      } else {
+        el.innerHTML = raw;
+      }
+    });
+    chapters.forEach(function(c){ c.classList.toggle("hidden-by-search", !matchedChapters.has(c.id)); });
+  }
+  searchbox.addEventListener("input", function(){ runSearch(this.value); });
+
+  /* ---------- Keyboard shortcuts ---------- */
+  document.addEventListener("keydown", function(e){
+    var tag = (document.activeElement && document.activeElement.tagName) || "";
+    if(tag === "INPUT" || tag === "TEXTAREA"){
+      if(e.key === "Escape") document.activeElement.blur();
+      return;
+    }
+    if(e.key === "/"){ e.preventDefault(); searchbox.focus(); }
+    if(e.key === "d" || e.key === "D"){ applyDark(!document.documentElement.classList.contains("dark")); }
+    if(e.key === "t" || e.key === "T"){ window.scrollTo({top:0, behavior:"smooth"}); }
+  });
+
+  /* ---------- Back to top ---------- */
+  var backBtn = document.getElementById("backtotop");
+  window.addEventListener("scroll", function(){
+    backBtn.classList.toggle("show", window.scrollY > 700);
+  });
+  backBtn.addEventListener("click", function(){ window.scrollTo({top:0, behavior:"smooth"}); });
+
+  /* ---------- Flashcards ---------- */
+  document.querySelectorAll(".flashcard").forEach(function(card){
+    card.addEventListener("click", function(){ card.classList.toggle("flipped"); });
+  });
+
+  /* ---------- Quiz ---------- */
+  document.querySelectorAll(".quiz-q").forEach(function(q){
+    var opts = q.querySelectorAll(".quiz-opt");
+    var feedback = q.querySelector(".quiz-feedback");
+    opts.forEach(function(opt){
+      opt.addEventListener("click", function(){
+        var correct = opt.getAttribute("data-correct") === "true";
+        opts.forEach(function(o){ o.disabled = true; });
+        opts.forEach(function(o){
+          if(o.getAttribute("data-correct") === "true") o.classList.add("correct");
+        });
+        if(!correct) opt.classList.add("wrong");
+        feedback.style.display = "block";
+        feedback.textContent = correct ? "\u2713 Correct!" : "\u2717 Not quite — correct answer highlighted above.";
+        feedback.style.color = correct ? "var(--green)" : "var(--red)";
+      });
+    });
+  });
+
+  /* ---------- Notes autosave ---------- */
+  var notesArea = document.getElementById("notesArea");
+  var notesStatus = document.getElementById("notesStatus");
+  notesArea.value = state.notes || "";
+  var saveTimer;
+  notesArea.addEventListener("input", function(){
+    clearTimeout(saveTimer);
+    notesStatus.textContent = "Saving\u2026";
+    saveTimer = setTimeout(function(){
+      state.notes = notesArea.value;
+      saveState(state);
+      notesStatus.textContent = "Saved to this browser \u2713";
+      setTimeout(function(){ notesStatus.textContent = ""; }, 1500);
+    }, 500);
+  });
+
+  /* ---------- Roadmap node click also scrolls smoothly (native anchor already handles it) ---------- */
+})();
+</script>
+</body>
+</html>
