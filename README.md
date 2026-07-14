@@ -35,9 +35,10 @@ render at runtime from JSON manifests.
 ```
 LearnShelf/
 ├── index.html            # Single shell: home + course views (via ?course=)
+├── src/
+│   └── styles.css        # Tailwind v4 source (tokens, components, dark mode)
 ├── css/
-│   ├── main.css          # Design tokens, layout, typography, dark mode
-│   └── components.css     # Cards, buttons, badges, search, progress bars
+│   └── main.css          # Compiled Tailwind output (committed; `npm run build:css`)
 ├── js/
 │   ├── storage.js        # localStorage state (theme, progress, favorites…)
 │   ├── search.js         # Instant client-side search

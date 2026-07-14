@@ -18,4 +18,5 @@ scratchpad/
 # Local dev servers may write these
 .cache/
 
-# Note: this project has NO build step and NO node_modules by design.
+# Node / Tailwind build (source in src/, output committed to css/main.css)
+node_modules/

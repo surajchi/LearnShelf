@@ -6,31 +6,28 @@ folder.
 
 ---
 
-## The prompt
+## The prompt (single copy-paste block)
 
-> You are turning a YouTube video transcript into a single, beautiful,
-> self-contained LearnShelf documentation chapter.
->
-> **Output rules**
-> - Return exactly one complete HTML file. No commentary before or after.
-> - Use the chapter template below verbatim; fill only the marked slots.
-> - Content must be original documentation, not a transcript dump: reorganize
->   into clear sections with headings, short paragraphs, lists, and code blocks.
-> - Keep it accurate to the transcript. Do not invent commands or facts.
-> - Use semantic HTML inside `<article class="reading">` — `<h2>`, `<h3>`,
->   `<p>`, `<ul>`, `<pre><code>`. No inline styles, no external assets.
-> - Start with a one-paragraph intro, end with a short "Summary" list.
-> - Keep the paths as written (`../../css/…`, `../../js/…`) — chapters live two
->   levels deep at `courses/<course>/<file>.html`.
->
-> **After the file**, also give me the JSON entry to paste into the course's
-> `course.json` `chapters[]` array (title, file, duration estimate, tags).
+Copy everything inside the fence below, paste to Claude, then paste the
+transcript under it.
 
----
+````text
+You are turning a YouTube video transcript into a single, beautiful,
+self-contained LearnShelf documentation chapter.
 
-## Chapter HTML template
+OUTPUT RULES
+- Return exactly one complete HTML file, then the course.json entry. Nothing else.
+- Use the chapter template below verbatim; fill only the ⟨…⟩ slots.
+- Content must be original documentation, not a transcript dump: reorganize
+  into clear sections with headings, short paragraphs, lists, and code blocks.
+- Keep it accurate to the transcript. Do not invent commands or facts.
+- Use semantic HTML inside <article class="reading"> — <h2>, <h3>, <p>, <ul>,
+  <pre><code>. No inline styles, no external assets.
+- Start with a one-paragraph intro, end with a short "Summary" list.
+- Keep the paths as written (../../css/…, ../../js/…) — chapters live two
+  levels deep at courses/<course>/<file>.html.
 
-Fill the `⟨…⟩` slots. Leave everything else exactly as-is.
+CHAPTER HTML TEMPLATE — fill the ⟨…⟩ slots, leave everything else exactly as-is:
 
 ```html
 <!DOCTYPE html>
@@ -43,7 +40,6 @@ Fill the `⟨…⟩` slots. Leave everything else exactly as-is.
   <meta name="color-scheme" content="light dark" />
 
   <link rel="stylesheet" href="../../css/main.css" />
-  <link rel="stylesheet" href="../../css/components.css" />
 
   <script>
     (function () {
@@ -66,7 +62,7 @@ Fill the `⟨…⟩` slots. Leave everything else exactly as-is.
     </div>
   </header>
 
-  <main id="main" class="container">
+  <main id="main" class="container container--full">
     <nav class="breadcrumb" aria-label="Breadcrumb">
       <a href="../../index.html">Home</a>
       <span class="breadcrumb__sep" aria-hidden="true">/</span>
@@ -97,9 +93,7 @@ Fill the `⟨…⟩` slots. Leave everything else exactly as-is.
 </html>
 ```
 
----
-
-## course.json entry template
+THEN append the course.json entry to paste into the course's chapters[] array:
 
 ```json
 {
@@ -109,6 +103,7 @@ Fill the `⟨…⟩` slots. Leave everything else exactly as-is.
   "tags": ["⟨tag⟩", "⟨tag⟩"]
 }
 ```
+````
 
 ---
 

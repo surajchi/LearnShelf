@@ -1,0 +1,14 @@
+{
+  "name": "learnshelf",
+  "version": "1.0.0",
+  "description": "Personal documentation platform built from YouTube transcripts.",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i ./src/styles.css -o ./css/main.css --minify",
+    "watch:css": "tailwindcss -i ./src/styles.css -o ./css/main.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.0.0",
+    "tailwindcss": "^4.0.0"
+  }
+}

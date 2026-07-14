@@ -120,7 +120,7 @@ Design everything with scalability in mind.
 Only use:
 
 * HTML5
-* CSS3
+* CSS3 authored with **Tailwind CSS v4**
 * Vanilla JavaScript
 
 No:
@@ -129,16 +129,15 @@ No:
 * Vue
 * Angular
 * Bootstrap
-* Tailwind
 * jQuery
-* Build tools
-* Node.js
-* npm
-* Webpack
 
-The project must work by simply opening index.html.
+Styling: Tailwind CSS v4 with a CSS-first config. Source lives in `src/styles.css`
+(tokens in `@theme`, components in `@layer`); it compiles to `css/main.css`, which
+is committed. Build with `npm run build:css` (or `npm run watch:css` while editing).
 
-It must also deploy directly to GitHub Pages.
+The compiled `css/main.css` is committed, so the site still works by simply opening
+index.html and deploys directly to GitHub Pages with no build step on the host.
+`node_modules` is only needed locally to rebuild the CSS after editing `src/styles.css`.
 
 ---
 
@@ -153,11 +152,13 @@ LearnShelf/
 
 ├── index.html
 
+├── src/
+
+│      styles.css          (Tailwind v4 source → builds to css/main.css)
+
 ├── css/
 
-│      main.css
-
-│      components.css
+│      main.css            (compiled, committed)
 
 │
 
