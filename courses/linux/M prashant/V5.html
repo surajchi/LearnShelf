@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCP &mdash; Securely Copying Files Between Servers</title>
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   Palette: white paper, engineering-notebook navy ink,
+   yellow roadmap cards, blue connector lines (per brief)
+   ============================================================ */
+:root{
+  --bg:#ffffff;
+  --bg-alt:#f6f8fb;
+  --paper-line:#e7ecf3;
+  --ink:#16202e;
+  --ink-soft:#4a5872;
+  --ink-faint:#8895ab;
+  --blue:#1955c9;
+  --blue-dark:#0e3a8c;
+  --blue-tint:#eaf1ff;
+  --yellow:#ffcd3c;
+  --yellow-deep:#f0a500;
+  --yellow-tint:#fff8e1;
+  --green:#1c8a5c;
+  --green-tint:#e6f6ee;
+  --red:#c8402c;
+  --red-tint:#fdeceb;
+  --border:#dce3ee;
+  --radius:14px;
+  --sans: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --serif: Georgia, "Cambria", "Times New Roman", serif;
+  --mono: ui-monospace, "Cascadia Mono", "Consolas", "SFMono-Regular", Menlo, monospace;
+  --shadow: 0 1px 2px rgba(20,30,50,.04), 0 8px 24px rgba(20,30,50,.06);
+  --maxw: 100%;
+}
+html.dark{
+  --bg:#0f1420;
+  --bg-alt:#161d2c;
+  --paper-line:#232c40;
+  --ink:#e9edf6;
+  --ink-soft:#aab4c9;
+  --ink-faint:#71809a;
+  --blue:#5b9bff;
+  --blue-dark:#8fb8ff;
+  --blue-tint:#152241;
+  --yellow:#ffcd3c;
+  --yellow-deep:#ffb703;
+  --yellow-tint:#2b2410;
+  --green:#3fcf8e;
+  --green-tint:#0f2a20;
+  --red:#ff7a68;
+  --red-tint:#331714;
+  --border:#28324a;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  line-height:1.65;
+  transition:background .25s ease, color .25s ease;
+}
+::selection{background:var(--yellow); color:#16202e;}
+img,svg{max-width:100%;}
+a{color:var(--blue);}
+h1,h2,h3,h4{font-family:var(--serif); color:var(--ink); line-height:1.25; letter-spacing:.2px;}
+code, .mono{font-family:var(--mono);}
+.wrap{max-width:var(--maxw); margin:0 auto; padding:0 24px;}
+.eyebrow{
+  display:inline-block; font-family:var(--mono); font-size:11.5px; letter-spacing:1.5px;
+  text-transform:uppercase; color:var(--blue-dark); background:var(--blue-tint);
+  padding:4px 10px; border-radius:20px; font-weight:700;
+}
+
+/* ============================================================
+   TOP BAR / PROGRESS
+   ============================================================ */
+#progress-track{position:fixed; top:0; left:0; right:0; height:3px; background:var(--paper-line); z-index:100;}
+#progress-bar{height:100%; width:0%; background:linear-gradient(90deg,var(--blue),var(--yellow)); transition:width .2s ease;}
+
+header.topbar{
+  position:sticky; top:3px; z-index:90; background:var(--bg);
+  border-bottom:1px solid var(--border); backdrop-filter:blur(6px);
+}
+.topbar-inner{
+  max-width:var(--maxw); margin:0 auto; padding:12px 24px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.brand{display:flex; align-items:center; gap:9px; font-family:var(--serif); font-weight:700; font-size:17px; white-space:nowrap;}
+.brand .tux{width:22px;height:22px;flex:none;}
+.topbar-inner input[type=search]{
+  flex:1; min-width:120px; padding:8px 12px; border-radius:9px; border:1px solid var(--border);
+  background:var(--bg-alt); color:var(--ink); font-family:var(--sans); font-size:13.5px;
+}
+.topbar-inner input[type=search]:focus{outline:2px solid var(--blue); outline-offset:1px;}
+.tbtn{
+  border:1px solid var(--border); background:var(--bg-alt); color:var(--ink-soft);
+  border-radius:9px; padding:8px 11px; font-size:13px; cursor:pointer; font-family:var(--sans);
+  display:inline-flex; align-items:center; gap:6px; white-space:nowrap;
+}
+.tbtn:hover{border-color:var(--blue); color:var(--blue-dark);}
+.tbtn:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible{
+  outline:2px solid var(--blue); outline-offset:2px;
+}
+#progress-label{font-size:12px; color:var(--ink-faint); font-family:var(--mono); white-space:nowrap;}
+
+nav.chnav{display:flex; gap:4px; overflow-x:auto; padding:10px 24px 12px; max-width:var(--maxw); margin:0 auto;}
+nav.chnav a{
+  font-size:12.5px; color:var(--ink-soft); text-decoration:none; padding:6px 10px; border-radius:8px;
+  white-space:nowrap; border:1px solid transparent; font-family:var(--mono);
+}
+nav.chnav a.active{background:var(--blue-tint); color:var(--blue-dark); border-color:var(--blue);}
+nav.chnav a:hover{background:var(--bg-alt);}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero{padding:64px 24px 40px; max-width:var(--maxw); margin:0 auto;}
+.hero h1{font-size:42px; margin:14px 0 10px; max-width:16ch;}
+.hero p.lede{font-size:17px; color:var(--ink-soft); max-width:58ch; margin:0 0 26px;}
+.hero-meta{display:flex; gap:18px; flex-wrap:wrap; font-size:13px; color:var(--ink-faint); font-family:var(--mono);}
+.hero-meta span{display:flex; align-items:center; gap:6px;}
+
+/* ============================================================
+   ROADMAP  (yellow cards + blue connectors — signature element)
+   ============================================================ */
+.roadmap-section{padding:10px 24px 56px; max-width:var(--maxw); margin:0 auto;}
+.roadmap-section h2{font-size:13px; text-transform:uppercase; letter-spacing:2px; color:var(--ink-faint); font-family:var(--mono); margin-bottom:22px;}
+.roadmap{position:relative; padding-left:26px;}
+.roadmap::before{
+  content:""; position:absolute; left:10px; top:10px; bottom:10px; width:3px;
+  background:repeating-linear-gradient(180deg, var(--blue) 0 8px, transparent 8px 14px);
+  border-radius:3px;
+}
+.rnode{position:relative; margin-bottom:14px;}
+.rnode::before{
+  content:""; position:absolute; left:-26px; top:18px; width:13px; height:13px; border-radius:50%;
+  background:var(--blue); border:3px solid var(--bg); box-shadow:0 0 0 2px var(--blue);
+}
+.rnode a{
+  display:flex; align-items:center; gap:12px; text-decoration:none; color:var(--ink);
+  background:var(--yellow-tint); border:1.5px solid var(--yellow-deep); border-radius:var(--radius);
+  padding:13px 16px; transition:transform .15s ease, box-shadow .15s ease;
+}
+.rnode a:hover{transform:translateX(3px); box-shadow:var(--shadow);}
+.rnode .num{
+  font-family:var(--mono); font-weight:700; font-size:12px; color:#7a5900;
+  background:var(--yellow); padding:3px 8px; border-radius:6px; flex:none;
+}
+html.dark .rnode .num{color:#241c00;}
+.rnode .rtxt{flex:1;}
+.rnode .rtxt b{display:block; font-family:var(--serif); font-size:15.5px;}
+.rnode .rtxt small{color:var(--ink-soft); font-size:12.5px;}
+.rnode .check{width:20px; height:20px; border-radius:50%; border:2px solid var(--yellow-deep); flex:none;}
+.rnode.done .check{background:var(--green); border-color:var(--green);}
+.rnode.done a{opacity:.75;}
+
+/* ============================================================
+   CHAPTER STRUCTURE
+   ============================================================ */
+.chapter{max-width:var(--maxw); margin:0 auto; padding:26px 24px 8px; border-top:1px solid var(--border);}
+.chapter-head{display:flex; align-items:flex-start; gap:14px; margin-bottom:4px;}
+.chapter-head .ch-num{
+  font-family:var(--mono); font-weight:800; font-size:14px; color:var(--blue);
+  background:var(--blue-tint); border-radius:8px; padding:6px 10px; flex:none; margin-top:4px;
+}
+.chapter-head h2{font-size:26px; margin:0 0 4px;}
+.chapter-head .ch-sub{color:var(--ink-soft); font-size:14.5px; margin:0;}
+.chapter-tools{display:flex; align-items:center; gap:10px; margin-left:auto; flex:none;}
+.markdone{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink-faint); cursor:pointer; font-family:var(--mono); white-space:nowrap;}
+.markdone input{accent-color:var(--green); width:15px; height:15px;}
+.collapse-toggle{
+  border:1px solid var(--border); background:var(--bg-alt); border-radius:8px; width:30px; height:30px;
+  cursor:pointer; color:var(--ink-soft); font-size:14px; flex:none;
+}
+.chapter-body{padding-top:14px; overflow:hidden;}
+.chapter-body.collapsed{display:none;}
+
+/* step block (problem -> why -> analogy -> ...) */
+.step{
+  border-left:3px solid var(--border); padding:2px 0 2px 18px; margin:20px 0;
+}
+.step .step-label{
+  font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:1.4px;
+  color:var(--blue-dark); font-weight:700; margin-bottom:5px; display:block;
+}
+.step p{margin:6px 0; color:var(--ink); font-size:15.5px;}
+.step p.soft{color:var(--ink-soft);}
+
+.analogy-card{
+  background:var(--yellow-tint); border:1px solid var(--yellow-deep); border-radius:var(--radius);
+  padding:16px 18px; margin:16px 0; display:flex; gap:12px;
+}
+.analogy-card .ico{font-size:22px; flex:none;}
+.analogy-card b{display:block; font-family:var(--serif); margin-bottom:4px;}
+
+.note{
+  background:var(--blue-tint); border-left:4px solid var(--blue); border-radius:0 10px 10px 0;
+  padding:12px 16px; margin:16px 0; font-size:14.5px;
+}
+.note b{color:var(--blue-dark);}
+.correction{
+  background:var(--red-tint); border-left:4px solid var(--red); border-radius:0 10px 10px 0;
+  padding:12px 16px; margin:16px 0; font-size:14.5px;
+}
+.correction b{color:var(--red);}
+.source-tag{font-family:var(--mono); font-size:10.5px; letter-spacing:.5px; text-transform:uppercase; color:var(--ink-faint); border:1px solid var(--border); border-radius:5px; padding:1px 6px; margin-left:6px;}
+
+/* ============================================================
+   DIAGRAMS
+   ============================================================ */
+.diagram-wrap{
+  background:var(--bg-alt); border:1px solid var(--border); border-radius:var(--radius);
+  padding:22px; margin:20px 0; break-inside:avoid;
+}
+.diagram-wrap .cap{font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); text-align:center; margin-top:10px;}
+
+/* generic box+arrow flow */
+.flow{display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap;}
+.flow .box{
+  background:var(--bg); border:1.5px solid var(--blue); border-radius:10px; padding:12px 16px;
+  font-size:13.5px; text-align:center; font-family:var(--mono); color:var(--ink); min-width:110px;
+}
+.flow .box.yellow{border-color:var(--yellow-deep); background:var(--yellow-tint);}
+.flow .arrow{color:var(--blue); font-size:20px; padding:0 10px; flex:none;}
+@media (max-width:520px){ .flow{flex-direction:column;} .flow .arrow{transform:rotate(90deg);} }
+
+/* layered stack diagram */
+.stack-diagram{display:flex; flex-direction:column; align-items:center; gap:0;}
+.stack-layer{
+  width:100%; max-width:460px; text-align:center; padding:14px; border-radius:10px;
+  font-family:var(--mono); font-size:13.5px; border:1.5px solid var(--border); background:var(--bg);
+}
+.stack-layer.apps{border-color:var(--blue); color:var(--blue-dark);}
+.stack-layer.hyper{border-color:var(--yellow-deep); background:var(--yellow-tint); font-weight:700;}
+.stack-layer.os{border-color:var(--green); color:var(--green);}
+.stack-layer.hw{border-color:var(--ink-faint); color:var(--ink-soft);}
+.stack-conn{width:2px; height:20px; background:var(--blue);}
+
+/* host machine -> VM split diagram */
+.split-diagram{display:flex; align-items:center; justify-content:center; gap:22px; flex-wrap:wrap;}
+.host-box{
+  border:2px solid var(--blue); border-radius:12px; padding:16px; text-align:center; min-width:170px;
+  background:var(--bg);
+}
+.host-box .htitle{font-family:var(--serif); font-weight:700; font-size:15px; margin-bottom:4px;}
+.host-box .hres{font-family:var(--mono); font-size:12px; color:var(--ink-soft);}
+.vm-stack{display:flex; flex-direction:column; gap:12px;}
+.vm-box{
+  border:1.5px solid var(--yellow-deep); background:var(--yellow-tint); border-radius:10px;
+  padding:11px 14px; font-family:var(--mono); font-size:12px; text-align:center; min-width:150px;
+}
+.vm-box b{display:block; font-size:12.5px; color:#7a5900; margin-bottom:2px;}
+html.dark .vm-box b{color:var(--yellow);}
+
+/* request-travel style animation */
+.travel-track{position:relative; height:46px; background:var(--bg); border:1.5px dashed var(--border); border-radius:30px; margin:18px 0 6px;}
+.travel-dot{
+  position:absolute; top:50%; left:6px; transform:translateY(-50%);
+  width:26px; height:26px; border-radius:50%; background:var(--blue); color:#fff; font-size:12px;
+  display:flex; align-items:center; justify-content:center; font-family:var(--mono);
+  animation:travel 3.2s ease-in-out infinite;
+}
+@keyframes travel{
+  0%{left:6px;} 45%{left:calc(50% - 13px);} 55%{left:calc(50% - 13px);} 100%{left:calc(100% - 32px);}
+}
+@media (prefers-reduced-motion:reduce){ .travel-dot{animation:none; left:calc(50% - 13px);} }
+.travel-ends{display:flex; justify-content:space-between; font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); padding:0 4px;}
+
+/* ============================================================
+   COMPARISON TABLE
+   ============================================================ */
+.cmp-table{width:100%; border-collapse:separate; border-spacing:0; margin:18px 0; font-size:14px; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;}
+.cmp-table th{background:var(--blue); color:#fff; text-align:left; padding:11px 14px; font-family:var(--mono); font-size:12.5px; letter-spacing:.4px;}
+.cmp-table td{padding:11px 14px; border-top:1px solid var(--border); vertical-align:top;}
+.cmp-table tr:nth-child(even) td{background:var(--bg-alt);}
+.cmp-table td:first-child{font-weight:700; color:var(--blue-dark); white-space:nowrap;}
+
+/* ============================================================
+   CARDS: examples / industry / job roles
+   ============================================================ */
+.card-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin:18px 0;}
+.info-card{background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow);}
+.info-card h4{margin:0 0 6px; font-size:15.5px; display:flex; align-items:center; gap:8px;}
+.info-card p{margin:0; font-size:13.5px; color:var(--ink-soft);}
+.info-card .tag{display:inline-block; font-family:var(--mono); font-size:10.5px; background:var(--green-tint); color:var(--green); padding:2px 7px; border-radius:6px; margin-top:8px;}
+
+/* ============================================================
+   INTERVIEW / MISTAKES / MEMORY TRICK
+   ============================================================ */
+details.qa{border:1px solid var(--border); border-radius:10px; margin:9px 0; background:var(--bg);}
+details.qa summary{padding:12px 15px; cursor:pointer; font-weight:600; font-size:14.5px; list-style:none; display:flex; gap:10px; align-items:flex-start;}
+details.qa summary::before{content:"Q"; font-family:var(--mono); font-size:11px; background:var(--blue-tint); color:var(--blue-dark); border-radius:5px; padding:2px 7px; flex:none;}
+details.qa[open] summary{border-bottom:1px solid var(--border);}
+details.qa .ans{padding:12px 15px 15px 42px; color:var(--ink-soft); font-size:14px;}
+
+.mistake-row{display:flex; gap:10px; align-items:flex-start; margin:10px 0; font-size:14px;}
+.mistake-row .x{color:var(--red); font-weight:800; flex:none;}
+.mistake-row .ok{color:var(--green); font-weight:800; flex:none;}
+
+.trick{
+  background:var(--yellow-tint); border:1px dashed var(--yellow-deep); border-radius:10px;
+  padding:12px 16px; margin:14px 0; font-size:14px;
+}
+.trick b{font-family:var(--mono); font-size:11.5px; text-transform:uppercase; color:#7a5900;}
+html.dark .trick b{color:var(--yellow);}
+
+/* ============================================================
+   QUIZ / FLASHCARDS
+   ============================================================ */
+.quiz-q{border:1px solid var(--border); border-radius:var(--radius); padding:15px 16px; margin:12px 0; background:var(--bg);}
+.quiz-q p.qtext{font-weight:600; margin:0 0 10px;}
+.quiz-opts{display:grid; gap:8px;}
+.quiz-opt{
+  text-align:left; border:1px solid var(--border); background:var(--bg-alt); border-radius:8px;
+  padding:9px 12px; cursor:pointer; font-size:13.5px; color:var(--ink); font-family:var(--sans);
+}
+.quiz-opt:hover{border-color:var(--blue);}
+.quiz-opt.correct{background:var(--green-tint); border-color:var(--green); font-weight:700;}
+.quiz-opt.wrong{background:var(--red-tint); border-color:var(--red);}
+.quiz-feedback{font-size:12.5px; margin-top:8px; font-family:var(--mono); display:none;}
+
+.flash-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin:16px 0;}
+.flashcard{perspective:1000px; height:120px; cursor:pointer;}
+.flashcard-inner{position:relative; width:100%; height:100%; transition:transform .5s; transform-style:preserve-3d;}
+.flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+.flashcard-face{
+  position:absolute; inset:0; backface-visibility:hidden; border-radius:12px;
+  display:flex; align-items:center; justify-content:center; text-align:center; padding:14px;
+  font-size:13.5px; border:1.5px solid var(--border);
+}
+.flashcard-front{background:var(--blue-tint); color:var(--blue-dark); font-weight:700;}
+.flashcard-back{background:var(--yellow-tint); color:#5c4400; transform:rotateY(180deg); border-color:var(--yellow-deep);}
+html.dark .flashcard-back{color:var(--yellow-tint);}
+
+/* ============================================================
+   REVISION / KEY POINTS
+   ============================================================ */
+.keypoints{padding-left:0; list-style:none; display:grid; gap:8px; margin:16px 0;}
+.keypoints li{display:flex; gap:10px; align-items:flex-start; font-size:14.5px;}
+.keypoints li .kn{
+  font-family:var(--mono); font-size:11px; font-weight:800; background:var(--blue); color:#fff;
+  width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex:none; margin-top:2px;
+}
+
+/* ============================================================
+   NOTES
+   ============================================================ */
+.notes-area{width:100%; min-height:80px; resize:vertical; border:1px solid var(--border); border-radius:10px; padding:12px; font-family:var(--sans); font-size:13.5px; background:var(--bg-alt); color:var(--ink);}
+.notes-status{font-size:11.5px; color:var(--ink-faint); font-family:var(--mono); margin-top:5px; height:14px;}
+
+/* ============================================================
+   NAV FOOTER / BACK TO TOP
+   ============================================================ */
+.chnav-footer{display:flex; justify-content:space-between; gap:12px; max-width:var(--maxw); margin:10px auto 0; padding:0 24px;}
+.chnav-footer a{
+  border:1px solid var(--border); border-radius:10px; padding:10px 14px; text-decoration:none; color:var(--ink);
+  font-size:13px; flex:1; max-width:48%;
+}
+.chnav-footer a.next{text-align:right;}
+.chnav-footer a small{display:block; color:var(--ink-faint); font-family:var(--mono); font-size:10.5px;}
+.chnav-footer a:hover{border-color:var(--blue);}
+
+#backtotop{
+  position:fixed; bottom:22px; right:22px; width:42px; height:42px; border-radius:50%;
+  background:var(--blue); color:#fff; border:none; cursor:pointer; font-size:16px; box-shadow:var(--shadow);
+  opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:80;
+}
+#backtotop.show{opacity:1; pointer-events:auto;}
+
+.site-footer{text-align:center; padding:50px 24px 70px; color:var(--ink-faint); font-size:12.5px; font-family:var(--mono);}
+.kbd{font-family:var(--mono); background:var(--bg-alt); border:1px solid var(--border); border-radius:5px; padding:1px 6px; font-size:11px;}
+
+mark.hit{background:var(--yellow); color:#16202e; border-radius:3px;}
+.hidden-by-search{display:none !important;}
+
+/* ============================================================
+   PRINT
+   ============================================================ */
+@media print{
+  header.topbar, nav.chnav, #progress-track, #backtotop, .chapter-tools, .notes-area, .notes-status{display:none !important;}
+  body{background:#fff; color:#000;}
+  .chapter{break-before:page; border-top:none;}
+  .chapter-body.collapsed{display:block !important;}
+  .diagram-wrap, .analogy-card, .cmp-table, .quiz-q, details.qa, .flashcard{break-inside:avoid;}
+  a{color:#000; text-decoration:none;}
+}
+body{padding-left:clamp(16px,5vw,80px);padding-right:clamp(16px,5vw,80px);}
+.flashcard{perspective:none;} .flashcard-inner{transform:none !important;} .flashcard-face{backface-visibility:visible; position:absolute; inset:0;} .flashcard-back{transform:none; display:none;} .flashcard.flipped .flashcard-front{display:none;} .flashcard.flipped .flashcard-back{display:flex;}
+</style>
+</head>
+<body>
+
+<div id="progress-track"><div id="progress-bar"></div></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <svg class="tux" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="12" rx="2" stroke="var(--blue)" stroke-width="1.5"/><rect x="7" y="7" width="4.5" height="6" rx="1" fill="var(--yellow)"/><rect x="12.5" y="7" width="4.5" height="6" rx="1" fill="var(--yellow)" opacity=".6"/><path d="M8 20h8M12 16v4" stroke="var(--blue)" stroke-width="1.5"/></svg>
+      SCP File Copy
+    </div>
+    <input type="search" id="searchbox" placeholder="Search this book&hellip;  ( / )" aria-label="Search chapters">
+    <span id="progress-label">0 / 7 chapters</span>
+    <button class="tbtn" id="expandAllBtn">Expand all</button>
+    <button class="tbtn" id="darkToggle" aria-label="Toggle dark mode">🌙 Dark</button>
+  </div>
+  <nav class="chnav" id="chnav" aria-label="Chapter navigation">
+    <a href="#ch1">1. What is SCP</a>
+    <a href="#ch2">2. What You Need</a>
+    <a href="#ch3">3. The Syntax</a>
+    <a href="#ch4">4. Local &rarr; Remote</a>
+    <a href="#ch5">5. Remote &rarr; Local</a>
+    <a href="#ch6">6. Many Files</a>
+    <a href="#ch7">7. Use Cases</a>
+    <a href="#revision">Revision</a>
+  </nav>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <span class="eyebrow">Chapter 05 &middot; SCP</span>
+  <h1>Copying files between servers, securely, with one command</h1>
+  <p class="lede">WinSCP moves files with a mouse. <strong>SCP</strong> &mdash; Secure Copy Protocol &mdash; does the same job from the command line: one short command copies a file from your machine to a remote server, or between two servers, all <em>encrypted</em> over SSH. If you know <code>cp</code>, you already almost know <code>scp</code>.</p>
+  <div class="hero-meta">
+    <span>📺 Source: SCP command lecture (Hindi/English)</span>
+    <span>⏱ transcript &rarr; full chapter</span>
+    <span>🧠 Builds on the SSH / remote-access chapters</span>
+  </div>
+</section>
+
+<!-- ================= ROADMAP ================= -->
+<section class="roadmap-section">
+  <h2>Your roadmap through this chapter</h2>
+  <div class="roadmap" id="roadmap">
+    <div class="rnode" data-ch="ch1"><a href="#ch1"><span class="num">01</span><span class="rtxt"><b>What is SCP?</b><small>Secure Copy Protocol — encrypted file transfer</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch2"><a href="#ch2"><span class="num">02</span><span class="rtxt"><b>What you need first</b><small>IP, credentials, and connectivity between the servers</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch3"><a href="#ch3"><span class="num">03</span><span class="rtxt"><b>The syntax</b><small>scp &lt;source&gt; &lt;user@host:path&gt;</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch4"><a href="#ch4"><span class="num">04</span><span class="rtxt"><b>Local &rarr; Remote</b><small>Push a file from your server to another</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch5"><a href="#ch5"><span class="num">05</span><span class="rtxt"><b>Remote &rarr; Local</b><small>Pull a file from a remote server to yours</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch6"><a href="#ch6"><span class="num">06</span><span class="rtxt"><b>Many files &amp; wildcards</b><small>file1 file2, or file* to copy them all</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch7"><a href="#ch7"><span class="num">07</span><span class="rtxt"><b>Real use cases</b><small>Jump servers, and a note on rsync</small></span><span class="check"></span></a></div>
+  </div>
+</section>
+
+<main>
+
+<!-- ================= CHAPTER 1 ================= -->
+<section class="chapter" id="ch1">
+  <div class="chapter-head">
+    <span class="ch-num">01</span>
+    <div><h2>What is SCP?</h2><p class="ch-sub">Secure Copy Protocol — file transfer that is encrypted and authenticated</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch1"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="note"><b>Where this comes from:</b> The lecture introduces SCP for the case where "you have two servers and need to move a file between them." SCP = <b>Secure Copy Protocol</b>. <span class="source-tag">from transcript</span></div>
+
+    <div class="step">
+      <span class="step-label">1 &middot; The name tells the story</span>
+      <p>Notice the word <b>Secure</b> in the name — just like <b>SSH</b> is <i>Secure Shell</i>, <b>SCP</b> is <i>Secure Copy Protocol</i>. "Secure" means the transfer is <b>encrypted</b> and uses <b>authentication</b>.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">2 &middot; What "encrypted" buys you</span>
+      <p>Because the transfer is encrypted, the <b>file / data you send travels safely</b> — nobody in between can read it. That's the whole point of SCP over plain, unencrypted copying.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">3 &middot; What it's used for</span>
+      <p>SCP is used for <b>securely transferring files between a local and a remote host</b> — or between <b>two remote hosts</b>. Different combinations are possible; with one command you copy a file from one server to another.</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="flow">
+        <div class="box">Server A</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box yellow">scp (encrypted, over SSH)</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box">Server B</div>
+      </div>
+      <div class="cap">Fig 1.1 — SCP copies a file from one machine to another through an encrypted SSH channel</div>
+    </div>
+
+    <div class="analogy-card">
+      <span class="ico">🔒</span>
+      <div><b>Real-life analogy</b>Plain copy is a postcard — anyone handling it can read it. SCP is a sealed, tamper-proof courier envelope: only the sender and the intended server can open it.</div>
+    </div>
+
+    <div class="trick"><b>Memory trick</b><br><b>S</b>SH = <b>S</b>ecure <b>SH</b>ell (run commands). <b>SCP</b> = <b>S</b>ecure <b>C</b>o<b>P</b>y (move files). Same "secure over SSH" idea.</div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>SCP is the Secure Copy Protocol: an encrypted, authenticated way to copy files between local and remote machines. Before using it, you need a few things ready.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 2 ================= -->
+<section class="chapter" id="ch2">
+  <div class="chapter-head">
+    <span class="ch-num">02</span>
+    <div><h2>What you need before using SCP</h2><p class="ch-sub">The details and connectivity that make a transfer possible</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch2"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="step">
+      <span class="step-label">1 &middot; You must know the other server's details</span>
+      <p>To copy to another server you need to know that server's connection details: its <b>hostname or IP address</b>, plus a valid <b>username and password</b> (your credentials) on that machine.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">2 &middot; There must be connectivity between them</span>
+      <p>The two servers must be able to reach each other over the network — for example on the <b>same network</b>, or otherwise <b>allowed</b> to connect. No connectivity, no transfer.</p>
+    </div>
+
+    <div class="note"><b>"Where do I get the username?"</b> The lecture answers a common student question: the credentials must already <b>exist</b> on the target server. In a company, you ask the <b>system administrator</b> — state your requirement, get <b>manager approval</b>, and they create your credentials. <span class="source-tag">from transcript</span></div>
+
+    <div class="step">
+      <span class="step-label">3 &middot; The three things to gather</span>
+      <p>In the demo, the presenter reads the target's IP with <code>ifconfig</code> (e.g. <b>10.21.55.1</b>), and already knows the username <b>paul</b> and its password. So: <b>IP</b>, <b>username</b>, <b>password</b>.</p>
+    </div>
+
+    <div class="card-grid">
+      <div class="info-card"><h4>🌐 Host / IP</h4><p>The target server's address, e.g. from <code>ifconfig</code> or <code>ip addr</code>.</p></div>
+      <div class="info-card"><h4>👤 Username</h4><p>A valid account on the target server (e.g. paul).</p></div>
+      <div class="info-card"><h4>🔑 Password</h4><p>That user's password — asked at transfer time (unless keys are set up).</p></div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>Have the target's IP/hostname, a real username + password, and network connectivity between the machines. With those, the command itself is tiny.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 3 ================= -->
+<section class="chapter" id="ch3">
+  <div class="chapter-head">
+    <span class="ch-num">03</span>
+    <div><h2>The SCP syntax</h2><p class="ch-sub">Just like <code>cp</code>, but with a remote destination</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch3"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="step">
+      <span class="step-label">1 &middot; The shape of the command</span>
+      <p>SCP mirrors the ordinary copy command <code>cp</code>. You write <code>scp</code>, then the <b>source</b> (the local path where your file is), then the <b>destination</b> (where it should go).</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">2 &middot; The remote destination format</span>
+      <p>The destination is a <b>remote location</b>, written as <b>username@host:path</b> — the username, then <code>@</code>, then the hostname or IP, then a <b>colon</b> <code>:</code>, then the path to place the file.</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="flow"><div class="box">scp &lt;source-path&gt; user@host:/destination/path</div></div>
+      <div class="cap">Basic SCP syntax — local source, remote destination</div>
+    </div>
+
+    <div class="note"><b>Read the colon carefully:</b> everything <i>after</i> the <code>:</code> is the path <b>on the remote machine</b>. <code>paul@10.21.55.1:/tmp</code> means "user paul, host 10.21.55.1, put it in <code>/tmp</code>." <span class="source-tag">expanded</span></div>
+
+    <div class="trick"><b>Memory trick</b><br><code>cp source dest</code> on one machine &rarr; <code>scp source user@host:dest</code> across machines. Add <b>s</b>, add <b>user@host:</b>.</div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>Syntax: <code>scp &lt;source&gt; user@host:/path</code>. Source and destination can each be local or remote. Let's push a file to another server.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 4 ================= -->
+<section class="chapter" id="ch4">
+  <div class="chapter-head">
+    <span class="ch-num">04</span>
+    <div><h2>Local &rarr; Remote: pushing a file to another server</h2><p class="ch-sub">Copy from centos-01 to centos-02</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch4"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="step">
+      <span class="step-label">1 &middot; The setup</span>
+      <p>The demo uses two CentOS servers: <b>centos-01</b> (where we are) and <b>centos-02</b> (the remote target). On centos-01 we make a working folder and some files:</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="flow"><div class="box">mkdir scp-demo</div><div class="arrow">&rarr;</div><div class="box">cd scp-demo</div><div class="arrow">&rarr;</div><div class="box">touch file1 file2</div></div>
+      <div class="cap">Create a folder and two files to transfer</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">2 &middot; Put some content in a file</span>
+      <p>Optionally add text, e.g. write <b>hello</b> into <code>file1</code>. Check where you are with <code>pwd</code> (inside <code>scp-demo</code>) — two files, <code>file1</code> and <code>file2</code>.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">3 &middot; The transfer command</span>
+      <p>Task: send <code>file1</code> to centos-02. We know the IP (<b>10.21.55.1</b>), the user (<b>paul</b>) and its password. Run:</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="flow"><div class="box">scp file1 paul@10.21.55.1:/tmp</div></div>
+      <div class="cap">Copies file1 into /tmp on the remote server (the colon separates host from path)</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">4 &middot; What you see</span>
+      <p>SCP prints a progress line: <b>file1&nbsp;&nbsp;100%</b> with the size and speed (e.g. 8kB/s). <b>100%</b> means the transfer completed.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">5 &middot; Verify on the other server</span>
+      <p>Move to centos-02, go into <code>/tmp</code>, run <code>ls</code> — <code>file1</code> is there. Read it with <code>cat file1</code> and you'll see <b>hello</b> printed, proving the content came across intact.</p>
+    </div>
+
+    <div class="note"><b>Will it ask for a password?</b> Yes — normally SCP asks for the remote user's password before transferring. In the demo it didn't, only because the presenter had already exchanged <b>SSH keys</b> (public/private key) with that server, allowing password-less login. In your case, expect a password prompt. <span class="source-tag">from transcript</span></div>
+
+    <div class="analogy-card">
+      <span class="ico">📤</span>
+      <div><b>Real-life analogy</b>This is "posting" a file: you hand <code>file1</code> to the courier addressed to <code>paul@10.21.55.1</code>, drop-box <code>/tmp</code>. The 100% line is the delivery confirmation.</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p><code>scp file1 paul@10.21.55.1:/tmp</code> pushes a local file to a remote server's folder; a 100% line confirms success, and <code>ls</code>/<code>cat</code> on the target verify it. Now the reverse direction.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 5 ================= -->
+<section class="chapter" id="ch5">
+  <div class="chapter-head">
+    <span class="ch-num">05</span>
+    <div><h2>Remote &rarr; Local: pulling a file from another server</h2><p class="ch-sub">Copy a file from centos-02 back to your machine</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch5"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="step">
+      <span class="step-label">1 &middot; The scenario</span>
+      <p>Now the opposite: a file lives on the <b>remote</b> server (centos-02) and you want it on your <b>local</b> system. Yes — SCP does this too; you just swap which side is remote.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">2 &middot; Make a file on the remote server</span>
+      <p>On centos-02, in <code>/tmp</code>, create <code>remotefile</code> and add text:</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="flow"><div class="box">touch remotefile</div><div class="arrow">&rarr;</div><div class="box">cat remotefile &rarr; "This is file from centos-02"</div></div>
+      <div class="cap">A file that currently exists only on the remote server</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">3 &middot; Pull it — source is now the remote side</span>
+      <p>Back on centos-01, the <b>source</b> becomes the remote path and the <b>destination</b> is local. The lecture also adds <code>-v</code> (verbose) for extra debug output — optional. Command:</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="flow"><div class="box">scp -v paul@10.21.55.1:/tmp/remotefile .</div></div>
+      <div class="cap">Pulls remotefile from the server into the current directory ( . )</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">4 &middot; About the <code>.</code> and <code>-v</code></span>
+      <p>The final <code>.</code> (dot) means "put it in the <b>current directory</b>" — you could give any other path instead. The <code>-v</code> flag floods the screen with detail; it's only useful for <b>debugging</b> what's happening. Without it, the output is just the clean 100% line.</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="flow"><div class="box">scp paul@10.21.55.1:/tmp/remotefile .</div></div>
+      <div class="cap">Same pull without -v — shows 100%, 27 bytes, and the rate</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">5 &middot; Verify locally</span>
+      <p>Run <code>ls</code> — <code>remotefile</code> is now here. <code>cat remotefile</code> prints <b>"This is the file from centos-02"</b>, confirming the pull worked.</p>
+    </div>
+
+    <div class="trick"><b>Memory trick</b><br>Push vs pull is just <b>which side wears the</b> <code>user@host:</code>. Remote on the right = push; remote on the left = pull.</div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>To pull, put the remote path first and a local path (often <code>.</code>) last: <code>scp paul@10.21.55.1:/tmp/remotefile .</code>. <code>-v</code> is optional debug output. So files can flow both ways. Next: copying more than one file at a time.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 6 ================= -->
+<section class="chapter" id="ch6">
+  <div class="chapter-head">
+    <span class="ch-num">06</span>
+    <div><h2>Copying many files &amp; using wildcards</h2><p class="ch-sub">List several files, or use <code>*</code> to grab them all</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch6"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="step">
+      <span class="step-label">1 &middot; More than one file</span>
+      <p>The earlier example sent a single file (<code>file1</code>). You can list <b>multiple files</b> before the destination and all of them transfer:</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="flow"><div class="box">scp file1 file2 paul@10.21.55.1:/tmp</div></div>
+      <div class="cap">Both file1 and file2 are copied to the remote /tmp</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">2 &middot; Wildcards</span>
+      <p>You can also use a <b>wildcard</b>. Instead of naming <code>file1 file2</code>, use <code>file*</code> — it matches every file starting with "file":</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="flow"><div class="box">scp file* paul@10.21.55.1:/tmp</div></div>
+      <div class="cap">The * matches file1, file2, and any other file* — all transferred</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">3 &middot; Copy everything in a folder</span>
+      <p>If you need to transfer <b>all</b> the files in a location, just use <code>*</code> — SCP will try to copy everything (remotefile, and all the rest).</p>
+    </div>
+
+    <div class="note"><b>What is a wildcard?</b> <code>*</code> is a shell pattern meaning "any characters." <code>file*</code> expands to every matching filename before SCP runs, so one command handles many files. <span class="source-tag">expanded</span></div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>Copy several files by listing them (<code>file1 file2</code>) or by pattern (<code>file*</code>, or <code>*</code> for all). One command, many files. Finally, where this really shines in practice.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 7 ================= -->
+<section class="chapter" id="ch7">
+  <div class="chapter-head">
+    <span class="ch-num">07</span>
+    <div><h2>Real-world use cases</h2><p class="ch-sub">Jump servers, pulling remote files, and a nod to rsync</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch7"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="step">
+      <span class="step-label">1 &middot; The jump-server case</span>
+      <p>A very handy real case from the lecture: sometimes you <b>don't have direct access</b> to a server. You reach it through a <b>jump server</b> (also called a bastion server) — you log into one server, and from <i>there</i> log into the next. SCP is very helpful in that kind of hop-based setup.</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="flow">
+        <div class="box">You</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box yellow">Jump / Bastion server</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box">Target server (no direct access)</div>
+      </div>
+      <div class="cap">Fig 7.1 — A jump/bastion server is an allowed stepping-stone to reach a locked-down target</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">2 &middot; Fetching a needed file</span>
+      <p>It's equally useful the other way: if you just need to <b>bring a file</b> from some server to yours, SCP pulls it in one line.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">3 &middot; Related tool — rsync</span>
+      <p>The lecture mentions a related, more powerful tool: <b>rsync</b>, also used for transferring files (and efficient at syncing only what changed). There's a separate video for it on the channel.</p>
+    </div>
+
+    <div class="analogy-card">
+      <span class="ico">🪜</span>
+      <div><b>Real-life analogy</b>A jump server is the security desk in a locked building: you can't walk straight to the vault, but you're allowed through the front desk, and from there to the room you need.</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>SCP shines for hop-based access via jump/bastion servers and for grabbing files off remote machines. For heavier, incremental syncing, look at <b>rsync</b>. That completes the SCP tour.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= REVISION ================= -->
+<section class="chapter" id="revision">
+  <div class="chapter-head">
+    <span class="ch-num">★</span>
+    <div><h2>Revision Kit</h2><p class="ch-sub">Quiz, flashcards, common mistakes &amp; a one-page summary</p></div>
+    <div class="chapter-tools">
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <h3>Quick Quiz</h3>
+    <div class="quiz-q">
+      <p class="qtext">1. What does SCP stand for?</p>
+      <div class="quiz-opts">
+        <button class="quiz-opt" data-correct="true">Secure Copy Protocol</button>
+        <button class="quiz-opt" data-correct="false">System Copy Program</button>
+        <button class="quiz-opt" data-correct="false">Server Control Protocol</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <div class="quiz-q">
+      <p class="qtext">2. Which command pushes a local file1 to /tmp on a remote server?</p>
+      <div class="quiz-opts">
+        <button class="quiz-opt" data-correct="false">scp /tmp paul@10.21.55.1:file1</button>
+        <button class="quiz-opt" data-correct="true">scp file1 paul@10.21.55.1:/tmp</button>
+        <button class="quiz-opt" data-correct="false">cp file1 paul@10.21.55.1/tmp</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <div class="quiz-q">
+      <p class="qtext">3. In a pull command, what does the final <code>.</code> mean?</p>
+      <div class="quiz-opts">
+        <button class="quiz-opt" data-correct="true">Put the file in the current directory</button>
+        <button class="quiz-opt" data-correct="false">Delete the source file</button>
+        <button class="quiz-opt" data-correct="false">Run in verbose mode</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <div class="quiz-q">
+      <p class="qtext">4. How do you copy every file starting with "file"?</p>
+      <div class="quiz-opts">
+        <button class="quiz-opt" data-correct="true">scp file* user@host:/tmp</button>
+        <button class="quiz-opt" data-correct="false">scp --all file user@host:/tmp</button>
+        <button class="quiz-opt" data-correct="false">scp file+ user@host:/tmp</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <div class="quiz-q">
+      <p class="qtext">5. Why did the demo not ask for a password?</p>
+      <div class="quiz-opts">
+        <button class="quiz-opt" data-correct="false">SCP never needs a password</button>
+        <button class="quiz-opt" data-correct="true">SSH keys (public/private) were already exchanged</button>
+        <button class="quiz-opt" data-correct="false">The server had no security</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <h3 style="margin-top:34px;">Flashcards <span style="font-size:12px; color:var(--ink-faint); font-family:var(--mono);">(click to flip)</span></h3>
+    <div class="flash-grid">
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">SCP</div><div class="flashcard-face flashcard-back">Secure Copy Protocol — encrypted, authenticated file transfer over SSH.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">Syntax</div><div class="flashcard-face flashcard-back">scp &lt;source&gt; user@host:/path — like cp, but with a remote side.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">Push (local &rarr; remote)</div><div class="flashcard-face flashcard-back">scp file1 paul@10.21.55.1:/tmp — remote wears user@host: on the right.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">Pull (remote &rarr; local)</div><div class="flashcard-face flashcard-back">scp paul@10.21.55.1:/tmp/remotefile . — remote on the left, . = current dir.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">file* / *</div><div class="flashcard-face flashcard-back">Wildcards to copy many files at once.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">-v</div><div class="flashcard-face flashcard-back">Verbose mode — extra debug output; optional.</div></div></div>
+    </div>
+
+    <h3 style="margin-top:34px;">Common Mistakes</h3>
+    <div class="mistake-row"><span class="x">✗</span><span>"Forgetting the colon: scp file1 paul@10.21.55.1/tmp"</span></div>
+    <div class="mistake-row"><span class="ok">✓</span><span>The colon separates host from path: paul@10.21.55.1:/tmp</span></div>
+    <div class="mistake-row"><span class="x">✗</span><span>"SCP works even with no account on the target."</span></div>
+    <div class="mistake-row"><span class="ok">✓</span><span>You need a valid username + password (or key) that already exists there.</span></div>
+    <div class="mistake-row"><span class="x">✗</span><span>"-v is required to transfer."</span></div>
+    <div class="mistake-row"><span class="ok">✓</span><span>-v is optional debug output only; the transfer works fine without it.</span></div>
+
+    <h3 style="margin-top:34px;">One-Page Revision</h3>
+    <div class="diagram-wrap">
+      <p style="margin:0 0 10px;"><b>SCP = Secure Copy Protocol</b> (encrypted, over SSH, like SSH is Secure Shell) &rarr; needs: target <b>IP/host</b>, a real <b>username + password</b> (created by a sysadmin), and <b>connectivity</b> between machines &rarr; syntax like <code>cp</code>: <code>scp &lt;source&gt; user@host:/path</code> (note the <b>colon</b> before the remote path) &rarr; <b>push</b> local→remote: <code>scp file1 paul@10.21.55.1:/tmp</code> (100% = done; verify with <code>ls</code>/<code>cat</code>) &rarr; <b>pull</b> remote→local: <code>scp paul@10.21.55.1:/tmp/remotefile .</code> (<code>.</code> = current dir; <code>-v</code> = optional debug) &rarr; <b>many files</b>: list them or use <code>file*</code> / <code>*</code> &rarr; usually asks a <b>password</b> unless <b>SSH keys</b> exchanged &rarr; great for <b>jump/bastion servers</b>; heavier syncing → <b>rsync</b>.</p>
+    </div>
+
+    <h3 style="margin-top:34px;">Your Notes</h3>
+    <textarea class="notes-area" id="notesArea" placeholder="Jot your own summary or questions here — saved automatically in your browser..."></textarea>
+    <div class="notes-status" id="notesStatus"></div>
+  </div>
+</section>
+
+</main>
+
+<div class="chnav-footer">
+  <a href="#ch1" class="prev"><small>&larr; Back to start</small>What is SCP</a>
+  <a href="#revision" class="next"><small>Jump to &rarr;</small>Revision Kit</a>
+</div>
+
+<footer class="site-footer">
+  Built as a single offline HTML file &middot; works without internet &middot; prints cleanly as a PDF chapter<br>
+  Shortcuts: <span class="kbd">/</span> search &middot; <span class="kbd">d</span> dark mode &middot; <span class="kbd">t</span> back to top
+</footer>
+
+<button id="backtotop" aria-label="Back to top">&uarr;</button>
+
+<script>
+(function(){
+  "use strict";
+  var STORE_KEY = "scp-book-progress-v5";
+  var chapters = Array.prototype.slice.call(document.querySelectorAll(".chapter[id]"));
+
+  function loadState(){
+    try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }catch(e){ return {}; }
+  }
+  function saveState(state){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+  var state = loadState();
+
+  /* ---------- Dark mode ---------- */
+  var darkToggle = document.getElementById("darkToggle");
+  function applyDark(on){
+    document.documentElement.classList.toggle("dark", on);
+    darkToggle.textContent = on ? "☀️ Light" : "🌙 Dark";
+    state.dark = on; saveState(state);
+  }
+  applyDark(!!state.dark);
+  darkToggle.addEventListener("click", function(){ applyDark(!document.documentElement.classList.contains("dark")); });
+
+  /* ---------- Completion checkboxes + progress ---------- */
+  var doneboxes = document.querySelectorAll(".donebox");
+  var totalCh = doneboxes.length;
+  function updateProgressUI(){
+    var doneCount = 0;
+    doneboxes.forEach(function(cb){
+      var ch = cb.getAttribute("data-ch");
+      var isDone = !!(state.done && state.done[ch]);
+      cb.checked = isDone;
+      if(isDone) doneCount++;
+      var rnode = document.querySelector('.rnode[data-ch="'+ch+'"]');
+      if(rnode) rnode.classList.toggle("done", isDone);
+    });
+    var pct = totalCh ? Math.round((doneCount/totalCh)*100) : 0;
+    document.getElementById("progress-bar").style.width = pct + "%";
+    document.getElementById("progress-label").textContent = doneCount + " / " + totalCh + " chapters";
+  }
+  state.done = state.done || {};
+  doneboxes.forEach(function(cb){
+    cb.addEventListener("change", function(){
+      state.done[cb.getAttribute("data-ch")] = cb.checked;
+      saveState(state);
+      updateProgressUI();
+    });
+  });
+  updateProgressUI();
+
+  /* ---------- Collapsible chapters ---------- */
+  document.querySelectorAll(".chapter").forEach(function(section){
+    var btn = section.querySelector(".collapse-toggle");
+    var body = section.querySelector(".chapter-body");
+    if(!btn || !body) return;
+    var id = section.id;
+    if(state.collapsed && state.collapsed[id]){
+      body.classList.add("collapsed"); btn.textContent = "+";
+    }
+    btn.addEventListener("click", function(){
+      var collapsed = body.classList.toggle("collapsed");
+      btn.textContent = collapsed ? "+" : "−";
+      state.collapsed = state.collapsed || {};
+      state.collapsed[id] = collapsed;
+      saveState(state);
+    });
+  });
+  document.getElementById("expandAllBtn").addEventListener("click", function(){
+    var anyCollapsed = document.querySelector(".chapter-body.collapsed");
+    document.querySelectorAll(".chapter-body").forEach(function(b){ b.classList.toggle("collapsed", !anyCollapsed); });
+    document.querySelectorAll(".collapse-toggle").forEach(function(b){ b.textContent = anyCollapsed ? "+" : "−"; });
+    this.textContent = anyCollapsed ? "Expand all" : "Collapse all";
+    state.collapsed = {};
+    if(anyCollapsed){ chapters.forEach(function(c){ state.collapsed[c.id] = true; }); }
+    saveState(state);
+  });
+
+  /* ---------- Scrollspy nav ---------- */
+  var navLinks = document.querySelectorAll("#chnav a");
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        navLinks.forEach(function(l){ l.classList.remove("active"); });
+        var link = document.querySelector('#chnav a[href="#'+entry.target.id+'"]');
+        if(link) link.classList.add("active");
+      }
+    });
+  }, {rootMargin:"-40% 0px -50% 0px"});
+  chapters.concat(document.getElementById("revision")).forEach(function(s){ if(s) observer.observe(s); });
+
+  /* ---------- Search ---------- */
+  var searchbox = document.getElementById("searchbox");
+  var searchableEls = document.querySelectorAll(".chapter p, .chapter li, .chapter td, .chapter .qtext, .chapter summary");
+  var originalHTML = new Map();
+  searchableEls.forEach(function(el){ originalHTML.set(el, el.innerHTML); });
+
+  function clearHighlights(){
+    searchableEls.forEach(function(el){ el.innerHTML = originalHTML.get(el); });
+    chapters.forEach(function(c){ c.classList.remove("hidden-by-search"); });
+  }
+  function runSearch(q){
+    q = q.trim();
+    if(!q){ clearHighlights(); return; }
+    var re;
+    try{ re = new RegExp("("+q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig"); }catch(e){ return; }
+    var matchedChapters = new Set();
+    searchableEls.forEach(function(el){
+      var raw = originalHTML.get(el);
+      if(re.test(raw)){
+        el.innerHTML = raw.replace(re, "<mark class=\"hit\">$1</mark>");
+        var ch = el.closest(".chapter");
+        if(ch) matchedChapters.add(ch.id);
+      } else {
+        el.innerHTML = raw;
+      }
+    });
+    chapters.forEach(function(c){ c.classList.toggle("hidden-by-search", !matchedChapters.has(c.id)); });
+  }
+  searchbox.addEventListener("input", function(){ runSearch(this.value); });
+
+  /* ---------- Keyboard shortcuts ---------- */
+  document.addEventListener("keydown", function(e){
+    var tag = (document.activeElement && document.activeElement.tagName) || "";
+    if(tag === "INPUT" || tag === "TEXTAREA"){
+      if(e.key === "Escape") document.activeElement.blur();
+      return;
+    }
+    if(e.key === "/"){ e.preventDefault(); searchbox.focus(); }
+    if(e.key === "d" || e.key === "D"){ applyDark(!document.documentElement.classList.contains("dark")); }
+    if(e.key === "t" || e.key === "T"){ window.scrollTo({top:0, behavior:"smooth"}); }
+  });
+
+  /* ---------- Back to top ---------- */
+  var backBtn = document.getElementById("backtotop");
+  window.addEventListener("scroll", function(){
+    backBtn.classList.toggle("show", window.scrollY > 700);
+  });
+  backBtn.addEventListener("click", function(){ window.scrollTo({top:0, behavior:"smooth"}); });
+
+  /* ---------- Flashcards ---------- */
+  document.querySelectorAll(".flashcard").forEach(function(card){
+    card.addEventListener("click", function(){ card.classList.toggle("flipped"); });
+  });
+
+  /* ---------- Quiz ---------- */
+  document.querySelectorAll(".quiz-q").forEach(function(q){
+    var opts = q.querySelectorAll(".quiz-opt");
+    var feedback = q.querySelector(".quiz-feedback");
+    opts.forEach(function(opt){
+      opt.addEventListener("click", function(){
+        var correct = opt.getAttribute("data-correct") === "true";
+        opts.forEach(function(o){ o.disabled = true; });
+        opts.forEach(function(o){
+          if(o.getAttribute("data-correct") === "true") o.classList.add("correct");
+        });
+        if(!correct) opt.classList.add("wrong");
+        feedback.style.display = "block";
+        feedback.textContent = correct ? "✓ Correct!" : "✗ Not quite — correct answer highlighted above.";
+        feedback.style.color = correct ? "var(--green)" : "var(--red)";
+      });
+    });
+  });
+
+  /* ---------- Notes autosave ---------- */
+  var notesArea = document.getElementById("notesArea");
+  var notesStatus = document.getElementById("notesStatus");
+  notesArea.value = state.notes || "";
+  var saveTimer;
+  notesArea.addEventListener("input", function(){
+    clearTimeout(saveTimer);
+    notesStatus.textContent = "Saving…";
+    saveTimer = setTimeout(function(){
+      state.notes = notesArea.value;
+      saveState(state);
+      notesStatus.textContent = "Saved to this browser ✓";
+      setTimeout(function(){ notesStatus.textContent = ""; }, 1500);
+    }, 500);
+  });
+})();
+</script>
+</body>
+</html>

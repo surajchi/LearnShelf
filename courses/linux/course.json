@@ -45,6 +45,18 @@
           "file": "V4.html",
           "duration": "10 mins",
           "tags": ["winscp", "sftp", "file-transfer", "scp"]
+        },
+        {
+          "title": "SCP — Securely Copying Files Between Servers",
+          "file": "V5.html",
+          "duration": "12 mins",
+          "tags": ["scp", "secure-copy", "file-transfer", "ssh", "rsync"]
+        },
+        {
+          "title": "100 Must-Know Linux Commands for Power Users",
+          "file": "V6.html",
+          "duration": "90 mins",
+          "tags": ["linux", "commands", "cli", "reference", "power-user"]
         }
       ]
     }
