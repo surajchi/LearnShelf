@@ -33,7 +33,7 @@
   --serif: Georgia, "Cambria", "Times New Roman", serif;
   --mono: ui-monospace, "Cascadia Mono", "Consolas", "SFMono-Regular", Menlo, monospace;
   --shadow: 0 1px 2px rgba(20,30,50,.04), 0 8px 24px rgba(20,30,50,.06);
-  --maxw: 880px;
+  --maxw: 100%;
 }
 html.dark{
   --bg:#0f1420;
@@ -390,6 +390,8 @@ mark.hit{background:var(--yellow); color:#16202e; border-radius:3px;}
   .diagram-wrap, .analogy-card, .cmp-table, .quiz-q, details.qa, .flashcard{break-inside:avoid;}
   a{color:#000; text-decoration:none;}
 }
+body{padding-left:clamp(16px,5vw,80px);padding-right:clamp(16px,5vw,80px);}
+.flashcard{perspective:none;} .flashcard-inner{transform:none !important;} .flashcard-face{backface-visibility:visible; position:absolute; inset:0;} .flashcard-back{transform:none; display:none;} .flashcard.flipped .flashcard-front{display:none;} .flashcard.flipped .flashcard-back{display:flex;}
 </style>
 </head>
 <body>

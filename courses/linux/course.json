@@ -33,6 +33,18 @@
           "file": "V2.html",
           "duration": "12 mins",
           "tags": ["virtualization", "hypervisor", "virtual-machine"]
+        },
+        {
+          "title": "Remote Access Tools — PuTTY, SSH, Git Bash & MobaXterm",
+          "file": "V3.html",
+          "duration": "18 mins",
+          "tags": ["ssh", "putty", "mobaxterm", "remote-access", "networking"]
+        },
+        {
+          "title": "WinSCP — Transferring Files To & From a Server",
+          "file": "V4.html",
+          "duration": "10 mins",
+          "tags": ["winscp", "sftp", "file-transfer", "scp"]
         }
       ]
     }

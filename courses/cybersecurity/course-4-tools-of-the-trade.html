@@ -31,7 +31,7 @@
   --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
   --sans: -apple-system, 'Segoe UI', 'Inter', Avenir, Helvetica, Arial, sans-serif;
   --mono: 'SF Mono', 'JetBrains Mono', Consolas, 'Courier New', monospace;
-  --maxw: 780px;
+  --maxw: 100%;
 }
 
 *{box-sizing:border-box;}
@@ -391,6 +391,7 @@ details.acc .acc-body{padding:16px 18px; font-size:15px;}
   position:absolute; left:-999px; top:0; background:var(--ink); color:#fff; padding:10px 16px; z-index:900;
 }
 .skip-link:focus{left:70px; top:8px;}
+body{padding-left:clamp(16px,5vw,80px);padding-right:clamp(16px,5vw,80px);}
 </style>
 </head>
 <body>

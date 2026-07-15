@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Remote Access Tools &mdash; PuTTY, SSH, Git Bash &amp; MobaXterm</title>
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   Palette: white paper, engineering-notebook navy ink,
+   yellow roadmap cards, blue connector lines (per brief)
+   ============================================================ */
+:root{
+  --bg:#ffffff;
+  --bg-alt:#f6f8fb;
+  --paper-line:#e7ecf3;
+  --ink:#16202e;
+  --ink-soft:#4a5872;
+  --ink-faint:#8895ab;
+  --blue:#1955c9;
+  --blue-dark:#0e3a8c;
+  --blue-tint:#eaf1ff;
+  --yellow:#ffcd3c;
+  --yellow-deep:#f0a500;
+  --yellow-tint:#fff8e1;
+  --green:#1c8a5c;
+  --green-tint:#e6f6ee;
+  --red:#c8402c;
+  --red-tint:#fdeceb;
+  --border:#dce3ee;
+  --radius:14px;
+  --sans: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --serif: Georgia, "Cambria", "Times New Roman", serif;
+  --mono: ui-monospace, "Cascadia Mono", "Consolas", "SFMono-Regular", Menlo, monospace;
+  --shadow: 0 1px 2px rgba(20,30,50,.04), 0 8px 24px rgba(20,30,50,.06);
+  --maxw: 100%;
+}
+html.dark{
+  --bg:#0f1420;
+  --bg-alt:#161d2c;
+  --paper-line:#232c40;
+  --ink:#e9edf6;
+  --ink-soft:#aab4c9;
+  --ink-faint:#71809a;
+  --blue:#5b9bff;
+  --blue-dark:#8fb8ff;
+  --blue-tint:#152241;
+  --yellow:#ffcd3c;
+  --yellow-deep:#ffb703;
+  --yellow-tint:#2b2410;
+  --green:#3fcf8e;
+  --green-tint:#0f2a20;
+  --red:#ff7a68;
+  --red-tint:#331714;
+  --border:#28324a;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  line-height:1.65;
+  transition:background .25s ease, color .25s ease;
+}
+::selection{background:var(--yellow); color:#16202e;}
+img,svg{max-width:100%;}
+a{color:var(--blue);}
+h1,h2,h3,h4{font-family:var(--serif); color:var(--ink); line-height:1.25; letter-spacing:.2px;}
+code, .mono{font-family:var(--mono);}
+.wrap{max-width:var(--maxw); margin:0 auto; padding:0 24px;}
+.eyebrow{
+  display:inline-block; font-family:var(--mono); font-size:11.5px; letter-spacing:1.5px;
+  text-transform:uppercase; color:var(--blue-dark); background:var(--blue-tint);
+  padding:4px 10px; border-radius:20px; font-weight:700;
+}
+
+/* ============================================================
+   TOP BAR / PROGRESS
+   ============================================================ */
+#progress-track{position:fixed; top:0; left:0; right:0; height:3px; background:var(--paper-line); z-index:100;}
+#progress-bar{height:100%; width:0%; background:linear-gradient(90deg,var(--blue),var(--yellow)); transition:width .2s ease;}
+
+header.topbar{
+  position:sticky; top:3px; z-index:90; background:var(--bg);
+  border-bottom:1px solid var(--border); backdrop-filter:blur(6px);
+}
+.topbar-inner{
+  max-width:var(--maxw); margin:0 auto; padding:12px 24px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.brand{display:flex; align-items:center; gap:9px; font-family:var(--serif); font-weight:700; font-size:17px; white-space:nowrap;}
+.brand .tux{width:22px;height:22px;flex:none;}
+.topbar-inner input[type=search]{
+  flex:1; min-width:120px; padding:8px 12px; border-radius:9px; border:1px solid var(--border);
+  background:var(--bg-alt); color:var(--ink); font-family:var(--sans); font-size:13.5px;
+}
+.topbar-inner input[type=search]:focus{outline:2px solid var(--blue); outline-offset:1px;}
+.tbtn{
+  border:1px solid var(--border); background:var(--bg-alt); color:var(--ink-soft);
+  border-radius:9px; padding:8px 11px; font-size:13px; cursor:pointer; font-family:var(--sans);
+  display:inline-flex; align-items:center; gap:6px; white-space:nowrap;
+}
+.tbtn:hover{border-color:var(--blue); color:var(--blue-dark);}
+.tbtn:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible{
+  outline:2px solid var(--blue); outline-offset:2px;
+}
+#progress-label{font-size:12px; color:var(--ink-faint); font-family:var(--mono); white-space:nowrap;}
+
+nav.chnav{display:flex; gap:4px; overflow-x:auto; padding:10px 24px 12px; max-width:var(--maxw); margin:0 auto;}
+nav.chnav a{
+  font-size:12.5px; color:var(--ink-soft); text-decoration:none; padding:6px 10px; border-radius:8px;
+  white-space:nowrap; border:1px solid transparent; font-family:var(--mono);
+}
+nav.chnav a.active{background:var(--blue-tint); color:var(--blue-dark); border-color:var(--blue);}
+nav.chnav a:hover{background:var(--bg-alt);}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero{padding:64px 24px 40px; max-width:var(--maxw); margin:0 auto;}
+.hero h1{font-size:42px; margin:14px 0 10px; max-width:16ch;}
+.hero p.lede{font-size:17px; color:var(--ink-soft); max-width:58ch; margin:0 0 26px;}
+.hero-meta{display:flex; gap:18px; flex-wrap:wrap; font-size:13px; color:var(--ink-faint); font-family:var(--mono);}
+.hero-meta span{display:flex; align-items:center; gap:6px;}
+
+/* ============================================================
+   ROADMAP  (yellow cards + blue connectors — signature element)
+   ============================================================ */
+.roadmap-section{padding:10px 24px 56px; max-width:var(--maxw); margin:0 auto;}
+.roadmap-section h2{font-size:13px; text-transform:uppercase; letter-spacing:2px; color:var(--ink-faint); font-family:var(--mono); margin-bottom:22px;}
+.roadmap{position:relative; padding-left:26px;}
+.roadmap::before{
+  content:""; position:absolute; left:10px; top:10px; bottom:10px; width:3px;
+  background:repeating-linear-gradient(180deg, var(--blue) 0 8px, transparent 8px 14px);
+  border-radius:3px;
+}
+.rnode{position:relative; margin-bottom:14px;}
+.rnode::before{
+  content:""; position:absolute; left:-26px; top:18px; width:13px; height:13px; border-radius:50%;
+  background:var(--blue); border:3px solid var(--bg); box-shadow:0 0 0 2px var(--blue);
+}
+.rnode a{
+  display:flex; align-items:center; gap:12px; text-decoration:none; color:var(--ink);
+  background:var(--yellow-tint); border:1.5px solid var(--yellow-deep); border-radius:var(--radius);
+  padding:13px 16px; transition:transform .15s ease, box-shadow .15s ease;
+}
+.rnode a:hover{transform:translateX(3px); box-shadow:var(--shadow);}
+.rnode .num{
+  font-family:var(--mono); font-weight:700; font-size:12px; color:#7a5900;
+  background:var(--yellow); padding:3px 8px; border-radius:6px; flex:none;
+}
+html.dark .rnode .num{color:#241c00;}
+.rnode .rtxt{flex:1;}
+.rnode .rtxt b{display:block; font-family:var(--serif); font-size:15.5px;}
+.rnode .rtxt small{color:var(--ink-soft); font-size:12.5px;}
+.rnode .check{width:20px; height:20px; border-radius:50%; border:2px solid var(--yellow-deep); flex:none;}
+.rnode.done .check{background:var(--green); border-color:var(--green);}
+.rnode.done a{opacity:.75;}
+
+/* ============================================================
+   CHAPTER STRUCTURE
+   ============================================================ */
+.chapter{max-width:var(--maxw); margin:0 auto; padding:26px 24px 8px; border-top:1px solid var(--border);}
+.chapter-head{display:flex; align-items:flex-start; gap:14px; margin-bottom:4px;}
+.chapter-head .ch-num{
+  font-family:var(--mono); font-weight:800; font-size:14px; color:var(--blue);
+  background:var(--blue-tint); border-radius:8px; padding:6px 10px; flex:none; margin-top:4px;
+}
+.chapter-head h2{font-size:26px; margin:0 0 4px;}
+.chapter-head .ch-sub{color:var(--ink-soft); font-size:14.5px; margin:0;}
+.chapter-tools{display:flex; align-items:center; gap:10px; margin-left:auto; flex:none;}
+.markdone{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink-faint); cursor:pointer; font-family:var(--mono); white-space:nowrap;}
+.markdone input{accent-color:var(--green); width:15px; height:15px;}
+.collapse-toggle{
+  border:1px solid var(--border); background:var(--bg-alt); border-radius:8px; width:30px; height:30px;
+  cursor:pointer; color:var(--ink-soft); font-size:14px; flex:none;
+}
+.chapter-body{padding-top:14px; overflow:hidden;}
+.chapter-body.collapsed{display:none;}
+
+/* step block (problem -> why -> analogy -> ...) */
+.step{
+  border-left:3px solid var(--border); padding:2px 0 2px 18px; margin:20px 0;
+}
+.step .step-label{
+  font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:1.4px;
+  color:var(--blue-dark); font-weight:700; margin-bottom:5px; display:block;
+}
+.step p{margin:6px 0; color:var(--ink); font-size:15.5px;}
+.step p.soft{color:var(--ink-soft);}
+
+.analogy-card{
+  background:var(--yellow-tint); border:1px solid var(--yellow-deep); border-radius:var(--radius);
+  padding:16px 18px; margin:16px 0; display:flex; gap:12px;
+}
+.analogy-card .ico{font-size:22px; flex:none;}
+.analogy-card b{display:block; font-family:var(--serif); margin-bottom:4px;}
+
+.note{
+  background:var(--blue-tint); border-left:4px solid var(--blue); border-radius:0 10px 10px 0;
+  padding:12px 16px; margin:16px 0; font-size:14.5px;
+}
+.note b{color:var(--blue-dark);}
+.correction{
+  background:var(--red-tint); border-left:4px solid var(--red); border-radius:0 10px 10px 0;
+  padding:12px 16px; margin:16px 0; font-size:14.5px;
+}
+.correction b{color:var(--red);}
+.source-tag{font-family:var(--mono); font-size:10.5px; letter-spacing:.5px; text-transform:uppercase; color:var(--ink-faint); border:1px solid var(--border); border-radius:5px; padding:1px 6px; margin-left:6px;}
+
+/* ============================================================
+   DIAGRAMS
+   ============================================================ */
+.diagram-wrap{
+  background:var(--bg-alt); border:1px solid var(--border); border-radius:var(--radius);
+  padding:22px; margin:20px 0; break-inside:avoid;
+}
+.diagram-wrap .cap{font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); text-align:center; margin-top:10px;}
+
+/* generic box+arrow flow */
+.flow{display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap;}
+.flow .box{
+  background:var(--bg); border:1.5px solid var(--blue); border-radius:10px; padding:12px 16px;
+  font-size:13.5px; text-align:center; font-family:var(--mono); color:var(--ink); min-width:110px;
+}
+.flow .box.yellow{border-color:var(--yellow-deep); background:var(--yellow-tint);}
+.flow .arrow{color:var(--blue); font-size:20px; padding:0 10px; flex:none;}
+@media (max-width:520px){ .flow{flex-direction:column;} .flow .arrow{transform:rotate(90deg);} }
+
+/* layered stack diagram */
+.stack-diagram{display:flex; flex-direction:column; align-items:center; gap:0;}
+.stack-layer{
+  width:100%; max-width:460px; text-align:center; padding:14px; border-radius:10px;
+  font-family:var(--mono); font-size:13.5px; border:1.5px solid var(--border); background:var(--bg);
+}
+.stack-layer.apps{border-color:var(--blue); color:var(--blue-dark);}
+.stack-layer.hyper{border-color:var(--yellow-deep); background:var(--yellow-tint); font-weight:700;}
+.stack-layer.os{border-color:var(--green); color:var(--green);}
+.stack-layer.hw{border-color:var(--ink-faint); color:var(--ink-soft);}
+.stack-conn{width:2px; height:20px; background:var(--blue);}
+
+/* host machine -> VM split diagram */
+.split-diagram{display:flex; align-items:center; justify-content:center; gap:22px; flex-wrap:wrap;}
+.host-box{
+  border:2px solid var(--blue); border-radius:12px; padding:16px; text-align:center; min-width:170px;
+  background:var(--bg);
+}
+.host-box .htitle{font-family:var(--serif); font-weight:700; font-size:15px; margin-bottom:4px;}
+.host-box .hres{font-family:var(--mono); font-size:12px; color:var(--ink-soft);}
+.vm-stack{display:flex; flex-direction:column; gap:12px;}
+.vm-box{
+  border:1.5px solid var(--yellow-deep); background:var(--yellow-tint); border-radius:10px;
+  padding:11px 14px; font-family:var(--mono); font-size:12px; text-align:center; min-width:150px;
+}
+.vm-box b{display:block; font-size:12.5px; color:#7a5900; margin-bottom:2px;}
+html.dark .vm-box b{color:var(--yellow);}
+
+/* request-travel style animation */
+.travel-track{position:relative; height:46px; background:var(--bg); border:1.5px dashed var(--border); border-radius:30px; margin:18px 0 6px;}
+.travel-dot{
+  position:absolute; top:50%; left:6px; transform:translateY(-50%);
+  width:26px; height:26px; border-radius:50%; background:var(--blue); color:#fff; font-size:12px;
+  display:flex; align-items:center; justify-content:center; font-family:var(--mono);
+  animation:travel 3.2s ease-in-out infinite;
+}
+@keyframes travel{
+  0%{left:6px;} 45%{left:calc(50% - 13px);} 55%{left:calc(50% - 13px);} 100%{left:calc(100% - 32px);}
+}
+@media (prefers-reduced-motion:reduce){ .travel-dot{animation:none; left:calc(50% - 13px);} }
+.travel-ends{display:flex; justify-content:space-between; font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); padding:0 4px;}
+
+/* ============================================================
+   COMPARISON TABLE
+   ============================================================ */
+.cmp-table{width:100%; border-collapse:separate; border-spacing:0; margin:18px 0; font-size:14px; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;}
+.cmp-table th{background:var(--blue); color:#fff; text-align:left; padding:11px 14px; font-family:var(--mono); font-size:12.5px; letter-spacing:.4px;}
+.cmp-table td{padding:11px 14px; border-top:1px solid var(--border); vertical-align:top;}
+.cmp-table tr:nth-child(even) td{background:var(--bg-alt);}
+.cmp-table td:first-child{font-weight:700; color:var(--blue-dark); white-space:nowrap;}
+
+/* ============================================================
+   CARDS: examples / industry / job roles
+   ============================================================ */
+.card-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin:18px 0;}
+.info-card{background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow);}
+.info-card h4{margin:0 0 6px; font-size:15.5px; display:flex; align-items:center; gap:8px;}
+.info-card p{margin:0; font-size:13.5px; color:var(--ink-soft);}
+.info-card .tag{display:inline-block; font-family:var(--mono); font-size:10.5px; background:var(--green-tint); color:var(--green); padding:2px 7px; border-radius:6px; margin-top:8px;}
+
+/* ============================================================
+   INTERVIEW / MISTAKES / MEMORY TRICK
+   ============================================================ */
+details.qa{border:1px solid var(--border); border-radius:10px; margin:9px 0; background:var(--bg);}
+details.qa summary{padding:12px 15px; cursor:pointer; font-weight:600; font-size:14.5px; list-style:none; display:flex; gap:10px; align-items:flex-start;}
+details.qa summary::before{content:"Q"; font-family:var(--mono); font-size:11px; background:var(--blue-tint); color:var(--blue-dark); border-radius:5px; padding:2px 7px; flex:none;}
+details.qa[open] summary{border-bottom:1px solid var(--border);}
+details.qa .ans{padding:12px 15px 15px 42px; color:var(--ink-soft); font-size:14px;}
+
+.mistake-row{display:flex; gap:10px; align-items:flex-start; margin:10px 0; font-size:14px;}
+.mistake-row .x{color:var(--red); font-weight:800; flex:none;}
+.mistake-row .ok{color:var(--green); font-weight:800; flex:none;}
+
+.trick{
+  background:var(--yellow-tint); border:1px dashed var(--yellow-deep); border-radius:10px;
+  padding:12px 16px; margin:14px 0; font-size:14px;
+}
+.trick b{font-family:var(--mono); font-size:11.5px; text-transform:uppercase; color:#7a5900;}
+html.dark .trick b{color:var(--yellow);}
+
+/* ============================================================
+   QUIZ / FLASHCARDS
+   ============================================================ */
+.quiz-q{border:1px solid var(--border); border-radius:var(--radius); padding:15px 16px; margin:12px 0; background:var(--bg);}
+.quiz-q p.qtext{font-weight:600; margin:0 0 10px;}
+.quiz-opts{display:grid; gap:8px;}
+.quiz-opt{
+  text-align:left; border:1px solid var(--border); background:var(--bg-alt); border-radius:8px;
+  padding:9px 12px; cursor:pointer; font-size:13.5px; color:var(--ink); font-family:var(--sans);
+}
+.quiz-opt:hover{border-color:var(--blue);}
+.quiz-opt.correct{background:var(--green-tint); border-color:var(--green); font-weight:700;}
+.quiz-opt.wrong{background:var(--red-tint); border-color:var(--red);}
+.quiz-feedback{font-size:12.5px; margin-top:8px; font-family:var(--mono); display:none;}
+
+.flash-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin:16px 0;}
+.flashcard{perspective:1000px; height:120px; cursor:pointer;}
+.flashcard-inner{position:relative; width:100%; height:100%; transition:transform .5s; transform-style:preserve-3d;}
+.flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+.flashcard-face{
+  position:absolute; inset:0; backface-visibility:hidden; border-radius:12px;
+  display:flex; align-items:center; justify-content:center; text-align:center; padding:14px;
+  font-size:13.5px; border:1.5px solid var(--border);
+}
+.flashcard-front{background:var(--blue-tint); color:var(--blue-dark); font-weight:700;}
+.flashcard-back{background:var(--yellow-tint); color:#5c4400; transform:rotateY(180deg); border-color:var(--yellow-deep);}
+html.dark .flashcard-back{color:var(--yellow-tint);}
+
+/* ============================================================
+   REVISION / KEY POINTS
+   ============================================================ */
+.keypoints{padding-left:0; list-style:none; display:grid; gap:8px; margin:16px 0;}
+.keypoints li{display:flex; gap:10px; align-items:flex-start; font-size:14.5px;}
+.keypoints li .kn{
+  font-family:var(--mono); font-size:11px; font-weight:800; background:var(--blue); color:#fff;
+  width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex:none; margin-top:2px;
+}
+
+/* ============================================================
+   NOTES
+   ============================================================ */
+.notes-area{width:100%; min-height:80px; resize:vertical; border:1px solid var(--border); border-radius:10px; padding:12px; font-family:var(--sans); font-size:13.5px; background:var(--bg-alt); color:var(--ink);}
+.notes-status{font-size:11.5px; color:var(--ink-faint); font-family:var(--mono); margin-top:5px; height:14px;}
+
+/* ============================================================
+   NAV FOOTER / BACK TO TOP
+   ============================================================ */
+.chnav-footer{display:flex; justify-content:space-between; gap:12px; max-width:var(--maxw); margin:10px auto 0; padding:0 24px;}
+.chnav-footer a{
+  border:1px solid var(--border); border-radius:10px; padding:10px 14px; text-decoration:none; color:var(--ink);
+  font-size:13px; flex:1; max-width:48%;
+}
+.chnav-footer a.next{text-align:right;}
+.chnav-footer a small{display:block; color:var(--ink-faint); font-family:var(--mono); font-size:10.5px;}
+.chnav-footer a:hover{border-color:var(--blue);}
+
+#backtotop{
+  position:fixed; bottom:22px; right:22px; width:42px; height:42px; border-radius:50%;
+  background:var(--blue); color:#fff; border:none; cursor:pointer; font-size:16px; box-shadow:var(--shadow);
+  opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:80;
+}
+#backtotop.show{opacity:1; pointer-events:auto;}
+
+.site-footer{text-align:center; padding:50px 24px 70px; color:var(--ink-faint); font-size:12.5px; font-family:var(--mono);}
+.kbd{font-family:var(--mono); background:var(--bg-alt); border:1px solid var(--border); border-radius:5px; padding:1px 6px; font-size:11px;}
+
+mark.hit{background:var(--yellow); color:#16202e; border-radius:3px;}
+.hidden-by-search{display:none !important;}
+
+/* ============================================================
+   PRINT
+   ============================================================ */
+@media print{
+  header.topbar, nav.chnav, #progress-track, #backtotop, .chapter-tools, .notes-area, .notes-status{display:none !important;}
+  body{background:#fff; color:#000;}
+  .chapter{break-before:page; border-top:none;}
+  .chapter-body.collapsed{display:block !important;}
+  .diagram-wrap, .analogy-card, .cmp-table, .quiz-q, details.qa, .flashcard{break-inside:avoid;}
+  a{color:#000; text-decoration:none;}
+}
+body{padding-left:clamp(16px,5vw,80px);padding-right:clamp(16px,5vw,80px);}
+.flashcard{perspective:none;} .flashcard-inner{transform:none !important;} .flashcard-face{backface-visibility:visible; position:absolute; inset:0;} .flashcard-back{transform:none; display:none;} .flashcard.flipped .flashcard-front{display:none;} .flashcard.flipped .flashcard-back{display:flex;}
+</style>
+</head>
+<body>
+
+<div id="progress-track"><div id="progress-bar"></div></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <svg class="tux" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="12" rx="2" stroke="var(--blue)" stroke-width="1.5"/><rect x="7" y="7" width="4.5" height="6" rx="1" fill="var(--yellow)"/><rect x="12.5" y="7" width="4.5" height="6" rx="1" fill="var(--yellow)" opacity=".6"/><path d="M8 20h8M12 16v4" stroke="var(--blue)" stroke-width="1.5"/></svg>
+      Remote Access Tools
+    </div>
+    <input type="search" id="searchbox" placeholder="Search this book&hellip;  ( / )" aria-label="Search chapters">
+    <span id="progress-label">0 / 10 chapters</span>
+    <button class="tbtn" id="expandAllBtn">Expand all</button>
+    <button class="tbtn" id="darkToggle" aria-label="Toggle dark mode">🌙 Dark</button>
+  </div>
+  <nav class="chnav" id="chnav" aria-label="Chapter navigation">
+    <a href="#ch1">1. The Goal</a>
+    <a href="#ch2">2. Install PuTTY</a>
+    <a href="#ch3">3. Find the IP</a>
+    <a href="#ch4">4. Bridged Adapter Fix</a>
+    <a href="#ch5">5. Connect with PuTTY</a>
+    <a href="#ch6">6. CentOS vs Ubuntu</a>
+    <a href="#ch7">7. Start the SSH Server</a>
+    <a href="#ch8">8. SSH from CMD</a>
+    <a href="#ch9">9. Git Bash</a>
+    <a href="#ch10">10. MobaXterm</a>
+    <a href="#revision">Revision</a>
+  </nav>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <span class="eyebrow">Chapter 03 &middot; Remote Access Tools</span>
+  <h1>Reaching a server from your own desktop</h1>
+  <p class="lede">Servers usually sit somewhere else — another machine, another building, the cloud. This chapter walks through the everyday Windows tools engineers use to log into a remote Linux machine and run commands on it as if it were right in front of them: <em>PuTTY</em>, the built-in <em>ssh</em> command, <em>Git Bash</em>, and <em>MobaXterm</em> — plus the network setup that makes the connection actually work.</p>
+  <div class="hero-meta">
+    <span>📺 Source: Remote access tools lecture (Hindi/English)</span>
+    <span>⏱ transcript &rarr; full chapter</span>
+    <span>🧠 Assumes you can open a VM &amp; a terminal</span>
+  </div>
+</section>
+
+<!-- ================= ROADMAP ================= -->
+<section class="roadmap-section">
+  <h2>Your roadmap through this chapter</h2>
+  <div class="roadmap" id="roadmap">
+    <div class="rnode" data-ch="ch1"><a href="#ch1"><span class="num">01</span><span class="rtxt"><b>Why Remote Access?</b><small>Log into a server that isn't in front of you</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch2"><a href="#ch2"><span class="num">02</span><span class="rtxt"><b>Install PuTTY</b><small>Download the MSI from putty.org and finish</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch3"><a href="#ch3"><span class="num">03</span><span class="rtxt"><b>Find the VM's IP address</b><small>ifconfig on CentOS, ip addr on Ubuntu</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch4"><a href="#ch4"><span class="num">04</span><span class="rtxt"><b>The connection error &amp; the fix</b><small>Switch VirtualBox to Bridged Adapter, then reboot</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch5"><a href="#ch5"><span class="num">05</span><span class="rtxt"><b>Connect with PuTTY</b><small>Accept the host key, log in as your user</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch6"><a href="#ch6"><span class="num">06</span><span class="rtxt"><b>CentOS vs Ubuntu commands</b><small>Same idea, slightly different commands</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch7"><a href="#ch7"><span class="num">07</span><span class="rtxt"><b>Start the SSH server</b><small>Install &amp; start openssh-server so logins are accepted</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch8"><a href="#ch8"><span class="num">08</span><span class="rtxt"><b>SSH from Windows CMD</b><small>The built-in ssh user@ip command</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch9"><a href="#ch9"><span class="num">09</span><span class="rtxt"><b>Git Bash</b><small>Another way to run ssh on Windows</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch10"><a href="#ch10"><span class="num">10</span><span class="rtxt"><b>MobaXterm</b><small>A colourful, multi-tab terminal for many sessions</small></span><span class="check"></span></a></div>
+  </div>
+</section>
+
+<main>
+
+<!-- ================= CHAPTER 1 ================= -->
+<section class="chapter" id="ch1">
+  <div class="chapter-head">
+    <span class="ch-num">01</span>
+    <div><h2>Why do we need remote access tools?</h2><p class="ch-sub">The server you want to use is usually not the machine in front of you</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch1"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="note"><b>Where this comes from:</b> The lecture opens by saying: in this section we'll look at some <i>useful tools you should know about</i>. The scenario it draws is simple — "imagine there's a server on the right-hand side; how can we access it?" That is exactly what we'll practise. <span class="source-tag">from transcript</span></div>
+
+    <div class="step">
+      <span class="step-label">1 &middot; The situation</span>
+      <p>You are sitting at your own Windows desktop or laptop. The machine you actually want to work on — a Linux <b>server</b> or virtual machine — is somewhere else. You need a way to open its command line <i>from your machine</i>, type commands, and see the results, without physically standing at that server.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">2 &middot; What we'll practise</span>
+      <p>In this chapter we set up and use several tools that all do this same job. We'll use two virtual machines as our "remote servers": a <b>CentOS</b> VM and an <b>Ubuntu</b> VM (which is Debian-based). Everything you learn here applies identically to a real remote server on the internet.</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="flow">
+        <div class="box">Your Windows PC</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box yellow">Remote Access Tool</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box">Linux Server / VM</div>
+      </div>
+      <div class="cap">Fig 1.1 — A remote access tool bridges your local machine and the remote server's terminal</div>
+    </div>
+
+    <div class="analogy-card">
+      <span class="ico">📞</span>
+      <div><b>Real-life analogy</b>A remote access tool is like a telephone line into the server's control room. You don't travel there — you dial in, and once connected you can operate its controls (type commands) exactly as if you were sitting inside.</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>We need remote access tools to open and control a server's command line from our own machine. First tool up: <b>PuTTY</b>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 2 ================= -->
+<section class="chapter" id="ch2">
+  <div class="chapter-head">
+    <span class="ch-num">02</span>
+    <div><h2>Installing PuTTY</h2><p class="ch-sub">A tiny, classic SSH client for Windows</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch2"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="step">
+      <span class="step-label">1 &middot; Download it</span>
+      <p>Go to the PuTTY website and click the <b>Download</b> button. The transcript points you to the official site — <b>putty.org</b> — to grab the installer.</p>
+    </div>
+
+    <div class="correction"><b>Small correction:</b> the audio says "google.org", but the tool is actually downloaded from <b>putty.org</b> (the official PuTTY site). Use putty.org, not google.org. <span class="source-tag">clarified</span></div>
+
+    <div class="step">
+      <span class="step-label">2 &middot; Install it</span>
+      <p>Download the <b>MSI</b> installer (the standard Windows installer package). The steps are simple: run it, click through, and <b>Finish</b>. Once done, PuTTY is installed.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">3 &middot; Open it</span>
+      <p>Go to the Windows <b>Search</b>, type <b>PuTTY</b>, and open it. The first time, you'll see the PuTTY configuration screen — a window asking for a host name and port.</p>
+    </div>
+
+    <div class="note"><b>What is an MSI?</b> An <code>.msi</code> file is Microsoft's standard installer format on Windows. Double-clicking it launches a guided install (Next → Next → Finish) that copies the program onto your system and registers it. <span class="source-tag">expanded</span></div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>PuTTY is installed from putty.org via a simple MSI installer, then opened from Windows Search. Before we can connect, though, we need one piece of information: the server's IP address.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 3 ================= -->
+<section class="chapter" id="ch3">
+  <div class="chapter-head">
+    <span class="ch-num">03</span>
+    <div><h2>Finding the server's IP address</h2><p class="ch-sub">You connect to a machine by its IP — so first you must read it</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch3"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="step">
+      <span class="step-label">1 &middot; Why we need the IP</span>
+      <p>To reach any machine over the network you need its <b>IP address</b> — its unique address on the network. So the first thing we do on the CentOS VM is open a <b>terminal</b> and read its IP.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">2 &middot; On CentOS — the <code>ifconfig</code> command</span>
+      <p>On the CentOS virtual machine, open the terminal and run:</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="flow"><div class="box">ifconfig</div></div>
+      <div class="cap">Command on CentOS to display network interfaces</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">3 &middot; Reading the output</span>
+      <p>In the output you'll see a <b>network interface</b> that shows the flags <b>BROADCAST RUNNING MULTICAST</b>. Next to that interface is an IP address. <b>That</b> is the IP we use to access this server.</p>
+    </div>
+
+    <div class="note"><b>What is a network interface?</b> It's the machine's connection point to a network (wired or virtual). A single machine can have several. The one marked <code>RUNNING</code> with an IP is the active one you connect through. <span class="source-tag">expanded</span></div>
+
+    <div class="analogy-card">
+      <span class="ico">🏠</span>
+      <div><b>Real-life analogy</b>An IP address is the server's street address. Before you can post a letter (open a connection), you must first look up and copy down that address.</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>On CentOS, <code>ifconfig</code> shows the network interface and its IP address (the one with BROADCAST RUNNING MULTICAST). Copy that IP — we'll type it into PuTTY next. But the very first attempt will fail, which teaches us something important.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 4 ================= -->
+<section class="chapter" id="ch4">
+  <div class="chapter-head">
+    <span class="ch-num">04</span>
+    <div><h2>The connection error &mdash; and the Bridged Adapter fix</h2><p class="ch-sub">Why the first attempt fails, and the VirtualBox setting that repairs it</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch4"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="step">
+      <span class="step-label">1 &middot; The first attempt</span>
+      <p>Open PuTTY. In <b>Host Name (or IP address)</b> type the IP you read from the VM. Leave the <b>Port</b> at its default, <b>22</b>. Click <b>Open</b> to connect.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">2 &middot; It fails</span>
+      <p>The connection errors out. In the transcript this is expected — the default VirtualBox networking (<b>NAT</b>) doesn't let your host PC reach the VM directly by that IP. We need to change one VirtualBox setting.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">3 &middot; Change the network to Bridged Adapter</span>
+      <p>In the running VM's window go to <b>Devices &rarr; Network &rarr; Network Settings</b>. By default the adapter is <b>Attached to: NAT</b>. Change that to <b>Bridged Adapter</b> and click <b>OK</b>.</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="flow">
+        <div class="box">Devices</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box">Network</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box yellow">Attached to: Bridged Adapter</div>
+      </div>
+      <div class="cap">Fig 4.1 — Switching the VM's network adapter from NAT to Bridged Adapter</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">4 &middot; Reboot so the change takes effect</span>
+      <p>Check the IP again with <code>ifconfig</code> — it's still the same, because the change hasn't applied yet. So we restart the VM. In the VM terminal run:</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="flow"><div class="box">reboot</div></div>
+      <div class="cap">Restarts the virtual machine so the new network setting applies</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">5 &middot; A new IP appears</span>
+      <p>After the VM restarts, log back in, open the terminal, and run <code>ifconfig</code> once more. This time you get a <b>new IP</b> — in the lecture's case <b>192.168.1.35</b> (yours will differ). A new, bridged IP means the network is now set up correctly and PuTTY should work.</p>
+    </div>
+
+    <div class="note"><b>NAT vs Bridged, in one line:</b> With <b>NAT</b> the VM hides behind the host and isn't directly reachable. With a <b>Bridged Adapter</b> the VM gets its own address on your real home network — so your PC (and PuTTY) can reach it directly, just like any other device. <span class="source-tag">expanded</span></div>
+
+    <div class="mistake-row"><span class="x">✗</span><span>Changing the setting to Bridged Adapter and expecting it to work immediately.</span></div>
+    <div class="mistake-row"><span class="ok">✓</span><span>Reboot the VM after changing the adapter — the new IP only appears after the restart.</span></div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>The first PuTTY attempt fails because the VM uses NAT. Switching the VirtualBox adapter to <b>Bridged Adapter</b> and <b>rebooting</b> gives the VM a directly reachable IP. Now we can actually log in.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 5 ================= -->
+<section class="chapter" id="ch5">
+  <div class="chapter-head">
+    <span class="ch-num">05</span>
+    <div><h2>Connecting with PuTTY</h2><p class="ch-sub">Host key, login name, password — and you're in</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch5"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="step">
+      <span class="step-label">1 &middot; Enter the new IP</span>
+      <p>Open PuTTY again. In <b>Host Name (or IP address)</b> type the new bridged IP (e.g. <b>192.168.1.35</b>), keep <b>Port 22</b>, and click <b>Open</b>.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">2 &middot; Accept the security certificate (host key)</span>
+      <p>The first time you connect, PuTTY shows a <b>security alert</b> about the server's key. This is normal for a first connection — simply <b>Accept</b> it. PuTTY then remembers this server.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">3 &middot; Log in</span>
+      <p>You now see <code>login as:</code>. Enter your <b>username</b> — in the lecture the user is <b>paul</b> — then enter that user's <b>password</b>. On success you're connected: you now have the VM's terminal open <i>inside PuTTY</i>.</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="flow">
+        <div class="box">Enter IP + Port 22</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box yellow">Accept host key</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box">login as: paul + password</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box">Connected</div>
+      </div>
+      <div class="cap">Fig 5.1 — The PuTTY login flow</div>
+    </div>
+
+    <div class="note"><b>Why a "host key"?</b> The first time you connect, the server presents a unique fingerprint (its host key). Accepting it lets PuTTY recognise the same server next time and warn you if it ever changes — a protection against connecting to an impostor. <span class="source-tag">expanded</span></div>
+
+    <div class="step">
+      <span class="step-label">4 &middot; Customise the look (optional)</span>
+      <p>Inside the PuTTY session you can go full screen and change settings. Right-click the title bar &rarr; <b>Change Settings</b> &rarr; <b>Appearance</b>, and change the <b>font</b> and size, then <b>Apply</b>. It's the same terminal as the VM — commands like <code>pwd</code> and <code>hostname</code> all work exactly as they do locally.</p>
+    </div>
+
+    <div class="analogy-card">
+      <span class="ico">🪟</span>
+      <div><b>Real-life analogy</b>PuTTY is a window cut into the remote machine. Everything you type goes through the window to the server; everything the server prints comes back through it. The glass (fonts, colours) is yours to decorate.</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>Enter the bridged IP, accept the host key, log in as your user with a password, and you have a live remote terminal in PuTTY. Next we look at how the commands differ between CentOS and Ubuntu.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 6 ================= -->
+<section class="chapter" id="ch6">
+  <div class="chapter-head">
+    <span class="ch-num">06</span>
+    <div><h2>CentOS vs Ubuntu &mdash; small command differences</h2><p class="ch-sub"><code>ifconfig</code> vs <code>ip addr</code>, and the same Bridged + reboot dance</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch6"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="step">
+      <span class="step-label">1 &middot; Repeat on the Ubuntu VM</span>
+      <p>Now we do the same for the second (Ubuntu) VM. Open its terminal. Because Ubuntu is <b>Debian-based</b>, the command to read the IP is slightly different — instead of <code>ifconfig</code>, use:</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="flow"><div class="box">ip addr</div></div>
+      <div class="cap">The IP-address command on Debian/Ubuntu systems</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">2 &middot; Same pattern in the output</span>
+      <p>The output shows the same pattern — interfaces with flags like <b>BROADCAST MULTICAST</b>, and an IP address. But you already know this first IP won't work until we bridge the network.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">3 &middot; Same fix — Bridged Adapter + reboot</span>
+      <p>Go to <b>Devices &rarr; Network Settings</b>, switch from <b>NAT</b> to <b>Bridged Adapter</b>, click <b>OK</b>, then run <code>reboot</code>. After the restart, run <code>ip addr</code> again — in the lecture the Ubuntu VM now shows <b>192.168.1.16</b>, confirming the network is set up.</p>
+    </div>
+
+    <table class="cmp-table">
+      <tr><th>Task</th><th>CentOS (RHEL family)</th><th>Ubuntu (Debian family)</th></tr>
+      <tr><td>Read the IP</td><td><code>ifconfig</code></td><td><code>ip addr</code></td></tr>
+      <tr><td>Network fix</td><td>Bridged Adapter + reboot</td><td>Bridged Adapter + reboot</td></tr>
+      <tr><td>Default SSH port</td><td>22</td><td>22</td></tr>
+    </table>
+
+    <div class="trick"><b>Memory trick</b><br><b>i</b>fconfig on the older/Red-Hat side, <b>ip addr</b> on the Debian/Ubuntu side. Different words, same answer: "what's my IP?"</div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>The workflow is identical across distros; only the IP command changes (<code>ifconfig</code> vs <code>ip addr</code>). But when we try PuTTY against the Ubuntu VM, we hit a <i>new</i> error — because a service is missing.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 7 ================= -->
+<section class="chapter" id="ch7">
+  <div class="chapter-head">
+    <span class="ch-num">07</span>
+    <div><h2>Starting the SSH server so logins are accepted</h2><p class="ch-sub">A machine can only accept remote logins if its SSH service is running</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch7"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="step">
+      <span class="step-label">1 &middot; The new error</span>
+      <p>We enter the Ubuntu VM's IP into PuTTY and get an error again. The reason: to accept remote connections, a machine needs an <b>SSH service enabled and running</b>. The Ubuntu VM doesn't have it yet, so we install it.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">2 &middot; Install the OpenSSH server</span>
+      <p>In the Ubuntu VM's terminal, run:</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="flow"><div class="box">sudo apt install openssh-server</div></div>
+      <div class="cap">Installs the package that lets this machine accept SSH logins</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">3 &middot; Start the service</span>
+      <p>Installing the package isn't enough — we must <b>start</b> the service so it's actually listening. Basically, we're <i>enabling a service</i> so the server can be reached remotely from outside. Run:</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="flow"><div class="box">sudo systemctl start ssh</div></div>
+      <div class="cap">Starts the SSH service (it may ask for the user's password, e.g. paul)</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">4 &middot; Check it's running</span>
+      <p>Confirm the status with:</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="flow"><div class="box">sudo systemctl status ssh</div></div>
+      <div class="cap">Should report the service as active (running)</div>
+    </div>
+
+    <div class="note"><b>What is a "service" here?</b> A service (or daemon) is a background program that stays running to handle requests. The <b>SSH service</b> listens on port 22 for incoming logins. No running SSH service = no remote access, which is exactly the error we saw. <span class="source-tag">expanded</span></div>
+
+    <div class="analogy-card">
+      <span class="ico">🚪</span>
+      <div><b>Real-life analogy</b>Installing <code>openssh-server</code> builds the door. <code>systemctl start ssh</code> is what actually <i>opens</i> that door and posts someone to answer knocks. Without starting it, the door exists but stays locked.</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">5 &middot; Now PuTTY works</span>
+      <p>With the SSH service active, open PuTTY again for the Ubuntu VM. This time it connects — accept the host key, enter the username and password, and you're in. The transcript even verifies it with <code>cat /etc/os-release</code> to prove it really is the Ubuntu VM.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>Remote logins require a running SSH server. On Ubuntu: <code>sudo apt install openssh-server</code>, then <code>sudo systemctl start ssh</code> (check with <code>status</code>). PuTTY is only the first client — next, three more ways to make the same SSH connection.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 8 ================= -->
+<section class="chapter" id="ch8">
+  <div class="chapter-head">
+    <span class="ch-num">08</span>
+    <div><h2>SSH straight from the Windows Command Prompt</h2><p class="ch-sub">No extra tool needed — <code>ssh</code> is built into modern Windows</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch8"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="step">
+      <span class="step-label">1 &middot; The idea</span>
+      <p>You don't always need PuTTY. Windows ships with an <b>ssh</b> command in its Command Prompt (CMD). First read the server's IP (e.g. <code>ifconfig</code> on CentOS), then open CMD.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">2 &middot; The command</span>
+      <p><b>SSH</b> stands for <b>Secure Shell</b>. The pattern is <code>ssh</code>, then the username, then <code>@</code>, then the host name or IP. For user <b>paul</b>:</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="flow"><div class="box">ssh paul@192.168.1.35</div></div>
+      <div class="cap">Syntax: ssh &lt;user&gt;@&lt;ip-or-hostname&gt;</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">3 &middot; Same prompts as PuTTY</span>
+      <p>Press Enter. The first time it asks you to confirm the server's fingerprint — type <b>yes</b>. Then it asks for the <b>password</b>. Enter it, and you're logged into the VM straight from CMD. The same command works against a real remote server.</p>
+    </div>
+
+    <div class="trick"><b>Memory trick</b><br><b>ssh</b> = <b>S</b>ecure <b>SH</b>ell. Read it as "shell into that machine, securely." <code>ssh user@address</code>.</div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>Modern Windows has SSH built in: <code>ssh paul@&lt;ip&gt;</code> in CMD, confirm the fingerprint, enter the password. Same result as PuTTY, zero install. Next: Git Bash.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 9 ================= -->
+<section class="chapter" id="ch9">
+  <div class="chapter-head">
+    <span class="ch-num">09</span>
+    <div><h2>Git Bash</h2><p class="ch-sub">The terminal you install for Git can run <code>ssh</code> too</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch9"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="step">
+      <span class="step-label">1 &middot; What it is</span>
+      <p>Another option is <b>Git Bash</b> — the tool many people already have installed because they use <b>Git</b>. It gives you a Unix-style shell on Windows, and it can access a remote server the same way.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">2 &middot; Install it</span>
+      <p>Run the Git installer, double-click to launch, accept the licence, and click <b>Next → Next → Next → Finish</b>. Very simple steps.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">3 &middot; Use the same ssh command</span>
+      <p>Open Git Bash and use the identical SSH command you used in CMD:</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="flow"><div class="box">ssh paul@192.168.1.35</div></div>
+      <div class="cap">Git Bash accepts the very same ssh syntax</div>
+    </div>
+
+    <div class="note"><b>Why does the same command work everywhere?</b> PuTTY, CMD, and Git Bash are all just <i>clients</i> speaking the same SSH protocol to the server. The tool is a matter of taste — the underlying connection is identical. <span class="source-tag">expanded</span></div>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>Git Bash is a familiar Unix-style shell on Windows that runs <code>ssh user@ip</code> just like CMD. One last, more feature-rich tool remains: MobaXterm.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 10 ================= -->
+<section class="chapter" id="ch10">
+  <div class="chapter-head">
+    <span class="ch-num">10</span>
+    <div><h2>MobaXterm &mdash; a multi-tab terminal</h2><p class="ch-sub">A colourful client that keeps many server sessions side by side</p></div>
+    <div class="chapter-tools">
+      <label class="markdone"><input type="checkbox" class="donebox" data-ch="ch10"> Mark complete</label>
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <div class="step">
+      <span class="step-label">1 &middot; What makes it different</span>
+      <p><b>MobaXterm</b> is a <b>multi-tab terminal</b>. Its big advantage: you can keep several remote sessions open at once, side by side, and switch between them easily. Its presentation is colourful and polished, which many people find nicer to work in — especially for reading files and logs.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">2 &middot; Open a session</span>
+      <p>Launch MobaXterm and go full screen. To connect to any terminal, click <b>Session</b>. There are several options; we use <b>SSH</b>. Actually the transcript calls it the <b>Remote host</b> field — put the server's <b>IP</b> there.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-label">3 &middot; Fill in the details</span>
+      <p>Tick <b>Specify username</b> and enter <b>paul</b>. Leave the <b>Port</b> at <b>22</b>, click <b>OK</b>, accept the keys/permission prompt, then enter the <b>password</b>. If it asks to save the password, you can choose <b>No</b>. You're connected.</p>
+    </div>
+
+    <div class="diagram-wrap">
+      <div class="flow">
+        <div class="box">Session</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box">SSH / Remote host = IP</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box">Specify username = paul, Port 22</div>
+        <div class="arrow">&rarr;</div>
+        <div class="box yellow">Connected tab</div>
+      </div>
+      <div class="cap">Fig 10.1 — Opening an SSH session in MobaXterm</div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">4 &middot; Two servers, side by side</span>
+      <p>Now open a <b>second</b> session the same way for the other VM (e.g. copy its IP with <code>ip addr</code>, then Session &rarr; SSH &rarr; paste IP &rarr; username paul &rarr; password). Both terminals are now open side by side. That's the point: you can <b>multitask</b>, switching easily between one server's terminal and another's.</p>
+    </div>
+
+    <div class="analogy-card">
+      <span class="ico">🖥️</span>
+      <div><b>Real-life analogy</b>PuTTY gives you one window per server. MobaXterm is more like a control desk with several monitors in one frame — all your servers visible at once, a glance apart.</div>
+    </div>
+
+    <table class="cmp-table">
+      <tr><th>Tool</th><th>What it is</th><th>Nice for</th></tr>
+      <tr><td>PuTTY</td><td>Classic, tiny SSH client</td><td>Quick single connections</td></tr>
+      <tr><td>CMD ssh</td><td>Built into Windows</td><td>No install, fast one-offs</td></tr>
+      <tr><td>Git Bash</td><td>Unix-style shell (comes with Git)</td><td>If you already use Git</td></tr>
+      <tr><td>MobaXterm</td><td>Colourful multi-tab terminal</td><td>Many servers at once, logs &amp; files</td></tr>
+    </table>
+
+    <div class="step">
+      <span class="step-label">13 &middot; Summary</span>
+      <p>MobaXterm connects via <b>Session &rarr; SSH</b> using the remote host IP, username, and port 22 — and lets you keep multiple servers open side by side for easy multitasking. That completes our tour of remote access clients.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= REVISION ================= -->
+<section class="chapter" id="revision">
+  <div class="chapter-head">
+    <span class="ch-num">★</span>
+    <div><h2>Revision Kit</h2><p class="ch-sub">Quiz, flashcards, common mistakes &amp; a one-page summary</p></div>
+    <div class="chapter-tools">
+      <button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button>
+    </div>
+  </div>
+  <div class="chapter-body">
+
+    <h3>Quick Quiz</h3>
+    <div class="quiz-q">
+      <p class="qtext">1. On CentOS, which command shows the machine's IP address?</p>
+      <div class="quiz-opts">
+        <button class="quiz-opt" data-correct="true">ifconfig</button>
+        <button class="quiz-opt" data-correct="false">ip addr</button>
+        <button class="quiz-opt" data-correct="false">ssh -ip</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <div class="quiz-q">
+      <p class="qtext">2. The first PuTTY connection fails. What VirtualBox change fixes it?</p>
+      <div class="quiz-opts">
+        <button class="quiz-opt" data-correct="false">Increase the VM's RAM</button>
+        <button class="quiz-opt" data-correct="true">Switch the network adapter from NAT to Bridged Adapter (then reboot)</button>
+        <button class="quiz-opt" data-correct="false">Change the SSH port to 80</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <div class="quiz-q">
+      <p class="qtext">3. On Ubuntu, connecting still fails. What must you install and start?</p>
+      <div class="quiz-opts">
+        <button class="quiz-opt" data-correct="true">openssh-server, then systemctl start ssh</button>
+        <button class="quiz-opt" data-correct="false">virtualbox-guest-additions</button>
+        <button class="quiz-opt" data-correct="false">putty on the server</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <div class="quiz-q">
+      <p class="qtext">4. What is the correct SSH command syntax from CMD?</p>
+      <div class="quiz-opts">
+        <button class="quiz-opt" data-correct="false">ssh 192.168.1.35 paul</button>
+        <button class="quiz-opt" data-correct="true">ssh paul@192.168.1.35</button>
+        <button class="quiz-opt" data-correct="false">ssh --user paul --ip 192.168.1.35</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+    <div class="quiz-q">
+      <p class="qtext">5. Which tool is best when you want several server terminals open side by side?</p>
+      <div class="quiz-opts">
+        <button class="quiz-opt" data-correct="false">PuTTY</button>
+        <button class="quiz-opt" data-correct="true">MobaXterm (multi-tab)</button>
+        <button class="quiz-opt" data-correct="false">The MSI installer</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <h3 style="margin-top:34px;">Flashcards <span style="font-size:12px; color:var(--ink-faint); font-family:var(--mono);">(click to flip)</span></h3>
+    <div class="flash-grid">
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">PuTTY</div><div class="flashcard-face flashcard-back">A small classic Windows SSH client. Download from putty.org.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">ifconfig / ip addr</div><div class="flashcard-face flashcard-back">Read the IP: ifconfig on CentOS, ip addr on Ubuntu/Debian.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">Bridged Adapter</div><div class="flashcard-face flashcard-back">VirtualBox network mode that gives the VM its own reachable IP. Reboot after switching.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">openssh-server</div><div class="flashcard-face flashcard-back">Package that lets a machine accept SSH logins. Install, then systemctl start ssh.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">ssh user@ip</div><div class="flashcard-face flashcard-back">Secure Shell command to log into a remote machine. Port 22 by default.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">MobaXterm</div><div class="flashcard-face flashcard-back">Colourful multi-tab terminal — many server sessions open side by side.</div></div></div>
+    </div>
+
+    <h3 style="margin-top:34px;">Common Mistakes</h3>
+    <div class="mistake-row"><span class="x">✗</span><span>"Downloading PuTTY from google.org."</span></div>
+    <div class="mistake-row"><span class="ok">✓</span><span>The official site is putty.org.</span></div>
+    <div class="mistake-row"><span class="x">✗</span><span>"Switching to Bridged Adapter works instantly."</span></div>
+    <div class="mistake-row"><span class="ok">✓</span><span>Reboot the VM first — the new IP only appears after the restart.</span></div>
+    <div class="mistake-row"><span class="x">✗</span><span>"Installing openssh-server is enough to accept logins."</span></div>
+    <div class="mistake-row"><span class="ok">✓</span><span>You must also start it: systemctl start ssh (check with status).</span></div>
+
+    <h3 style="margin-top:34px;">One-Page Revision</h3>
+    <div class="diagram-wrap">
+      <p style="margin:0 0 10px;">Goal: reach a remote server's terminal from your PC &rarr; install <b>PuTTY</b> (from putty.org, MSI) &rarr; read the VM's IP: <b>ifconfig</b> (CentOS) / <b>ip addr</b> (Ubuntu) &rarr; first connect fails: switch VirtualBox adapter <b>NAT → Bridged Adapter</b> and <b>reboot</b> to get a reachable IP &rarr; connect in PuTTY: accept <b>host key</b>, <b>login as</b> paul + password &rarr; if a machine still refuses (Ubuntu), install &amp; start the SSH service: <b>sudo apt install openssh-server</b> then <b>sudo systemctl start ssh</b> (check <b>status</b>) &rarr; other clients, same protocol: <b>CMD</b> <code>ssh paul@ip</code>, <b>Git Bash</b> same command, <b>MobaXterm</b> Session → SSH (multi-tab, side by side). Default port everywhere: <b>22</b>.</p>
+    </div>
+
+    <h3 style="margin-top:34px;">Your Notes</h3>
+    <textarea class="notes-area" id="notesArea" placeholder="Jot your own summary or questions here — saved automatically in your browser..."></textarea>
+    <div class="notes-status" id="notesStatus"></div>
+  </div>
+</section>
+
+</main>
+
+<div class="chnav-footer">
+  <a href="#ch1" class="prev"><small>&larr; Back to start</small>The Goal</a>
+  <a href="#revision" class="next"><small>Jump to &rarr;</small>Revision Kit</a>
+</div>
+
+<footer class="site-footer">
+  Built as a single offline HTML file &middot; works without internet &middot; prints cleanly as a PDF chapter<br>
+  Shortcuts: <span class="kbd">/</span> search &middot; <span class="kbd">d</span> dark mode &middot; <span class="kbd">t</span> back to top
+</footer>
+
+<button id="backtotop" aria-label="Back to top">&uarr;</button>
+
+<script>
+(function(){
+  "use strict";
+  var STORE_KEY = "remote-access-tools-book-progress-v3";
+  var chapters = Array.prototype.slice.call(document.querySelectorAll(".chapter[id]"));
+
+  function loadState(){
+    try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }catch(e){ return {}; }
+  }
+  function saveState(state){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+  var state = loadState();
+
+  /* ---------- Dark mode ---------- */
+  var darkToggle = document.getElementById("darkToggle");
+  function applyDark(on){
+    document.documentElement.classList.toggle("dark", on);
+    darkToggle.textContent = on ? "☀️ Light" : "🌙 Dark";
+    state.dark = on; saveState(state);
+  }
+  applyDark(!!state.dark);
+  darkToggle.addEventListener("click", function(){ applyDark(!document.documentElement.classList.contains("dark")); });
+
+  /* ---------- Completion checkboxes + progress ---------- */
+  var doneboxes = document.querySelectorAll(".donebox");
+  var totalCh = doneboxes.length;
+  function updateProgressUI(){
+    var doneCount = 0;
+    doneboxes.forEach(function(cb){
+      var ch = cb.getAttribute("data-ch");
+      var isDone = !!(state.done && state.done[ch]);
+      cb.checked = isDone;
+      if(isDone) doneCount++;
+      var rnode = document.querySelector('.rnode[data-ch="'+ch+'"]');
+      if(rnode) rnode.classList.toggle("done", isDone);
+    });
+    var pct = totalCh ? Math.round((doneCount/totalCh)*100) : 0;
+    document.getElementById("progress-bar").style.width = pct + "%";
+    document.getElementById("progress-label").textContent = doneCount + " / " + totalCh + " chapters";
+  }
+  state.done = state.done || {};
+  doneboxes.forEach(function(cb){
+    cb.addEventListener("change", function(){
+      state.done[cb.getAttribute("data-ch")] = cb.checked;
+      saveState(state);
+      updateProgressUI();
+    });
+  });
+  updateProgressUI();
+
+  /* ---------- Collapsible chapters ---------- */
+  document.querySelectorAll(".chapter").forEach(function(section){
+    var btn = section.querySelector(".collapse-toggle");
+    var body = section.querySelector(".chapter-body");
+    if(!btn || !body) return;
+    var id = section.id;
+    if(state.collapsed && state.collapsed[id]){
+      body.classList.add("collapsed"); btn.textContent = "+";
+    }
+    btn.addEventListener("click", function(){
+      var collapsed = body.classList.toggle("collapsed");
+      btn.textContent = collapsed ? "+" : "−";
+      state.collapsed = state.collapsed || {};
+      state.collapsed[id] = collapsed;
+      saveState(state);
+    });
+  });
+  document.getElementById("expandAllBtn").addEventListener("click", function(){
+    var anyCollapsed = document.querySelector(".chapter-body.collapsed");
+    document.querySelectorAll(".chapter-body").forEach(function(b){ b.classList.toggle("collapsed", !anyCollapsed); });
+    document.querySelectorAll(".collapse-toggle").forEach(function(b){ b.textContent = anyCollapsed ? "+" : "−"; });
+    this.textContent = anyCollapsed ? "Expand all" : "Collapse all";
+    state.collapsed = {};
+    if(anyCollapsed){ chapters.forEach(function(c){ state.collapsed[c.id] = true; }); }
+    saveState(state);
+  });
+
+  /* ---------- Scrollspy nav ---------- */
+  var navLinks = document.querySelectorAll("#chnav a");
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        navLinks.forEach(function(l){ l.classList.remove("active"); });
+        var link = document.querySelector('#chnav a[href="#'+entry.target.id+'"]');
+        if(link) link.classList.add("active");
+      }
+    });
+  }, {rootMargin:"-40% 0px -50% 0px"});
+  chapters.concat(document.getElementById("revision")).forEach(function(s){ if(s) observer.observe(s); });
+
+  /* ---------- Search ---------- */
+  var searchbox = document.getElementById("searchbox");
+  var searchableEls = document.querySelectorAll(".chapter p, .chapter li, .chapter td, .chapter .qtext, .chapter summary");
+  var originalHTML = new Map();
+  searchableEls.forEach(function(el){ originalHTML.set(el, el.innerHTML); });
+
+  function clearHighlights(){
+    searchableEls.forEach(function(el){ el.innerHTML = originalHTML.get(el); });
+    chapters.forEach(function(c){ c.classList.remove("hidden-by-search"); });
+  }
+  function runSearch(q){
+    q = q.trim();
+    if(!q){ clearHighlights(); return; }
+    var re;
+    try{ re = new RegExp("("+q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig"); }catch(e){ return; }
+    var matchedChapters = new Set();
+    searchableEls.forEach(function(el){
+      var raw = originalHTML.get(el);
+      if(re.test(raw)){
+        el.innerHTML = raw.replace(re, "<mark class=\"hit\">$1</mark>");
+        var ch = el.closest(".chapter");
+        if(ch) matchedChapters.add(ch.id);
+      } else {
+        el.innerHTML = raw;
+      }
+    });
+    chapters.forEach(function(c){ c.classList.toggle("hidden-by-search", !matchedChapters.has(c.id)); });
+  }
+  searchbox.addEventListener("input", function(){ runSearch(this.value); });
+
+  /* ---------- Keyboard shortcuts ---------- */
+  document.addEventListener("keydown", function(e){
+    var tag = (document.activeElement && document.activeElement.tagName) || "";
+    if(tag === "INPUT" || tag === "TEXTAREA"){
+      if(e.key === "Escape") document.activeElement.blur();
+      return;
+    }
+    if(e.key === "/"){ e.preventDefault(); searchbox.focus(); }
+    if(e.key === "d" || e.key === "D"){ applyDark(!document.documentElement.classList.contains("dark")); }
+    if(e.key === "t" || e.key === "T"){ window.scrollTo({top:0, behavior:"smooth"}); }
+  });
+
+  /* ---------- Back to top ---------- */
+  var backBtn = document.getElementById("backtotop");
+  window.addEventListener("scroll", function(){
+    backBtn.classList.toggle("show", window.scrollY > 700);
+  });
+  backBtn.addEventListener("click", function(){ window.scrollTo({top:0, behavior:"smooth"}); });
+
+  /* ---------- Flashcards ---------- */
+  document.querySelectorAll(".flashcard").forEach(function(card){
+    card.addEventListener("click", function(){ card.classList.toggle("flipped"); });
+  });
+
+  /* ---------- Quiz ---------- */
+  document.querySelectorAll(".quiz-q").forEach(function(q){
+    var opts = q.querySelectorAll(".quiz-opt");
+    var feedback = q.querySelector(".quiz-feedback");
+    opts.forEach(function(opt){
+      opt.addEventListener("click", function(){
+        var correct = opt.getAttribute("data-correct") === "true";
+        opts.forEach(function(o){ o.disabled = true; });
+        opts.forEach(function(o){
+          if(o.getAttribute("data-correct") === "true") o.classList.add("correct");
+        });
+        if(!correct) opt.classList.add("wrong");
+        feedback.style.display = "block";
+        feedback.textContent = correct ? "✓ Correct!" : "✗ Not quite — correct answer highlighted above.";
+        feedback.style.color = correct ? "var(--green)" : "var(--red)";
+      });
+    });
+  });
+
+  /* ---------- Notes autosave ---------- */
+  var notesArea = document.getElementById("notesArea");
+  var notesStatus = document.getElementById("notesStatus");
+  notesArea.value = state.notes || "";
+  var saveTimer;
+  notesArea.addEventListener("input", function(){
+    clearTimeout(saveTimer);
+    notesStatus.textContent = "Saving…";
+    saveTimer = setTimeout(function(){
+      state.notes = notesArea.value;
+      saveState(state);
+      notesStatus.textContent = "Saved to this browser ✓";
+      setTimeout(function(){ notesStatus.textContent = ""; }, 1500);
+    }, 500);
+  });
+})();
+</script>
+</body>
+</html>
