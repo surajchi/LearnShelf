@@ -57,6 +57,18 @@
           "file": "V6.html",
           "duration": "90 mins",
           "tags": ["linux", "commands", "cli", "reference", "power-user"]
+        },
+        {
+          "title": "Most Frequently Used Linux Commands in a Job",
+          "file": "V7.html",
+          "duration": "45 mins",
+          "tags": ["linux", "commands", "networking", "processes", "users", "packages", "environment"]
+        },
+        {
+          "title": "A–Z Linux Commands — One Command per Alphabet",
+          "file": "V8.html",
+          "duration": "30 mins",
+          "tags": ["linux", "commands", "a-z", "interview", "revision", "cheatsheet"]
         }
       ]
     }

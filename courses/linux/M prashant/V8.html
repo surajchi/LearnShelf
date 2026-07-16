@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A–Z Linux Commands — One Command per Alphabet</title>
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   Palette: white paper, engineering-notebook navy ink,
+   yellow roadmap cards, blue connector lines (per brief)
+   ============================================================ */
+:root{
+  --bg:#ffffff;
+  --bg-alt:#f6f8fb;
+  --paper-line:#e7ecf3;
+  --ink:#16202e;
+  --ink-soft:#4a5872;
+  --ink-faint:#8895ab;
+  --blue:#1955c9;
+  --blue-dark:#0e3a8c;
+  --blue-tint:#eaf1ff;
+  --yellow:#ffcd3c;
+  --yellow-deep:#f0a500;
+  --yellow-tint:#fff8e1;
+  --green:#1c8a5c;
+  --green-tint:#e6f6ee;
+  --red:#c8402c;
+  --red-tint:#fdeceb;
+  --border:#dce3ee;
+  --radius:14px;
+  --sans: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --serif: Georgia, "Cambria", "Times New Roman", serif;
+  --mono: ui-monospace, "Cascadia Mono", "Consolas", "SFMono-Regular", Menlo, monospace;
+  --shadow: 0 1px 2px rgba(20,30,50,.04), 0 8px 24px rgba(20,30,50,.06);
+  --maxw: 100%;
+}
+html.dark{
+  --bg:#0f1420;
+  --bg-alt:#161d2c;
+  --paper-line:#232c40;
+  --ink:#e9edf6;
+  --ink-soft:#aab4c9;
+  --ink-faint:#71809a;
+  --blue:#5b9bff;
+  --blue-dark:#8fb8ff;
+  --blue-tint:#152241;
+  --yellow:#ffcd3c;
+  --yellow-deep:#ffb703;
+  --yellow-tint:#2b2410;
+  --green:#3fcf8e;
+  --green-tint:#0f2a20;
+  --red:#ff7a68;
+  --red-tint:#331714;
+  --border:#28324a;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  line-height:1.65;
+  transition:background .25s ease, color .25s ease;
+}
+::selection{background:var(--yellow); color:#16202e;}
+img,svg{max-width:100%;}
+a{color:var(--blue);}
+h1,h2,h3,h4{font-family:var(--serif); color:var(--ink); line-height:1.25; letter-spacing:.2px;}
+code, .mono{font-family:var(--mono);}
+.eyebrow{
+  display:inline-block; font-family:var(--mono); font-size:11.5px; letter-spacing:1.5px;
+  text-transform:uppercase; color:var(--blue-dark); background:var(--blue-tint);
+  padding:4px 10px; border-radius:20px; font-weight:700;
+}
+
+/* ============================================================
+   TOP BAR / PROGRESS
+   ============================================================ */
+#progress-track{position:fixed; top:0; left:0; right:0; height:3px; background:var(--paper-line); z-index:100;}
+#progress-bar{height:100%; width:0%; background:linear-gradient(90deg,var(--blue),var(--yellow)); transition:width .2s ease;}
+
+header.topbar{
+  position:sticky; top:3px; z-index:90; background:var(--bg);
+  border-bottom:1px solid var(--border); backdrop-filter:blur(6px);
+}
+.topbar-inner{
+  max-width:var(--maxw); margin:0 auto; padding:12px 24px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.brand{display:flex; align-items:center; gap:9px; font-family:var(--serif); font-weight:700; font-size:17px; white-space:nowrap;}
+.brand .tux{width:22px;height:22px;flex:none;}
+.topbar-inner input[type=search]{
+  flex:1; min-width:120px; padding:8px 12px; border-radius:9px; border:1px solid var(--border);
+  background:var(--bg-alt); color:var(--ink); font-family:var(--sans); font-size:13.5px;
+}
+.topbar-inner input[type=search]:focus{outline:2px solid var(--blue); outline-offset:1px;}
+.tbtn{
+  border:1px solid var(--border); background:var(--bg-alt); color:var(--ink-soft);
+  border-radius:9px; padding:8px 11px; font-size:13px; cursor:pointer; font-family:var(--sans);
+  display:inline-flex; align-items:center; gap:6px; white-space:nowrap;
+}
+.tbtn:hover{border-color:var(--blue); color:var(--blue-dark);}
+.tbtn:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible{
+  outline:2px solid var(--blue); outline-offset:2px;
+}
+#progress-label{font-size:12px; color:var(--ink-faint); font-family:var(--mono); white-space:nowrap;}
+
+nav.chnav{display:flex; gap:4px; overflow-x:auto; padding:10px 24px 12px; max-width:var(--maxw); margin:0 auto;}
+nav.chnav a{
+  font-size:12.5px; color:var(--ink-soft); text-decoration:none; padding:6px 10px; border-radius:8px;
+  white-space:nowrap; border:1px solid transparent; font-family:var(--mono);
+}
+nav.chnav a.active{background:var(--blue-tint); color:var(--blue-dark); border-color:var(--blue);}
+nav.chnav a:hover{background:var(--bg-alt);}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero{padding:64px 24px 40px; max-width:var(--maxw); margin:0 auto;}
+.hero h1{font-size:42px; margin:14px 0 10px; max-width:18ch;}
+.hero p.lede{font-size:17px; color:var(--ink-soft); max-width:58ch; margin:0 0 26px;}
+.hero-meta{display:flex; gap:18px; flex-wrap:wrap; font-size:13px; color:var(--ink-faint); font-family:var(--mono);}
+.hero-meta span{display:flex; align-items:center; gap:6px;}
+
+/* ============================================================
+   ALPHABET INDEX (signature element for this chapter)
+   ============================================================ */
+.alpha-index{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(46px,1fr)); gap:8px; margin:18px 0 4px;
+}
+.alpha-index a{
+  display:flex; align-items:center; justify-content:center; text-decoration:none;
+  background:var(--yellow-tint); border:1.5px solid var(--yellow-deep); border-radius:10px;
+  font-family:var(--mono); font-weight:800; font-size:15px; color:#7a5900; padding:11px 0;
+  transition:transform .12s ease, box-shadow .12s ease;
+}
+html.dark .alpha-index a{color:var(--yellow);}
+.alpha-index a:hover{transform:translateY(-2px); box-shadow:var(--shadow); border-color:var(--blue);}
+
+/* ============================================================
+   ROADMAP  (yellow cards + blue connectors)
+   ============================================================ */
+.roadmap-section{padding:10px 24px 56px; max-width:var(--maxw); margin:0 auto;}
+.roadmap-section h2{font-size:13px; text-transform:uppercase; letter-spacing:2px; color:var(--ink-faint); font-family:var(--mono); margin-bottom:22px;}
+.roadmap{position:relative; padding-left:26px;}
+.roadmap::before{
+  content:""; position:absolute; left:10px; top:10px; bottom:10px; width:3px;
+  background:repeating-linear-gradient(180deg, var(--blue) 0 8px, transparent 8px 14px);
+  border-radius:3px;
+}
+.rnode{position:relative; margin-bottom:14px;}
+.rnode::before{
+  content:""; position:absolute; left:-26px; top:18px; width:13px; height:13px; border-radius:50%;
+  background:var(--blue); border:3px solid var(--bg); box-shadow:0 0 0 2px var(--blue);
+}
+.rnode a{
+  display:flex; align-items:center; gap:12px; text-decoration:none; color:var(--ink);
+  background:var(--yellow-tint); border:1.5px solid var(--yellow-deep); border-radius:var(--radius);
+  padding:13px 16px; transition:transform .15s ease, box-shadow .15s ease;
+}
+.rnode a:hover{transform:translateX(3px); box-shadow:var(--shadow);}
+.rnode .num{
+  font-family:var(--mono); font-weight:700; font-size:12px; color:#7a5900;
+  background:var(--yellow); padding:3px 8px; border-radius:6px; flex:none;
+}
+html.dark .rnode .num{color:#241c00;}
+.rnode .rtxt{flex:1;}
+.rnode .rtxt b{display:block; font-family:var(--serif); font-size:15.5px;}
+.rnode .rtxt small{color:var(--ink-soft); font-size:12.5px;}
+.rnode .check{width:20px; height:20px; border-radius:50%; border:2px solid var(--yellow-deep); flex:none;}
+.rnode.done .check{background:var(--green); border-color:var(--green);}
+.rnode.done a{opacity:.75;}
+
+/* ============================================================
+   CHAPTER STRUCTURE
+   ============================================================ */
+.chapter{max-width:var(--maxw); margin:0 auto; padding:26px 24px 8px; border-top:1px solid var(--border);}
+.chapter-head{display:flex; align-items:flex-start; gap:14px; margin-bottom:4px;}
+.chapter-head .ch-num{
+  font-family:var(--mono); font-weight:800; font-size:14px; color:var(--blue);
+  background:var(--blue-tint); border-radius:8px; padding:6px 10px; flex:none; margin-top:4px;
+}
+.chapter-head h2{font-size:26px; margin:0 0 4px;}
+.chapter-head .ch-sub{color:var(--ink-soft); font-size:14.5px; margin:0;}
+.chapter-tools{display:flex; align-items:center; gap:10px; margin-left:auto; flex:none;}
+.markdone{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink-faint); cursor:pointer; font-family:var(--mono); white-space:nowrap;}
+.markdone input{accent-color:var(--green); width:15px; height:15px;}
+.collapse-toggle{
+  border:1px solid var(--border); background:var(--bg-alt); border-radius:8px; width:30px; height:30px;
+  cursor:pointer; color:var(--ink-soft); font-size:14px; flex:none;
+}
+.chapter-body{padding-top:14px; overflow:hidden;}
+.chapter-body.collapsed{display:none;}
+
+/* ============================================================
+   LETTER BLOCK — the core unit of this chapter
+   ============================================================ */
+.letter{display:flex; gap:16px; margin:26px 0; scroll-margin-top:120px;}
+.letter-badge{
+  flex:none; width:52px; height:52px; border-radius:12px; background:var(--blue);
+  color:#fff; font-family:var(--serif); font-weight:700; font-size:26px;
+  display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow);
+}
+.letter-body{flex:1; min-width:0;}
+.letter-body h3{margin:2px 0 8px; font-size:19px;}
+.cmd-row{
+  display:flex; gap:12px; align-items:flex-start; padding:9px 0;
+  border-bottom:1px dashed var(--border); font-size:14.5px;
+}
+.cmd-row:last-child{border-bottom:none;}
+.cmd-row .cname{
+  font-family:var(--mono); font-weight:700; color:var(--blue-dark); background:var(--blue-tint);
+  border-radius:6px; padding:2px 8px; flex:none; min-width:92px; font-size:13px;
+}
+.cmd-row .cdesc{flex:1; color:var(--ink);}
+.cmd-row .cdesc small{display:block; color:var(--ink-faint); font-family:var(--mono); font-size:11.5px; margin-top:2px;}
+.grp-tag{
+  display:inline-block; font-family:var(--mono); font-size:10px; letter-spacing:.4px; text-transform:uppercase;
+  border-radius:5px; padding:1px 6px; margin-left:6px; border:1px solid var(--border); color:var(--ink-faint);
+}
+.grp-tag.file{background:var(--yellow-tint); border-color:var(--yellow-deep); color:#7a5900;}
+.grp-tag.net{background:var(--blue-tint); border-color:var(--blue); color:var(--blue-dark);}
+.grp-tag.proc{background:var(--green-tint); border-color:var(--green); color:var(--green);}
+.grp-tag.user{background:var(--red-tint); border-color:var(--red); color:var(--red);}
+html.dark .grp-tag.file{color:var(--yellow);}
+
+.note{
+  background:var(--blue-tint); border-left:4px solid var(--blue); border-radius:0 10px 10px 0;
+  padding:12px 16px; margin:16px 0; font-size:14.5px;
+}
+.note b{color:var(--blue-dark);}
+.correction{
+  background:var(--red-tint); border-left:4px solid var(--red); border-radius:0 10px 10px 0;
+  padding:12px 16px; margin:16px 0; font-size:14.5px;
+}
+.correction b{color:var(--red);}
+.source-tag{font-family:var(--mono); font-size:10.5px; letter-spacing:.5px; text-transform:uppercase; color:var(--ink-faint); border:1px solid var(--border); border-radius:5px; padding:1px 6px; margin-left:6px;}
+
+.step{border-left:3px solid var(--border); padding:2px 0 2px 18px; margin:20px 0;}
+.step .step-label{
+  font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:1.4px;
+  color:var(--blue-dark); font-weight:700; margin-bottom:5px; display:block;
+}
+.step p{margin:6px 0; color:var(--ink); font-size:15.5px;}
+
+.analogy-card{
+  background:var(--yellow-tint); border:1px solid var(--yellow-deep); border-radius:var(--radius);
+  padding:16px 18px; margin:16px 0; display:flex; gap:12px;
+}
+.analogy-card .ico{font-size:22px; flex:none;}
+.analogy-card b{display:block; font-family:var(--serif); margin-bottom:4px;}
+
+/* ============================================================
+   TERMINAL CODE BLOCK
+   ============================================================ */
+.terminal{
+  background:#0d1424; border:1px solid #26314a; border-radius:12px; margin:18px 0; overflow:hidden;
+  box-shadow:var(--shadow);
+}
+.terminal .tbar{display:flex; align-items:center; gap:7px; padding:9px 13px; background:#161f33; border-bottom:1px solid #26314a;}
+.terminal .tbar .dot{width:11px; height:11px; border-radius:50%; display:inline-block;}
+.terminal .tbar .r{background:#ff5f56;} .terminal .tbar .y{background:#ffbd2e;} .terminal .tbar .g{background:#27c93f;}
+.terminal .tbar .ttl{margin-left:8px; font-family:var(--mono); font-size:11.5px; color:#8595b4;}
+.terminal .tbar .copy{
+  margin-left:auto; background:transparent; border:1px solid #37425f; color:#9fb0d0; border-radius:6px;
+  font-family:var(--mono); font-size:11px; padding:3px 9px; cursor:pointer;
+}
+.terminal .tbar .copy:hover{border-color:var(--blue); color:#fff;}
+.terminal pre{margin:0; padding:14px 16px; overflow-x:auto; font-family:var(--mono); font-size:13px; line-height:1.7; color:#d7e0f0;}
+.terminal pre .p{color:#5b9bff;}
+.terminal pre .c{color:#ffcd6b;}
+.terminal pre .o{color:#8595b4;}
+.terminal pre .f{color:#7ee0a8;}
+
+/* ============================================================
+   DIAGRAMS
+   ============================================================ */
+.diagram-wrap{
+  background:var(--bg-alt); border:1px solid var(--border); border-radius:var(--radius);
+  padding:22px; margin:20px 0; break-inside:avoid;
+}
+.diagram-wrap .cap{font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); text-align:center; margin-top:10px;}
+.flow{display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap;}
+.flow .box{
+  background:var(--bg); border:1.5px solid var(--blue); border-radius:10px; padding:12px 16px;
+  font-size:13.5px; text-align:center; font-family:var(--mono); color:var(--ink); min-width:110px;
+}
+.flow .box.yellow{border-color:var(--yellow-deep); background:var(--yellow-tint);}
+.flow .arrow{color:var(--blue); font-size:20px; padding:0 10px; flex:none;}
+@media (max-width:520px){ .flow{flex-direction:column;} .flow .arrow{transform:rotate(90deg);} }
+
+/* ============================================================
+   COMPARISON TABLE
+   ============================================================ */
+.cmp-table{width:100%; border-collapse:separate; border-spacing:0; margin:18px 0; font-size:14px; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;}
+.cmp-table th{background:var(--blue); color:#fff; text-align:left; padding:11px 14px; font-family:var(--mono); font-size:12.5px; letter-spacing:.4px;}
+.cmp-table td{padding:11px 14px; border-top:1px solid var(--border); vertical-align:top;}
+.cmp-table tr:nth-child(even) td{background:var(--bg-alt);}
+.cmp-table td:first-child{font-weight:700; color:var(--blue-dark); white-space:nowrap; font-family:var(--mono); font-size:13px;}
+
+/* ============================================================
+   INTERVIEW / MISTAKES / MEMORY TRICK
+   ============================================================ */
+details.qa{border:1px solid var(--border); border-radius:10px; margin:9px 0; background:var(--bg);}
+details.qa summary{padding:12px 15px; cursor:pointer; font-weight:600; font-size:14.5px; list-style:none; display:flex; gap:10px; align-items:flex-start;}
+details.qa summary::before{content:"Q"; font-family:var(--mono); font-size:11px; background:var(--blue-tint); color:var(--blue-dark); border-radius:5px; padding:2px 7px; flex:none;}
+details.qa[open] summary{border-bottom:1px solid var(--border);}
+details.qa .ans{padding:12px 15px 15px 42px; color:var(--ink-soft); font-size:14px;}
+
+.mistake-row{display:flex; gap:10px; align-items:flex-start; margin:10px 0; font-size:14px;}
+.mistake-row .x{color:var(--red); font-weight:800; flex:none;}
+.mistake-row .ok{color:var(--green); font-weight:800; flex:none;}
+
+.trick{
+  background:var(--yellow-tint); border:1px dashed var(--yellow-deep); border-radius:10px;
+  padding:12px 16px; margin:14px 0; font-size:14px;
+}
+.trick b{font-family:var(--mono); font-size:11.5px; text-transform:uppercase; color:#7a5900;}
+html.dark .trick b{color:var(--yellow);}
+
+/* ============================================================
+   QUIZ / FLASHCARDS
+   ============================================================ */
+.quiz-q{border:1px solid var(--border); border-radius:var(--radius); padding:15px 16px; margin:12px 0; background:var(--bg);}
+.quiz-q p.qtext{font-weight:600; margin:0 0 10px;}
+.quiz-opts{display:grid; gap:8px;}
+.quiz-opt{
+  text-align:left; border:1px solid var(--border); background:var(--bg-alt); border-radius:8px;
+  padding:9px 12px; cursor:pointer; font-size:13.5px; color:var(--ink); font-family:var(--sans);
+}
+.quiz-opt:hover{border-color:var(--blue);}
+.quiz-opt.correct{background:var(--green-tint); border-color:var(--green); font-weight:700;}
+.quiz-opt.wrong{background:var(--red-tint); border-color:var(--red);}
+.quiz-feedback{font-size:12.5px; margin-top:8px; font-family:var(--mono); display:none;}
+
+.flash-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin:16px 0;}
+.flashcard{perspective:1000px; height:120px; cursor:pointer;}
+.flashcard-inner{position:relative; width:100%; height:100%; transition:transform .5s; transform-style:preserve-3d;}
+.flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+.flashcard-face{
+  position:absolute; inset:0; backface-visibility:hidden; border-radius:12px;
+  display:flex; align-items:center; justify-content:center; text-align:center; padding:14px;
+  font-size:13.5px; border:1.5px solid var(--border);
+}
+.flashcard-front{background:var(--blue-tint); color:var(--blue-dark); font-weight:700;}
+.flashcard-back{background:var(--yellow-tint); color:#5c4400; transform:rotateY(180deg); border-color:var(--yellow-deep);}
+html.dark .flashcard-back{color:var(--yellow-tint);}
+
+.keypoints{padding-left:0; list-style:none; display:grid; gap:8px; margin:16px 0;}
+.keypoints li{display:flex; gap:10px; align-items:flex-start; font-size:14.5px;}
+.keypoints li .kn{
+  font-family:var(--mono); font-size:11px; font-weight:800; background:var(--blue); color:#fff;
+  width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex:none; margin-top:2px;
+}
+
+.notes-area{width:100%; min-height:80px; resize:vertical; border:1px solid var(--border); border-radius:10px; padding:12px; font-family:var(--sans); font-size:13.5px; background:var(--bg-alt); color:var(--ink);}
+.notes-status{font-size:11.5px; color:var(--ink-faint); font-family:var(--mono); margin-top:5px; height:14px;}
+
+.chnav-footer{display:flex; justify-content:space-between; gap:12px; max-width:var(--maxw); margin:10px auto 0; padding:0 24px;}
+.chnav-footer a{
+  border:1px solid var(--border); border-radius:10px; padding:10px 14px; text-decoration:none; color:var(--ink);
+  font-size:13px; flex:1; max-width:48%;
+}
+.chnav-footer a.next{text-align:right;}
+.chnav-footer a small{display:block; color:var(--ink-faint); font-family:var(--mono); font-size:10.5px;}
+.chnav-footer a:hover{border-color:var(--blue);}
+
+#backtotop{
+  position:fixed; bottom:22px; right:22px; width:42px; height:42px; border-radius:50%;
+  background:var(--blue); color:#fff; border:none; cursor:pointer; font-size:16px; box-shadow:var(--shadow);
+  opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:80;
+}
+#backtotop.show{opacity:1; pointer-events:auto;}
+
+.site-footer{text-align:center; padding:50px 24px 70px; color:var(--ink-faint); font-size:12.5px; font-family:var(--mono);}
+.kbd{font-family:var(--mono); background:var(--bg-alt); border:1px solid var(--border); border-radius:5px; padding:1px 6px; font-size:11px;}
+
+mark.hit{background:var(--yellow); color:#16202e; border-radius:3px;}
+.hidden-by-search{display:none !important;}
+
+/* ============================================================
+   PRINT
+   ============================================================ */
+@media print{
+  header.topbar, nav.chnav, #progress-track, #backtotop, .chapter-tools, .notes-area, .notes-status, .terminal .copy, .alpha-index{display:none !important;}
+  body{background:#fff; color:#000;}
+  .chapter{break-before:page; border-top:none;}
+  .chapter-body.collapsed{display:block !important;}
+  .diagram-wrap, .analogy-card, .cmp-table, .quiz-q, details.qa, .flashcard, .terminal, .letter{break-inside:avoid;}
+  .terminal{background:#0d1424 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  .letter-badge{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  a{color:#000; text-decoration:none;}
+}
+body{padding-left:clamp(16px,5vw,80px);padding-right:clamp(16px,5vw,80px);}
+.flashcard{perspective:none;} .flashcard-inner{transform:none !important;} .flashcard-face{backface-visibility:visible; position:absolute; inset:0;} .flashcard-back{transform:none; display:none;} .flashcard.flipped .flashcard-front{display:none;} .flashcard.flipped .flashcard-back{display:flex;}
+</style>
+</head>
+<body>
+
+<div id="progress-track"><div id="progress-bar"></div></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <svg class="tux" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="12" rx="2" stroke="var(--blue)" stroke-width="1.5"/><rect x="7" y="7" width="4.5" height="6" rx="1" fill="var(--yellow)"/><rect x="12.5" y="7" width="4.5" height="6" rx="1" fill="var(--yellow)" opacity=".6"/><path d="M8 20h8M12 16v4" stroke="var(--blue)" stroke-width="1.5"/></svg>
+      A–Z Linux Commands
+    </div>
+    <input type="search" id="searchbox" placeholder="Search any command&hellip;  ( / )" aria-label="Search commands">
+    <span id="progress-label">0 / 6 sections</span>
+    <button class="tbtn" id="expandAllBtn">Expand all</button>
+    <button class="tbtn" id="darkToggle" aria-label="Toggle dark mode">🌙 Dark</button>
+  </div>
+  <nav class="chnav" id="chnav" aria-label="Chapter navigation">
+    <a href="#ch1">A – D</a>
+    <a href="#ch2">E – H</a>
+    <a href="#ch3">I – L</a>
+    <a href="#ch4">M – P</a>
+    <a href="#ch5">Q – T</a>
+    <a href="#ch6">U – Z</a>
+    <a href="#revision">Revision</a>
+  </nav>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <span class="eyebrow">Chapter 08 &middot; A–Z Quick Revision</span>
+  <h1>One Linux command for every letter of the alphabet</h1>
+  <p class="lede">This is a classic <b>interview question</b>: "name a Linux command starting with each letter A to Z." It doubles as the fastest possible <b>revision sweep</b> of everything you know. Every entry below says what the command does and which task-group it belongs to &mdash; so if you've read the earlier chapters, this is your recall drill.</p>
+  <div class="hero-meta">
+    <span>📺 Source: "A to Z Linux commands — interview question" (M. Prashant)</span>
+    <span>⏱ Quick revision sweep</span>
+    <span>🧠 Best used after chapter 07</span>
+  </div>
+  <div class="alpha-index" aria-label="Jump to a letter">
+    <a href="#L-A">A</a><a href="#L-B">B</a><a href="#L-C">C</a><a href="#L-D">D</a><a href="#L-E">E</a>
+    <a href="#L-F">F</a><a href="#L-G">G</a><a href="#L-H">H</a><a href="#L-I">I</a><a href="#L-J">J</a>
+    <a href="#L-K">K</a><a href="#L-L">L</a><a href="#L-M">M</a><a href="#L-N">N</a><a href="#L-O">O</a>
+    <a href="#L-P">P</a><a href="#L-Q">Q</a><a href="#L-R">R</a><a href="#L-S">S</a><a href="#L-T">T</a>
+    <a href="#L-U">U</a><a href="#L-V">V</a><a href="#L-W">W</a><a href="#L-X">X</a><a href="#L-Y">Y</a>
+    <a href="#L-Z">Z</a>
+  </div>
+</section>
+
+<!-- ================= ROADMAP ================= -->
+<section class="roadmap-section">
+  <h2>Your roadmap through this chapter</h2>
+  <div class="roadmap" id="roadmap">
+    <div class="rnode" data-ch="ch1"><a href="#ch1"><span class="num">01</span><span class="rtxt"><b>A – D</b><small>awk, alias, apt, at · bg, bc, bash · chmod, chown, cp, cal · df, du, diff, date</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch2"><a href="#ch2"><span class="num">02</span><span class="rtxt"><b>E – H</b><small>env, export, echo · find, file, fg, free · grep, gzip, groupadd · history, head, hostname</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch3"><a href="#ch3"><span class="num">03</span><span class="rtxt"><b>I – L</b><small>ifconfig, ip, id, iptables · jobs · kill · ls, less, ln, locate</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch4"><a href="#ch4"><span class="num">04</span><span class="rtxt"><b>M – P</b><small>mkdir, mv, more · netstat, nano, nice · openssl · ps, printenv, pwd, passwd</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch5"><a href="#ch5"><span class="num">05</span><span class="rtxt"><b>Q – T</b><small>quota · rsync, rm, rmdir, reboot · sudo, sed, sort, systemctl · top, tail, tar, telnet, tee</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch6"><a href="#ch6"><span class="num">06</span><span class="rtxt"><b>U – Z</b><small>uniq, useradd, umask · vi, vim · wget, wc, whoami, which · xxd · yum, yes · zip</small></span><span class="check"></span></a></div>
+  </div>
+</section>
+
+<main>
+
+<!-- ============ CH1 · A–D ============ -->
+<section class="chapter" id="ch1">
+  <div class="chapter-head"><span class="ch-num">01</span><div><h2>A &ndash; D</h2><p class="ch-sub">awk, alias, apt, at · bg, bc, bash · chmod, chown, chgrp, cp, cal · df, du, diff, date</p></div><div class="chapter-tools"><label class="markdone"><input type="checkbox" class="donebox" data-ch="ch1"> Mark complete</label><button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button></div></div>
+  <div class="chapter-body">
+
+    <div class="step"><span class="step-label">How to use this chapter</span><p>Each letter gets a card. The coloured tag on the right of each command tells you which <b>task group</b> it belongs to &mdash; <span class="grp-tag file">files</span> <span class="grp-tag net">network</span> <span class="grp-tag proc">process</span> <span class="grp-tag user">user/perms</span> &mdash; so you're revising the grouping and the alphabet at the same time.</p></div>
+
+    <div class="letter" id="L-A">
+      <div class="letter-badge">A</div>
+      <div class="letter-body">
+        <h3>A &mdash; text processing, shortcuts &amp; packages</h3>
+        <div class="cmd-row"><span class="cname">awk</span><span class="cdesc">Very helpful for text processing: print a chosen <b>column</b>, use a <b>field separator</b>, and filter data. <span class="grp-tag file">files</span><small>awk -F, '{print $2}' data.csv</small></span></div>
+        <div class="cmd-row"><span class="cname">alias</span><span class="cdesc">Create a <b>shortcut</b> for a longer command. <span class="grp-tag file">shell</span><small>alias ll="ls -ltr"</small></span></div>
+        <div class="cmd-row"><span class="cname">apt</span><span class="cdesc"><b>Package management</b> &mdash; install a package. Used especially on <b>Ubuntu</b>. <span class="grp-tag user">apps</span><small>sudo apt install nginx</small></span></div>
+        <div class="cmd-row"><span class="cname">at</span><span class="cdesc"><b>Schedule a job</b> to run once at a given time. <span class="grp-tag proc">process</span><small>echo "./backup.sh" | at 02:00</small></span></div>
+      </div>
+    </div>
+
+    <div class="note"><b><code>at</code> vs <code>crontab</code>:</b> <code>at</code> schedules a <b>one-time</b> job at a specific moment; <code>crontab</code> schedules a <b>repeating</b> job on a recurring pattern. <span class="source-tag">added for clarity</span></div>
+
+    <div class="letter" id="L-B">
+      <div class="letter-badge">B</div>
+      <div class="letter-body">
+        <h3>B &mdash; background jobs, maths &amp; the shell itself</h3>
+        <div class="cmd-row"><span class="cname">bg</span><span class="cdesc">Resume a stopped job in the <b>background</b>. <span class="grp-tag proc">process</span><small>Ctrl+Z to pause, then: bg</small></span></div>
+        <div class="cmd-row"><span class="cname">bc</span><span class="cdesc">The <b>b</b>asic <b>c</b>alculator &mdash; do arithmetic right in the terminal. <span class="grp-tag file">utility</span><small>echo "5*3" | bc</small></span></div>
+        <div class="cmd-row"><span class="cname">bash</span><span class="cdesc">The <b>Bourne Again Shell</b> &mdash; used to run your scripts. <span class="grp-tag file">shell</span><small>bash myscript.sh</small></span></div>
+      </div>
+    </div>
+
+    <div class="letter" id="L-C">
+      <div class="letter-badge">C</div>
+      <div class="letter-body">
+        <h3>C &mdash; permissions, ownership &amp; copying</h3>
+        <div class="cmd-row"><span class="cname">chmod</span><span class="cdesc"><b>Ch</b>ange <b>mod</b>e &mdash; modify a file's <b>permissions</b>. <span class="grp-tag user">perms</span><small>chmod +x script.sh · chmod 755 file</small></span></div>
+        <div class="cmd-row"><span class="cname">chown</span><span class="cdesc">Change the file's <b>ownership</b> (which user owns it). <span class="grp-tag user">perms</span><small>sudo chown paul file.txt</small></span></div>
+        <div class="cmd-row"><span class="cname">chgrp</span><span class="cdesc">Change the <b>group ownership</b> of a file. <span class="grp-tag user">perms</span><small>sudo chgrp developers file.txt</small></span></div>
+        <div class="cmd-row"><span class="cname">cp</span><span class="cdesc">The simplest one &mdash; <b>copy</b> a file. <span class="grp-tag file">files</span><small>cp -r folder/ backup/</small></span></div>
+        <div class="cmd-row"><span class="cname">cal</span><span class="cdesc">Show a <b>calendar</b> &mdash; useful to check dates for a specific month or year. <span class="grp-tag file">utility</span><small>cal 2026 · cal 7 2026</small></span></div>
+      </div>
+    </div>
+
+    <div class="letter" id="L-D">
+      <div class="letter-badge">D</div>
+      <div class="letter-body">
+        <h3>D &mdash; disk space, differences &amp; the clock</h3>
+        <div class="cmd-row"><span class="cname">df</span><span class="cdesc"><b>D</b>isk <b>f</b>ree &mdash; check the <b>filesystem's disk space</b>. <span class="grp-tag file">system</span><small>df -h</small></span></div>
+        <div class="cmd-row"><span class="cname">du</span><span class="cdesc"><b>D</b>isk <b>u</b>tilisation &mdash; the space used by <b>one folder or file</b>. <span class="grp-tag file">system</span><small>du -sh /var/log</small></span></div>
+        <div class="cmd-row"><span class="cname">diff</span><span class="cdesc"><b>File comparison</b> &mdash; show the differences between two files. <span class="grp-tag file">files</span><small>diff -u old.conf new.conf</small></span></div>
+        <div class="cmd-row"><span class="cname">date</span><span class="cdesc">The system <b>date and time</b>. <span class="grp-tag file">utility</span><small>date · date +%T</small></span></div>
+      </div>
+    </div>
+
+    <div class="diagram-wrap"><div class="flow"><div class="box yellow">df -h</div><div class="arrow">&rarr;</div><div class="box">"disk is 96% full"</div><div class="arrow">&rarr;</div><div class="box yellow">du -sh /*</div><div class="arrow">&rarr;</div><div class="box">"/var/log is 40G"</div></div><div class="cap">Fig 1.1 — The classic pairing: <code>df</code> tells you the disk is full, <code>du</code> tells you <i>what</i> filled it.</div></div>
+
+    <div class="trick"><b>Memory trick</b><br><b>df</b> = <b>d</b>isk <b>f</b>ree (whole disk) · <b>du</b> = <b>d</b>isk <b>u</b>sage (one folder). <b>ch</b>* commands all <b>ch</b>ange something: <b>mod</b>e, <b>own</b>er, <b>grp</b>.</div>
+  </div>
+</section>
+
+<!-- ============ CH2 · E–H ============ -->
+<section class="chapter" id="ch2">
+  <div class="chapter-head"><span class="ch-num">02</span><div><h2>E &ndash; H</h2><p class="ch-sub">env, export, echo · find, file, fg, free · grep, gzip, groupadd, groupdel · history, head, hostname</p></div><div class="chapter-tools"><label class="markdone"><input type="checkbox" class="donebox" data-ch="ch2"> Mark complete</label><button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button></div></div>
+  <div class="chapter-body">
+
+    <div class="letter" id="L-E">
+      <div class="letter-badge">E</div>
+      <div class="letter-body">
+        <h3>E &mdash; environment variables &amp; printing</h3>
+        <div class="cmd-row"><span class="cname">env</span><span class="cdesc"><b>Check</b> the environment variables currently set. <span class="grp-tag file">env</span><small>env | grep JAVA</small></span></div>
+        <div class="cmd-row"><span class="cname">export</span><span class="cdesc"><b>Set</b> an environment variable. <span class="grp-tag file">env</span><small>export JAVA_HOME=/usr/lib/jvm/java-17</small></span></div>
+        <div class="cmd-row"><span class="cname">echo</span><span class="cdesc">Simple: <b>print</b> anything to the terminal, or <b>redirect</b> it into a file. <span class="grp-tag file">console</span><small>echo "hi" · echo "hi" &gt;&gt; notes.txt</small></span></div>
+      </div>
+    </div>
+
+    <div class="letter" id="L-F">
+      <div class="letter-badge">F</div>
+      <div class="letter-body">
+        <h3>F &mdash; finding, foreground &amp; free memory</h3>
+        <div class="cmd-row"><span class="cname">find</span><span class="cdesc"><b>Search</b> for a file or directory across a whole directory hierarchy. <span class="grp-tag file">files</span><small>find /var -name "*.log" -size +10G</small></span></div>
+        <div class="cmd-row"><span class="cname">file</span><span class="cdesc">Get information about a file's <b>type</b>. <span class="grp-tag file">files</span><small>file report.pdf → PDF document</small></span></div>
+        <div class="cmd-row"><span class="cname">fg</span><span class="cdesc"><b>F</b>ore<b>g</b>round &mdash; resume a job in the foreground. Process management. <span class="grp-tag proc">process</span><small>fg %1</small></span></div>
+        <div class="cmd-row"><span class="cname">free</span><span class="cdesc">Check the status of <b>free RAM and available RAM</b>. <span class="grp-tag file">system</span><small>free -h</small></span></div>
+      </div>
+    </div>
+
+    <div class="letter" id="L-G">
+      <div class="letter-badge">G</div>
+      <div class="letter-body">
+        <h3>G &mdash; the famous one, plus compression &amp; groups</h3>
+        <div class="cmd-row"><span class="cname">grep</span><span class="cdesc">So popular &mdash; used for <b>pattern searching</b> inside files. <span class="grp-tag file">files</span><small>grep -rin "error" /var/log/</small></span></div>
+        <div class="cmd-row"><span class="cname">gzip</span><span class="cdesc"><b>Compress</b> a file. <span class="grp-tag file">files</span><small>gzip bigfile.csv · gunzip bigfile.csv.gz</small></span></div>
+        <div class="cmd-row"><span class="cname">groupadd</span><span class="cdesc">Create a <b>group</b> &mdash; part of user management. <span class="grp-tag user">users</span><small>sudo groupadd developers</small></span></div>
+        <div class="cmd-row"><span class="cname">groupdel</span><span class="cdesc"><b>Delete</b> a group. <span class="grp-tag user">users</span><small>sudo groupdel developers</small></span></div>
+      </div>
+    </div>
+
+    <div class="letter" id="L-H">
+      <div class="letter-badge">H</div>
+      <div class="letter-body">
+        <h3>H &mdash; history, the top of a file &amp; the machine's name</h3>
+        <div class="cmd-row"><span class="cname">history</span><span class="cdesc">Heavily used &mdash; check <b>which commands you recently executed</b>. <span class="grp-tag file">shell</span><small>history | grep ssh</small></span></div>
+        <div class="cmd-row"><span class="cname">head</span><span class="cdesc">See the <b>top-most</b> specific lines of a file. <span class="grp-tag file">files</span><small>head -n 5 app.log</small></span></div>
+        <div class="cmd-row"><span class="cname">hostname</span><span class="cdesc">Check a server's <b>hostname</b>. <span class="grp-tag net">network</span><small>hostname · hostname -I</small></span></div>
+      </div>
+    </div>
+
+    <div class="trick"><b>Memory trick</b><br><b>head</b> = top of the file · <b>tail</b> = bottom (chapter 5). <b>export</b> pushes a variable out to child programs; <b>env</b> shows what's already out there.</div>
+  </div>
+</section>
+
+<!-- ============ CH3 · I–L ============ -->
+<section class="chapter" id="ch3">
+  <div class="chapter-head"><span class="ch-num">03</span><div><h2>I &ndash; L</h2><p class="ch-sub">ifconfig, ip, id, iptables · jobs · kill · ls, less, ln, locate</p></div><div class="chapter-tools"><label class="markdone"><input type="checkbox" class="donebox" data-ch="ch3"> Mark complete</label><button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button></div></div>
+  <div class="chapter-body">
+
+    <div class="letter" id="L-I">
+      <div class="letter-badge">I</div>
+      <div class="letter-body">
+        <h3>I &mdash; IP addresses, identity &amp; the firewall</h3>
+        <div class="cmd-row"><span class="cname">ifconfig</span><span class="cdesc">Heavily used &mdash; <b>check your server's IP</b>. <span class="grp-tag net">network</span><small>ifconfig</small></span></div>
+        <div class="cmd-row"><span class="cname">ip</span><span class="cdesc">The modern one &mdash; <b>network interface</b> and IP-related information. <span class="grp-tag net">network</span><small>ip addr · ip route</small></span></div>
+        <div class="cmd-row"><span class="cname">id</span><span class="cdesc">Information about a user: their <b>groups</b>, <b>UID</b> and <b>GID</b>. <span class="grp-tag user">users</span><small>id riya</small></span></div>
+        <div class="cmd-row"><span class="cname">iptables</span><span class="cdesc">Manage <b>firewall</b> rules. <span class="grp-tag net">network</span><small>sudo iptables -L</small></span></div>
+      </div>
+    </div>
+
+    <div class="letter" id="L-J">
+      <div class="letter-badge">J</div>
+      <div class="letter-body">
+        <h3>J &mdash; the only real answer</h3>
+        <div class="cmd-row"><span class="cname">jobs</span><span class="cdesc"><b>List down</b> the current jobs in this shell and their state &mdash; stopped, or still active. <span class="grp-tag proc">process</span><small>jobs</small></span></div>
+      </div>
+    </div>
+
+    <div class="note"><b>Interview tip:</b> J is the letter people freeze on. <code>jobs</code> is the answer &mdash; and it pairs naturally with <code>bg</code> and <code>fg</code>, which is a good thing to say out loud. <span class="source-tag">added for clarity</span></div>
+
+    <div class="letter" id="L-K">
+      <div class="letter-badge">K</div>
+      <div class="letter-body">
+        <h3>K &mdash; ending a process</h3>
+        <div class="cmd-row"><span class="cname">kill</span><span class="cdesc">Heavily used &mdash; <b>kill</b> or <b>terminate</b> a process by its PID. <span class="grp-tag proc">process</span><small>kill 4821 · kill -9 4821 (force)</small></span></div>
+      </div>
+    </div>
+
+    <div class="letter" id="L-L">
+      <div class="letter-badge">L</div>
+      <div class="letter-body">
+        <h3>L &mdash; listing, reading, linking &amp; locating</h3>
+        <div class="cmd-row"><span class="cname">ls</span><span class="cdesc">Very popular &mdash; <b>list</b> a directory's contents. <span class="grp-tag file">files</span><small>ls -ltr</small></span></div>
+        <div class="cmd-row"><span class="cname">less</span><span class="cdesc">Simple &mdash; what we use for <b>reading bigger files</b> (with forward &amp; reverse search). <span class="grp-tag file">files</span><small>less /var/log/syslog</small></span></div>
+        <div class="cmd-row"><span class="cname">ln</span><span class="cdesc">Create <b>hard and soft links</b>. <span class="grp-tag file">files</span><small>ln -s /opt/app/v2 /opt/app/current</small></span></div>
+        <div class="cmd-row"><span class="cname">locate</span><span class="cdesc">A <b>substitute for find</b> &mdash; search for files, a slightly easier option. <span class="grp-tag file">files</span><small>locate nginx.conf</small></span></div>
+      </div>
+    </div>
+
+    <div class="diagram-wrap"><div class="flow"><div class="box">find</div><div class="arrow">vs</div><div class="box yellow">walks the live disk<br>slow, always current</div><div style="width:24px;"></div><div class="box">locate</div><div class="arrow">vs</div><div class="box yellow">reads a database<br>fast, needs updatedb</div></div><div class="cap">Fig 3.1 — <code>locate</code> is the easier, faster option; <code>find</code> is the thorough one with conditions.</div></div>
+
+    <div class="correction"><b>Nuance worth knowing:</b> <code>locate</code> is fast because it searches a pre-built <b>database</b>, not the live disk &mdash; so a brand-new file may not show up until <code>sudo updatedb</code> runs. <code>find</code> always reflects reality. <span class="source-tag">added for clarity</span></div>
+  </div>
+</section>
+
+<!-- ============ CH4 · M–P ============ -->
+<section class="chapter" id="ch4">
+  <div class="chapter-head"><span class="ch-num">04</span><div><h2>M &ndash; P</h2><p class="ch-sub">mkdir, mv, more · netstat, nano, nice · openssl · ps, printenv, pwd, passwd</p></div><div class="chapter-tools"><label class="markdone"><input type="checkbox" class="donebox" data-ch="ch4"> Mark complete</label><button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button></div></div>
+  <div class="chapter-body">
+
+    <div class="letter" id="L-M">
+      <div class="letter-badge">M</div>
+      <div class="letter-body">
+        <h3>M &mdash; making, moving &amp; paging</h3>
+        <div class="cmd-row"><span class="cname">mkdir</span><span class="cdesc"><b>M</b>a<b>k</b>e <b>dir</b>ectory &mdash; create a folder. <span class="grp-tag file">files</span><small>mkdir -p project/logs</small></span></div>
+        <div class="cmd-row"><span class="cname">mv</span><span class="cdesc"><b>Move</b> a file from one directory to another (like cut-paste) &mdash; <b>or rename</b> it. <span class="grp-tag file">files</span><small>mv old.txt new.txt</small></span></div>
+        <div class="cmd-row"><span class="cname">more</span><span class="cdesc">Show a command's output, or read a file, <b>page by page</b>. <span class="grp-tag file">files</span><small>more app.log · ps -ef | more</small></span></div>
+      </div>
+    </div>
+
+    <div class="letter" id="L-N">
+      <div class="letter-badge">N</div>
+      <div class="letter-body">
+        <h3>N &mdash; networking, an easier editor &amp; priority</h3>
+        <div class="cmd-row"><span class="cname">netstat</span><span class="cdesc">Lots of network information: <b>protocols</b>, network interfaces, <b>ports</b> and <b>routing tables</b>. Very helpful. <span class="grp-tag net">network</span><small>netstat -tulpn</small></span></div>
+        <div class="cmd-row"><span class="cname">nano</span><span class="cdesc">A very good <b>substitute</b> for the vi and vim editors &mdash; friendlier for beginners. <span class="grp-tag file">files</span><small>nano config.yml</small></span></div>
+        <div class="cmd-row"><span class="cname">nice</span><span class="cdesc">The <b>nice value</b> &mdash; sets a process's <b>priority</b> (process management). <span class="grp-tag proc">process</span><small>nice -n 10 ./heavy.sh</small></span></div>
+      </div>
+    </div>
+
+    <div class="letter" id="L-O">
+      <div class="letter-badge">O</div>
+      <div class="letter-body">
+        <h3>O &mdash; rarely used, but have an answer ready</h3>
+        <div class="cmd-row"><span class="cname">openssl</span><span class="cdesc">A <b>toolkit</b> for <b>TLS/SSL</b> protocols &mdash; certificates, keys, encryption. Not used much day to day, but it's a solid answer for the letter O. <span class="grp-tag net">network</span><small>openssl s_client -connect example.com:443</small></span></div>
+      </div>
+    </div>
+
+    <div class="letter" id="L-P">
+      <div class="letter-badge">P</div>
+      <div class="letter-body">
+        <h3>P &mdash; processes, paths &amp; passwords</h3>
+        <div class="cmd-row"><span class="cname">ps</span><span class="cdesc">Check <b>process status</b> &mdash; what's running and its PID. <span class="grp-tag proc">process</span><small>ps -ef | grep nginx</small></span></div>
+        <div class="cmd-row"><span class="cname">printenv</span><span class="cdesc">Kind of the same as <code>env</code> &mdash; print the environment variables. <span class="grp-tag file">env</span><small>printenv PATH</small></span></div>
+        <div class="cmd-row"><span class="cname">pwd</span><span class="cdesc">Check your location &mdash; you get the <b>full path</b>. <span class="grp-tag file">files</span><small>pwd</small></span></div>
+        <div class="cmd-row"><span class="cname">passwd</span><span class="cdesc"><b>Change a password</b>. <span class="grp-tag user">users</span><small>passwd · sudo passwd riya</small></span></div>
+      </div>
+    </div>
+
+    <div class="trick"><b>Memory trick</b><br>P is the richest letter: <b>p</b>rocess status, <b>p</b>rint env, <b>p</b>resent directory, <b>p</b>assword. If you blank in an interview, "P" always has an answer.</div>
+  </div>
+</section>
+
+<!-- ============ CH5 · Q–T ============ -->
+<section class="chapter" id="ch5">
+  <div class="chapter-head"><span class="ch-num">05</span><div><h2>Q &ndash; T</h2><p class="ch-sub">quota · rsync, rm, rmdir, reboot · sudo, sed, sort, systemctl · top, tail, tar, telnet, tee</p></div><div class="chapter-tools"><label class="markdone"><input type="checkbox" class="donebox" data-ch="ch5"> Mark complete</label><button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button></div></div>
+  <div class="chapter-body">
+
+    <div class="letter" id="L-Q">
+      <div class="letter-badge">Q</div>
+      <div class="letter-body">
+        <h3>Q &mdash; the hardest letter</h3>
+        <div class="cmd-row"><span class="cname">quota</span><span class="cdesc">Q has very few options. <code>quota</code> displays the <b>disk usage and limits</b> for a user or group. That's the one to name. <span class="grp-tag user">users</span><small>quota -u paul</small></span></div>
+      </div>
+    </div>
+
+    <div class="letter" id="L-R">
+      <div class="letter-badge">R</div>
+      <div class="letter-body">
+        <h3>R &mdash; copying, removing &amp; restarting</h3>
+        <div class="cmd-row"><span class="cname">rsync</span><span class="cdesc">A <b>fast and versatile file copying tool</b> &mdash; great for syncing folders and backups. <span class="grp-tag net">network</span><small>rsync -avz /data/ user@host:/backup/</small></span></div>
+        <div class="cmd-row"><span class="cname">rm</span><span class="cdesc">Simple &mdash; <b>delete a file</b>. <span class="grp-tag file">files</span><small>rm file.txt · rm -r folder/</small></span></div>
+        <div class="cmd-row"><span class="cname">rmdir</span><span class="cdesc"><b>Remove a directory</b> (an empty one). <span class="grp-tag file">files</span><small>rmdir emptyfolder</small></span></div>
+        <div class="cmd-row"><span class="cname">reboot</span><span class="cdesc"><b>Reboot</b> the system. <span class="grp-tag file">system</span><small>sudo reboot</small></span></div>
+      </div>
+    </div>
+
+    <div class="letter" id="L-S">
+      <div class="letter-badge">S</div>
+      <div class="letter-body">
+        <h3>S &mdash; privilege, streams &amp; services</h3>
+        <div class="cmd-row"><span class="cname">sudo</span><span class="cdesc">Heavily used &mdash; perform an action with <b>super-user privileges</b> as a normal user (install a package, start/stop a service). <span class="grp-tag user">users</span><small>sudo apt install nginx</small></span></div>
+        <div class="cmd-row"><span class="cname">sed</span><span class="cdesc"><b>Stream editor</b> &mdash; find and replace text. <span class="grp-tag file">files</span><small>sed 's/error/ERROR/g' app.log</small></span></div>
+        <div class="cmd-row"><span class="cname">sort</span><span class="cdesc"><b>Sort</b> data alphabetically (or numerically). <span class="grp-tag file">files</span><small>sort names.txt · sort -r names.txt</small></span></div>
+        <div class="cmd-row"><span class="cname">systemctl</span><span class="cdesc">Check a service's <b>status</b>, and <b>start</b>, <b>stop</b> or <b>restart</b> it. <span class="grp-tag proc">services</span><small>sudo systemctl restart nginx</small></span></div>
+      </div>
+    </div>
+
+    <div class="letter" id="L-T">
+      <div class="letter-badge">T</div>
+      <div class="letter-body">
+        <h3>T &mdash; the busiest letter</h3>
+        <div class="cmd-row"><span class="cname">top</span><span class="cdesc">Heavily used &mdash; check processes and <b>CPU utilisation</b> percentage-wise. It's a whole <b>monitoring tool</b> in one command. <span class="grp-tag proc">process</span><small>top (press q to quit)</small></span></div>
+        <div class="cmd-row"><span class="cname">tail</span><span class="cdesc">See some <b>bottom lines</b> of a file. With <code>-f</code> it follows a log live. <span class="grp-tag file">files</span><small>tail -f /var/log/syslog</small></span></div>
+        <div class="cmd-row"><span class="cname">tar</span><span class="cdesc"><b>T</b>ape <b>ar</b>chive &mdash; archive and compress a whole directory. <span class="grp-tag file">files</span><small>tar -czf backup.tar.gz folder/</small></span></div>
+        <div class="cmd-row"><span class="cname">telnet</span><span class="cdesc">Check connectivity based on <b>IP and port</b> &mdash; is that specific port open? <span class="grp-tag net">network</span><small>telnet 10.0.0.5 3306</small></span></div>
+        <div class="cmd-row"><span class="cname">tee</span><span class="cdesc">Write output <b>to a file and print it on the terminal at the same time</b>. Not used a lot, but sometimes exactly right. <span class="grp-tag file">console</span><small>./deploy.sh | tee deploy.log</small></span></div>
+      </div>
+    </div>
+
+    <div class="terminal">
+      <div class="tbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">bash — why tee exists</span><button class="copy" type="button">Copy</button></div>
+<pre><span class="p">$</span> <span class="c">./deploy.sh &gt; deploy.log</span>        <span class="o"># saved, but you see nothing</span>
+<span class="p">$</span> <span class="c">./deploy.sh | tee deploy.log</span>    <span class="o"># saved AND printed live</span>
+<span class="o">Deploying... OK</span></pre>
+    </div>
+
+    <div class="trick"><b>Memory trick</b><br><b>tee</b> is named after a <b>T-pipe</b> in plumbing: one stream in, two streams out &mdash; one to the file, one to your screen.</div>
+  </div>
+</section>
+
+<!-- ============ CH6 · U–Z ============ -->
+<section class="chapter" id="ch6">
+  <div class="chapter-head"><span class="ch-num">06</span><div><h2>U &ndash; Z</h2><p class="ch-sub">uniq, useradd, usermod, umount, umask · vi, vim · wget, wc, whoami, which · xxd · yum, yes · zip</p></div><div class="chapter-tools"><label class="markdone"><input type="checkbox" class="donebox" data-ch="ch6"> Mark complete</label><button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button></div></div>
+  <div class="chapter-body">
+
+    <div class="letter" id="L-U">
+      <div class="letter-badge">U</div>
+      <div class="letter-body">
+        <h3>U &mdash; unique values, users &amp; default permissions</h3>
+        <div class="cmd-row"><span class="cname">uniq</span><span class="cdesc">Goes with <code>sort</code> &mdash; when you want only the <b>unique values</b> from a file. <span class="grp-tag file">files</span><small>sort names.txt | uniq</small></span></div>
+        <div class="cmd-row"><span class="cname">useradd</span><span class="cdesc"><b>Create a user</b> &mdash; user management. <span class="grp-tag user">users</span><small>sudo useradd -m riya</small></span></div>
+        <div class="cmd-row"><span class="cname">usermod</span><span class="cdesc"><b>Modify</b> an existing user (e.g. add them to a group). <span class="grp-tag user">users</span><small>sudo usermod -aG sudo riya</small></span></div>
+        <div class="cmd-row"><span class="cname">umount</span><span class="cdesc"><b>Unmount</b> a mounted filesystem or disk. <span class="grp-tag file">system</span><small>sudo umount /mnt/data</small></span></div>
+        <div class="cmd-row"><span class="cname">umask</span><span class="cdesc">Set the <b>default permissions</b> for newly created files and directories. <span class="grp-tag user">perms</span><small>umask 022</small></span></div>
+      </div>
+    </div>
+
+    <div class="correction"><b>Note on <code>usermod -aG</code>:</b> always include the <code>a</code> (append). Plain <code>-G</code> <b>replaces</b> all of the user's secondary groups, silently dropping the rest. <span class="source-tag">common mistake</span></div>
+
+    <div class="letter" id="L-V">
+      <div class="letter-badge">V</div>
+      <div class="letter-body">
+        <h3>V &mdash; the editors</h3>
+        <div class="cmd-row"><span class="cname">vi</span><span class="cdesc">Heavily used for <b>file editing</b>. <span class="grp-tag file">files</span><small>vi file → i to insert, Esc, :wq to save</small></span></div>
+        <div class="cmd-row"><span class="cname">vim</span><span class="cdesc"><b>Vi improved</b> &mdash; same idea, more features (syntax colours, etc.). <span class="grp-tag file">files</span><small>vim config.yml</small></span></div>
+      </div>
+    </div>
+
+    <div class="letter" id="L-W">
+      <div class="letter-badge">W</div>
+      <div class="letter-body">
+        <h3>W &mdash; downloading, counting &amp; identity</h3>
+        <div class="cmd-row"><span class="cname">wget</span><span class="cdesc"><b>Download files</b> from the internet (also FTP and more). <span class="grp-tag net">network</span><small>wget https://site.com/app.tar.gz</small></span></div>
+        <div class="cmd-row"><span class="cname">wc</span><span class="cdesc"><b>W</b>ord <b>c</b>ount &mdash; how many <b>lines</b>, words and characters. <span class="grp-tag file">files</span><small>wc -l data.csv</small></span></div>
+        <div class="cmd-row"><span class="cname">whoami</span><span class="cdesc">Who is the <b>current user</b>? <span class="grp-tag user">users</span><small>whoami</small></span></div>
+        <div class="cmd-row"><span class="cname">which</span><span class="cdesc">For any command, find out <b>where it is being sourced from</b> (its binary path). <span class="grp-tag file">apps</span><small>which python3 → /usr/bin/python3</small></span></div>
+      </div>
+    </div>
+
+    <div class="letter" id="L-X">
+      <div class="letter-badge">X</div>
+      <div class="letter-body">
+        <h3>X &mdash; the trick letter</h3>
+        <div class="cmd-row"><span class="cname">xxd</span><span class="cdesc">Creates a <b>hex dump</b> of a given file or of standard input. Not very useful day to day, but at least it's a real answer for X. <span class="grp-tag file">utility</span><small>xxd file.bin | head</small></span></div>
+      </div>
+    </div>
+
+    <div class="letter" id="L-Y">
+      <div class="letter-badge">Y</div>
+      <div class="letter-body">
+        <h3>Y &mdash; packages &amp; endless output</h3>
+        <div class="cmd-row"><span class="cname">yum</span><span class="cdesc"><b>Package management</b>, based on <b>Red Hat / CentOS</b>. <span class="grp-tag user">apps</span><small>sudo yum install nginx</small></span></div>
+        <div class="cmd-row"><span class="cname">yes</span><span class="cdesc">Run a task <b>repetitively</b> &mdash; e.g. keep a script looping when it has no while loop of its own, or auto-answer "y" to prompts. <span class="grp-tag proc">utility</span><small>yes | sudo apt install nginx</small></span></div>
+      </div>
+    </div>
+
+    <div class="letter" id="L-Z">
+      <div class="letter-badge">Z</div>
+      <div class="letter-body">
+        <h3>Z &mdash; the last one</h3>
+        <div class="cmd-row"><span class="cname">zip</span><span class="cdesc"><b>Compress</b> and archive your files so they transfer easily. <span class="grp-tag file">files</span><small>zip -r out.zip folder/ · unzip out.zip</small></span></div>
+      </div>
+    </div>
+
+    <div class="note"><b>Your turn:</b> the lecturer invites suggestions &mdash; if you know another command for any letter, add it to your notes below (or the video's comments). Building your own A&ndash;Z list is the point of the exercise. <span class="source-tag">from transcript</span></div>
+  </div>
+</section>
+
+<!-- ================= REVISION ================= -->
+<section class="chapter" id="revision">
+  <div class="chapter-head"><span class="ch-num">★</span><div><h2>Revision Kit</h2><p class="ch-sub">The full A–Z table, quiz, flashcards &amp; a one-page cheat sheet</p></div><div class="chapter-tools"><button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button></div></div>
+  <div class="chapter-body">
+
+    <h3>The Complete A–Z Table</h3>
+    <table class="cmp-table"><tr><th>Letter</th><th>Command(s)</th><th>What it does</th></tr>
+      <tr><td>A</td><td>awk, alias, apt, at</td><td>Print columns · shortcuts · install packages (Ubuntu) · schedule a one-time job</td></tr>
+      <tr><td>B</td><td>bg, bc, bash</td><td>Resume job in background · calculator · the shell that runs scripts</td></tr>
+      <tr><td>C</td><td>chmod, chown, chgrp, cp, cal</td><td>Permissions · ownership · group ownership · copy · calendar</td></tr>
+      <tr><td>D</td><td>df, du, diff, date</td><td>Filesystem space · folder size · compare files · date &amp; time</td></tr>
+      <tr><td>E</td><td>env, export, echo</td><td>Show env vars · set an env var · print / redirect</td></tr>
+      <tr><td>F</td><td>find, file, fg, free</td><td>Search files · file type · foreground a job · free RAM</td></tr>
+      <tr><td>G</td><td>grep, gzip, groupadd, groupdel</td><td>Pattern search · compress a file · create / delete a group</td></tr>
+      <tr><td>H</td><td>history, head, hostname</td><td>Past commands · top lines of a file · server's hostname</td></tr>
+      <tr><td>I</td><td>ifconfig, ip, id, iptables</td><td>IP (classic) · IP (modern) · user's UID/GID/groups · firewall rules</td></tr>
+      <tr><td>J</td><td>jobs</td><td>List current jobs — stopped or active</td></tr>
+      <tr><td>K</td><td>kill</td><td>Kill / terminate a process by PID</td></tr>
+      <tr><td>L</td><td>ls, less, ln, locate</td><td>List · read big files · hard/soft links · fast file search</td></tr>
+      <tr><td>M</td><td>mkdir, mv, more</td><td>Make directory · move &amp; rename · page through output</td></tr>
+      <tr><td>N</td><td>netstat, nano, nice</td><td>Ports/protocols/routing · easy editor · process priority</td></tr>
+      <tr><td>O</td><td>openssl</td><td>TLS/SSL toolkit — certificates and keys</td></tr>
+      <tr><td>P</td><td>ps, printenv, pwd, passwd</td><td>Process status · env vars · full path · change password</td></tr>
+      <tr><td>Q</td><td>quota</td><td>Disk usage &amp; limits for a user or group</td></tr>
+      <tr><td>R</td><td>rsync, rm, rmdir, reboot</td><td>Fast file sync · delete file · remove directory · restart</td></tr>
+      <tr><td>S</td><td>sudo, sed, sort, systemctl</td><td>Super-user privileges · find &amp; replace · sort · manage services</td></tr>
+      <tr><td>T</td><td>top, tail, tar, telnet, tee</td><td>CPU monitor · last lines · archive · port check · file + screen</td></tr>
+      <tr><td>U</td><td>uniq, useradd, usermod, umount, umask</td><td>Unique values · create/modify user · unmount · default perms</td></tr>
+      <tr><td>V</td><td>vi, vim</td><td>The classic editors</td></tr>
+      <tr><td>W</td><td>wget, wc, whoami, which</td><td>Download · count lines · current user · binary's path</td></tr>
+      <tr><td>X</td><td>xxd</td><td>Hex dump of a file or standard input</td></tr>
+      <tr><td>Y</td><td>yum, yes</td><td>Packages (Red Hat/CentOS) · repeat a task endlessly</td></tr>
+      <tr><td>Z</td><td>zip</td><td>Compress &amp; archive files for easy transfer</td></tr>
+    </table>
+
+    <h3 style="margin-top:34px;">10 Key Points</h3>
+    <ul class="keypoints">
+      <li><span class="kn">1</span>The A&ndash;Z question isn't about trivia &mdash; it's a fast check that you've actually <b>used</b> Linux.</li>
+      <li><span class="kn">2</span>The hard letters are <b>J, O, Q, X, Y</b>. Memorise one each: <code>jobs</code>, <code>openssl</code>, <code>quota</code>, <code>xxd</code>, <code>yes</code>.</li>
+      <li><span class="kn">3</span><b>T</b> is the richest letter: top, tail, tar, telnet, tee.</li>
+      <li><span class="kn">4</span><code>df</code> = whole filesystem; <code>du</code> = one folder. Interviewers love this pair.</li>
+      <li><span class="kn">5</span><code>find</code> walks the live disk; <code>locate</code> reads a fast database (needs <code>updatedb</code>).</li>
+      <li><span class="kn">6</span><code>bg</code>, <code>fg</code>, <code>jobs</code>, <code>nice</code>, <code>kill</code>, <code>ps</code>, <code>top</code> are all one family: <b>process management</b>.</li>
+      <li><span class="kn">7</span><code>chmod</code>/<code>chown</code>/<code>chgrp</code>/<code>umask</code> are all one family: <b>permissions</b>.</li>
+      <li><span class="kn">8</span><code>yum</code> = Red Hat/CentOS, <code>apt</code> = Ubuntu. Naming both shows distro awareness.</li>
+      <li><span class="kn">9</span><code>tee</code> = write to a file <b>and</b> the screen at once; <code>&gt;</code> only writes to the file.</li>
+      <li><span class="kn">10</span>Grouping commands by <b>task</b> (chapter 07) is how you recall them; the alphabet is just the drill.</li>
+    </ul>
+
+    <h3 style="margin-top:34px;">5 Interview Questions</h3>
+    <details class="qa"><summary>Name a Linux command starting with J, O, Q and X.</summary><div class="ans">These are the four that trip people up. <b>J</b> &rarr; <code>jobs</code> (list current background jobs, stopped or active). <b>O</b> &rarr; <code>openssl</code> (a toolkit for TLS/SSL). <b>Q</b> &rarr; <code>quota</code> (display disk usage and limits for a user or group). <b>X</b> &rarr; <code>xxd</code> (create a hex dump of a file or standard input).</div></details>
+    <details class="qa"><summary>What is the difference between <code>df</code> and <code>du</code>?</summary><div class="ans"><code>df</code> (disk free) reports space at the <b>filesystem/partition</b> level &mdash; total, used, available and use%. <code>du</code> (disk utilisation) reports the space consumed by <b>one particular directory or file</b>. The workflow is: <code>df -h</code> tells you the disk is full, then <code>du -sh /*</code> tells you which folder filled it.</div></details>
+    <details class="qa"><summary>What is <code>tee</code> and why would you use it?</summary><div class="ans"><code>tee</code> writes output to a <b>file and the terminal at the same time</b>. With a plain redirect (<code>cmd &gt; file</code>) the output is saved but invisible while it runs. <code>cmd | tee file</code> lets you watch a long deploy or build live <i>and</i> keep the log. It's named after a T-shaped pipe: one input, two outputs.</div></details>
+    <details class="qa"><summary>Difference between <code>find</code> and <code>locate</code>?</summary><div class="ans">Both search for files. <code>locate</code> is a faster, easier substitute because it queries a pre-built <b>database</b> &mdash; but that database is only as fresh as the last <code>updatedb</code>, so brand-new files can be missing. <code>find</code> walks the live filesystem, so it's always accurate and supports rich conditions (<code>-name</code>, <code>-mtime</code>, <code>-size</code>).</div></details>
+    <details class="qa"><summary>Which commands belong to process management?</summary><div class="ans"><code>ps</code> (process status &amp; PID), <code>top</code> (live CPU/memory monitor), <code>kill</code> (terminate by PID, <code>-9</code> to force), <code>jobs</code> (list jobs in this shell), <code>bg</code> (resume in background), <code>fg</code> (resume in foreground), and <code>nice</code> (set priority). Grouping them like this is exactly what an interviewer wants to hear.</div></details>
+
+    <h3 style="margin-top:34px;">Quick Quiz</h3>
+    <div class="quiz-q"><p class="qtext">1. Which command starts with J?</p><div class="quiz-opts"><button class="quiz-opt" data-correct="true">jobs</button><button class="quiz-opt" data-correct="false">join-user</button><button class="quiz-opt" data-correct="false">jump</button></div><div class="quiz-feedback"></div></div>
+    <div class="quiz-q"><p class="qtext">2. <code>quota</code> displays what?</p><div class="quiz-opts"><button class="quiz-opt" data-correct="true">Disk usage and limits for a user or group</button><button class="quiz-opt" data-correct="false">A quotation of CPU time</button><button class="quiz-opt" data-correct="false">Queued print jobs</button></div><div class="quiz-feedback"></div></div>
+    <div class="quiz-q"><p class="qtext">3. Which writes output to a file AND the terminal at once?</p><div class="quiz-opts"><button class="quiz-opt" data-correct="true">tee</button><button class="quiz-opt" data-correct="false">&gt; redirect</button><button class="quiz-opt" data-correct="false">tail</button></div><div class="quiz-feedback"></div></div>
+    <div class="quiz-q"><p class="qtext">4. <code>xxd</code> is used for:</p><div class="quiz-opts"><button class="quiz-opt" data-correct="true">Creating a hex dump of a file or input</button><button class="quiz-opt" data-correct="false">Deleting files securely</button><button class="quiz-opt" data-correct="false">Extracting archives</button></div><div class="quiz-feedback"></div></div>
+    <div class="quiz-q"><p class="qtext">5. Which shows the space used by ONE folder?</p><div class="quiz-opts"><button class="quiz-opt" data-correct="true">du -sh folder</button><button class="quiz-opt" data-correct="false">df -h</button><button class="quiz-opt" data-correct="false">free -h</button></div><div class="quiz-feedback"></div></div>
+    <div class="quiz-q"><p class="qtext">6. <code>yes</code> is used to:</p><div class="quiz-opts"><button class="quiz-opt" data-correct="true">Repeat a task / auto-answer prompts endlessly</button><button class="quiz-opt" data-correct="false">Confirm a file deletion</button><button class="quiz-opt" data-correct="false">Enable a service</button></div><div class="quiz-feedback"></div></div>
+    <div class="quiz-q"><p class="qtext">7. Which is the fast database-backed substitute for <code>find</code>?</p><div class="quiz-opts"><button class="quiz-opt" data-correct="true">locate</button><button class="quiz-opt" data-correct="false">grep</button><button class="quiz-opt" data-correct="false">which</button></div><div class="quiz-feedback"></div></div>
+
+    <h3 style="margin-top:34px;">Flashcards <span style="font-size:12px; color:var(--ink-faint); font-family:var(--mono);">(click to flip)</span></h3>
+    <div class="flash-grid">
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">J</div><div class="flashcard-face flashcard-back">jobs — list current jobs (stopped or active).</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">O</div><div class="flashcard-face flashcard-back">openssl — TLS/SSL toolkit.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">Q</div><div class="flashcard-face flashcard-back">quota — disk usage &amp; limits per user/group.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">X</div><div class="flashcard-face flashcard-back">xxd — hex dump of a file or stdin.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">Y</div><div class="flashcard-face flashcard-back">yum (Red Hat packages) · yes (repeat endlessly).</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">df vs du</div><div class="flashcard-face flashcard-back">Whole filesystem vs one folder.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">find vs locate</div><div class="flashcard-face flashcard-back">Live disk + conditions vs fast database (updatedb).</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">tee</div><div class="flashcard-face flashcard-back">Write to file AND screen at the same time.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">bg · fg · jobs</div><div class="flashcard-face flashcard-back">Background / foreground / list — process family.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">chmod · chown · chgrp</div><div class="flashcard-face flashcard-back">Permissions · owner · group owner.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">umask</div><div class="flashcard-face flashcard-back">Default permissions for NEW files/dirs.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">rsync</div><div class="flashcard-face flashcard-back">Fast, versatile file copying/syncing tool.</div></div></div>
+    </div>
+
+    <h3 style="margin-top:34px;">Common Mistakes</h3>
+    <div class="mistake-row"><span class="x">✗</span><span>"<code>usermod -G sudo riya</code> adds her to sudo."</span></div>
+    <div class="mistake-row"><span class="ok">✓</span><span>Plain <code>-G</code> <b>replaces</b> all secondary groups; use <code>-aG</code> to append.</span></div>
+    <div class="mistake-row"><span class="x">✗</span><span>"<code>locate</code> always finds every file."</span></div>
+    <div class="mistake-row"><span class="ok">✓</span><span>It reads a database — a new file may be missing until <code>updatedb</code> runs.</span></div>
+    <div class="mistake-row"><span class="x">✗</span><span>"<code>gzip</code> can compress a folder."</span></div>
+    <div class="mistake-row"><span class="ok">✓</span><span><code>gzip</code> is single-file only; use <code>tar -czf</code> or <code>zip -r</code> for folders.</span></div>
+    <div class="mistake-row"><span class="x">✗</span><span>"<code>rmdir</code> deletes any directory."</span></div>
+    <div class="mistake-row"><span class="ok">✓</span><span><code>rmdir</code> only removes <b>empty</b> directories; use <code>rm -r</code> otherwise.</span></div>
+
+    <h3 style="margin-top:34px;">One-Page Cheat Sheet</h3>
+    <div class="diagram-wrap">
+      <p style="margin:0 0 10px;"><b>A</b> awk · alias · apt · at &nbsp;|&nbsp; <b>B</b> bg · bc · bash &nbsp;|&nbsp; <b>C</b> chmod · chown · chgrp · cp · cal &nbsp;|&nbsp; <b>D</b> df · du · diff · date &nbsp;|&nbsp; <b>E</b> env · export · echo &nbsp;|&nbsp; <b>F</b> find · file · fg · free &nbsp;|&nbsp; <b>G</b> grep · gzip · groupadd · groupdel &nbsp;|&nbsp; <b>H</b> history · head · hostname &nbsp;|&nbsp; <b>I</b> ifconfig · ip · id · iptables &nbsp;|&nbsp; <b>J</b> jobs &nbsp;|&nbsp; <b>K</b> kill &nbsp;|&nbsp; <b>L</b> ls · less · ln · locate &nbsp;|&nbsp; <b>M</b> mkdir · mv · more &nbsp;|&nbsp; <b>N</b> netstat · nano · nice &nbsp;|&nbsp; <b>O</b> openssl &nbsp;|&nbsp; <b>P</b> ps · printenv · pwd · passwd &nbsp;|&nbsp; <b>Q</b> quota &nbsp;|&nbsp; <b>R</b> rsync · rm · rmdir · reboot &nbsp;|&nbsp; <b>S</b> sudo · sed · sort · systemctl &nbsp;|&nbsp; <b>T</b> top · tail · tar · telnet · tee &nbsp;|&nbsp; <b>U</b> uniq · useradd · usermod · umount · umask &nbsp;|&nbsp; <b>V</b> vi · vim &nbsp;|&nbsp; <b>W</b> wget · wc · whoami · which &nbsp;|&nbsp; <b>X</b> xxd &nbsp;|&nbsp; <b>Y</b> yum · yes &nbsp;|&nbsp; <b>Z</b> zip</p>
+    </div>
+
+    <h3 style="margin-top:34px;">Your Notes</h3>
+    <textarea class="notes-area" id="notesArea" placeholder="Know another command for a letter? Add your own A–Z list here — saved automatically in your browser..."></textarea>
+    <div class="notes-status" id="notesStatus"></div>
+  </div>
+</section>
+
+</main>
+
+<div class="chnav-footer">
+  <a href="#ch1" class="prev"><small>&larr; Back to start</small>A &ndash; D</a>
+  <a href="#revision" class="next"><small>Jump to &rarr;</small>Revision Kit</a>
+</div>
+
+<footer class="site-footer">
+  Built as a single offline HTML file &middot; works without internet &middot; prints cleanly as a PDF chapter<br>
+  Shortcuts: <span class="kbd">/</span> search &middot; <span class="kbd">d</span> dark mode &middot; <span class="kbd">t</span> back to top
+</footer>
+
+<button id="backtotop" aria-label="Back to top">&uarr;</button>
+
+<script>
+(function(){
+  "use strict";
+  var STORE_KEY = "linux-a-to-z-commands-book-progress-v8";
+  var chapters = Array.prototype.slice.call(document.querySelectorAll(".chapter[id]"));
+
+  function loadState(){
+    try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }catch(e){ return {}; }
+  }
+  function saveState(state){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+  var state = loadState();
+
+  var darkToggle = document.getElementById("darkToggle");
+  function applyDark(on){
+    document.documentElement.classList.toggle("dark", on);
+    darkToggle.textContent = on ? "☀️ Light" : "🌙 Dark";
+    state.dark = on; saveState(state);
+  }
+  applyDark(!!state.dark);
+  darkToggle.addEventListener("click", function(){ applyDark(!document.documentElement.classList.contains("dark")); });
+
+  var doneboxes = document.querySelectorAll(".donebox");
+  var totalCh = doneboxes.length;
+  function updateProgressUI(){
+    var doneCount = 0;
+    doneboxes.forEach(function(cb){
+      var ch = cb.getAttribute("data-ch");
+      var isDone = !!(state.done && state.done[ch]);
+      cb.checked = isDone;
+      if(isDone) doneCount++;
+      var rnode = document.querySelector('.rnode[data-ch="'+ch+'"]');
+      if(rnode) rnode.classList.toggle("done", isDone);
+    });
+    var pct = totalCh ? Math.round((doneCount/totalCh)*100) : 0;
+    document.getElementById("progress-bar").style.width = pct + "%";
+    document.getElementById("progress-label").textContent = doneCount + " / " + totalCh + " sections";
+  }
+  state.done = state.done || {};
+  doneboxes.forEach(function(cb){
+    cb.addEventListener("change", function(){
+      state.done[cb.getAttribute("data-ch")] = cb.checked;
+      saveState(state);
+      updateProgressUI();
+    });
+  });
+  updateProgressUI();
+
+  document.querySelectorAll(".chapter").forEach(function(section){
+    var btn = section.querySelector(".collapse-toggle");
+    var body = section.querySelector(".chapter-body");
+    if(!btn || !body) return;
+    var id = section.id;
+    if(state.collapsed && state.collapsed[id]){
+      body.classList.add("collapsed"); btn.textContent = "+";
+    }
+    btn.addEventListener("click", function(){
+      var collapsed = body.classList.toggle("collapsed");
+      btn.textContent = collapsed ? "+" : "−";
+      state.collapsed = state.collapsed || {};
+      state.collapsed[id] = collapsed;
+      saveState(state);
+    });
+  });
+  document.getElementById("expandAllBtn").addEventListener("click", function(){
+    var anyCollapsed = document.querySelector(".chapter-body.collapsed");
+    document.querySelectorAll(".chapter-body").forEach(function(b){ b.classList.toggle("collapsed", !anyCollapsed); });
+    document.querySelectorAll(".collapse-toggle").forEach(function(b){ b.textContent = anyCollapsed ? "+" : "−"; });
+    this.textContent = anyCollapsed ? "Expand all" : "Collapse all";
+    state.collapsed = {};
+    if(anyCollapsed){ chapters.forEach(function(c){ state.collapsed[c.id] = true; }); }
+    saveState(state);
+  });
+
+  var navLinks = document.querySelectorAll("#chnav a");
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        navLinks.forEach(function(l){ l.classList.remove("active"); });
+        var link = document.querySelector('#chnav a[href="#'+entry.target.id+'"]');
+        if(link) link.classList.add("active");
+      }
+    });
+  }, {rootMargin:"-40% 0px -50% 0px"});
+  chapters.forEach(function(s){ if(s) observer.observe(s); });
+
+  // Expand a collapsed chapter when jumping to a letter inside it
+  document.querySelectorAll(".alpha-index a").forEach(function(link){
+    link.addEventListener("click", function(){
+      var target = document.querySelector(link.getAttribute("href"));
+      if(!target) return;
+      var section = target.closest(".chapter");
+      if(!section) return;
+      var body = section.querySelector(".chapter-body");
+      var btn = section.querySelector(".collapse-toggle");
+      if(body && body.classList.contains("collapsed")){
+        body.classList.remove("collapsed");
+        if(btn) btn.textContent = "−";
+        state.collapsed = state.collapsed || {};
+        state.collapsed[section.id] = false;
+        saveState(state);
+      }
+    });
+  });
+
+  var searchbox = document.getElementById("searchbox");
+  var searchableEls = document.querySelectorAll(".chapter p, .chapter li, .chapter td, .chapter .qtext, .chapter summary, .chapter .cdesc, .chapter .cname");
+  var originalHTML = new Map();
+  searchableEls.forEach(function(el){ originalHTML.set(el, el.innerHTML); });
+
+  function clearHighlights(){
+    searchableEls.forEach(function(el){ el.innerHTML = originalHTML.get(el); });
+    chapters.forEach(function(c){ c.classList.remove("hidden-by-search"); });
+  }
+  function runSearch(q){
+    q = q.trim();
+    if(!q){ clearHighlights(); return; }
+    var re;
+    try{ re = new RegExp("("+q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig"); }catch(e){ return; }
+    var matchedChapters = new Set();
+    searchableEls.forEach(function(el){
+      var raw = originalHTML.get(el);
+      if(re.test(raw)){
+        el.innerHTML = raw.replace(re, "<mark class=\"hit\">$1</mark>");
+        var ch = el.closest(".chapter");
+        if(ch) matchedChapters.add(ch.id);
+      } else {
+        el.innerHTML = raw;
+      }
+    });
+    chapters.forEach(function(c){ c.classList.toggle("hidden-by-search", !matchedChapters.has(c.id)); });
+  }
+  searchbox.addEventListener("input", function(){ runSearch(this.value); });
+
+  document.addEventListener("keydown", function(e){
+    var tag = (document.activeElement && document.activeElement.tagName) || "";
+    if(tag === "INPUT" || tag === "TEXTAREA"){
+      if(e.key === "Escape") document.activeElement.blur();
+      return;
+    }
+    if(e.key === "/"){ e.preventDefault(); searchbox.focus(); }
+    if(e.key === "d" || e.key === "D"){ applyDark(!document.documentElement.classList.contains("dark")); }
+    if(e.key === "t" || e.key === "T"){ window.scrollTo({top:0, behavior:"smooth"}); }
+  });
+
+  var backBtn = document.getElementById("backtotop");
+  window.addEventListener("scroll", function(){
+    backBtn.classList.toggle("show", window.scrollY > 700);
+  });
+  backBtn.addEventListener("click", function(){ window.scrollTo({top:0, behavior:"smooth"}); });
+
+  document.querySelectorAll(".flashcard").forEach(function(card){
+    card.addEventListener("click", function(){ card.classList.toggle("flipped"); });
+  });
+
+  document.querySelectorAll(".quiz-q").forEach(function(q){
+    var opts = q.querySelectorAll(".quiz-opt");
+    var feedback = q.querySelector(".quiz-feedback");
+    opts.forEach(function(opt){
+      opt.addEventListener("click", function(){
+        var correct = opt.getAttribute("data-correct") === "true";
+        opts.forEach(function(o){ o.disabled = true; });
+        opts.forEach(function(o){
+          if(o.getAttribute("data-correct") === "true") o.classList.add("correct");
+        });
+        if(!correct) opt.classList.add("wrong");
+        feedback.style.display = "block";
+        feedback.textContent = correct ? "✓ Correct!" : "✗ Not quite — correct answer highlighted above.";
+        feedback.style.color = correct ? "var(--green)" : "var(--red)";
+      });
+    });
+  });
+
+  document.querySelectorAll(".terminal .copy").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var pre = btn.closest(".terminal").querySelector("pre");
+      if(!pre) return;
+      var lines = pre.innerText.split("\n");
+      var cmds = lines.filter(function(l){ return /^\s*\$\s/.test(l); })
+                      .map(function(l){ return l.replace(/^\s*\$\s?/, ""); });
+      var text = (cmds.length ? cmds : lines).join("\n");
+      var done = function(){ var old = btn.textContent; btn.textContent = "Copied!"; setTimeout(function(){ btn.textContent = old; }, 1200); };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done).catch(done);
+      } else {
+        var ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta);
+        ta.select(); try{ document.execCommand("copy"); }catch(e){} document.body.removeChild(ta); done();
+      }
+    });
+  });
+
+  var notesArea = document.getElementById("notesArea");
+  var notesStatus = document.getElementById("notesStatus");
+  notesArea.value = state.notes || "";
+  var saveTimer;
+  notesArea.addEventListener("input", function(){
+    clearTimeout(saveTimer);
+    notesStatus.textContent = "Saving…";
+    saveTimer = setTimeout(function(){
+      state.notes = notesArea.value;
+      saveState(state);
+      notesStatus.textContent = "Saved to this browser ✓";
+      setTimeout(function(){ notesStatus.textContent = ""; }, 1500);
+    }, 500);
+  });
+})();
+</script>
+</body>
+</html>

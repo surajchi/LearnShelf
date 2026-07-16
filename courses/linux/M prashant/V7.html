@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Most Frequently Used Linux Commands in a Job</title>
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   Palette: white paper, engineering-notebook navy ink,
+   yellow roadmap cards, blue connector lines (per brief)
+   ============================================================ */
+:root{
+  --bg:#ffffff;
+  --bg-alt:#f6f8fb;
+  --paper-line:#e7ecf3;
+  --ink:#16202e;
+  --ink-soft:#4a5872;
+  --ink-faint:#8895ab;
+  --blue:#1955c9;
+  --blue-dark:#0e3a8c;
+  --blue-tint:#eaf1ff;
+  --yellow:#ffcd3c;
+  --yellow-deep:#f0a500;
+  --yellow-tint:#fff8e1;
+  --green:#1c8a5c;
+  --green-tint:#e6f6ee;
+  --red:#c8402c;
+  --red-tint:#fdeceb;
+  --border:#dce3ee;
+  --radius:14px;
+  --sans: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --serif: Georgia, "Cambria", "Times New Roman", serif;
+  --mono: ui-monospace, "Cascadia Mono", "Consolas", "SFMono-Regular", Menlo, monospace;
+  --shadow: 0 1px 2px rgba(20,30,50,.04), 0 8px 24px rgba(20,30,50,.06);
+  --maxw: 100%;
+}
+html.dark{
+  --bg:#0f1420;
+  --bg-alt:#161d2c;
+  --paper-line:#232c40;
+  --ink:#e9edf6;
+  --ink-soft:#aab4c9;
+  --ink-faint:#71809a;
+  --blue:#5b9bff;
+  --blue-dark:#8fb8ff;
+  --blue-tint:#152241;
+  --yellow:#ffcd3c;
+  --yellow-deep:#ffb703;
+  --yellow-tint:#2b2410;
+  --green:#3fcf8e;
+  --green-tint:#0f2a20;
+  --red:#ff7a68;
+  --red-tint:#331714;
+  --border:#28324a;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  line-height:1.65;
+  transition:background .25s ease, color .25s ease;
+}
+::selection{background:var(--yellow); color:#16202e;}
+img,svg{max-width:100%;}
+a{color:var(--blue);}
+h1,h2,h3,h4{font-family:var(--serif); color:var(--ink); line-height:1.25; letter-spacing:.2px;}
+code, .mono{font-family:var(--mono);}
+.wrap{max-width:var(--maxw); margin:0 auto; padding:0 24px;}
+.eyebrow{
+  display:inline-block; font-family:var(--mono); font-size:11.5px; letter-spacing:1.5px;
+  text-transform:uppercase; color:var(--blue-dark); background:var(--blue-tint);
+  padding:4px 10px; border-radius:20px; font-weight:700;
+}
+
+/* ============================================================
+   TOP BAR / PROGRESS
+   ============================================================ */
+#progress-track{position:fixed; top:0; left:0; right:0; height:3px; background:var(--paper-line); z-index:100;}
+#progress-bar{height:100%; width:0%; background:linear-gradient(90deg,var(--blue),var(--yellow)); transition:width .2s ease;}
+
+header.topbar{
+  position:sticky; top:3px; z-index:90; background:var(--bg);
+  border-bottom:1px solid var(--border); backdrop-filter:blur(6px);
+}
+.topbar-inner{
+  max-width:var(--maxw); margin:0 auto; padding:12px 24px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.brand{display:flex; align-items:center; gap:9px; font-family:var(--serif); font-weight:700; font-size:17px; white-space:nowrap;}
+.brand .tux{width:22px;height:22px;flex:none;}
+.topbar-inner input[type=search]{
+  flex:1; min-width:120px; padding:8px 12px; border-radius:9px; border:1px solid var(--border);
+  background:var(--bg-alt); color:var(--ink); font-family:var(--sans); font-size:13.5px;
+}
+.topbar-inner input[type=search]:focus{outline:2px solid var(--blue); outline-offset:1px;}
+.tbtn{
+  border:1px solid var(--border); background:var(--bg-alt); color:var(--ink-soft);
+  border-radius:9px; padding:8px 11px; font-size:13px; cursor:pointer; font-family:var(--sans);
+  display:inline-flex; align-items:center; gap:6px; white-space:nowrap;
+}
+.tbtn:hover{border-color:var(--blue); color:var(--blue-dark);}
+.tbtn:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible{
+  outline:2px solid var(--blue); outline-offset:2px;
+}
+#progress-label{font-size:12px; color:var(--ink-faint); font-family:var(--mono); white-space:nowrap;}
+
+nav.chnav{display:flex; gap:4px; overflow-x:auto; padding:10px 24px 12px; max-width:var(--maxw); margin:0 auto;}
+nav.chnav a{
+  font-size:12.5px; color:var(--ink-soft); text-decoration:none; padding:6px 10px; border-radius:8px;
+  white-space:nowrap; border:1px solid transparent; font-family:var(--mono);
+}
+nav.chnav a.active{background:var(--blue-tint); color:var(--blue-dark); border-color:var(--blue);}
+nav.chnav a:hover{background:var(--bg-alt);}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero{padding:64px 24px 40px; max-width:var(--maxw); margin:0 auto;}
+.hero h1{font-size:42px; margin:14px 0 10px; max-width:18ch;}
+.hero p.lede{font-size:17px; color:var(--ink-soft); max-width:58ch; margin:0 0 26px;}
+.hero-meta{display:flex; gap:18px; flex-wrap:wrap; font-size:13px; color:var(--ink-faint); font-family:var(--mono);}
+.hero-meta span{display:flex; align-items:center; gap:6px;}
+
+/* ============================================================
+   ROADMAP  (yellow cards + blue connectors — signature element)
+   ============================================================ */
+.roadmap-section{padding:10px 24px 56px; max-width:var(--maxw); margin:0 auto;}
+.roadmap-section h2{font-size:13px; text-transform:uppercase; letter-spacing:2px; color:var(--ink-faint); font-family:var(--mono); margin-bottom:22px;}
+.roadmap{position:relative; padding-left:26px;}
+.roadmap::before{
+  content:""; position:absolute; left:10px; top:10px; bottom:10px; width:3px;
+  background:repeating-linear-gradient(180deg, var(--blue) 0 8px, transparent 8px 14px);
+  border-radius:3px;
+}
+.rnode{position:relative; margin-bottom:14px;}
+.rnode::before{
+  content:""; position:absolute; left:-26px; top:18px; width:13px; height:13px; border-radius:50%;
+  background:var(--blue); border:3px solid var(--bg); box-shadow:0 0 0 2px var(--blue);
+}
+.rnode a{
+  display:flex; align-items:center; gap:12px; text-decoration:none; color:var(--ink);
+  background:var(--yellow-tint); border:1.5px solid var(--yellow-deep); border-radius:var(--radius);
+  padding:13px 16px; transition:transform .15s ease, box-shadow .15s ease;
+}
+.rnode a:hover{transform:translateX(3px); box-shadow:var(--shadow);}
+.rnode .num{
+  font-family:var(--mono); font-weight:700; font-size:12px; color:#7a5900;
+  background:var(--yellow); padding:3px 8px; border-radius:6px; flex:none;
+}
+html.dark .rnode .num{color:#241c00;}
+.rnode .rtxt{flex:1;}
+.rnode .rtxt b{display:block; font-family:var(--serif); font-size:15.5px;}
+.rnode .rtxt small{color:var(--ink-soft); font-size:12.5px;}
+.rnode .check{width:20px; height:20px; border-radius:50%; border:2px solid var(--yellow-deep); flex:none;}
+.rnode.done .check{background:var(--green); border-color:var(--green);}
+.rnode.done a{opacity:.75;}
+
+/* ============================================================
+   CHAPTER STRUCTURE
+   ============================================================ */
+.chapter{max-width:var(--maxw); margin:0 auto; padding:26px 24px 8px; border-top:1px solid var(--border);}
+.chapter-head{display:flex; align-items:flex-start; gap:14px; margin-bottom:4px;}
+.chapter-head .ch-num{
+  font-family:var(--mono); font-weight:800; font-size:14px; color:var(--blue);
+  background:var(--blue-tint); border-radius:8px; padding:6px 10px; flex:none; margin-top:4px;
+}
+.chapter-head h2{font-size:26px; margin:0 0 4px;}
+.chapter-head .ch-sub{color:var(--ink-soft); font-size:14.5px; margin:0;}
+.chapter-tools{display:flex; align-items:center; gap:10px; margin-left:auto; flex:none;}
+.markdone{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink-faint); cursor:pointer; font-family:var(--mono); white-space:nowrap;}
+.markdone input{accent-color:var(--green); width:15px; height:15px;}
+.collapse-toggle{
+  border:1px solid var(--border); background:var(--bg-alt); border-radius:8px; width:30px; height:30px;
+  cursor:pointer; color:var(--ink-soft); font-size:14px; flex:none;
+}
+.chapter-body{padding-top:14px; overflow:hidden;}
+.chapter-body.collapsed{display:none;}
+
+/* step block (problem -> why -> analogy -> ...) */
+.step{
+  border-left:3px solid var(--border); padding:2px 0 2px 18px; margin:20px 0;
+}
+.step .step-label{
+  font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:1.4px;
+  color:var(--blue-dark); font-weight:700; margin-bottom:5px; display:block;
+}
+.step p{margin:6px 0; color:var(--ink); font-size:15.5px;}
+.step p.soft{color:var(--ink-soft);}
+
+.analogy-card{
+  background:var(--yellow-tint); border:1px solid var(--yellow-deep); border-radius:var(--radius);
+  padding:16px 18px; margin:16px 0; display:flex; gap:12px;
+}
+.analogy-card .ico{font-size:22px; flex:none;}
+.analogy-card b{display:block; font-family:var(--serif); margin-bottom:4px;}
+
+.note{
+  background:var(--blue-tint); border-left:4px solid var(--blue); border-radius:0 10px 10px 0;
+  padding:12px 16px; margin:16px 0; font-size:14.5px;
+}
+.note b{color:var(--blue-dark);}
+.correction{
+  background:var(--red-tint); border-left:4px solid var(--red); border-radius:0 10px 10px 0;
+  padding:12px 16px; margin:16px 0; font-size:14.5px;
+}
+.correction b{color:var(--red);}
+.source-tag{font-family:var(--mono); font-size:10.5px; letter-spacing:.5px; text-transform:uppercase; color:var(--ink-faint); border:1px solid var(--border); border-radius:5px; padding:1px 6px; margin-left:6px;}
+
+/* ============================================================
+   TERMINAL CODE BLOCK
+   ============================================================ */
+.terminal{
+  background:#0d1424; border:1px solid #26314a; border-radius:12px; margin:18px 0; overflow:hidden;
+  box-shadow:var(--shadow);
+}
+.terminal .tbar{display:flex; align-items:center; gap:7px; padding:9px 13px; background:#161f33; border-bottom:1px solid #26314a;}
+.terminal .tbar .dot{width:11px; height:11px; border-radius:50%; display:inline-block;}
+.terminal .tbar .r{background:#ff5f56;} .terminal .tbar .y{background:#ffbd2e;} .terminal .tbar .g{background:#27c93f;}
+.terminal .tbar .ttl{margin-left:8px; font-family:var(--mono); font-size:11.5px; color:#8595b4;}
+.terminal .tbar .copy{
+  margin-left:auto; background:transparent; border:1px solid #37425f; color:#9fb0d0; border-radius:6px;
+  font-family:var(--mono); font-size:11px; padding:3px 9px; cursor:pointer;
+}
+.terminal .tbar .copy:hover{border-color:var(--blue); color:#fff;}
+.terminal pre{margin:0; padding:14px 16px; overflow-x:auto; font-family:var(--mono); font-size:13px; line-height:1.7; color:#d7e0f0;}
+.terminal pre .p{color:#5b9bff;}   /* prompt */
+.terminal pre .c{color:#ffcd6b;}   /* command */
+.terminal pre .o{color:#8595b4;}   /* output/comment */
+.terminal pre .f{color:#7ee0a8;}   /* flag */
+
+/* ============================================================
+   DIAGRAMS
+   ============================================================ */
+.diagram-wrap{
+  background:var(--bg-alt); border:1px solid var(--border); border-radius:var(--radius);
+  padding:22px; margin:20px 0; break-inside:avoid;
+}
+.diagram-wrap .cap{font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); text-align:center; margin-top:10px;}
+
+/* generic box+arrow flow */
+.flow{display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap;}
+.flow .box{
+  background:var(--bg); border:1.5px solid var(--blue); border-radius:10px; padding:12px 16px;
+  font-size:13.5px; text-align:center; font-family:var(--mono); color:var(--ink); min-width:110px;
+}
+.flow .box.yellow{border-color:var(--yellow-deep); background:var(--yellow-tint);}
+.flow .arrow{color:var(--blue); font-size:20px; padding:0 10px; flex:none;}
+@media (max-width:520px){ .flow{flex-direction:column;} .flow .arrow{transform:rotate(90deg);} }
+
+/* request-travel style animation (packet on the wire) */
+.travel-track{position:relative; height:46px; background:var(--bg); border:1.5px dashed var(--border); border-radius:30px; margin:18px 0 6px;}
+.travel-dot{
+  position:absolute; top:50%; left:6px; transform:translateY(-50%);
+  width:26px; height:26px; border-radius:50%; background:var(--blue); color:#fff; font-size:12px;
+  display:flex; align-items:center; justify-content:center; font-family:var(--mono);
+  animation:travel 3.2s ease-in-out infinite;
+}
+@keyframes travel{
+  0%{left:6px;} 45%{left:calc(50% - 13px);} 55%{left:calc(50% - 13px);} 100%{left:calc(100% - 32px);}
+}
+@media (prefers-reduced-motion:reduce){ .travel-dot{animation:none; left:calc(50% - 13px);} }
+.travel-ends{display:flex; justify-content:space-between; font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); padding:0 4px;}
+
+/* ============================================================
+   COMPARISON TABLE
+   ============================================================ */
+.cmp-table{width:100%; border-collapse:separate; border-spacing:0; margin:18px 0; font-size:14px; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;}
+.cmp-table th{background:var(--blue); color:#fff; text-align:left; padding:11px 14px; font-family:var(--mono); font-size:12.5px; letter-spacing:.4px;}
+.cmp-table td{padding:11px 14px; border-top:1px solid var(--border); vertical-align:top;}
+.cmp-table tr:nth-child(even) td{background:var(--bg-alt);}
+.cmp-table td:first-child{font-weight:700; color:var(--blue-dark); white-space:nowrap; font-family:var(--mono); font-size:13px;}
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+.card-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin:18px 0;}
+.info-card{background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow);}
+.info-card h4{margin:0 0 6px; font-size:15.5px; display:flex; align-items:center; gap:8px;}
+.info-card p{margin:0; font-size:13.5px; color:var(--ink-soft);}
+.info-card .tag{display:inline-block; font-family:var(--mono); font-size:10.5px; background:var(--green-tint); color:var(--green); padding:2px 7px; border-radius:6px; margin-top:8px;}
+
+/* ============================================================
+   INTERVIEW / MISTAKES / MEMORY TRICK
+   ============================================================ */
+details.qa{border:1px solid var(--border); border-radius:10px; margin:9px 0; background:var(--bg);}
+details.qa summary{padding:12px 15px; cursor:pointer; font-weight:600; font-size:14.5px; list-style:none; display:flex; gap:10px; align-items:flex-start;}
+details.qa summary::before{content:"Q"; font-family:var(--mono); font-size:11px; background:var(--blue-tint); color:var(--blue-dark); border-radius:5px; padding:2px 7px; flex:none;}
+details.qa[open] summary{border-bottom:1px solid var(--border);}
+details.qa .ans{padding:12px 15px 15px 42px; color:var(--ink-soft); font-size:14px;}
+
+.mistake-row{display:flex; gap:10px; align-items:flex-start; margin:10px 0; font-size:14px;}
+.mistake-row .x{color:var(--red); font-weight:800; flex:none;}
+.mistake-row .ok{color:var(--green); font-weight:800; flex:none;}
+
+.trick{
+  background:var(--yellow-tint); border:1px dashed var(--yellow-deep); border-radius:10px;
+  padding:12px 16px; margin:14px 0; font-size:14px;
+}
+.trick b{font-family:var(--mono); font-size:11.5px; text-transform:uppercase; color:#7a5900;}
+html.dark .trick b{color:var(--yellow);}
+
+/* ============================================================
+   QUIZ / FLASHCARDS
+   ============================================================ */
+.quiz-q{border:1px solid var(--border); border-radius:var(--radius); padding:15px 16px; margin:12px 0; background:var(--bg);}
+.quiz-q p.qtext{font-weight:600; margin:0 0 10px;}
+.quiz-opts{display:grid; gap:8px;}
+.quiz-opt{
+  text-align:left; border:1px solid var(--border); background:var(--bg-alt); border-radius:8px;
+  padding:9px 12px; cursor:pointer; font-size:13.5px; color:var(--ink); font-family:var(--sans);
+}
+.quiz-opt:hover{border-color:var(--blue);}
+.quiz-opt.correct{background:var(--green-tint); border-color:var(--green); font-weight:700;}
+.quiz-opt.wrong{background:var(--red-tint); border-color:var(--red);}
+.quiz-feedback{font-size:12.5px; margin-top:8px; font-family:var(--mono); display:none;}
+
+.flash-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin:16px 0;}
+.flashcard{perspective:1000px; height:120px; cursor:pointer;}
+.flashcard-inner{position:relative; width:100%; height:100%; transition:transform .5s; transform-style:preserve-3d;}
+.flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+.flashcard-face{
+  position:absolute; inset:0; backface-visibility:hidden; border-radius:12px;
+  display:flex; align-items:center; justify-content:center; text-align:center; padding:14px;
+  font-size:13.5px; border:1.5px solid var(--border);
+}
+.flashcard-front{background:var(--blue-tint); color:var(--blue-dark); font-weight:700;}
+.flashcard-back{background:var(--yellow-tint); color:#5c4400; transform:rotateY(180deg); border-color:var(--yellow-deep);}
+html.dark .flashcard-back{color:var(--yellow-tint);}
+
+/* ============================================================
+   REVISION / KEY POINTS
+   ============================================================ */
+.keypoints{padding-left:0; list-style:none; display:grid; gap:8px; margin:16px 0;}
+.keypoints li{display:flex; gap:10px; align-items:flex-start; font-size:14.5px;}
+.keypoints li .kn{
+  font-family:var(--mono); font-size:11px; font-weight:800; background:var(--blue); color:#fff;
+  width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex:none; margin-top:2px;
+}
+
+/* ============================================================
+   NOTES
+   ============================================================ */
+.notes-area{width:100%; min-height:80px; resize:vertical; border:1px solid var(--border); border-radius:10px; padding:12px; font-family:var(--sans); font-size:13.5px; background:var(--bg-alt); color:var(--ink);}
+.notes-status{font-size:11.5px; color:var(--ink-faint); font-family:var(--mono); margin-top:5px; height:14px;}
+
+/* ============================================================
+   NAV FOOTER / BACK TO TOP
+   ============================================================ */
+.chnav-footer{display:flex; justify-content:space-between; gap:12px; max-width:var(--maxw); margin:10px auto 0; padding:0 24px;}
+.chnav-footer a{
+  border:1px solid var(--border); border-radius:10px; padding:10px 14px; text-decoration:none; color:var(--ink);
+  font-size:13px; flex:1; max-width:48%;
+}
+.chnav-footer a.next{text-align:right;}
+.chnav-footer a small{display:block; color:var(--ink-faint); font-family:var(--mono); font-size:10.5px;}
+.chnav-footer a:hover{border-color:var(--blue);}
+
+#backtotop{
+  position:fixed; bottom:22px; right:22px; width:42px; height:42px; border-radius:50%;
+  background:var(--blue); color:#fff; border:none; cursor:pointer; font-size:16px; box-shadow:var(--shadow);
+  opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:80;
+}
+#backtotop.show{opacity:1; pointer-events:auto;}
+
+.site-footer{text-align:center; padding:50px 24px 70px; color:var(--ink-faint); font-size:12.5px; font-family:var(--mono);}
+.kbd{font-family:var(--mono); background:var(--bg-alt); border:1px solid var(--border); border-radius:5px; padding:1px 6px; font-size:11px;}
+
+mark.hit{background:var(--yellow); color:#16202e; border-radius:3px;}
+.hidden-by-search{display:none !important;}
+
+/* ============================================================
+   PRINT
+   ============================================================ */
+@media print{
+  header.topbar, nav.chnav, #progress-track, #backtotop, .chapter-tools, .notes-area, .notes-status, .terminal .copy{display:none !important;}
+  body{background:#fff; color:#000;}
+  .chapter{break-before:page; border-top:none;}
+  .chapter-body.collapsed{display:block !important;}
+  .diagram-wrap, .analogy-card, .cmp-table, .quiz-q, details.qa, .flashcard, .terminal{break-inside:avoid;}
+  .terminal{background:#0d1424 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  a{color:#000; text-decoration:none;}
+}
+body{padding-left:clamp(16px,5vw,80px);padding-right:clamp(16px,5vw,80px);}
+.flashcard{perspective:none;} .flashcard-inner{transform:none !important;} .flashcard-face{backface-visibility:visible; position:absolute; inset:0;} .flashcard-back{transform:none; display:none;} .flashcard.flipped .flashcard-front{display:none;} .flashcard.flipped .flashcard-back{display:flex;}
+</style>
+</head>
+<body>
+
+<div id="progress-track"><div id="progress-bar"></div></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <svg class="tux" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="12" rx="2" stroke="var(--blue)" stroke-width="1.5"/><rect x="7" y="7" width="4.5" height="6" rx="1" fill="var(--yellow)"/><rect x="12.5" y="7" width="4.5" height="6" rx="1" fill="var(--yellow)" opacity=".6"/><path d="M8 20h8M12 16v4" stroke="var(--blue)" stroke-width="1.5"/></svg>
+      Linux Commands in a Job
+    </div>
+    <input type="search" id="searchbox" placeholder="Search this book&hellip;  ( / )" aria-label="Search chapters">
+    <span id="progress-label">0 / 9 sections</span>
+    <button class="tbtn" id="expandAllBtn">Expand all</button>
+    <button class="tbtn" id="darkToggle" aria-label="Toggle dark mode">🌙 Dark</button>
+  </div>
+  <nav class="chnav" id="chnav" aria-label="Chapter navigation">
+    <a href="#ch1">1. Files &amp; Directories</a>
+    <a href="#ch2">2. Search &amp; Compress</a>
+    <a href="#ch3">3. Networking</a>
+    <a href="#ch4">4. Processes</a>
+    <a href="#ch5">5. Users</a>
+    <a href="#ch6">6. Applications</a>
+    <a href="#ch7">7. Environment Variables</a>
+    <a href="#ch8">8. Console &amp; Output</a>
+    <a href="#ch9">9. Other Useful</a>
+    <a href="#revision">Revision</a>
+  </nav>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <span class="eyebrow">Chapter 07 &middot; Linux Commands</span>
+  <h1>The Linux commands you actually use in a job</h1>
+  <p class="lede">No matter whether you sit in <b>support</b>, <b>testing</b>, or <b>development</b> &mdash; the same handful of Linux commands come up every single day. This lecture groups them by the <i>task</i> you are doing rather than alphabetically, so you can reach for the right one instantly. Everything is taught from zero, with real syntax and output.</p>
+  <div class="hero-meta">
+    <span>📺 Source: "Most frequently used Linux commands in a job" (M. Prashant)</span>
+    <span>⏱ Task-grouped reference chapter</span>
+    <span>🧠 Zero prior knowledge assumed</span>
+  </div>
+</section>
+
+<!-- ================= ROADMAP ================= -->
+<section class="roadmap-section">
+  <h2>Your roadmap through this chapter</h2>
+  <div class="roadmap" id="roadmap">
+    <div class="rnode" data-ch="ch1"><a href="#ch1"><span class="num">01</span><span class="rtxt"><b>Files &amp; Directory Management</b><small>less, more, vi/vim/nano, cat, mkdir, rm, cp, mv, pwd, ls</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch2"><a href="#ch2"><span class="num">02</span><span class="rtxt"><b>Searching &amp; Compression</b><small>find, grep, tar, gzip, gunzip, zip, unzip</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch3"><a href="#ch3"><span class="num">03</span><span class="rtxt"><b>Basic Networking</b><small>curl, wget, ip, ifconfig, netstat, ss, ssh, ftp, ping, telnet</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch4"><a href="#ch4"><span class="num">04</span><span class="rtxt"><b>Process Management</b><small>ps, kill</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch5"><a href="#ch5"><span class="num">05</span><span class="rtxt"><b>User Management</b><small>id, whoami, passwd, su, sudo</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch6"><a href="#ch6"><span class="num">06</span><span class="rtxt"><b>Application Management</b><small>yum, dnf, apt, which, systemctl</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch7"><a href="#ch7"><span class="num">07</span><span class="rtxt"><b>Environment Variables</b><small>env, printenv, export, source</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch8"><a href="#ch8"><span class="num">08</span><span class="rtxt"><b>Console, Output &amp; System Control</b><small>cat, clear, echo, redirection, poweroff, reboot</small></span><span class="check"></span></a></div>
+    <div class="rnode" data-ch="ch9"><a href="#ch9"><span class="num">09</span><span class="rtxt"><b>Other Useful Commands</b><small>df, du, free, chmod, awk, cut, sed, ln, nohup, crontab, touch, history</small></span><span class="check"></span></a></div>
+  </div>
+</section>
+
+<main>
+
+<!-- ============ CH1 · FILES & DIRECTORIES ============ -->
+<section class="chapter" id="ch1">
+  <div class="chapter-head"><span class="ch-num">01</span><div><h2>Files &amp; Directory Management</h2><p class="ch-sub">Reading, editing, creating, moving and listing &mdash; the daily bread</p></div><div class="chapter-tools"><label class="markdone"><input type="checkbox" class="donebox" data-ch="ch1"> Mark complete</label><button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button></div></div>
+  <div class="chapter-body">
+
+    <div class="step"><span class="step-label">Problem &middot; why start here</span><p>Whatever your role &mdash; support, testing, or development &mdash; you spend most of your Linux day looking at <b>files</b>: reading a log, editing a config, creating a folder, or checking what's in a directory. The lecture starts with this group because every other group builds on it.</p></div>
+
+    <div class="analogy-card"><span class="ico">🗄️</span><div><b>Real-life analogy</b>The filesystem is a giant filing cabinet. <code>cd</code> is walking to a drawer, <code>ls</code> is opening it, <code>less</code> is reading a document without taking it out, <code>cp</code>/<code>mv</code> are photocopying or relocating it, and <code>rm</code> is the shredder. <code>pwd</code> asks "which drawer am I standing at?"</div></div>
+
+    <div class="step"><span class="step-label">1 &middot; Reading big files — <code>less</code> and <code>more</code></span><p>Sometimes you have a command's output, sometimes a file &mdash; and you want to read it <b>page by page</b> instead of it flying past. <code>less file</code> and <code>more file</code> both do this. The lecturer's personal pick is <b><code>less</code></b>, used most of all for big files, because inside it you can search <b>forward and reverse</b> very easily.</p></div>
+
+    <table class="cmp-table"><tr><th>Key inside <code>less</code></th><th>Action</th></tr>
+      <tr><td>/word</td><td>Forward search (top &rarr; bottom)</td></tr>
+      <tr><td>?word</td><td>Reverse search (bottom &rarr; top)</td></tr>
+      <tr><td>n / N</td><td>Next match / previous match</td></tr>
+      <tr><td>Shift+G / g</td><td>Jump to last line / first line</td></tr>
+      <tr><td>q</td><td>Quit</td></tr>
+    </table>
+
+    <div class="note"><b>less vs more:</b> both page through content, but <code>less</code> gives you easy forward <i>and</i> reverse searching, which is why it wins for large log files. <span class="source-tag">from transcript</span></div>
+
+    <div class="step"><span class="step-label">2 &middot; Editing files — <code>vi</code>, <code>vim</code>, <code>nano</code></span><p>To <b>create</b> or <b>edit</b> a file you need a text editor. The classic is the <b>vi editor</b>; you'll also see <b>vim</b> (vi improved) and <b>nano</b>. <code>vi file</code> or <code>nano file</code> opens it. In <code>vi</code>: press <b>i</b> to start typing, <b>Esc</b> to stop, then <code>:wq</code> to save and quit. In <code>nano</code>: just type, then <b>Ctrl+X</b>, <b>Y</b>, <b>Enter</b>.</p></div>
+
+    <div class="step"><span class="step-label">3 &middot; Quick read — <code>cat</code></span><p><code>cat file</code> is the simplest of all: it dumps the whole file to the terminal. Perfect for a small file. For anything long, go back to <code>less</code>.</p></div>
+
+    <div class="step"><span class="step-label">4 &middot; Create &amp; delete — <code>mkdir</code>, <code>rm</code></span><p><code>mkdir foldername</code> = <b>make directory</b>, when you need a new folder. <code>rm file</code> deletes a file; <code>rm -r folder</code> deletes a directory and its contents.</p></div>
+
+    <div class="correction"><b>Care with <code>rm -rf</code>:</b> there is no recycle bin in Linux &mdash; deletion is permanent. <code>rm -rf</code> force-deletes recursively with no confirmation, so always re-read the path before pressing Enter. <span class="source-tag">best practice</span></div>
+
+    <div class="step"><span class="step-label">5 &middot; Copy, move &amp; rename — <code>cp</code>, <code>mv</code></span><p><code>cp source dest</code> copies a file (add <code>-r</code> for a folder). To move a file or directory somewhere else, use the <b>move command</b>: <code>mv file folder/</code>. And there is no separate rename command &mdash; <code>mv oldname newname</code> is <b>also</b> how you rename.</p></div>
+
+    <div class="step"><span class="step-label">6 &middot; Where am I — <code>pwd</code></span><p><code>pwd</code> = <b>present working directory</b>. Whatever location you're working in, it prints the full <b>absolute path</b>. Use it whenever you need to check where you currently are.</p></div>
+
+    <div class="step"><span class="step-label">7 &middot; What's here — <code>ls</code></span><p><code>ls</code> is the <b>listing</b> command for any directory. With options it tells you far more: permissions, the <b>owner</b>, when the file was <b>last modified</b>, and its <b>size</b>. That's why <code>ls -l</code> (long listing) is what you'll actually type most days.</p></div>
+
+    <div class="terminal">
+      <div class="tbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">bash — daily file work</span><button class="copy" type="button">Copy</button></div>
+<pre><span class="p">$</span> <span class="c">pwd</span>
+<span class="o">/home/paul</span>
+<span class="p">$</span> <span class="c">ls <span class="f">-lh</span></span>
+<span class="o">-rw-r--r-- 1 paul paul  220 Jul 16 10:20 notes.txt
+drwxr-xr-x 2 paul paul 4.0K Jul 16 10:22 projects
+     ^perms  ^owner ^size ^last modified  ^name</span>
+<span class="p">$</span> <span class="c">mkdir reports</span>
+<span class="p">$</span> <span class="c">cp notes.txt reports/</span>
+<span class="p">$</span> <span class="c">mv notes.txt notes-old.txt</span>   <span class="o"># rename with mv</span>
+<span class="p">$</span> <span class="c">less /var/log/syslog</span>       <span class="o"># /word to search, q to quit</span></pre>
+    </div>
+
+    <table class="cmp-table"><tr><th>Command</th><th>What it does</th></tr>
+      <tr><td>less file</td><td>Page through a big file; forward &amp; reverse search</td></tr>
+      <tr><td>more file</td><td>Page through output/file, page by page</td></tr>
+      <tr><td>vi / vim / nano</td><td>Create &amp; edit a file (text editors)</td></tr>
+      <tr><td>cat file</td><td>Dump a small file to the terminal</td></tr>
+      <tr><td>mkdir folder</td><td>Make a directory</td></tr>
+      <tr><td>rm file / rm -r folder</td><td>Delete a file / a directory (permanent)</td></tr>
+      <tr><td>cp source dest</td><td>Copy a file (-r for folders)</td></tr>
+      <tr><td>mv file folder/</td><td>Move a file or directory</td></tr>
+      <tr><td>mv old new</td><td>Rename (same command as move)</td></tr>
+      <tr><td>pwd</td><td>Print present working directory (absolute path)</td></tr>
+      <tr><td>ls -l</td><td>List with permissions, owner, size, modified time</td></tr>
+    </table>
+
+    <div class="trick"><b>Memory trick</b><br><b>cat</b> = dump it all · <b>less</b> = scroll &amp; search (use for big files) · <b>cp</b> = <b>c</b>o<b>p</b>y · <b>mv</b> = <b>m</b>o<b>v</b>e <i>and</i> rename · <b>pwd</b> = <b>P</b>resent <b>W</b>orking <b>D</b>irectory.</div>
+
+    <div class="step"><span class="step-label">Summary</span><p><code>less</code>/<code>more</code>/<code>cat</code> read, <code>vi</code>/<code>nano</code> edit, <code>mkdir</code>/<code>rm</code> create and delete, <code>cp</code>/<code>mv</code> copy-move-rename, and <code>pwd</code>/<code>ls</code> orient you. Next: finding things and packing them up.</p></div>
+  </div>
+</section>
+
+<!-- ============ CH2 · SEARCH & COMPRESSION ============ -->
+<section class="chapter" id="ch2">
+  <div class="chapter-head"><span class="ch-num">02</span><div><h2>Searching &amp; Compression</h2><p class="ch-sub">find, grep, and the archive family — tar, gzip, gunzip, zip, unzip</p></div><div class="chapter-tools"><label class="markdone"><input type="checkbox" class="donebox" data-ch="ch2"> Mark complete</label><button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button></div></div>
+  <div class="chapter-body">
+
+    <div class="step"><span class="step-label">Problem &middot; needles and haystacks</span><p>A real server holds <b>thousands or even lakhs (hundreds of thousands) of files</b>. Two questions come up constantly: "where <i>is</i> that file?" and "which line inside this huge file mentions the error?" <code>find</code> answers the first, <code>grep</code> the second. Then, once you've found your data, you often need to <b>ship it or back it up</b> &mdash; that's compression.</p></div>
+
+    <div class="step"><span class="step-label">1 &middot; Find files — <code>find</code></span><p><code>find</code> searches a big server for a file. Its real power is <b>conditional searching</b>: not just by name, but by <b>time</b> (e.g. files older than two months) and by <b>size</b> (e.g. files larger than 10 GB). That's how you clean up a full disk.</p></div>
+
+    <div class="terminal">
+      <div class="tbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">bash — conditional find</span><button class="copy" type="button">Copy</button></div>
+<pre><span class="p">$</span> <span class="c">find /var <span class="f">-name</span> "*.log"</span>          <span class="o"># by name</span>
+<span class="p">$</span> <span class="c">find /data <span class="f">-mtime</span> +60</span>             <span class="o"># older than 2 months</span>
+<span class="p">$</span> <span class="c">find /data <span class="f">-size</span> +10G</span>              <span class="o"># bigger than 10 GB</span>
+<span class="p">$</span> <span class="c">find /data <span class="f">-size</span> +10G <span class="f">-mtime</span> +60</span>   <span class="o"># combine conditions</span></pre>
+    </div>
+
+    <div class="step"><span class="step-label">2 &middot; Search inside files — <code>grep</code></span><p><code>grep</code> finds a <b>pattern</b> &mdash; a word or string &mdash; inside files. It is heavily used in <b>log analysis</b> and <b>data analysis</b>: you have one enormous file and need every line mentioning a particular word. <code>grep "error" app.log</code>. Add <code>-i</code> to ignore case, <code>-r</code> to search a whole folder, <code>-n</code> for line numbers.</p></div>
+
+    <div class="diagram-wrap"><div class="flow"><div class="box">huge log file<br>500,000 lines</div><div class="arrow">&rarr;</div><div class="box yellow">grep "timeout"</div><div class="arrow">&rarr;</div><div class="box">just the 12<br>matching lines</div></div><div class="cap">Fig 2.1 — <code>grep</code> is the filter that turns an unreadable file into the handful of lines you care about.</div></div>
+
+    <div class="step"><span class="step-label">3 &middot; Why compress?</span><p>Two everyday reasons from the lecture. First, <b>transfer</b>: you have a very big file &mdash; 2 GB, 5 GB, 10 GB &mdash; and moving it as-is is slow. Second, <b>backup</b>: you need to preserve a lot of data on your server. In both cases you simply <b>archive</b> it (bundle many files into one) or <b>compress</b> it (make it smaller).</p></div>
+
+    <div class="step"><span class="step-label">4 &middot; The archive family — <code>tar</code>, <code>gzip</code>, <code>gunzip</code>, <code>zip</code>, <code>unzip</code></span><p><code>tar</code> ("tape archive") bundles a whole <b>folder</b> into one file, and with <code>-z</code> compresses it too: <code>tar -czf backup.tar.gz folder/</code> (<b>c</b>reate, g<b>z</b>ip, <b>f</b>ile). Reverse it with <code>tar -xzf backup.tar.gz</code> (e<b>x</b>tract). <code>gzip file</code> compresses a <b>single file</b>, <code>gunzip file.gz</code> decompresses it. <code>zip</code>/<code>unzip</code> handle the cross-platform <code>.zip</code> format.</p></div>
+
+    <div class="terminal">
+      <div class="tbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">bash — archive &amp; compress</span><button class="copy" type="button">Copy</button></div>
+<pre><span class="p">$</span> <span class="c">tar <span class="f">-czf</span> backup.tar.gz /data/reports/</span>  <span class="o"># folder -> one small file</span>
+<span class="p">$</span> <span class="c">tar <span class="f">-xzf</span> backup.tar.gz</span>                <span class="o"># extract it back</span>
+<span class="p">$</span> <span class="c">gzip bigfile.csv</span>                       <span class="o"># -> bigfile.csv.gz</span>
+<span class="p">$</span> <span class="c">gunzip bigfile.csv.gz</span>                  <span class="o"># -> bigfile.csv</span>
+<span class="p">$</span> <span class="c">zip <span class="f">-r</span> out.zip folder/  &amp;&amp;  unzip out.zip</span></pre>
+    </div>
+
+    <div class="correction"><b>Common mistake:</b> <code>gzip</code> compresses a <b>single file</b> only &mdash; it cannot bundle a folder. For a whole directory use <code>tar</code> (which is why <code>tar -czf</code> is so common). <span class="source-tag">common mistake</span></div>
+
+    <table class="cmp-table"><tr><th>Command</th><th>What it does</th></tr>
+      <tr><td>find path -name "*.log"</td><td>Find files by name on a big server</td></tr>
+      <tr><td>find path -mtime +60</td><td>Conditional search by time (older than 2 months)</td></tr>
+      <tr><td>find path -size +10G</td><td>Conditional search by size (bigger than 10 GB)</td></tr>
+      <tr><td>grep "word" file</td><td>Find a pattern/string inside a file (log analysis)</td></tr>
+      <tr><td>grep -rin "word" dir/</td><td>Recursive, case-insensitive, with line numbers</td></tr>
+      <tr><td>tar -czf out.tar.gz dir/</td><td>Archive + compress a folder</td></tr>
+      <tr><td>tar -xzf out.tar.gz</td><td>Extract an archive</td></tr>
+      <tr><td>gzip / gunzip file</td><td>Compress / decompress a single file</td></tr>
+      <tr><td>zip -r / unzip</td><td>Cross-platform .zip archives</td></tr>
+    </table>
+
+    <div class="trick"><b>Memory trick</b><br><b>find</b> = find the <b>file</b> · <b>grep</b> = find the <b>line inside</b> the file. <b>tar czf</b> = "<b>C</b>reate <b>Z</b>ipped <b>F</b>ile"; swap <b>c</b> for <b>x</b> to e<b>X</b>tract.</div>
+
+    <div class="note"><b>Forgot an option?</b> Every one of these commands has built-in help &mdash; <code>tar --help</code> or <code>man tar</code>. The lecturer notes these commands have dedicated deep-dive videos on the channel too. <span class="source-tag">from transcript</span></div>
+
+    <div class="step"><span class="step-label">Summary</span><p><code>find</code> locates files (by name, time, or size), <code>grep</code> locates lines inside them, and <code>tar</code>/<code>gzip</code>/<code>zip</code> pack data up for transfer or backup. That closes the basic file operations. Next: the network.</p></div>
+  </div>
+</section>
+
+<!-- ============ CH3 · NETWORKING ============ -->
+<section class="chapter" id="ch3">
+  <div class="chapter-head"><span class="ch-num">03</span><div><h2>Basic Networking Commands</h2><p class="ch-sub">Troubleshooting connectivity and pulling files across the wire</p></div><div class="chapter-tools"><label class="markdone"><input type="checkbox" class="donebox" data-ch="ch3"> Mark complete</label><button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button></div></div>
+  <div class="chapter-body">
+
+    <div class="step"><span class="step-label">Problem &middot; why this group matters</span><p>In a job the machine you work on is a <b>server</b> in a data centre or the cloud &mdash; not the laptop in front of you. So when an application misbehaves, half the questions are network questions: what is my IP, can I reach that server, is that port open, why won't this download? These commands are your basic <b>network troubleshooting</b> kit.</p></div>
+
+    <div class="analogy-card"><span class="ico">📮</span><div><b>Real-life analogy</b>The network is the postal system. Your <b>IP address</b> is your street address, <code>ping</code> is knocking to see if anyone's home, <code>netstat</code> is checking which of your own mailboxes are open, and <code>telnet</code> is checking whether one <i>specific</i> letterbox at that address accepts post.</div></div>
+
+    <div class="step"><span class="step-label">1 &middot; Download files — <code>curl</code> and <code>wget</code></span><p>Both let you <b>download a file from the internet</b>: you have a download link, you pass it to the command. <code>wget https://site.com/app.tar.gz</code> is the simple downloader. <code>curl</code> is <b>a bit more powerful</b> &mdash; it supports more protocols and HTTP methods like <b>GET and POST</b>, so you can send data <b>to and fro</b> from a server, not just pull files. That's why <code>curl</code> is the tool of choice for talking to APIs.</p></div>
+
+    <div class="step"><span class="step-label">2 &middot; My address — <code>ip</code> and <code>ifconfig</code></span><p>When you need the <b>IP-related information</b> of the server you're working on, or details about its <b>network interfaces</b>, use <code>ip addr</code> (modern) or <code>ifconfig</code> (older). Look for the <code>inet</code> line.</p></div>
+
+    <div class="step"><span class="step-label">3 &middot; Ports &amp; connections — <code>netstat</code> and <code>ss</code></span><p>Say you need details about <b>ports</b> or <b>already-established connections</b> &mdash; <code>netstat</code> is really helpful here. To check whether a port is open, <code>ss</code> does the same job with modern, faster tooling. The usual invocation is <code>netstat -tulpn</code> or <code>ss -tulpn</code>: <b>t</b>cp, <b>u</b>dp, <b>l</b>istening, <b>p</b>rocess, <b>n</b>umeric.</p></div>
+
+    <div class="step"><span class="step-label">4 &middot; Log into a server — <code>ssh</code> (and <code>ftp</code>)</span><p><code>ssh user@server</code> = <b>Secure Shell</b>, used to access a remote server. The key word is <b>secure</b>: the connection is <b>encrypted</b>. <b>FTP</b> (File Transfer Protocol) is also useful for moving files, though for anything sensitive you'd prefer its secure cousins (<code>sftp</code>/<code>scp</code>).</p></div>
+
+    <div class="step"><span class="step-label">5 &middot; Can I reach it — <code>ping</code> and <code>telnet</code></span><p>Both check connectivity from your server to a particular server. <code>ping</code> is the famous one: give it an IP and it tells you whether packets are getting through or being <b>lost</b>. <code>telnet</code> gives you a bit <b>more detail</b>: a server might be reachable overall, but is one <b>particular port</b> open and accessible on it? For that case <code>telnet host port</code> is more helpful.</p></div>
+
+    <div class="diagram-wrap">
+      <div class="travel-track"><div class="travel-dot">📦</div></div>
+      <div class="travel-ends"><span>your server</span><span>remote server</span></div>
+      <div class="cap">Fig 3.1 — <code>ping</code> asks "is the <b>host</b> alive?" · <code>telnet host port</code> asks "is that <b>one port</b> open?"</div>
+    </div>
+
+    <div class="terminal">
+      <div class="tbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">bash — network troubleshooting</span><button class="copy" type="button">Copy</button></div>
+<pre><span class="p">$</span> <span class="c">ip addr</span>                       <span class="o"># my IP &amp; interfaces</span>
+<span class="o">inet 192.168.1.20/24 ...</span>
+<span class="p">$</span> <span class="c">ping <span class="f">-c 3</span> 10.0.0.5</span>            <span class="o"># is host reachable?</span>
+<span class="o">3 packets transmitted, 3 received, 0% packet loss</span>
+<span class="p">$</span> <span class="c">telnet 10.0.0.5 3306</span>          <span class="o"># is THAT port open?</span>
+<span class="p">$</span> <span class="c">netstat <span class="f">-tulpn</span></span>              <span class="o"># my open ports + owners</span>
+<span class="p">$</span> <span class="c">ssh paul@10.0.0.5</span>             <span class="o"># encrypted remote login</span>
+<span class="p">$</span> <span class="c">wget https://site.com/app.tar.gz</span>
+<span class="p">$</span> <span class="c">curl <span class="f">-X POST</span> <span class="f">-d</span> '{"id":1}' https://api.site.com</span></pre>
+    </div>
+
+    <table class="cmp-table"><tr><th>Command</th><th>What it does</th></tr>
+      <tr><td>wget url</td><td>Download a file from the internet</td></tr>
+      <tr><td>curl url</td><td>More powerful: more protocols, GET/POST, APIs</td></tr>
+      <tr><td>ip addr / ifconfig</td><td>Your server's IP &amp; network interfaces</td></tr>
+      <tr><td>netstat -tulpn</td><td>Ports &amp; established connections</td></tr>
+      <tr><td>ss -tulpn</td><td>Modern equivalent; is a port open?</td></tr>
+      <tr><td>ssh user@host</td><td>Secure (encrypted) remote server access</td></tr>
+      <tr><td>ftp host</td><td>File Transfer Protocol</td></tr>
+      <tr><td>ping ip</td><td>Is the host reachable? any packet loss?</td></tr>
+      <tr><td>telnet host port</td><td>Is one particular port open on that host?</td></tr>
+    </table>
+
+    <div class="trick"><b>Memory trick</b><br><b>ping</b> = is the <b>house</b> there? · <b>telnet</b> = is that <b>one door</b> open? · <b>wget</b> = just <b>get</b> the file · <b>curl</b> = <b>converse</b> with the server (GET/POST).</div>
+
+    <div class="note"><b>Modern note:</b> <code>ifconfig</code> and <code>netstat</code> are the classics and still everywhere, but on newer distributions they are deprecated in favour of <code>ip</code> and <code>ss</code>. Learn both &mdash; you'll meet old servers. <span class="source-tag">added for clarity</span></div>
+
+    <div class="step"><span class="step-label">Summary</span><p><code>curl</code>/<code>wget</code> pull data, <code>ip</code>/<code>ifconfig</code> show your address, <code>netstat</code>/<code>ss</code> show ports, <code>ssh</code>/<code>ftp</code> reach other machines, and <code>ping</code>/<code>telnet</code> answer "is it reachable, and is that port open?" Next: the programs running on the box.</p></div>
+  </div>
+</section>
+
+<!-- ============ CH4 · PROCESSES ============ -->
+<section class="chapter" id="ch4">
+  <div class="chapter-head"><span class="ch-num">04</span><div><h2>Process Management Commands</h2><p class="ch-sub">Everything running is a process — see it, control it, stop it</p></div><div class="chapter-tools"><label class="markdone"><input type="checkbox" class="donebox" data-ch="ch4"> Mark complete</label><button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button></div></div>
+  <div class="chapter-body">
+
+    <div class="step"><span class="step-label">Prerequisite &middot; what is a process?</span><p>Whenever an <b>application</b> is running, a <b>script</b> is running, a <b>command</b> is running &mdash; <b>everything is all about processes</b>. Whatever work is happening on a Linux machine is happening in the form of a process. Linux gives each one a number called a <b>PID</b> (Process ID) so you can point at it precisely.</p></div>
+
+    <div class="analogy-card"><span class="ico">🏭</span><div><b>Real-life analogy</b>The CPU is a factory floor and each process is a worker with a badge number (the PID). <code>ps</code> is the supervisor's clipboard listing every worker on shift; <code>kill</code> is sending one of them home.</div></div>
+
+    <div class="step"><span class="step-label">1 &middot; Is it running? — <code>ps</code></span><p>Suppose you started an application. How do you check whether it is running or not? You <b>check its process</b> &mdash; and that's the <code>ps</code> command. Each process it lists has a <b>PID</b>. In practice you pipe it into <code>grep</code> to find the one you care about.</p></div>
+
+    <div class="step"><span class="step-label">2 &middot; Control it — <code>kill</code></span><p>Once you have the PID, you may need to control that process &mdash; <b>terminate</b> it or <b>stop</b> it. That's <code>kill PID</code>, which asks it to shut down gracefully. If it's frozen and ignores you, <code>kill -9 PID</code> forces it to stop.</p></div>
+
+    <div class="terminal">
+      <div class="tbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">bash — find it, then stop it</span><button class="copy" type="button">Copy</button></div>
+<pre><span class="p">$</span> <span class="c">ps <span class="f">-ef</span> | grep python</span>
+<span class="o">paul  4821  1  6.0  ...  python app.py
+      ^PID</span>
+<span class="p">$</span> <span class="c">kill 4821</span>        <span class="o"># graceful stop</span>
+<span class="p">$</span> <span class="c">kill <span class="f">-9</span> 4821</span>     <span class="o"># force, only if stuck</span></pre>
+    </div>
+
+    <div class="diagram-wrap"><div class="flow"><div class="box">ps -ef | grep app</div><div class="arrow">&rarr;</div><div class="box yellow">get the PID</div><div class="arrow">&rarr;</div><div class="box">kill PID</div><div class="arrow">&rarr;</div><div class="box" style="border-color:var(--red);">still stuck?<br>kill -9 PID</div></div><div class="cap">Fig 4.1 — The universal process workflow: find the PID, ask it to stop, force only as a last resort.</div></div>
+
+    <table class="cmp-table"><tr><th>Command</th><th>What it does</th></tr>
+      <tr><td>ps -ef</td><td>List all running processes with their PIDs</td></tr>
+      <tr><td>ps -ef | grep name</td><td>Check whether your app is running; get its PID</td></tr>
+      <tr><td>kill PID</td><td>Terminate/stop a process gracefully</td></tr>
+      <tr><td>kill -9 PID</td><td>Force-kill a frozen process (last resort)</td></tr>
+    </table>
+
+    <div class="trick"><b>Memory trick</b><br><b>-9 is the "no more Mr. Nice guy" signal.</b> Plain <code>kill</code> lets the program clean up; <code>-9</code> gives it no chance. Try plain first.</div>
+
+    <div class="note"><b>Related (covered in chapter 9):</b> <code>top</code> for a live process/CPU monitor, <code>nohup</code> to run a process in the background, and <code>nice</code> for priority. <span class="source-tag">added for clarity</span></div>
+
+    <div class="step"><span class="step-label">Summary</span><p>Everything running is a process with a PID. <code>ps</code> shows them, <code>kill</code> stops them. Next: the users who run them.</p></div>
+  </div>
+</section>
+
+<!-- ============ CH5 · USERS ============ -->
+<section class="chapter" id="ch5">
+  <div class="chapter-head"><span class="ch-num">05</span><div><h2>User Management Commands</h2><p class="ch-sub">Who exists, who you are, and how to borrow root power</p></div><div class="chapter-tools"><label class="markdone"><input type="checkbox" class="donebox" data-ch="ch5"> Mark complete</label><button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button></div></div>
+  <div class="chapter-body">
+
+    <div class="step"><span class="step-label">Prerequisite &middot; Linux is multi-user</span><p>Linux was built for many people to share one machine safely. Each person has a <b>user account</b> with a numeric <b>UID</b>, belongs to one or more <b>groups</b> (each with a <b>GID</b>), and one special account &mdash; <b>root</b> &mdash; can do absolutely anything.</p></div>
+
+    <div class="analogy-card"><span class="ico">🏢</span><div><b>Real-life analogy</b>An office building. Every employee has a keycard (user account), keycards belong to departments (groups), and <b>root</b> holds the master key. <code>sudo</code> is borrowing the master key for one door, one time, with your name in the log.</div></div>
+
+    <div class="step"><span class="step-label">1 &middot; Does this user exist? — <code>id</code></span><p>Say you need to check whether a user has been created on the server. Run <code>id username</code>. It tells you which <b>groups</b> that user is part of, plus their <b>UID</b> (user ID) and <b>GID</b> (group ID). All that information in one line.</p></div>
+
+    <div class="step"><span class="step-label">2 &middot; Who am I right now? — <code>whoami</code></span><p><code>whoami</code> prints the <b>presently logged-in user</b>. Simple, and constantly useful after you've been switching accounts.</p></div>
+
+    <div class="step"><span class="step-label">3 &middot; Change your password — <code>passwd</code></span><p>If you want to change your own password, run <code>passwd</code>. It asks for the current one, then the new one twice.</p></div>
+
+    <div class="step"><span class="step-label">4 &middot; Become another user — <code>su</code></span><p><code>su - username</code> = <b>switch user</b>. Use it when you need to perform some action <i>as</i> a different user. The <code>-</code> loads that user's full environment. <code>exit</code> brings you back.</p></div>
+
+    <div class="step"><span class="step-label">5 &middot; Borrow root power — <code>sudo</code></span><p>Separately, there's <code>sudo</code>: use it when you need to perform any action requiring <b>root privileges</b>. <code>sudo command</code> runs just that one command as the administrator, asking for <i>your</i> password and logging it &mdash; so you never have to stay logged in as root.</p></div>
+
+    <div class="terminal">
+      <div class="tbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">bash — identity &amp; privilege</span><button class="copy" type="button">Copy</button></div>
+<pre><span class="p">$</span> <span class="c">whoami</span>
+<span class="o">paul</span>
+<span class="p">$</span> <span class="c">id riya</span>
+<span class="o">uid=1001(riya) gid=1001(riya) groups=1001(riya),27(sudo)
+ ^UID          ^GID           ^groups she belongs to</span>
+<span class="p">$</span> <span class="c">passwd</span>                    <span class="o"># change my own password</span>
+<span class="p">$</span> <span class="c">su - riya</span>                 <span class="o"># switch user (exit to return)</span>
+<span class="p">$</span> <span class="c">sudo systemctl restart nginx</span>  <span class="o"># one command as root</span></pre>
+    </div>
+
+    <table class="cmp-table"><tr><th>Command</th><th>What it does</th></tr>
+      <tr><td>id username</td><td>Does the user exist? Their UID, GID &amp; groups</td></tr>
+      <tr><td>whoami</td><td>The presently logged-in user</td></tr>
+      <tr><td>passwd</td><td>Change your own password</td></tr>
+      <tr><td>su - username</td><td>Switch to another user (exit to return)</td></tr>
+      <tr><td>sudo command</td><td>Run one command with root privileges</td></tr>
+    </table>
+
+    <div class="trick"><b>Memory trick</b><br><b>su</b> = <b>s</b>witch <b>u</b>ser (become someone, whole session). <b>sudo</b> = <b>s</b>witch <b>u</b>ser and <b>do</b> one thing (borrow power for a single command).</div>
+
+    <div class="step"><span class="step-label">Summary</span><p><code>id</code> checks a user exists and shows their groups/UID/GID, <code>whoami</code> tells you who you are, <code>passwd</code> changes your password, and <code>su</code>/<code>sudo</code> switch user or borrow root. Next: installing the software they need.</p></div>
+  </div>
+</section>
+
+<!-- ============ CH6 · APPLICATIONS ============ -->
+<section class="chapter" id="ch6">
+  <div class="chapter-head"><span class="ch-num">06</span><div><h2>Application Management Commands</h2><p class="ch-sub">Installing packages and managing services</p></div><div class="chapter-tools"><label class="markdone"><input type="checkbox" class="donebox" data-ch="ch6"> Mark complete</label><button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button></div></div>
+  <div class="chapter-body">
+
+    <div class="step"><span class="step-label">Problem &middot; a concrete scenario</span><p>The lecture's example: your application uses a <b>database</b>, so you need to install <b>SQL</b> on the server. What do you do? On Linux you don't download an installer &mdash; you use a <b>package manager</b>, which fetches the software from a trusted repository along with everything it depends on.</p></div>
+
+    <div class="analogy-card"><span class="ico">📦</span><div><b>Real-life analogy</b>A package manager is a warehouse with a great catalogue. Ask for "mysql-server" and it delivers it <i>plus</i> every part it needs, remembers your order, and can take it all back cleanly (uninstall) without leaving a mess.</div></div>
+
+    <div class="step"><span class="step-label">1 &middot; Install packages — <code>yum</code>, <code>dnf</code>, <code>apt</code></span><p>Which one you type depends on your Linux <b>distribution</b>. <code>yum</code> and its successor <code>dnf</code> are for <b>Red Hat based</b> systems (RHEL, CentOS, Fedora). <code>apt</code> is for <b>Ubuntu</b>/Debian. Using these you install any software or package. All of them need <code>sudo</code> &mdash; installing software is an admin action.</p></div>
+
+    <div class="terminal">
+      <div class="tbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">bash — install SQL, both families</span><button class="copy" type="button">Copy</button></div>
+<pre><span class="o"># Ubuntu / Debian</span>
+<span class="p">$</span> <span class="c">sudo apt update</span>
+<span class="p">$</span> <span class="c">sudo apt install mysql-server</span>
+
+<span class="o"># Red Hat / CentOS / Fedora</span>
+<span class="p">$</span> <span class="c">sudo yum install mysql-server</span>
+<span class="p">$</span> <span class="c">sudo dnf install mysql-server</span>    <span class="o"># dnf = modern yum</span></pre>
+    </div>
+
+    <div class="step"><span class="step-label">2 &middot; Which binary am I actually running? — <code>which</code></span><p>Say you're using some command and you want to know, <b>behind the scenes</b>, which <b>binary executable</b> it's actually running. <code>which command</code> tells you the exact path. Useful when two versions of a tool are installed and you're not sure which one you get.</p></div>
+
+    <div class="step"><span class="step-label">3 &middot; Prerequisite &middot; what is a service?</span><p>As you've seen on Windows too, many applications run <b>as a service</b> &mdash; quietly in the <b>background</b>, started automatically. Good examples: <b>SQL</b>, a <b>web server</b>, or the <b>firewall</b>. They're not something you open a window for; they just run.</p></div>
+
+    <div class="step"><span class="step-label">4 &middot; Manage services — <code>systemctl</code></span><p>To manage those services, use <code>systemctl</code>: <b>start</b>, <b>stop</b>, <b>restart</b>, check <b>status</b>, view <b>logs</b>, and <b>enable</b> them (so they start automatically on boot).</p></div>
+
+    <div class="terminal">
+      <div class="tbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">bash — services &amp; binaries</span><button class="copy" type="button">Copy</button></div>
+<pre><span class="p">$</span> <span class="c">which python3</span>
+<span class="o">/usr/bin/python3</span>
+<span class="p">$</span> <span class="c">sudo systemctl status  mysql</span>   <span class="o"># is it running?</span>
+<span class="p">$</span> <span class="c">sudo systemctl start   mysql</span>
+<span class="p">$</span> <span class="c">sudo systemctl stop    mysql</span>
+<span class="p">$</span> <span class="c">sudo systemctl restart mysql</span>
+<span class="p">$</span> <span class="c">sudo systemctl enable  mysql</span>   <span class="o"># auto-start on boot</span></pre>
+    </div>
+
+    <table class="cmp-table"><tr><th>Command</th><th>What it does</th></tr>
+      <tr><td>sudo yum install X</td><td>Install a package (Red Hat / CentOS)</td></tr>
+      <tr><td>sudo dnf install X</td><td>Install a package (modern Red Hat / Fedora)</td></tr>
+      <tr><td>sudo apt install X</td><td>Install a package (Ubuntu / Debian)</td></tr>
+      <tr><td>which command</td><td>Which binary executable is behind this command</td></tr>
+      <tr><td>systemctl status X</td><td>Is the service running? recent logs</td></tr>
+      <tr><td>systemctl start/stop X</td><td>Start / stop a service</td></tr>
+      <tr><td>systemctl restart X</td><td>Restart a service</td></tr>
+      <tr><td>systemctl enable X</td><td>Start it automatically on boot</td></tr>
+    </table>
+
+    <div class="trick"><b>Memory trick</b><br><b>Red hat wears a YUM/DNF hat · Ubuntu is APT.</b> And every service verb is the obvious English word: start, stop, restart, status, enable.</div>
+
+    <div class="step"><span class="step-label">Summary</span><p><code>yum</code>/<code>dnf</code>/<code>apt</code> install software depending on your distro, <code>which</code> reveals the real binary, and <code>systemctl</code> manages background services. Next: the variables those applications read.</p></div>
+  </div>
+</section>
+
+<!-- ============ CH7 · ENVIRONMENT VARIABLES ============ -->
+<section class="chapter" id="ch7">
+  <div class="chapter-head"><span class="ch-num">07</span><div><h2>Environment Variable Commands</h2><p class="ch-sub">Basic, but many applications refuse to run without them</p></div><div class="chapter-tools"><label class="markdone"><input type="checkbox" class="donebox" data-ch="ch7"> Mark complete</label><button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button></div></div>
+  <div class="chapter-body">
+
+    <div class="step"><span class="step-label">Problem &middot; why applications need them</span><p>These are fairly basic things, but plenty of applications <b>require</b> environment variables to work. The typical example from the lecture: some <b>Java-based applications</b> need <code>JAVA_HOME</code> to be set, or they simply won't start. An <b>environment variable</b> is just a named value that the shell &mdash; and every program you launch from it &mdash; can read.</p></div>
+
+    <div class="analogy-card"><span class="ico">🗒️</span><div><b>Real-life analogy</b>Environment variables are settings sticky-notes on a shared office fridge. Any program that walks up can read "the Java kit is in cupboard 3" (<code>JAVA_HOME</code>) without being told each time. Change the note and everyone who reads it afterwards gets the new value.</div></div>
+
+    <div class="step"><span class="step-label">1 &middot; See what's already set — <code>env</code> and <code>printenv</code></span><p>The two starting commands. With <code>env</code> or <code>printenv</code> you can see whichever environment variables are <b>currently set</b> and already existing on the system. To read just one: <code>printenv JAVA_HOME</code> or <code>echo $JAVA_HOME</code> &mdash; the <code>$</code> means "give me the value of".</p></div>
+
+    <div class="step"><span class="step-label">2 &middot; Set your own — <code>export</code> and <code>source</code></span><p>If you want to set your own, use <code>export NAME=value</code>. That makes it available to programs you start afterwards. But it disappears when you close the terminal &mdash; so to make it <b>permanent</b>, put the <code>export</code> line into your startup file (<code>~/.bashrc</code>) and run <code>source ~/.bashrc</code> to reload it into the current session without logging out.</p></div>
+
+    <div class="terminal">
+      <div class="tbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">bash — the JAVA_HOME example</span><button class="copy" type="button">Copy</button></div>
+<pre><span class="p">$</span> <span class="c">printenv | head</span>              <span class="o"># what's already set?</span>
+<span class="o">HOME=/home/paul
+USER=paul
+PATH=/usr/local/bin:/usr/bin:/bin</span>
+<span class="p">$</span> <span class="c">export JAVA_HOME=/usr/lib/jvm/java-17</span>   <span class="o"># this session only</span>
+<span class="p">$</span> <span class="c">echo $JAVA_HOME</span>
+<span class="o">/usr/lib/jvm/java-17</span>
+<span class="p">$</span> <span class="c">echo 'export JAVA_HOME=/usr/lib/jvm/java-17' &gt;&gt; ~/.bashrc</span>
+<span class="p">$</span> <span class="c">source ~/.bashrc</span>             <span class="o"># reload — now it's permanent</span></pre>
+    </div>
+
+    <div class="diagram-wrap"><div class="flow"><div class="box">export VAR=val</div><div class="arrow">&rarr;</div><div class="box yellow">works now,<br>dies on logout</div><div style="width:24px;"></div><div class="box">line in ~/.bashrc</div><div class="arrow">&rarr;</div><div class="box yellow">source ~/.bashrc<br>= permanent</div></div><div class="cap">Fig 7.1 — <code>export</code> is temporary. <code>~/.bashrc</code> + <code>source</code> is how it survives a logout.</div></div>
+
+    <div class="correction"><b>Watch the spaces:</b> it must be <code>NAME=value</code> with <b>no spaces</b> around the <code>=</code>. Writing <code>NAME = value</code> makes the shell think <code>NAME</code> is a command &mdash; a classic beginner error. <span class="source-tag">common mistake</span></div>
+
+    <table class="cmp-table"><tr><th>Command</th><th>What it does</th></tr>
+      <tr><td>env</td><td>Show all currently set environment variables</td></tr>
+      <tr><td>printenv</td><td>Same; or one variable: printenv PATH</td></tr>
+      <tr><td>echo $VAR</td><td>Print the value of one variable</td></tr>
+      <tr><td>export NAME=value</td><td>Set a variable for this shell &amp; its children</td></tr>
+      <tr><td>source ~/.bashrc</td><td>Reload the startup file (make it permanent + live)</td></tr>
+    </table>
+
+    <div class="trick"><b>Memory trick</b><br><b>$</b> means "give me the <b>value</b>". <b>export</b> = push it out to child programs. <b>source</b> = suck the file back in, now.</div>
+
+    <div class="step"><span class="step-label">Summary</span><p><code>env</code>/<code>printenv</code> show what's set, <code>export</code> sets your own, and <code>~/.bashrc</code> + <code>source</code> makes it permanent. <code>JAVA_HOME</code> is the classic case. Next: the console itself.</p></div>
+  </div>
+</section>
+
+<!-- ============ CH8 · CONSOLE & OUTPUT ============ -->
+<section class="chapter" id="ch8">
+  <div class="chapter-head"><span class="ch-num">08</span><div><h2>Console, Output &amp; System Control</h2><p class="ch-sub">cat, clear, echo, redirection — plus poweroff &amp; reboot</p></div><div class="chapter-tools"><label class="markdone"><input type="checkbox" class="donebox" data-ch="ch8"> Mark complete</label><button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button></div></div>
+  <div class="chapter-body">
+
+    <div class="step"><span class="step-label">1 &middot; Taking input — <code>cat</code></span><p><code>cat</code> appears again here, in its "console" role: it's like <b>taking the inputs</b> &mdash; reading content in and writing it out to the terminal.</p></div>
+
+    <div class="step"><span class="step-label">2 &middot; Tidy the screen — <code>clear</code></span><p><code>clear</code> wipes your terminal clean. Shortcut: <b>Ctrl + L</b>, no command needed.</p></div>
+
+    <div class="step"><span class="step-label">3 &middot; Print anything — <code>echo</code></span><p><code>echo</code> is simple: it prints whatever you want to the terminal. You'll use it constantly <b>inside scripts</b> too, to report what's happening. <code>echo "Backup finished"</code>.</p></div>
+
+    <div class="step"><span class="step-label">4 &middot; Redirect into a file — <code>&gt;</code> and <code>&gt;&gt;</code></span><p>Beyond printing, if you have a small word or string you want to <b>redirect into a file</b>, you can do that with <code>echo</code> too. <code>echo "hello" &gt; file.txt</code> writes it (<b>overwriting</b> the file), while <code>echo "hello" &gt;&gt; file.txt</code> <b>appends</b> to the end.</p></div>
+
+    <div class="terminal">
+      <div class="tbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">bash — echo &amp; redirection</span><button class="copy" type="button">Copy</button></div>
+<pre><span class="p">$</span> <span class="c">echo "Backup finished"</span>
+<span class="o">Backup finished</span>
+<span class="p">$</span> <span class="c">echo "hello" &gt; notes.txt</span>    <span class="o"># write (OVERWRITES the file)</span>
+<span class="p">$</span> <span class="c">echo "world" &gt;&gt; notes.txt</span>   <span class="o"># append (adds to the end)</span>
+<span class="p">$</span> <span class="c">cat notes.txt</span>
+<span class="o">hello
+world</span>
+<span class="p">$</span> <span class="c">clear</span>                        <span class="o"># or press Ctrl+L</span></pre>
+    </div>
+
+    <div class="correction"><b>One <code>&gt;</code> versus two <code>&gt;&gt;</code>:</b> a single <code>&gt;</code> <b>wipes</b> the file and writes fresh. Two <code>&gt;&gt;</code> append. Using <code>&gt;</code> when you meant <code>&gt;&gt;</code> silently destroys the old contents. <span class="source-tag">common mistake</span></div>
+
+    <div class="step"><span class="step-label">5 &middot; System control — <code>poweroff</code>, <code>reboot</code></span><p>The lecturer is honest here: these are <b>not frequently used</b> on the job &mdash; you rarely restart a production server &mdash; but they're mentioned for completeness. <code>sudo reboot</code> restarts the machine, <code>sudo poweroff</code> shuts it down.</p></div>
+
+    <table class="cmp-table"><tr><th>Command</th><th>What it does</th></tr>
+      <tr><td>cat file</td><td>Read content in / print it out</td></tr>
+      <tr><td>clear (Ctrl+L)</td><td>Clear the terminal screen</td></tr>
+      <tr><td>echo "text"</td><td>Print to terminal; heavily used in scripts</td></tr>
+      <tr><td>echo "x" &gt; file</td><td>Redirect into a file (overwrite)</td></tr>
+      <tr><td>echo "x" &gt;&gt; file</td><td>Redirect into a file (append)</td></tr>
+      <tr><td>sudo reboot</td><td>Restart the system (rarely used in prod)</td></tr>
+      <tr><td>sudo poweroff</td><td>Shut the system down</td></tr>
+    </table>
+
+    <div class="step"><span class="step-label">Summary</span><p><code>cat</code>/<code>echo</code> move text in and out, <code>&gt;</code>/<code>&gt;&gt;</code> redirect it into files, <code>clear</code> tidies up, and <code>reboot</code>/<code>poweroff</code> exist but are rare in a job. Next: the leftovers that are still genuinely useful.</p></div>
+  </div>
+</section>
+
+<!-- ============ CH9 · OTHER USEFUL ============ -->
+<section class="chapter" id="ch9">
+  <div class="chapter-head"><span class="ch-num">09</span><div><h2>Other Useful Commands</h2><p class="ch-sub">Not top-frequency, but still genuinely useful on the job</p></div><div class="chapter-tools"><label class="markdone"><input type="checkbox" class="donebox" data-ch="ch9"> Mark complete</label><button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button></div></div>
+  <div class="chapter-body">
+
+    <div class="step"><span class="step-label">Framing &middot; what this group is</span><p>Everything so far was chosen for <b>frequency</b>. That doesn't mean you never use anything else &mdash; this final group collects the commands that are still very useful, just less constant.</p></div>
+
+    <div class="step"><span class="step-label">1 &middot; Memory &amp; disk — <code>free</code>, <code>du</code>, <code>df</code></span><p>The lecture's scenario: you have an application on a server and you're <b>testing</b> it. One part of testing is asking <b>how much memory is that application consuming?</b> For RAM, use <code>free -h</code>. <code>du</code> = <b>disk utilisation</b>, the space used by one particular directory or file (<code>du -sh /var/log</code>). <code>df -h</code> shows how full each filesystem/partition is overall.</p></div>
+
+    <div class="terminal">
+      <div class="tbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">bash — resources</span><button class="copy" type="button">Copy</button></div>
+<pre><span class="p">$</span> <span class="c">free <span class="f">-h</span></span>                <span class="o"># RAM: total / used / free</span>
+<span class="o">              total   used   free
+Mem:           7.7Gi  3.1Gi  2.2Gi</span>
+<span class="p">$</span> <span class="c">du <span class="f">-sh</span> /var/log</span>       <span class="o"># size of ONE folder</span>
+<span class="o">1.8G  /var/log</span>
+<span class="p">$</span> <span class="c">df <span class="f">-h</span></span>                  <span class="o"># whole filesystem, use%</span>
+<span class="o">/dev/sda1   40G  26G  14G  66%  /</span></pre>
+    </div>
+
+    <div class="step"><span class="step-label">2 &middot; Permissions — <code>chmod</code></span><p>Why it matters: when you work on a server you're <b>mostly working in a team</b>, with many users created on it. To work on a file, you must have the <b>proper permission</b>. <code>chmod</code> is what you use to <b>change</b> or <b>maintain</b> those permissions &mdash; for example <code>chmod +x script.sh</code> to make a script executable.</p></div>
+
+    <div class="step"><span class="step-label">3 &middot; Text processing — <code>awk</code>, <code>cut</code>, <code>sed</code></span><p>Sometimes you're doing <b>data analysis</b> or <b>log analysis</b> and need one particular piece of the data. These three carve text up: <code>awk</code> prints chosen columns, <code>cut</code> slices by character or field, <code>sed</code> finds and replaces. You also use them heavily in <b>scripting</b>.</p></div>
+
+    <div class="terminal">
+      <div class="tbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">bash — carve up text</span><button class="copy" type="button">Copy</button></div>
+<pre><span class="p">$</span> <span class="c">awk <span class="f">-F,</span> '{print $2}' data.csv</span>   <span class="o"># 2nd column of a CSV</span>
+<span class="p">$</span> <span class="c">cut <span class="f">-d:</span> <span class="f">-f1</span> /etc/passwd</span>        <span class="o"># 1st field, ':' separated</span>
+<span class="p">$</span> <span class="c">sed 's/error/ERROR/g' app.log</span>    <span class="o"># find &amp; replace all</span></pre>
+    </div>
+
+    <div class="step"><span class="step-label">4 &middot; Links — <code>ln</code></span><p><code>ln</code> creates links: <b>hard links</b> and <b>soft links</b> (symbolic links). A soft link is like a shortcut pointing at the real file: <code>ln -s /path/to/real /path/to/shortcut</code>.</p></div>
+
+    <div class="step"><span class="step-label">5 &middot; Background jobs — <code>nohup</code></span><p><code>nohup command &amp;</code> runs a process in the <b>background</b> &mdash; and keeps it running even after you log out. Essential for long tasks on a remote server.</p></div>
+
+    <div class="step"><span class="step-label">6 &middot; Automation — <code>crontab</code></span><p>Whatever task you have &mdash; a script, say &mdash; that you want to <b>automate</b>, you use <code>crontab</code> to create a <b>job</b> that runs it on a schedule. <code>crontab -e</code> edits your schedule, <code>crontab -l</code> lists it.</p></div>
+
+    <div class="terminal">
+      <div class="tbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="ttl">bash — links, background, schedule</span><button class="copy" type="button">Copy</button></div>
+<pre><span class="p">$</span> <span class="c">ln <span class="f">-s</span> /opt/app/v2 /opt/app/current</span>   <span class="o"># soft link (shortcut)</span>
+<span class="p">$</span> <span class="c">nohup ./long-backup.sh &amp;</span>              <span class="o"># survives logout</span>
+<span class="p">$</span> <span class="c">crontab <span class="f">-e</span></span>                           <span class="o"># edit scheduled jobs</span>
+<span class="o">0 2 * * *  /home/paul/backup.sh          # run daily at 02:00</span>
+<span class="p">$</span> <span class="c">crontab <span class="f">-l</span></span>                           <span class="o"># list my jobs</span></pre>
+    </div>
+
+    <div class="step"><span class="step-label">7 &middot; Create a file — <code>touch</code></span><p>The lecturer flags this one as accidentally left out of the earlier group: <code>touch filename</code> creates a new (empty) file. It belongs with chapter 1, but it's here so you don't miss it.</p></div>
+
+    <div class="step"><span class="step-label">8 &middot; What did I type? — <code>history</code></span><p>A great many commands have already been executed in your session. When you want to see an <b>old command</b> &mdash; which ones did I run? &mdash; use <code>history</code>. Combine it with grep: <code>history | grep ssh</code>.</p></div>
+
+    <table class="cmp-table"><tr><th>Command</th><th>What it does</th></tr>
+      <tr><td>free -h</td><td>RAM: how much memory is the app consuming?</td></tr>
+      <tr><td>du -sh folder</td><td>Disk utilisation of one directory/file</td></tr>
+      <tr><td>df -h</td><td>Filesystem/partition space overall</td></tr>
+      <tr><td>chmod +x file</td><td>Change/maintain permissions (team servers)</td></tr>
+      <tr><td>awk -F, '{print $2}'</td><td>Print a chosen column</td></tr>
+      <tr><td>cut -d: -f1</td><td>Slice by field or character</td></tr>
+      <tr><td>sed 's/a/b/g'</td><td>Find &amp; replace in text</td></tr>
+      <tr><td>ln -s target link</td><td>Create a soft (symbolic) link</td></tr>
+      <tr><td>nohup command &amp;</td><td>Run in background, survive logout</td></tr>
+      <tr><td>crontab -e / -l</td><td>Schedule a job / list jobs</td></tr>
+      <tr><td>touch file</td><td>Create a new empty file</td></tr>
+      <tr><td>history</td><td>See previously executed commands</td></tr>
+    </table>
+
+    <div class="note"><b>Want to go deeper?</b> The lecturer points out that every one of these commands has a <b>dedicated video</b> on the channel &mdash; use the channel's search box (e.g. search "find" to get "find command — 12+ use cases with examples", or search "grep"). <span class="source-tag">from transcript</span></div>
+
+    <div class="step"><span class="step-label">Summary</span><p><code>free</code>/<code>du</code>/<code>df</code> watch resources, <code>chmod</code> controls access on shared servers, <code>awk</code>/<code>cut</code>/<code>sed</code> carve up text, <code>ln</code> links, <code>nohup</code> backgrounds, <code>crontab</code> automates, <code>touch</code> creates and <code>history</code> recalls. Head to the Revision Kit.</p></div>
+  </div>
+</section>
+
+<!-- ================= REVISION ================= -->
+<section class="chapter" id="revision">
+  <div class="chapter-head"><span class="ch-num">★</span><div><h2>Revision Kit</h2><p class="ch-sub">Key points, interview Q&amp;A, quiz, flashcards, mistakes &amp; a one-page cheat sheet</p></div><div class="chapter-tools"><button class="collapse-toggle" aria-label="Collapse chapter">&minus;</button></div></div>
+  <div class="chapter-body">
+
+    <h3>10 Key Points</h3>
+    <ul class="keypoints">
+      <li><span class="kn">1</span>Commands are grouped by <b>task</b>, not alphabet &mdash; that's how you recall them under pressure.</li>
+      <li><span class="kn">2</span><code>less</code> beats <code>more</code> for big files because of easy <b>forward and reverse</b> search.</li>
+      <li><span class="kn">3</span><code>mv</code> does double duty: <b>move</b> and <b>rename</b>. There's no separate rename command.</li>
+      <li><span class="kn">4</span><code>find</code> finds <b>files</b> (by name, time, size); <code>grep</code> finds <b>lines inside</b> files &mdash; the log-analysis workhorse.</li>
+      <li><span class="kn">5</span><code>gzip</code> compresses a single file; use <code>tar -czf</code> for a whole folder.</li>
+      <li><span class="kn">6</span><code>ping</code> asks "is the host up?"; <code>telnet host port</code> asks "is that <b>port</b> open?"</li>
+      <li><span class="kn">7</span>Everything running is a <b>process</b> with a PID: <code>ps</code> to find it, <code>kill</code> to stop it.</li>
+      <li><span class="kn">8</span><code>su</code> switches user for a session; <code>sudo</code> borrows root for <b>one command</b>.</li>
+      <li><span class="kn">9</span><code>yum</code>/<code>dnf</code> = Red Hat, <code>apt</code> = Ubuntu. <code>systemctl</code> manages background <b>services</b>.</li>
+      <li><span class="kn">10</span><code>export</code> is temporary; <code>~/.bashrc</code> + <code>source</code> makes a variable (like <code>JAVA_HOME</code>) permanent.</li>
+    </ul>
+
+    <h3 style="margin-top:34px;">5 Interview Questions</h3>
+    <details class="qa"><summary>What's the difference between <code>ping</code> and <code>telnet</code> when troubleshooting?</summary><div class="ans"><code>ping</code> tests whether the <b>host</b> is reachable at all and whether packets are being lost. <code>telnet host port</code> goes one level deeper: the server may be perfectly reachable, but you need to know whether one <b>particular port</b> (say 3306 for MySQL) is open and accessible. So <code>ping</code> for host connectivity, <code>telnet</code> for port connectivity.</div></details>
+    <details class="qa"><summary>Difference between <code>curl</code> and <code>wget</code>?</summary><div class="ans">Both download files from the internet given a link. <code>curl</code> is more powerful: it supports more protocols and HTTP methods like GET and POST, so you can send data <b>to and fro</b> from a server. That makes <code>curl</code> the tool for talking to APIs, while <code>wget</code> is the straightforward file downloader.</div></details>
+    <details class="qa"><summary>How do you check if your application is running, and stop it?</summary><div class="ans">Everything running is a process. Use <code>ps -ef | grep appname</code> to check whether it's running and grab its <b>PID</b>. Then <code>kill PID</code> to terminate it gracefully; if it's frozen, <code>kill -9 PID</code> forces it. Force-killing skips cleanup, so it's a last resort.</div></details>
+    <details class="qa"><summary>An application needs <code>JAVA_HOME</code>. How do you set it permanently?</summary><div class="ans">Check what exists with <code>env</code>/<code>printenv</code>. Set it with <code>export JAVA_HOME=/path/to/jdk</code> &mdash; but that dies when the terminal closes. To make it permanent, add that same <code>export</code> line to <code>~/.bashrc</code>, then run <code>source ~/.bashrc</code> to load it into the current session without logging out.</div></details>
+    <details class="qa"><summary>How do you find files older than two months or larger than 10 GB?</summary><div class="ans">That's <code>find</code>'s conditional searching. <code>find /data -mtime +60</code> finds files modified more than 60 days ago; <code>find /data -size +10G</code> finds files bigger than 10 GB. You can combine them: <code>find /data -size +10G -mtime +60</code>. This is the standard way to hunt down what's filling a disk.</div></details>
+
+    <h3 style="margin-top:34px;">Quick Quiz</h3>
+    <div class="quiz-q"><p class="qtext">1. Which command is preferred for reading big files with forward &amp; reverse search?</p><div class="quiz-opts"><button class="quiz-opt" data-correct="true">less</button><button class="quiz-opt" data-correct="false">cat</button><button class="quiz-opt" data-correct="false">echo</button></div><div class="quiz-feedback"></div></div>
+    <div class="quiz-q"><p class="qtext">2. How do you rename a file in Linux?</p><div class="quiz-opts"><button class="quiz-opt" data-correct="true">mv old new</button><button class="quiz-opt" data-correct="false">rename old new</button><button class="quiz-opt" data-correct="false">cp old new</button></div><div class="quiz-feedback"></div></div>
+    <div class="quiz-q"><p class="qtext">3. A server is reachable, but is port 3306 open on it? Which command?</p><div class="quiz-opts"><button class="quiz-opt" data-correct="true">telnet 10.0.0.5 3306</button><button class="quiz-opt" data-correct="false">ping 10.0.0.5</button><button class="quiz-opt" data-correct="false">wget 10.0.0.5</button></div><div class="quiz-feedback"></div></div>
+    <div class="quiz-q"><p class="qtext">4. Which shows the UID, GID and groups of a user?</p><div class="quiz-opts"><button class="quiz-opt" data-correct="true">id username</button><button class="quiz-opt" data-correct="false">whoami</button><button class="quiz-opt" data-correct="false">passwd</button></div><div class="quiz-feedback"></div></div>
+    <div class="quiz-q"><p class="qtext">5. On a Red Hat / CentOS server, how do you install a package?</p><div class="quiz-opts"><button class="quiz-opt" data-correct="true">sudo yum install X</button><button class="quiz-opt" data-correct="false">sudo apt install X</button><button class="quiz-opt" data-correct="false">sudo systemctl install X</button></div><div class="quiz-feedback"></div></div>
+    <div class="quiz-q"><p class="qtext">6. Which finds files larger than 10 GB?</p><div class="quiz-opts"><button class="quiz-opt" data-correct="true">find /data -size +10G</button><button class="quiz-opt" data-correct="false">grep -size 10G /data</button><button class="quiz-opt" data-correct="false">du -size +10G</button></div><div class="quiz-feedback"></div></div>
+    <div class="quiz-q"><p class="qtext">7. Which command schedules a script to run automatically?</p><div class="quiz-opts"><button class="quiz-opt" data-correct="true">crontab -e</button><button class="quiz-opt" data-correct="false">nohup script.sh &amp;</button><button class="quiz-opt" data-correct="false">systemctl script.sh</button></div><div class="quiz-feedback"></div></div>
+
+    <h3 style="margin-top:34px;">Flashcards <span style="font-size:12px; color:var(--ink-faint); font-family:var(--mono);">(click to flip)</span></h3>
+    <div class="flash-grid">
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">less vs more</div><div class="flashcard-face flashcard-back">Both page; less adds easy forward &amp; reverse search.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">mv</div><div class="flashcard-face flashcard-back">Move a file — and also the way to rename.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">find vs grep</div><div class="flashcard-face flashcard-back">find the file (name/time/size) · grep the line inside it.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">tar -czf / -xzf</div><div class="flashcard-face flashcard-back">Compress a folder / extract it. gzip = single file only.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">ping vs telnet</div><div class="flashcard-face flashcard-back">Host reachable? · Is that one port open?</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">ps · kill</div><div class="flashcard-face flashcard-back">Find the PID · terminate it (-9 forces).</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">id · whoami</div><div class="flashcard-face flashcard-back">User's UID/GID/groups · presently logged-in user.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">yum/dnf vs apt</div><div class="flashcard-face flashcard-back">Red Hat/CentOS vs Ubuntu package managers.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">systemctl</div><div class="flashcard-face flashcard-back">start/stop/restart/status/enable a background service.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">export + source</div><div class="flashcard-face flashcard-back">Set a var · reload ~/.bashrc to make it permanent.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">free · du · df</div><div class="flashcard-face flashcard-back">RAM · size of one folder · whole filesystem.</div></div></div>
+      <div class="flashcard"><div class="flashcard-inner"><div class="flashcard-face flashcard-front">nohup · crontab</div><div class="flashcard-face flashcard-back">Background, survives logout · schedule a job.</div></div></div>
+    </div>
+
+    <h3 style="margin-top:34px;">Common Mistakes</h3>
+    <div class="mistake-row"><span class="x">✗</span><span>"<code>gzip</code> can compress a folder."</span></div>
+    <div class="mistake-row"><span class="ok">✓</span><span><code>gzip</code> is single-file only; use <code>tar -czf</code> for a directory.</span></div>
+    <div class="mistake-row"><span class="x">✗</span><span>"<code>ping</code> tells me the port is open."</span></div>
+    <div class="mistake-row"><span class="ok">✓</span><span><code>ping</code> only proves the host is reachable; use <code>telnet host port</code> for the port.</span></div>
+    <div class="mistake-row"><span class="x">✗</span><span>"<code>NAME = value</code> sets a variable."</span></div>
+    <div class="mistake-row"><span class="ok">✓</span><span>No spaces around <code>=</code> &mdash; it must be <code>NAME=value</code>.</span></div>
+    <div class="mistake-row"><span class="x">✗</span><span>"<code>echo x &gt; file</code> adds a line to the file."</span></div>
+    <div class="mistake-row"><span class="ok">✓</span><span>Single <code>&gt;</code> overwrites the whole file; <code>&gt;&gt;</code> appends.</span></div>
+    <div class="mistake-row"><span class="x">✗</span><span>"<code>rm</code> moves files to a trash bin."</span></div>
+    <div class="mistake-row"><span class="ok">✓</span><span>There is no trash &mdash; deletion is permanent. Re-read the path.</span></div>
+
+    <h3 style="margin-top:34px;">One-Page Cheat Sheet</h3>
+    <div class="diagram-wrap">
+      <p style="margin:0 0 10px;"><b>Files &amp; dirs:</b> less (/ ? n G q) · more · vi (i, Esc, :wq) / nano (Ctrl+X) · cat · mkdir · rm -r · cp -r · mv (move + rename) · pwd · ls -l (perms, owner, size, modified). <b>Search:</b> find path -name/-mtime +60/-size +10G · grep -rin "word". <b>Compress:</b> tar -czf out.tar.gz dir/ · tar -xzf · gzip/gunzip (single file) · zip -r/unzip. <b>Network:</b> curl (GET/POST, APIs) · wget url · ip addr / ifconfig · netstat -tulpn / ss -tulpn · ssh user@host (encrypted) · ftp · ping ip · telnet host port. <b>Processes:</b> ps -ef | grep · kill PID · kill -9 PID. <b>Users:</b> id user (UID/GID/groups) · whoami · passwd · su - user · sudo cmd. <b>Apps:</b> yum/dnf install (Red Hat) · apt install (Ubuntu) · which cmd · systemctl start/stop/restart/status/enable. <b>Env vars:</b> env · printenv · echo $VAR · export NAME=value · ~/.bashrc + source (permanent, e.g. JAVA_HOME). <b>Console:</b> cat · clear (Ctrl+L) · echo "x" · &gt; overwrite · &gt;&gt; append · reboot/poweroff (rare). <b>Other:</b> free -h · du -sh dir · df -h · chmod +x · awk -F, '{print $2}' · cut -d: -f1 · sed 's/a/b/g' · ln -s · nohup cmd &amp; · crontab -e/-l · touch · history | grep.</p>
+    </div>
+
+    <h3 style="margin-top:34px;">Your Notes</h3>
+    <textarea class="notes-area" id="notesArea" placeholder="Jot your own summary or questions here — saved automatically in your browser..."></textarea>
+    <div class="notes-status" id="notesStatus"></div>
+  </div>
+</section>
+
+</main>
+
+<div class="chnav-footer">
+  <a href="#ch1" class="prev"><small>&larr; Back to start</small>Files &amp; Directories</a>
+  <a href="#revision" class="next"><small>Jump to &rarr;</small>Revision Kit</a>
+</div>
+
+<footer class="site-footer">
+  Built as a single offline HTML file &middot; works without internet &middot; prints cleanly as a PDF chapter<br>
+  Shortcuts: <span class="kbd">/</span> search &middot; <span class="kbd">d</span> dark mode &middot; <span class="kbd">t</span> back to top
+</footer>
+
+<button id="backtotop" aria-label="Back to top">&uarr;</button>
+
+<script>
+(function(){
+  "use strict";
+  var STORE_KEY = "linux-commands-in-a-job-book-progress-v7";
+  var chapters = Array.prototype.slice.call(document.querySelectorAll(".chapter[id]"));
+
+  function loadState(){
+    try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }catch(e){ return {}; }
+  }
+  function saveState(state){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+  var state = loadState();
+
+  var darkToggle = document.getElementById("darkToggle");
+  function applyDark(on){
+    document.documentElement.classList.toggle("dark", on);
+    darkToggle.textContent = on ? "☀️ Light" : "🌙 Dark";
+    state.dark = on; saveState(state);
+  }
+  applyDark(!!state.dark);
+  darkToggle.addEventListener("click", function(){ applyDark(!document.documentElement.classList.contains("dark")); });
+
+  var doneboxes = document.querySelectorAll(".donebox");
+  var totalCh = doneboxes.length;
+  function updateProgressUI(){
+    var doneCount = 0;
+    doneboxes.forEach(function(cb){
+      var ch = cb.getAttribute("data-ch");
+      var isDone = !!(state.done && state.done[ch]);
+      cb.checked = isDone;
+      if(isDone) doneCount++;
+      var rnode = document.querySelector('.rnode[data-ch="'+ch+'"]');
+      if(rnode) rnode.classList.toggle("done", isDone);
+    });
+    var pct = totalCh ? Math.round((doneCount/totalCh)*100) : 0;
+    document.getElementById("progress-bar").style.width = pct + "%";
+    document.getElementById("progress-label").textContent = doneCount + " / " + totalCh + " sections";
+  }
+  state.done = state.done || {};
+  doneboxes.forEach(function(cb){
+    cb.addEventListener("change", function(){
+      state.done[cb.getAttribute("data-ch")] = cb.checked;
+      saveState(state);
+      updateProgressUI();
+    });
+  });
+  updateProgressUI();
+
+  document.querySelectorAll(".chapter").forEach(function(section){
+    var btn = section.querySelector(".collapse-toggle");
+    var body = section.querySelector(".chapter-body");
+    if(!btn || !body) return;
+    var id = section.id;
+    if(state.collapsed && state.collapsed[id]){
+      body.classList.add("collapsed"); btn.textContent = "+";
+    }
+    btn.addEventListener("click", function(){
+      var collapsed = body.classList.toggle("collapsed");
+      btn.textContent = collapsed ? "+" : "−";
+      state.collapsed = state.collapsed || {};
+      state.collapsed[id] = collapsed;
+      saveState(state);
+    });
+  });
+  document.getElementById("expandAllBtn").addEventListener("click", function(){
+    var anyCollapsed = document.querySelector(".chapter-body.collapsed");
+    document.querySelectorAll(".chapter-body").forEach(function(b){ b.classList.toggle("collapsed", !anyCollapsed); });
+    document.querySelectorAll(".collapse-toggle").forEach(function(b){ b.textContent = anyCollapsed ? "+" : "−"; });
+    this.textContent = anyCollapsed ? "Expand all" : "Collapse all";
+    state.collapsed = {};
+    if(anyCollapsed){ chapters.forEach(function(c){ state.collapsed[c.id] = true; }); }
+    saveState(state);
+  });
+
+  var navLinks = document.querySelectorAll("#chnav a");
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        navLinks.forEach(function(l){ l.classList.remove("active"); });
+        var link = document.querySelector('#chnav a[href="#'+entry.target.id+'"]');
+        if(link) link.classList.add("active");
+      }
+    });
+  }, {rootMargin:"-40% 0px -50% 0px"});
+  chapters.concat(document.getElementById("revision")).forEach(function(s){ if(s) observer.observe(s); });
+
+  var searchbox = document.getElementById("searchbox");
+  var searchableEls = document.querySelectorAll(".chapter p, .chapter li, .chapter td, .chapter .qtext, .chapter summary");
+  var originalHTML = new Map();
+  searchableEls.forEach(function(el){ originalHTML.set(el, el.innerHTML); });
+
+  function clearHighlights(){
+    searchableEls.forEach(function(el){ el.innerHTML = originalHTML.get(el); });
+    chapters.forEach(function(c){ c.classList.remove("hidden-by-search"); });
+  }
+  function runSearch(q){
+    q = q.trim();
+    if(!q){ clearHighlights(); return; }
+    var re;
+    try{ re = new RegExp("("+q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig"); }catch(e){ return; }
+    var matchedChapters = new Set();
+    searchableEls.forEach(function(el){
+      var raw = originalHTML.get(el);
+      if(re.test(raw)){
+        el.innerHTML = raw.replace(re, "<mark class=\"hit\">$1</mark>");
+        var ch = el.closest(".chapter");
+        if(ch) matchedChapters.add(ch.id);
+      } else {
+        el.innerHTML = raw;
+      }
+    });
+    chapters.forEach(function(c){ c.classList.toggle("hidden-by-search", !matchedChapters.has(c.id)); });
+  }
+  searchbox.addEventListener("input", function(){ runSearch(this.value); });
+
+  document.addEventListener("keydown", function(e){
+    var tag = (document.activeElement && document.activeElement.tagName) || "";
+    if(tag === "INPUT" || tag === "TEXTAREA"){
+      if(e.key === "Escape") document.activeElement.blur();
+      return;
+    }
+    if(e.key === "/"){ e.preventDefault(); searchbox.focus(); }
+    if(e.key === "d" || e.key === "D"){ applyDark(!document.documentElement.classList.contains("dark")); }
+    if(e.key === "t" || e.key === "T"){ window.scrollTo({top:0, behavior:"smooth"}); }
+  });
+
+  var backBtn = document.getElementById("backtotop");
+  window.addEventListener("scroll", function(){
+    backBtn.classList.toggle("show", window.scrollY > 700);
+  });
+  backBtn.addEventListener("click", function(){ window.scrollTo({top:0, behavior:"smooth"}); });
+
+  document.querySelectorAll(".flashcard").forEach(function(card){
+    card.addEventListener("click", function(){ card.classList.toggle("flipped"); });
+  });
+
+  document.querySelectorAll(".quiz-q").forEach(function(q){
+    var opts = q.querySelectorAll(".quiz-opt");
+    var feedback = q.querySelector(".quiz-feedback");
+    opts.forEach(function(opt){
+      opt.addEventListener("click", function(){
+        var correct = opt.getAttribute("data-correct") === "true";
+        opts.forEach(function(o){ o.disabled = true; });
+        opts.forEach(function(o){
+          if(o.getAttribute("data-correct") === "true") o.classList.add("correct");
+        });
+        if(!correct) opt.classList.add("wrong");
+        feedback.style.display = "block";
+        feedback.textContent = correct ? "✓ Correct!" : "✗ Not quite — correct answer highlighted above.";
+        feedback.style.color = correct ? "var(--green)" : "var(--red)";
+      });
+    });
+  });
+
+  document.querySelectorAll(".terminal .copy").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var pre = btn.closest(".terminal").querySelector("pre");
+      if(!pre) return;
+      var lines = pre.innerText.split("\n");
+      var cmds = lines.filter(function(l){ return /^\s*\$\s/.test(l); })
+                      .map(function(l){ return l.replace(/^\s*\$\s?/, ""); });
+      var text = (cmds.length ? cmds : lines).join("\n");
+      var done = function(){ var old = btn.textContent; btn.textContent = "Copied!"; setTimeout(function(){ btn.textContent = old; }, 1200); };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done).catch(done);
+      } else {
+        var ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta);
+        ta.select(); try{ document.execCommand("copy"); }catch(e){} document.body.removeChild(ta); done();
+      }
+    });
+  });
+
+  var notesArea = document.getElementById("notesArea");
+  var notesStatus = document.getElementById("notesStatus");
+  notesArea.value = state.notes || "";
+  var saveTimer;
+  notesArea.addEventListener("input", function(){
+    clearTimeout(saveTimer);
+    notesStatus.textContent = "Saving…";
+    saveTimer = setTimeout(function(){
+      state.notes = notesArea.value;
+      saveState(state);
+      notesStatus.textContent = "Saved to this browser ✓";
+      setTimeout(function(){ notesStatus.textContent = ""; }, 1500);
+    }, 500);
+  });
+})();
+</script>
+</body>
+</html>
