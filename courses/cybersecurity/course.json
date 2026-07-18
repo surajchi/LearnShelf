@@ -7,44 +7,51 @@
     {
       "title": "Foundations of Cybersecurity",
       "file": "course-1-foundations-of-cybersecurity.html",
-      "duration": "60 mins",
+      "duration": "5-6 hrs",
       "tags": ["cybersecurity", "foundations", "beginner"]
     },
     {
       "title": "Play It Safe: Manage Security Risks",
       "file": "course-2-play-it-safe.html",
-      "duration": "60 mins",
+       "duration": "5-6 hrs",
       "tags": ["cybersecurity", "risk", "governance"]
     },
     {
       "title": "Connect and Protect: Networks and Network Security",
       "file": "course-3-connect-and-protect.html",
-      "duration": "60 mins",
+       "duration": "5-6 hrs",
       "tags": ["cybersecurity", "networking", "security"]
     },
     {
       "title": "Tools of the Trade: Linux and SQL",
       "file": "course-4-tools-of-the-trade.html",
-      "duration": "60 mins",
+       "duration": "5-6 hrs",
       "tags": ["cybersecurity", "linux", "sql"]
     },
     {
       "title": "Assets, Threats, and Vulnerabilities",
       "file": "course-5-assets-threats-vulnerabilities.html",
-      "duration": "60 mins",
+       "duration": "5-6 hrs",
       "tags": ["cybersecurity", "threats", "vulnerabilities"]
     },
     {
       "title": "Sound the Alarm: Detection and Response",
       "file": "course-6-sound-the-alarm.html",
-      "duration": "60 mins",
+     "duration": "5-6 hrs",
       "tags": ["cybersecurity", "detection", "incident-response"]
     },
     {
       "title": "Automate Cybersecurity Tasks with Python",
       "file": "course-7-automate-with-python.html",
-      "duration": "60 mins",
+      "duration": "5-6 hrs",
       "tags": ["cybersecurity", "python", "automation"]
     }
+    ,
+    {
+  "title": "Put It to Work: Prepare for Cybersecurity Jobs",
+  "file": "course-8-put-it-to-work.html",
+  "duration": "5-6 hrs",
+  "tags": ["cybersecurity", "career-prep", "job-search", "interview-skills", "communication"]
+}
   ]
 }
