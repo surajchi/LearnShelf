@@ -1,0 +1,2261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course VIII · Put It to Work — Prepare for Cybersecurity Jobs — Complete Course (Modules 1–5)</title>
+<style>
+/* ============================================================
+   DESIGN SYSTEM — "CASE FILE" — SOC Reference Book
+   Palette: ink #0B1120, paper #F7F5F0, panel #131C2E, signal teal #2E9E5B,
+            warning amber #C97A2E, critical red #C9432D, wire blue #4A7FB5
+   Type: display = geometric sans, body = humanist serif, mono = code/log
+   ============================================================ */
+:root{
+  --ink:#0B1120;
+  --paper:#F7F5F0;
+  --paper-dim:#EFEBE2;
+  --panel:#131C2E;
+  --panel-2:#1A2332;
+  --line:#DAD4C4;
+  --line-dark:#26314A;
+  --signal:#1F7A44;
+  --signal-bright:#2E9E5B;
+  --warn:#9A5A1F;
+  --warn-bright:#C97A2E;
+  --crit:#A5301D;
+  --crit-bright:#C9432D;
+  --wire:#2E5C8A;
+  --wire-bright:#4A7FB5;
+  --ink-soft:#3A4456;
+  --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
+  --sans: -apple-system, 'Segoe UI', 'Inter', Avenir, Helvetica, Arial, sans-serif;
+  --mono: 'SF Mono', 'JetBrains Mono', Consolas, 'Courier New', monospace;
+  --maxw: 780px;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:17px;
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+
+::selection{background:var(--signal-bright); color:var(--ink);}
+
+/* ---------- progress bar (signal-strength style) ---------- */
+#progress-track{
+  position:fixed; top:0; left:0; right:0; height:4px; z-index:500;
+  background:var(--paper-dim);
+  border-bottom:1px solid var(--line);
+}
+#progress-fill{
+  height:100%; width:0%;
+  background:repeating-linear-gradient(90deg, var(--signal) 0 6px, var(--signal-bright) 6px 12px);
+  transition:width .1s linear;
+}
+
+/* ---------- spine rail (left nav) ---------- */
+#spine{
+  position:fixed; top:0; left:0; bottom:0; width:64px; z-index:400;
+  background:var(--ink);
+  border-right:1px solid var(--line-dark);
+  display:flex; flex-direction:column; align-items:center;
+  padding-top:24px; gap:4px;
+  font-family:var(--mono);
+}
+#spine .spine-mark{
+  writing-mode:vertical-rl; text-orientation:mixed;
+  color:var(--signal-bright); font-size:11px; letter-spacing:.15em;
+  margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid var(--line-dark);
+  text-transform:uppercase;
+}
+#spine .spine-tab{
+  width:40px; height:40px; border-radius:3px;
+  display:flex; align-items:center; justify-content:center;
+  color:#6B7A85; font-size:13px; font-weight:700;
+  border:1px solid transparent; cursor:pointer; text-decoration:none;
+  transition:all .15s ease;
+}
+#spine .spine-tab:hover{border-color:var(--line-dark); color:var(--paper);}
+#spine .spine-tab.active{background:var(--panel-2); color:var(--signal-bright); border-color:var(--signal);}
+#toc-toggle{
+  margin-top:auto; margin-bottom:20px; width:40px; height:40px;
+  border-radius:3px; border:1px solid var(--line-dark); background:none;
+  color:#6B7A85; cursor:pointer; font-size:16px;
+}
+#toc-toggle:hover{color:var(--signal-bright); border-color:var(--signal);}
+
+@media (max-width: 860px){
+  #spine{width:44px; padding-top:16px;}
+  #spine .spine-mark{display:none;}
+  #spine .spine-tab{width:30px; height:30px; font-size:11px;}
+}
+
+/* ---------- TOC drawer ---------- */
+#toc-drawer{
+  position:fixed; top:0; left:-380px; bottom:0; width:340px; z-index:450;
+  background:var(--panel); color:var(--paper);
+  padding:32px 28px; overflow-y:auto;
+  transition:left .25s ease;
+  box-shadow:8px 0 30px rgba(0,0,0,.35);
+  font-family:var(--sans);
+}
+#toc-drawer.open{left:64px;}
+@media (max-width:860px){ #toc-drawer.open{left:44px;} }
+#toc-drawer h3{
+  font-family:var(--mono); text-transform:uppercase; letter-spacing:.12em;
+  font-size:12px; color:var(--signal-bright); margin:0 0 18px;
+  border-bottom:1px solid var(--line-dark); padding-bottom:12px;
+}
+#toc-drawer .toc-course{font-size:13px; font-weight:700; margin:18px 0 6px; color:#9FB1BE;}
+#toc-drawer ol{list-style:none; margin:0 0 8px; padding:0;}
+#toc-drawer li a{
+  display:block; padding:7px 8px; border-radius:4px; color:#C9D3DA;
+  text-decoration:none; font-size:13.5px; line-height:1.4;
+  border-left:2px solid transparent;
+}
+#toc-drawer li a:hover{background:var(--panel-2); border-left-color:var(--signal-bright); color:#fff;}
+#toc-drawer li a.current{border-left-color:var(--signal-bright); color:var(--signal-bright); background:var(--panel-2);}
+#toc-close{
+  position:absolute; top:28px; right:24px; background:none; border:none;
+  color:#9FB1BE; font-size:20px; cursor:pointer;
+}
+#scrim{position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:440; display:none;}
+#scrim.show{display:block;}
+
+/* ---------- layout ---------- */
+main{margin-left:64px; padding:0 24px 120px;}
+@media (max-width:860px){ main{margin-left:44px; padding:0 16px 100px;} }
+.page{max-width:var(--maxw); margin:0 auto; padding-top:56px;}
+
+/* ---------- cover ---------- */
+.cover{
+  min-height:92vh; display:flex; flex-direction:column; justify-content:center;
+  border-bottom:3px solid var(--ink); padding-bottom:48px; margin-bottom:56px;
+}
+.cover-eyebrow{
+  font-family:var(--mono); font-size:12.5px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--signal); margin-bottom:18px; display:flex; align-items:center; gap:10px;
+}
+.cover-eyebrow::before{content:"";width:28px;height:2px;background:var(--signal-bright);display:inline-block;}
+.cover h1{
+  font-family:var(--sans); font-size:clamp(2.4rem, 6vw, 4rem); font-weight:800;
+  line-height:1.05; margin:0 0 14px; letter-spacing:-.02em; color:var(--ink);
+}
+.cover .subtitle{
+  font-family:var(--serif); font-style:italic; font-size:1.35rem; color:var(--ink-soft);
+  margin:0 0 36px; max-width:640px;
+}
+.cover-svg-wrap{margin:8px 0 40px;}
+.cover-meta{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:0;
+  border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+}
+.cover-meta div{padding:16px 18px; border-right:1px solid var(--line);}
+.cover-meta div:last-child{border-right:none;}
+.cover-meta .k{font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.1em; color:#8A8272; margin-bottom:5px;}
+.cover-meta .v{font-family:var(--sans); font-size:14.5px; font-weight:700; color:var(--ink);}
+
+.cover-block{margin-top:36px;}
+.cover-block h4{
+  font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.12em;
+  color:var(--signal); margin:0 0 10px;
+}
+.cover-block ul{margin:0; padding-left:20px;}
+.cover-block li{margin-bottom:6px; font-size:15.5px;}
+
+/* ---------- headings ---------- */
+h2.module-head{
+  font-family:var(--sans); font-size:2.1rem; font-weight:800; letter-spacing:-.01em;
+  margin:64px 0 6px; padding-top:40px; border-top:3px solid var(--ink);
+  page-break-before:always;
+}
+h2.module-head .tag{
+  display:block; font-family:var(--mono); font-size:12px; letter-spacing:.15em;
+  text-transform:uppercase; color:var(--signal); font-weight:700; margin-bottom:10px;
+}
+h3{
+  font-family:var(--sans); font-size:1.42rem; font-weight:800; margin:42px 0 14px;
+  color:var(--ink); letter-spacing:-.005em;
+  display:flex; align-items:baseline; gap:10px;
+}
+h3::before{
+  content:attr(data-n); font-family:var(--mono); font-size:.65em; color:var(--signal);
+  font-weight:700;
+}
+h4{font-family:var(--sans); font-weight:700; font-size:1.08rem; margin:28px 0 10px; color:var(--ink);}
+p{margin:0 0 16px;}
+strong{color:var(--ink); font-weight:700;}
+a{color:var(--wire);}
+
+/* ---------- objectives box ---------- */
+.objectives{
+  background:var(--ink); color:var(--paper); border-radius:6px; padding:28px 30px;
+  margin:24px 0 40px; font-family:var(--sans);
+}
+.objectives h4{
+  font-family:var(--mono); color:var(--signal-bright); text-transform:uppercase;
+  letter-spacing:.12em; font-size:12px; margin:0 0 16px;
+}
+.objectives ul{margin:0; padding-left:0; list-style:none;}
+.objectives li{
+  position:relative; padding-left:26px; margin-bottom:10px; font-size:15px; color:#DCE3E8;
+}
+.objectives li::before{content:"▸"; position:absolute; left:0; color:var(--signal-bright);}
+
+/* ---------- callouts: "case-file ticket" signature element ---------- */
+.ticket{
+  border:1.5px solid var(--ink); border-radius:4px; margin:26px 0; position:relative;
+  background:#fff; overflow:hidden; font-family:var(--sans);
+}
+.ticket-head{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:9px 16px; font-family:var(--mono); font-size:11px; letter-spacing:.08em;
+  text-transform:uppercase; font-weight:700; color:#fff;
+}
+.ticket-id{opacity:.85; font-weight:400;}
+.ticket-body{padding:16px 18px; font-size:15px; line-height:1.6;}
+.ticket-body p:last-child{margin-bottom:0;}
+.ticket.def .ticket-head{background:var(--wire);}
+.ticket.important .ticket-head{background:var(--ink);}
+.ticket.remember .ticket-head{background:#6B4FBB;}
+.ticket.interview .ticket-head{background:var(--signal);}
+.ticket.warning .ticket-head{background:var(--warn);}
+.ticket.alert .ticket-head{background:var(--crit);}
+.ticket.industry .ticket-head{background:#8A5A2B;}
+.ticket.bestpractice .ticket-head{background:#1E7A4C;}
+.ticket.compliance .ticket-head{background:#3A5A78;}
+.ticket.examtip .ticket-head{background:#B0862B;}
+.ticket.soc .ticket-head{background:#0F5E6B;}
+.ticket.threatintel .ticket-head{background:#7A1F3D;}
+.ticket.blueteam .ticket-head{background:#1D4E89;}
+.ticket.redteam .ticket-head{background:#8C1C1C;}
+.ticket.quickrev .ticket-head{background:#4C6444;}
+.ticket.deepdive .ticket-head{background:#2C2C54;}
+.ticket.expert .ticket-head{background:#5C4033;}
+.ticket.incident .ticket-head{background:#7A1F3D;}
+.ticket .icon{margin-right:6px;}
+
+/* ---------- ELI5 ---------- */
+.eli5{
+  border-left:4px solid var(--warn-bright); background:#FFF8ED; border-radius:0 6px 6px 0;
+  padding:18px 22px; margin:22px 0; font-family:var(--serif);
+}
+.eli5 .eli5-tag{
+  font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.1em;
+  color:var(--warn); font-weight:700; margin-bottom:8px; display:block;
+}
+
+/* ---------- multi-level explanation ---------- */
+.levels{margin:26px 0; border:1px solid var(--line); border-radius:6px; overflow:hidden;}
+.level{padding:16px 20px; border-bottom:1px solid var(--line);}
+.level:last-child{border-bottom:none;}
+.level .lv-tag{
+  font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.1em;
+  font-weight:700; margin-bottom:6px; display:inline-block; padding:2px 8px; border-radius:3px;
+}
+.level.l1{background:#FFF8ED;} .level.l1 .lv-tag{background:var(--warn-bright); color:#3A2A00;}
+.level.l2{background:#F2F7FF;} .level.l2 .lv-tag{background:var(--wire-bright); color:#0A1A3A;}
+.level.l3{background:#EFFAF8;} .level.l3 .lv-tag{background:var(--signal-bright); color:#00302B;}
+.level.l4{background:#F7F0FA;} .level.l4 .lv-tag{background:#B27FE0; color:#2A0A3A;}
+.level p{margin:0; font-size:15px;}
+
+/* ---------- tables ---------- */
+.table-wrap{overflow-x:auto; margin:24px 0;}
+table{width:100%; border-collapse:collapse; font-family:var(--sans); font-size:14px;}
+caption{
+  caption-side:top; text-align:left; font-family:var(--mono); font-size:11px;
+  text-transform:uppercase; letter-spacing:.1em; color:var(--signal); margin-bottom:8px; font-weight:700;
+}
+th{
+  background:var(--ink); color:var(--paper); text-align:left; padding:10px 14px;
+  font-weight:700; font-size:12.5px; text-transform:uppercase; letter-spacing:.04em;
+}
+td{padding:10px 14px; border-bottom:1px solid var(--line); vertical-align:top;}
+tr:nth-child(even) td{background:var(--paper-dim);}
+
+/* ---------- code blocks ---------- */
+.code-block{margin:22px 0; border-radius:6px; overflow:hidden; border:1px solid var(--line-dark);}
+.code-head{
+  background:var(--panel); color:#9FB1BE; font-family:var(--mono); font-size:11.5px;
+  padding:8px 14px; display:flex; justify-content:space-between; align-items:center;
+  border-bottom:1px solid var(--line-dark);
+}
+.code-head .lang{color:var(--signal-bright); text-transform:uppercase; letter-spacing:.08em;}
+.copy-btn{
+  background:var(--panel-2); border:1px solid var(--line-dark); color:#C9D3DA;
+  font-family:var(--mono); font-size:11px; padding:3px 10px; border-radius:3px; cursor:pointer;
+}
+.copy-btn:hover{border-color:var(--signal-bright); color:var(--signal-bright);}
+pre{
+  margin:0; background:var(--ink); color:#D9E4EA; padding:16px 18px; overflow-x:auto;
+  font-family:var(--mono); font-size:13.5px; line-height:1.6;
+}
+pre code{counter-reset:line;}
+.code-note{
+  background:var(--paper-dim); border-top:1px solid var(--line); padding:10px 16px;
+  font-family:var(--sans); font-size:13px; color:var(--ink-soft);
+}
+
+/* ---------- svg figure ---------- */
+figure{margin:28px 0; text-align:center;}
+figure svg{max-width:100%; height:auto;}
+figcaption{
+  font-family:var(--mono); font-size:11.5px; color:var(--ink-soft); margin-top:10px;
+  text-transform:uppercase; letter-spacing:.06em;
+}
+
+/* ---------- flashcards ---------- */
+.flash-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin:24px 0;}
+.flash{
+  border:1px solid var(--line); border-radius:6px; padding:16px; cursor:pointer;
+  background:#fff; min-height:96px; position:relative; font-family:var(--sans);
+  transition:box-shadow .15s;
+}
+.flash:hover{box-shadow:0 4px 14px rgba(0,0,0,.08);}
+.flash .front{font-weight:700; font-size:14.5px;}
+.flash .back{
+  display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);
+  font-family:var(--serif); font-size:14px; color:var(--ink-soft);
+}
+.flash.flipped .back{display:block;}
+.flash .hint{
+  position:absolute; top:12px; right:12px; font-family:var(--mono); font-size:9.5px;
+  color:#B0A996; text-transform:uppercase;
+}
+
+/* ---------- accordion ---------- */
+details.acc{border:1px solid var(--line); border-radius:6px; margin:12px 0; overflow:hidden;}
+details.acc summary{
+  padding:13px 18px; cursor:pointer; font-family:var(--sans); font-weight:700; font-size:14.5px;
+  background:var(--paper-dim); list-style:none; display:flex; justify-content:space-between;
+}
+details.acc summary::-webkit-details-marker{display:none;}
+details.acc summary::after{content:"+"; color:var(--signal); font-size:18px;}
+details.acc[open] summary::after{content:"–";}
+details.acc .acc-body{padding:16px 18px; font-size:15px;}
+
+/* ---------- MCQ / practice ---------- */
+.quiz{border:1px solid var(--line); border-radius:6px; padding:18px 20px; margin:16px 0; background:#fff;}
+.quiz .q{font-weight:700; font-family:var(--sans); margin-bottom:10px; font-size:14.5px;}
+.quiz .opt{
+  display:block; width:100%; text-align:left; padding:9px 12px; margin-bottom:6px;
+  border:1px solid var(--line); border-radius:4px; background:var(--paper); cursor:pointer;
+  font-family:var(--sans); font-size:14px;
+}
+.quiz .opt:hover{border-color:var(--wire);}
+.quiz .opt.correct{background:#E6F7EE; border-color:var(--signal); font-weight:700;}
+.quiz .opt.wrong{background:#FBEAEA; border-color:var(--crit);}
+.quiz .fb{margin-top:8px; font-size:13.5px; font-family:var(--sans); color:var(--ink-soft); display:none;}
+.quiz .fb.show{display:block;}
+
+/* ---------- summary / takeaway blocks ---------- */
+.summary-block{
+  background:var(--panel); color:var(--paper); border-radius:8px; padding:30px 32px; margin:36px 0;
+  font-family:var(--sans);
+}
+.summary-block h4{color:var(--signal-bright); font-family:var(--mono); text-transform:uppercase; letter-spacing:.1em; font-size:12px;}
+.summary-block ul{padding-left:20px; margin:12px 0 0;}
+.summary-block li{margin-bottom:8px; font-size:14.5px; color:#DCE3E8;}
+
+/* footer nav */
+.module-nav{
+  display:flex; justify-content:space-between; margin-top:60px; padding-top:24px;
+  border-top:1px solid var(--line); font-family:var(--sans); font-size:13.5px;
+}
+.module-nav a{text-decoration:none; color:var(--ink); font-weight:700;}
+.endmark{
+  text-align:center; font-family:var(--mono); font-size:11px; color:#B0A996;
+  letter-spacing:.15em; text-transform:uppercase; margin:80px 0 20px;
+}
+
+/* print */
+@media print{
+  #spine, #toc-drawer, #progress-track, #scrim, .copy-btn{display:none !important;}
+  main{margin-left:0;}
+  body{font-size:12pt;}
+  .ticket, .levels, .objectives, .summary-block{break-inside:avoid;}
+  h2.module-head{page-break-before:always;}
+  a{color:inherit; text-decoration:none;}
+}
+
+/* accessibility */
+:focus-visible{outline:3px solid var(--signal); outline-offset:2px;}
+.skip-link{
+  position:absolute; left:-999px; top:0; background:var(--ink); color:#fff; padding:10px 16px; z-index:900;
+}
+.skip-link:focus{left:70px; top:8px;}
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main-content">Skip to content</a>
+
+<div id="progress-track"><div id="progress-fill"></div></div>
+
+<nav id="spine" aria-label="Course navigation">
+  <div class="spine-mark">COURSE VIII</div>
+  <a class="spine-tab" href="#module-1" title="Module 1 · Protect Assets &amp; Detect Incidents">M1</a>
+  <a class="spine-tab" href="#module-2" title="Module 2 · Escalate Incidents">M2</a>
+  <a class="spine-tab" href="#module-3" title="Module 3 · Communicate with Stakeholders">M3</a>
+  <a class="spine-tab" href="#module-4" title="Module 4 · Engage with the Community">M4</a>
+  <a class="spine-tab" href="#module-5" title="Module 5 · Find &amp; Apply for Jobs">M5</a>
+  <button id="toc-toggle" aria-label="Open table of contents" aria-expanded="false">☰</button>
+</nav>
+
+<div id="scrim"></div>
+<aside id="toc-drawer" aria-label="Table of contents">
+  <button id="toc-close" aria-label="Close table of contents">✕</button>
+  <h3>Course VIII — Put It to Work</h3>
+  <div class="toc-course">Module 1 · Protect Assets &amp; Detect Incidents</div>
+  <ol>
+    <li><a href="#module-1" class="current">Cover &amp; Module 1 start</a></li>
+    <li><a href="#sec-1">1.1 The Security Mindset</a></li>
+    <li><a href="#sec-2">1.2 Data &amp; Asset Classification Revisited</a></li>
+    <li><a href="#sec-3">1.3 Your Impact on Data Protection</a></li>
+    <li><a href="#sec-4">1.4 Business Continuity &amp; Disaster Recovery</a></li>
+    <li><a href="#sec-5">1.5 Case Study: Juliana's First Day</a></li>
+    <li><a href="#labs">Labs &amp; Exercises</a></li>
+    <li><a href="#interview">Interview Prep</a></li>
+    <li><a href="#practice">Practice Section</a></li>
+    <li><a href="#revision">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Module 2 · Escalate Incidents</div>
+  <ol>
+    <li><a href="#module-2">Module 2 start</a></li>
+    <li><a href="#sec-2-1">2.1 The Importance of Escalation</a></li>
+    <li><a href="#sec-2-2">2.2 Breach Notification Laws &amp; Low-Level Issues</a></li>
+    <li><a href="#sec-2-3">2.3 Incident Classification Types</a></li>
+    <li><a href="#sec-2-4">2.4 Roles in the Escalation Process</a></li>
+    <li><a href="#sec-2-5">2.5 Escalation Timing &amp; Priority</a></li>
+    <li><a href="#sec-2-6">2.6 Case Study: Juliana's Attention to Detail</a></li>
+    <li><a href="#labs-2">Labs &amp; Exercises</a></li>
+    <li><a href="#interview-2">Interview Prep</a></li>
+    <li><a href="#practice-2">Practice Section</a></li>
+    <li><a href="#revision-2">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary-2">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Module 3 · Communicate with Stakeholders</div>
+  <ol>
+    <li><a href="#module-3">Module 3 start</a></li>
+    <li><a href="#sec-3-1">3.1 Understanding Stakeholders</a></li>
+    <li><a href="#sec-3-2">3.2 Five Key Stakeholder Roles</a></li>
+    <li><a href="#sec-3-3">3.3 Communicating for Impact</a></li>
+    <li><a href="#sec-3-4">3.4 The Security Story Structure</a></li>
+    <li><a href="#sec-3-5">3.5 Visual Dashboards</a></li>
+    <li><a href="#sec-3-6">3.6 Case Study: Juliana's Effective Communication</a></li>
+    <li><a href="#labs-3">Labs &amp; Exercises</a></li>
+    <li><a href="#interview-3">Interview Prep</a></li>
+    <li><a href="#practice-3">Practice Section</a></li>
+    <li><a href="#revision-3">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary-3">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Module 4 · Engage with the Community</div>
+  <ol>
+    <li><a href="#module-4">Module 4 start</a></li>
+    <li><a href="#sec-4-1">4.1 Reliable Cybersecurity Resources</a></li>
+    <li><a href="#sec-4-2">4.2 Finding Organizations &amp; Conferences</a></li>
+    <li><a href="#sec-4-3">4.3 Building Your Network on LinkedIn</a></li>
+    <li><a href="#labs-4">Labs &amp; Exercises</a></li>
+    <li><a href="#interview-4">Interview Prep</a></li>
+    <li><a href="#practice-4">Practice Section</a></li>
+    <li><a href="#revision-4">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary-4">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Module 5 · Find &amp; Apply for Jobs</div>
+  <ol>
+    <li><a href="#module-5">Module 5 start</a></li>
+    <li><a href="#sec-5-1">5.1 Cybersecurity Job Titles &amp; Job Sites</a></li>
+    <li><a href="#sec-5-2">5.2 Building a Resume</a></li>
+    <li><a href="#sec-5-3">5.3 Writing a Cover Letter</a></li>
+    <li><a href="#sec-5-4">5.4 The Interview Process</a></li>
+    <li><a href="#sec-5-5">5.5 The STAR Method</a></li>
+    <li><a href="#sec-5-6">5.6 Technical Interview Preparation</a></li>
+    <li><a href="#sec-5-7">5.7 Building Rapport &amp; Asking Questions</a></li>
+    <li><a href="#sec-5-8">5.8 The Elevator Pitch</a></li>
+    <li><a href="#sec-5-9">5.9 Remote Interviews &amp; Imposter Syndrome</a></li>
+    <li><a href="#labs-5">Labs &amp; Exercises</a></li>
+    <li><a href="#interview-5">Interview Prep</a></li>
+    <li><a href="#practice-5">Practice Section</a></li>
+    <li><a href="#revision-5">Revision &amp; Cheat Sheet</a></li>
+    <li><a href="#summary-5">Module Summary</a></li>
+  </ol>
+
+  <div class="toc-course">Course &amp; Certificate Reference</div>
+  <ol>
+    <li><a href="#course-summary">Course Summary</a></li>
+    <li><a href="#certificate-wrapup">Certificate Wrap-Up</a></li>
+    <li><a href="#course-glossary">Full Glossary (Weeks 1–5)</a></li>
+    <li><a href="#course-cheatsheet">Master Cheat Sheet</a></li>
+  </ol>
+</aside>
+
+<main id="main-content">
+<div class="page" id="course-page">
+
+<!-- ================= COVER ================= -->
+<section class="cover">
+  <div class="cover-eyebrow">Google Cybersecurity Certificate · Premium Edition · Final Course</div>
+  <h1>Course VIII<br>Put It to Work: Prepare for Cybersecurity Jobs</h1>
+  <p class="subtitle">Everything you've built across seven courses becomes a resume line, an interview answer, and a career. This is the book that gets you through the door.</p>
+
+  <div class="cover-svg-wrap">
+    <svg viewBox="0 0 700 220" width="100%" role="img" aria-label="Illustration of a launchpad with a rocket labeled career taking off, surrounded by icons representing a resume, a handshake, and a chat bubble for interviews">
+      <rect x="0" y="0" width="700" height="220" fill="#F7F5F0"/>
+      <!-- launch pad -->
+      <rect x="300" y="170" width="100" height="16" rx="3" fill="#0B1120"/>
+      <line x1="320" y1="170" x2="300" y2="200" stroke="#0B1120" stroke-width="4"/>
+      <line x1="380" y1="170" x2="400" y2="200" stroke="#0B1120" stroke-width="4"/>
+      <!-- rocket -->
+      <g transform="translate(350,110)">
+        <path d="M0 -70 C20 -50 20 0 20 30 L-20 30 C-20 0 -20 -50 0 -70 Z" fill="#1F7A44"/>
+        <circle cx="0" cy="-20" r="8" fill="#F7F5F0"/>
+        <path d="M-20 20 L-38 45 L-20 40 Z" fill="#C97A2E"/>
+        <path d="M20 20 L38 45 L20 40 Z" fill="#C97A2E"/>
+        <path d="M-10 30 L0 55 L10 30 Z" fill="#C9432D"/>
+      </g>
+      <!-- resume icon -->
+      <rect x="80" y="60" width="60" height="80" rx="4" fill="#2E5C8A"/>
+      <line x1="92" y1="80" x2="128" y2="80" stroke="#F7F5F0" stroke-width="3"/>
+      <line x1="92" y1="95" x2="128" y2="95" stroke="#F7F5F0" stroke-width="3"/>
+      <line x1="92" y1="110" x2="112" y2="110" stroke="#F7F5F0" stroke-width="3"/>
+      <!-- chat bubble icon -->
+      <g transform="translate(560,100)">
+        <path d="M-40 -25 h80 a8 8 0 0 1 8 8 v34 a8 8 0 0 1 -8 8 h-50 l-15 15 v-15 h-15 a8 8 0 0 1 -8 -8 v-34 a8 8 0 0 1 8 -8 z" fill="#2E9E5B"/>
+      </g>
+      <text x="350" y="25" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#0B1120">Everything you've learned, ready for liftoff</text>
+    </svg>
+  </div>
+
+  <div class="cover-meta">
+    <div><div class="k">Reading Time</div><div class="v">~5.5 hrs / module</div></div>
+    <div><div class="k">Difficulty</div><div class="v">All Levels</div></div>
+    <div><div class="k">Prerequisites</div><div class="v">Courses I–VII</div></div>
+    <div><div class="k">Modules</div><div class="v">5 (Weeks 1–5)</div></div>
+  </div>
+
+  <div class="cover-block">
+    <h4>Learning Objectives — Whole Course</h4>
+    <ul>
+      <li>Apply a security mindset to classify assets and data, and connect it to business continuity planning.</li>
+      <li>Recognize and properly escalate security incidents according to organizational policy.</li>
+      <li>Communicate effectively with stakeholders using clear writing and visual dashboards.</li>
+      <li>Engage meaningfully with the cybersecurity community for ongoing learning and networking.</li>
+      <li>Build a resume, cover letter, and elevator pitch tailored to entry-level security roles.</li>
+      <li>Navigate the full interview process, including technical interviews, using the STAR method.</li>
+    </ul>
+  </div>
+
+  <div class="cover-block">
+    <h4>Skills Gained</h4>
+    <ul>
+      <li>Incident classification and escalation-policy literacy</li>
+      <li>Stakeholder-aware written and visual communication</li>
+      <li>Professional networking and community engagement</li>
+      <li>Resume, cover letter, and elevator pitch construction</li>
+      <li>STAR-method interview answers and technical interview readiness</li>
+    </ul>
+  </div>
+
+  <div class="cover-block">
+    <h4>Career Relevance</h4>
+    <p>This course <em>is</em> the career relevance — it exists specifically to turn seven courses of technical learning into a job. Every section maps directly onto something a hiring manager will actually ask you to do: write about yourself, explain a technical concept simply, or walk through a challenge using the STAR method.</p>
+  </div>
+</section>
+
+<!-- ================= PREFACE ================= -->
+<h2 class="module-head"><span class="tag">Preface</span>How to Use This Course</h2>
+
+<p>This final course is different from the seven before it — less new technical material, more synthesis and application. Throughout, you'll follow Juliana Soto, a fictional new hire at a payment-processing company, as a running case study that ties every concept back to a realistic first week on the job. Treat every "Case Study" ticket as a model for how you'll actually apply what you've learned.</p>
+
+<div class="ticket deepdive">
+  <div class="ticket-head"><span><span class="icon">🧭</span>Deep Dive</span><span class="ticket-id">DD-700</span></div>
+  <div class="ticket-body">
+    <p><strong>Recommended study strategy:</strong> Module 5 is the longest and most consequential in this course — read it slowly, and actually draft your own resume, cover letter, and elevator pitch as you go rather than just reading examples.</p>
+    <p><strong>Lab recommendation:</strong> Use the STAR method worksheet (Lab 5.2) to draft at least three of your own stories before your first real interview — even stories from outside cybersecurity work well if they demonstrate the right transferable skills.</p>
+    <p><strong>Interview preparation:</strong> This entire course <em>is</em> interview preparation. If you only have time for one thing, memorize the STAR method and practice applying it out loud to three different stories from your own life.</p>
+    <p><strong>Certification preparation:</strong> This course doesn't map onto Security+ exam objectives directly, but it directly prepares you for the interviews that follow certification — arguably the more immediately useful skill.</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODULE 1 · WEEK 1 — PROTECT ASSETS & DETECT INCIDENTS
+     ============================================================ -->
+<h2 class="module-head" id="module-1"><span class="tag">Module 1 · Week 1</span>Protect Assets &amp; Detect Incidents</h2>
+
+<div class="objectives" id="objectives">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Define the security mindset and explain why it's a career differentiator.</li>
+    <li>Review the four data classification types: public, private, sensitive, confidential.</li>
+    <li>Explain asset classification from low-level to high-level.</li>
+    <li>Explain a security professional's daily impact on data protection.</li>
+    <li>Describe business continuity plans and disaster recovery plans as complementary documents.</li>
+    <li>Apply these concepts through Juliana Soto's first-day case study.</li>
+  </ul>
+</div>
+
+<h3 id="sec-1" data-n="1.1">The Security Mindset</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-701</span></div>
+  <div class="ticket-body"><p><strong>Security mindset:</strong> The ability to evaluate risk and constantly seek out and identify the potential or actual breach of a system, application, or data.</p></div>
+</div>
+
+<p>This is the concept every course before this one has been building toward. It is worth restating plainly, one final time, because it's the single idea most likely to come up unprompted in a job interview: security is not a checklist you complete once — it's a habit of continuously asking "what could go wrong here, and would I notice if it did?"</p>
+
+<div class="table-wrap">
+<table>
+<caption>Five Key Concepts in Developing a Security Mindset</caption>
+<thead><tr><th>Concept</th><th>What It Means in Practice</th></tr></thead>
+<tbody>
+<tr><td><strong>Understanding assets and threats</strong></td><td>Recognizing what's essential to the organization and what could negatively impact it</td></tr>
+<tr><td><strong>Evaluation of risk</strong></td><td>Constantly assessing likelihood and impact, not just reacting to alerts</td></tr>
+<tr><td><strong>Preventing social engineering</strong></td><td>Applying skepticism reflexively, especially against phishing</td></tr>
+<tr><td><strong>Continuous learning</strong></td><td>Staying current on the latest threats and vulnerabilities</td></tr>
+<tr><td><strong>Asset protection at all levels</strong></td><td>Treating guest Wi-Fi and trade secrets both seriously, proportionate to their risk</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-701</span></div>
+  <div class="ticket-body"><p>A strong security mindset can genuinely set you apart from other candidates. When an interviewer asks "why should we hire you over someone else with similar technical skills," naming and demonstrating a security mindset — with a concrete example — is one of the most effective answers available to an entry-level candidate.</p></div>
+</div>
+
+<h3 id="sec-2" data-n="1.2">Data &amp; Asset Classification, Revisited</h3>
+
+<p>This certificate has covered classification schemes several times, each course adding nuance. This final pass consolidates it into the version most commonly referenced in job interviews.</p>
+
+<div class="table-wrap">
+<table>
+<caption>Four Data Classification Types</caption>
+<thead><tr><th>Type</th><th>Risk if Exposed</th><th>Examples</th></tr></thead>
+<tbody>
+<tr><td><strong>Public data</strong></td><td>Minimal — already accessible to anyone</td><td>Press releases, job descriptions, marketing materials</td></tr>
+<tr><td><strong>Private data</strong></td><td>Serious — should stay internal</td><td>Company email addresses, employee ID numbers, internal research data</td></tr>
+<tr><td><strong>Sensitive data</strong></td><td>Significant financial/reputational damage</td><td>PII, SPII, PHI — bank numbers, SSNs, passwords, medical information</td></tr>
+<tr><td><strong>Confidential data</strong></td><td>Critical to ongoing business operations</td><td>Trade secrets, financial records, sensitive government data — often protected by NDAs</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The School</span>
+  <p>A school's public data is its published class schedule — anyone can see it. Private data is a teacher's personal email — not secret, but not meant for strangers. Sensitive data is a student's medical records — real harm if it leaks. Confidential data is next year's unreleased curriculum plans — only a few people are allowed to see it before it's finalized, sometimes under a formal agreement.</p>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-702</span></div>
+  <div class="ticket-body"><p><strong>Asset classification:</strong> Labeling assets based on sensitivity and importance to an organization, ranging from low- to high-level. Public data is a low-level asset; sensitive and confidential data are high-level assets.</p></div>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-701</span></div>
+  <div class="ticket-body"><p>Every company has its own data classification policy defining exactly what falls into each category. Learning that specific policy — not just the general four-tier concept — is one of the first things worth doing at any new job, and it's a completely reasonable thing to ask about directly in an interview.</p></div>
+</div>
+
+<h3 id="sec-3" data-n="1.3">Your Impact on Data Protection</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-703</span></div>
+  <div class="ticket-body"><p><strong>Security event vs. security incident:</strong> A security event that results in a data breach is categorized as a security incident. If an event is resolved without a breach occurring, it is not considered an incident.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Why Every Decision Matters</caption>
+<thead><tr><th>Principle</th><th>Explanation</th></tr></thead>
+<tbody>
+<tr><td><strong>Security is collaborative</strong></td><td>No security professional works alone — different team members handle financial data, credentials, vendor security, and employee PII</td></tr>
+<tr><td><strong>Stakeholders are watching</strong></td><td>People across the organization have a real interest in the security team's effectiveness</td></tr>
+<tr><td><strong>No issue is too small</strong></td><td>Unauthorized app installations, odd log entries — small issues can carry outsized downstream risk</td></tr>
+<tr><td><strong>Attention to detail is the job</strong></td><td>Careless handling of sensitive data is the single most preventable cause of breaches</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-702</span></div>
+  <div class="ticket-body"><p>When in doubt, escalate. A minor concern that turns out to be nothing costs a few minutes of a supervisor's time. A minor concern left unescalated that turns out to be something can cost the organization far more — this asymmetry is why "raise it, even if you're not sure" is standard guidance across the industry.</p></div>
+</div>
+
+<h3 id="sec-4" data-n="1.4">Business Continuity &amp; Disaster Recovery</h3>
+
+<p>Recall from Course VI that these are related but distinct documents. This module places them in their proper sequence within an organization's overall security process.</p>
+
+<figure>
+<svg viewBox="0 0 640 160" width="100%" role="img" aria-label="Diagram of the four-part security process: identify assets, determine threats, implement detection tools, create business continuity and disaster recovery plans">
+  <rect x="0" y="0" width="640" height="160" fill="#F7F5F0"/>
+  <g font-family="sans-serif" font-size="11" font-weight="700" fill="#fff">
+    <rect x="10" y="55" width="140" height="50" rx="6" fill="#2E5C8A"/><text x="80" y="84" text-anchor="middle">1. Identify Assets</text>
+    <rect x="170" y="55" width="140" height="50" rx="6" fill="#1F7A44"/><text x="240" y="84" text-anchor="middle">2. Determine Threats</text>
+    <rect x="330" y="55" width="140" height="50" rx="6" fill="#9A5A1F"/><text x="400" y="76" text-anchor="middle">3. Implement</text><text x="400" y="92" text-anchor="middle" font-weight="400" font-size="9">Detection Tools</text>
+    <rect x="490" y="55" width="140" height="50" rx="6" fill="#A5301D"/><text x="560" y="76" text-anchor="middle">4. Create BCP/</text><text x="560" y="92" text-anchor="middle" font-weight="400" font-size="9">DR Plans</text>
+  </g>
+  <path d="M150 80 L170 80" stroke="#0B1120" stroke-width="2" marker-end="url(#a8a)"/>
+  <path d="M310 80 L330 80" stroke="#0B1120" stroke-width="2" marker-end="url(#a8a)"/>
+  <path d="M470 80 L490 80" stroke="#0B1120" stroke-width="2" marker-end="url(#a8a)"/>
+  <defs><marker id="a8a" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#0B1120"/></marker></defs>
+</svg>
+<figcaption>Figure 1.1 — The four-part security process ending in BCP/DR planning</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<caption>Business Continuity Plan — Four Essential Steps</caption>
+<thead><tr><th>Step</th><th>Focus</th></tr></thead>
+<tbody>
+<tr><td><strong>1. Conduct a business impact analysis</strong></td><td>Assess the possible effects a disruption could have on business functions</td></tr>
+<tr><td><strong>2. Identify, document, and implement recovery steps</strong></td><td>Actionable steps for responding to a security event</td></tr>
+<tr><td><strong>3. Organize a business continuity team</strong></td><td>Typically drawn from cybersecurity, IT, HR, communications, and operations</td></tr>
+<tr><td><strong>4. Conduct training</strong></td><td>Practice different risk scenarios so the team is prepared, not just documented</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-704</span></div>
+  <div class="ticket-body"><p><strong>Disaster recovery plan:</strong> Outlines the steps needed to minimize the impact of a security incident (e.g., a ransomware attack halting manufacturing data access), created alongside a business continuity plan. It focuses on restoring software and hardware functionality and identifying affected applications and data.</p></div>
+</div>
+
+<h3 id="sec-5" data-n="1.5">Case Study: Juliana's First Day</h3>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>Case Study — Juliana Soto, Cybersecurity Analyst</span><span class="ticket-id">CASE-701</span></div>
+  <div class="ticket-body">
+    <p>Juliana Soto was recently hired as a cybersecurity analyst at Right-On-Time Payment Solutions, a fictional payment-processing company. On her first day, she reviews onboarding materials and discovers the company handles significant PII — usernames, passwords, full names, employee ID numbers (EINs), and bank account or debit card information.</p>
+    <p>She concludes that <strong>customer data</strong> is the company's most important asset. Rather than guessing at next steps, she applies the <strong>information lifecycle strategy</strong> she learned during her certificate program:</p>
+    <ol>
+      <li><strong>Identify</strong> the important assets — sensitive customer information, PII, financial data, SSNs, EINs.</li>
+      <li><strong>Assess</strong> existing security measures and review the company's information security policies.</li>
+      <li><strong>Protect</strong> the identified assets — since it's her first day, she asks to shadow a senior analyst rather than acting alone.</li>
+      <li><strong>Monitor</strong> the security processes already in place — she ends her day observing live systems monitoring.</li>
+    </ol>
+    <p>Her supervisor is impressed with her initiative in requesting to shadow a senior colleague rather than overreaching on day one.</p>
+  </div>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-703</span></div>
+  <div class="ticket-body"><p>Juliana's approach models exactly the right instinct for a new hire: use a structured framework (the information lifecycle) rather than improvising, and recognize the limits of what you can responsibly do on day one. Asking to observe rather than act independently isn't a lack of confidence — it's good judgment, and supervisors notice the difference.</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 1.1 — Data Classification Drill</summary>
+  <div class="acc-body">
+    <p>Classify each: (1) a company's annual press release, (2) an employee's ID badge number, (3) a customer's Social Security number, (4) an unpublished merger agreement under NDA.</p>
+    <p><strong>Answer key:</strong> 1 — Public, 2 — Private, 3 — Sensitive, 4 — Confidential.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 1.2 — BCP vs. DR Plan</summary>
+  <div class="acc-body">
+    <p>A ransomware attack has just encrypted a manufacturing database. Which document guides restoring the database and applications specifically, and which guides keeping the broader business operating during the disruption?</p>
+    <p><strong>Answer:</strong> The disaster recovery plan guides restoring the specific software/hardware/data. The business continuity plan guides sustaining broader business operations during and after the disruption. They're created together but serve distinct purposes.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Portfolio Project 1.1 — Apply the Information Lifecycle</summary>
+  <div class="acc-body">
+    <p>Choose a hypothetical small organization. Write a one-page information lifecycle strategy for it, following Juliana's four steps: identify, assess, protect, monitor. Save this to your portfolio — it demonstrates structured thinking that interviewers specifically look for.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Beginner Question</span><span class="ticket-id">INT-701</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: What does having a "security mindset" mean to you?</strong></p>
+    <p><strong>Ideal answer:</strong> "It's the ongoing habit of evaluating risk and actively looking for potential or actual breaches, rather than only reacting when something is already flagged. It means treating security as a continuous practice — staying current on new threats, applying skepticism to unexpected requests, and taking even small anomalies seriously because they can indicate something larger."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Scenario Question</span><span class="ticket-id">INT-702</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: On your first day, you notice something that seems slightly off in a log file, but you're not fully sure what your company's escalation process is yet. What do you do?</strong></p>
+    <p><strong>Ideal answer:</strong> "I'd raise it to my supervisor or a more senior colleague right away, even if it turns out to be nothing — like Juliana's approach on her first day, it's better to ask and observe than to guess or stay silent. I'd also make it a priority to learn the specific escalation policy quickly so I can act more independently going forward."</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which asset classification level does a company's public marketing brochure fall under?</div>
+  <button class="opt" onclick="checkAnswer(this,true)">Low-level</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Mid-level</button>
+  <button class="opt" onclick="checkAnswer(this,false)">High-level</button>
+  <div class="fb">Correct — public data is a low-level asset since it's already accessible and won't harm the organization if compromised.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: A security event that is resolved without a data breach is still classified as a security incident.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — an event only becomes an incident if it actually results in a breach.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. Which document specifically addresses restoring software and hardware functionality after a security incident?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Business continuity plan</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Disaster recovery plan</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Escalation policy</button>
+  <div class="fb">Correct — the disaster recovery plan focuses on restoring software/hardware functionality specifically.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-701</span></div>
+  <div class="ticket-body"><p>Security mindset = continuous risk evaluation, not a one-time checklist. 4 data types: public/private/sensitive/confidential, mapped to low/high-level assets. A security event only becomes an incident if a breach actually occurs. BCP (sustain operations) and DR plan (restore systems) are created together, as the final step of a 4-part process: identify → determine threats → implement detection → create BCP/DR.</p></div>
+</div>
+
+<div class="summary-block" id="summary">
+  <h4>Module Summary</h4>
+  <p>This module opened the final course by consolidating the security mindset and classification frameworks from across the certificate into their most interview-ready form, then applied them through Juliana's realistic first-day case study.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>A security mindset is an ongoing practice of risk evaluation, not a static skill you acquire once.</li>
+    <li>Four data classification types (public/private/sensitive/confidential) map onto low- to high-level asset importance.</li>
+    <li>No security issue is too small to escalate — the asymmetry between wasted time and unaddressed risk favors raising concerns.</li>
+    <li>Business continuity and disaster recovery plans are complementary, created together, addressing different scopes of recovery.</li>
+    <li>Structured frameworks (like the information lifecycle) help new analysts act confidently without overreaching.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives">◂ Back to Module 1 Objectives</a>
+  <a href="#module-2">Module 2 · Escalate Incidents ▸</a>
+</div>
+
+<div class="endmark">— End of Module 1 —</div>
+<!-- ============================================================
+     MODULE 2 · WEEK 2 — ESCALATE INCIDENTS
+     ============================================================ -->
+<h2 class="module-head" id="module-2"><span class="tag">Module 2 · Week 2</span>Escalate Incidents</h2>
+
+<div class="objectives" id="objectives-2">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Define incident escalation and explain why entry-level analysts play a critical role in it.</li>
+    <li>Explain breach notification laws and distinguish low-level from high-level security issues.</li>
+    <li>Identify the three incident classification types: malware infection, unauthorized access, improper usage.</li>
+    <li>Describe the roles involved in escalation: data owners, controllers, processors, custodians, and DPOs.</li>
+    <li>Explain how escalation timing and asset criticality determine incident priority.</li>
+    <li>Apply these concepts through Juliana's second-day case study.</li>
+  </ul>
+</div>
+
+<h3 id="sec-2-1" data-n="2.1">The Importance of Escalation</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-705</span></div>
+  <div class="ticket-body"><p><strong>Incident escalation:</strong> The process of identifying a potential security incident, triaging it, and handing it off to a more experienced team member.</p></div>
+</div>
+
+<p>Entry-level analysts are rarely expected to independently resolve major incidents — but they are absolutely expected to correctly identify and escalate them. This distinction matters: your value in your first security role comes less from having every answer and more from reliably recognizing when something needs an experienced person's attention.</p>
+
+<div class="table-wrap">
+<table>
+<caption>Two Essential Skills for Escalation</caption>
+<thead><tr><th>Skill</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><strong>Attention to detail</strong></td><td>Identifying anomalies in the organization's network or systems</td></tr>
+<tr><td><strong>Following escalation guidelines</strong></td><td>Knowing precisely how to properly escalate identified issues</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Assembly Line</span>
+  <p>Think of incident escalation like an assembly line: your job is one specific station, and every decision you make — pass this along, or handle it here — affects everyone downstream. Correctly identifying and escalating an incident isn't a small task; it's what keeps the entire line moving smoothly.</p>
+</div>
+
+<h3 id="sec-2-2" data-n="2.2">Breach Notification Laws &amp; Low-Level Issues</h3>
+
+<div class="ticket compliance">
+  <div class="ticket-head"><span><span class="icon">⚖️</span>Compliance Note</span><span class="ticket-id">CMP-701</span></div>
+  <div class="ticket-body"><p>Many countries have <strong>breach notification laws</strong>, requiring companies and government entities to notify individuals of security breaches involving PII — personal identification numbers (like SSNs and driver's license numbers), medical records, addresses, and other sensitive customer information. As an entry-level analyst, staying aware of applicable laws matters, since they're regularly updated.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Low-Level Security Issues — Examples</caption>
+<thead><tr><th>Example</th><th>Why It's Still Worth Investigating</th></tr></thead>
+<tbody>
+<tr><td>One failed login attempt on an account</td><td>Not urgent alone, but establishes the baseline for what "normal" looks like</td></tr>
+<tr><td>An employee downloading unapproved software</td><td>Could be entirely innocent, or could be malware-infected — worth a quick check</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-702</span></div>
+  <div class="ticket-body"><p>Frequency changes everything. A password typed incorrectly two or three times is unremarkable. That same password entered incorrectly <strong>15 times within 30 minutes</strong> is a completely different signal — a low-level issue can become a genuine concern purely through repetition and pattern.</p></div>
+</div>
+
+<h3 id="sec-2-3" data-n="2.3">Incident Classification Types</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Three Incident Classification Types</caption>
+<thead><tr><th>Type</th><th>Definition</th><th>Escalation Note</th></tr></thead>
+<tbody>
+<tr><td><strong>Malware infection</strong></td><td>Malicious software disrupting a system by infiltrating computers or a network — phishing-delivered and ransomware are common forms</td><td>Especially impactful given the sensitivity of data typically stored on organizational networks</td></tr>
+<tr><td><strong>Unauthorized access</strong></td><td>An individual gains digital or physical access to a system or application without permission — brute force attacks are one method</td><td>All instances are important to escalate; urgency depends on criticality to business operations</td></tr>
+<tr><td><strong>Improper usage</strong></td><td>An employee violates the organization's acceptable use policies</td><td>Can be unintentional or intentional — hard to tell which, so escalate to a supervisor to make that determination</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-2-4" data-n="2.4">Roles in the Escalation Process</h3>
+
+<p>Recall from Course V that data governance roles exist. This module details specifically how each role fits into the escalation chain when an incident occurs.</p>
+
+<div class="table-wrap">
+<table>
+<caption>Five Escalation-Relevant Roles</caption>
+<thead><tr><th>Role</th><th>Responsibility</th><th>Escalate to Them When...</th></tr></thead>
+<tbody>
+<tr><td><strong>Data owner</strong></td><td>Decides who can access, edit, use, or destroy their information; accountable for classification and protection</td><td>Someone gains unauthorized access to software they don't need for work</td></tr>
+<tr><td><strong>Data controller</strong></td><td>Determines the procedure and purpose for processing data, especially customer personal information</td><td>Sensitive customer information is at risk</td></tr>
+<tr><td><strong>Data processor</strong></td><td>Reports to the data controller; processes data on their behalf, often a vendor</td><td>Data processing issues arise with a third-party vendor</td></tr>
+<tr><td><strong>Data custodian</strong></td><td>Assigns/removes access, implements security controls, monitors the data</td><td>Security controls need strengthening or have been compromised</td></tr>
+<tr><td><strong>Data protection officer (DPO)</strong></td><td>Monitors internal compliance with data protection procedures, advises on obligations</td><td>Set standards or protocols have been violated</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-704</span></div>
+  <div class="ticket-body"><p>As an entry-level analyst, you'll typically escalate to your <strong>direct supervisor</strong> in practice, regardless of the incident type. But understanding this full role map still matters — it helps you recognize which incidents are especially significant and why, even when you're not personally routing the escalation to each specific role yourself.</p></div>
+</div>
+
+<h3 id="sec-2-5" data-n="2.5">Escalation Timing &amp; Priority</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-706</span></div>
+  <div class="ticket-body"><p><strong>Escalation policy:</strong> An organization's process for handling security incidents — a set of actions outlining who should be notified when an incident alert occurs and how that incident should be handled.</p></div>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning — From Small Activity to Major Breach</span><span class="ticket-id">WRN-701</span></div>
+  <div class="ticket-body"><p>Google's course materials describe a realistic near-miss: unusual log activity from a recently banned app goes unnoticed on a quiet day. One week later, a data breach halts operations at a manufacturing site and causes real financial losses. The lesson is explicit — <strong>simple, unescalated incidents can compound into much larger failures</strong>, purely through the passage of time.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>Priority Driver</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td><strong>Asset criticality</strong></td><td>Unauthorized access to a manufacturing application takes priority over malware on a legacy system that no longer supports business operations</td></tr>
+<tr><td><strong>Reversibility</strong></td><td>A forgotten password (low-level, minimal impact) vs. unauthorized access to a database with PII (urgent, high impact)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Quick Escalation Tips</caption>
+<tbody>
+<tr><td>Familiarize yourself with your organization's escalation policy</td></tr>
+<tr><td>Follow the policy at all times, even when it's inconvenient</td></tr>
+<tr><td>Ask questions — it demonstrates commitment to doing the job correctly, not uncertainty</td></tr>
+<tr><td>Bookmark or save the escalation policy on your work devices for quick access during a real incident</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-2-6" data-n="2.6">Case Study: Juliana's Attention to Detail</h3>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>Case Study — Juliana's Second Day</span><span class="ticket-id">CASE-702</span></div>
+  <div class="ticket-body">
+    <p>While monitoring data logs, Juliana's system alerts her to an employee account locked after <strong>10 failed login attempts</strong> — the organization's escalation policy requires this specific threshold to be escalated to the password protection team.</p>
+    <p>Before she can act, a second alert arrives: an unknown source has attempted to compromise a system storing customer <strong>bank account information</strong>. Juliana quickly recognizes this as the more urgent of the two events, given the sensitivity of financial data and the number of customers who would be affected.</p>
+    <p>She follows the escalation policy carefully for the high-priority bank-data incident first, notifying the appropriate team members with full attention to procedural detail. Only after completing that escalation does she return to the lower-priority failed-login incident and escalate it following the same careful process.</p>
+    <p>Her supervisor is impressed with both her initiative and her ability to correctly prioritize between two simultaneous incidents.</p>
+  </div>
+</div>
+
+<div class="ticket examtip">
+  <div class="ticket-head"><span><span class="icon">🎯</span>Exam Tip</span><span class="ticket-id">EXM-701</span></div>
+  <div class="ticket-body"><p>Juliana's decision is a clean, reusable model for a "how would you prioritize two incidents" interview question: identify which asset is more critical to the business and how many people would be affected, act on the higher-priority incident first, but ensure <em>both</em> get properly escalated — nothing gets dropped, just sequenced.</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs-2">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 2.1 — Incident Type Classification</summary>
+  <div class="acc-body">
+    <p>Classify each: (1) an employee installs an unapproved game that turns out to be infected, (2) an attacker uses brute force to access a payroll system, (3) an employee shares their password with a coworker in violation of policy.</p>
+    <p><strong>Answer key:</strong> 1 — Malware infection, 2 — Unauthorized access, 3 — Improper usage.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 2.2 — Role Identification</summary>
+  <div class="acc-body">
+    <p>A third-party vendor responsible for processing customer data experiences a technical issue that risks data integrity. Which role does this escalate to first, and which role oversees them?</p>
+    <p><strong>Answer:</strong> This escalates to the data processor (the vendor itself, or whoever oversees the vendor relationship), who in turn reports to the data controller — the party that determines the purpose and procedure for processing that data.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Scenario Challenge 2.1 — Simultaneous Incident Prioritization</summary>
+  <div class="acc-body">
+    <p>You receive two alerts at once: a single failed login on a low-importance internal wiki, and unusual outbound traffic from a server hosting customer PII. Which do you escalate first, and how would you justify that choice if asked in an interview?</p>
+    <p><strong>Answer guidance:</strong> The PII server traffic takes priority — it involves a high-criticality asset (customer PII, likely triggering breach notification obligations) versus a low-impact internal tool. Justify the choice explicitly in terms of asset criticality and potential regulatory/customer impact, mirroring Juliana's reasoning.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview-2">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Beginner Question</span><span class="ticket-id">INT-703</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: What are the three main incident classification types, and why does classifying an incident correctly matter?</strong></p>
+    <p><strong>Ideal answer:</strong> "Malware infection, unauthorized access, and improper usage. Correctly classifying an incident matters because it determines who it should be escalated to and how urgently — a malware infection might route to a different team than an improper-usage policy violation, and getting the classification wrong can slow down the right response."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Scenario Question</span><span class="ticket-id">INT-704</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Tell me about a time you had to prioritize between two competing tasks or issues. How did you decide what came first?</strong></p>
+    <p><strong>Ideal answer approach:</strong> Even without direct security experience, this maps cleanly onto the STAR method (covered fully in Module 5) — describe the situation, the competing priorities, the criteria you used to decide (impact, urgency, reversibility), and the outcome. Juliana's bank-data-vs-failed-login example is a strong model to reference or adapt from your own experience.</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice-2">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which incident type occurs when an employee violates the organization's acceptable use policy?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Malware infection</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Unauthorized access</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Improper usage</button>
+  <div class="fb">Correct — improper usage specifically involves violating acceptable use policies.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: A data processor determines the purpose and procedure for processing data.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — that's the data controller. The data processor processes data on the controller's behalf, often as a vendor.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. What determines an incident's urgency, according to this module?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">How embarrassing it would be if discovered</button>
+  <button class="opt" onclick="checkAnswer(this,true)">The criticality of the affected asset to business operations</button>
+  <button class="opt" onclick="checkAnswer(this,false)">How long ago the incident occurred</button>
+  <div class="fb">Correct — asset criticality to business operations is the primary driver of urgency.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision-2">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-702</span></div>
+  <div class="ticket-body"><p>Incident escalation = identify → triage → hand off to a more experienced team member. 3 incident types: malware infection, unauthorized access, improper usage. 5 escalation roles: data owner, controller, processor, custodian, DPO. Entry-level analysts typically escalate to their direct supervisor. Priority is driven by asset criticality, not just incident severity in isolation. Unescalated small incidents can compound into major breaches over time.</p></div>
+</div>
+
+<div class="summary-block" id="summary-2">
+  <h4>Module Summary</h4>
+  <p>This module gave you the complete escalation toolkit: the three incident types, the five roles involved in a full escalation chain, and the timing/priority judgment that turns a list of alerts into a correctly sequenced response — all demonstrated through Juliana's realistic dual-incident scenario.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>Incident escalation is a triage-and-handoff skill, not a resolve-it-yourself expectation for entry-level analysts.</li>
+    <li>Malware infection, unauthorized access, and improper usage are the three core incident classification types.</li>
+    <li>Data owners, controllers, processors, custodians, and DPOs each play a distinct role in the escalation chain.</li>
+    <li>Asset criticality — not just how alarming an alert looks — should drive prioritization between competing incidents.</li>
+    <li>Small, unescalated issues can compound into major breaches purely through the passage of time.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives-2">◂ Back to Module 2 Objectives</a>
+  <a href="#module-3">Module 3 · Communicate with Stakeholders ▸</a>
+</div>
+
+<div class="endmark">— End of Module 2 —</div>
+<!-- ============================================================
+     MODULE 3 · WEEK 3 — COMMUNICATE WITH STAKEHOLDERS
+     ============================================================ -->
+<h2 class="module-head" id="module-3"><span class="tag">Module 3 · Week 3</span>Communicate Effectively to Influence Stakeholders</h2>
+
+<div class="objectives" id="objectives-3">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Define stakeholder and identify the five key stakeholder roles in an organization.</li>
+    <li>Explain the principles of clear, concise stakeholder communication.</li>
+    <li>Apply the "security story" structure: challenge, impact, proposed solution.</li>
+    <li>Choose an appropriate communication channel for a given scenario.</li>
+    <li>Explain visual dashboards and when to use them over other communication methods.</li>
+    <li>Apply these concepts through Juliana's stakeholder-communication case study.</li>
+  </ul>
+</div>
+
+<h3 id="sec-3-1" data-n="3.1">Understanding Stakeholders</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-707</span></div>
+  <div class="ticket-body"><p><strong>Stakeholder:</strong> An individual or group with an interest in the decisions or activities of an organization.</p></div>
+</div>
+
+<p>Every organization has a hierarchy from entry-level analyst up through management to executives. Stakeholders sit at every level of that hierarchy, and their decisions directly shape the daily work of the analysts beneath them — which is exactly why learning to communicate with them well is a career skill, not an afterthought.</p>
+
+<h3 id="sec-3-2" data-n="3.2">Five Key Stakeholder Roles</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Five Key Stakeholders in Cybersecurity</caption>
+<thead><tr><th>Role</th><th>Primary Concern</th></tr></thead>
+<tbody>
+<tr><td><strong>Risk Managers</strong></td><td>Identify risks, manage incident response, notify legal about regulatory issues, coordinate with PR for public communications</td></tr>
+<tr><td><strong>Chief Executive Officer (CEO)</strong></td><td>Highest-ranking person in the organization; financial/managerial decisions, shareholder reporting; security is a top concern</td></tr>
+<tr><td><strong>Chief Financial Officer (CFO)</strong></td><td>Financial operations; concerned with the financial standpoint of incidents and the cost of security tools/strategies</td></tr>
+<tr><td><strong>Chief Information Security Officer (CISO)</strong></td><td>Develops security architecture, conducts risk analysis and system audits, creates security and business continuity plans</td></tr>
+<tr><td><strong>Operations Managers</strong></td><td>Oversee security professionals; first line of defense; daily maintenance of security operations</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-703</span></div>
+  <div class="ticket-body"><p>As an entry-level analyst, direct communication with higher-level stakeholders (risk managers, CEO, CFO, CISO) is unlikely day to day. What's far more common: your <strong>operations manager</strong> asks you to prepare communications — a report, a dashboard, a summary — that they'll then relay upward. Your writing and visuals may reach senior stakeholders even when you don't personally present them.</p></div>
+</div>
+
+<h3 id="sec-3-3" data-n="3.3">Communicating for Impact</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Four Questions to Get to the Point</caption>
+<tbody>
+<tr><td>What do I want this person to know?</td></tr>
+<tr><td>Why is it important for them to know it?</td></tr>
+<tr><td>When do they need to take action?</td></tr>
+<tr><td>How do I explain the situation in a nontechnical manner?</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="eli5">
+  <span class="eli5-tag">Explain Like I'm Five — The Restaurant Order</span>
+  <p>Telling a busy chef "the customer at table 6 says the soup tastes a little different than usual, possibly less salt, though it could just be their personal preference, and they mentioned it politely without seeming upset" buries the useful information. "Table 6: less salt in the soup, please check the batch" gets acted on immediately. Stakeholder communication works the same way — say the thing that requires action, clearly, first.</p>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-705</span></div>
+  <div class="ticket-body"><p>Different stakeholder levels care about different things by default. Operations managers tend to focus on day-to-day operational details (like log anomalies); senior-level stakeholders tend to focus on underlying business risk (like potential financial burden). Tailor which details you lead with based on who's actually reading the communication.</p></div>
+</div>
+
+<h3 id="sec-3-4" data-n="3.4">The Security Story Structure</h3>
+
+<p>Google's course materials frame effective security communication as a small story, with a deliberate three-part structure — borrowing from the same beginning/middle/end logic as any narrative, but compressed for a busy reader.</p>
+
+<div class="table-wrap">
+<table>
+<caption>The Three-Part Security Story</caption>
+<thead><tr><th>Part</th><th>Content</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td><strong>1. What the challenge is</strong></td><td>A clear description of the issue</td><td>"Potential malicious code execution found in system logs"</td></tr>
+<tr><td><strong>2. How it impacts the organization</strong></td><td>Reference to the incident response playbook, showing adherence to established procedure</td><td>Citing the playbook's specific guidance on malicious code found in logs</td></tr>
+<tr><td><strong>3. A possible solution</strong></td><td>A proposed next step, with the humility that you're not the final decision-maker</td><td>Recommending isolation and further investigation, while deferring the final call</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Choosing a Communication Channel</caption>
+<thead><tr><th>Situation</th><th>Best Channel</th></tr></thead>
+<tbody>
+<tr><td>Straightforward, quick update</td><td>Instant message or phone call</td></tr>
+<tr><td>Complex situation with multiple layers</td><td>Email or in-person meeting</td></tr>
+<tr><td>Heavy on numbers and data</td><td>A graph or visual dashboard</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-3-5" data-n="3.5">Visual Dashboards</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-708</span></div>
+  <div class="ticket-body"><p><strong>Visual dashboard:</strong> A way of displaying various types of data quickly in one place — a tool for communicating stories to stakeholders about security events, especially when numbers and data are involved.</p></div>
+</div>
+
+<figure>
+<svg viewBox="0 0 640 240" width="100%" role="img" aria-label="Mockup of a simple visual dashboard showing a bar chart of phishing emails clicked by department, built in a spreadsheet tool for stakeholder communication">
+  <rect x="0" y="0" width="640" height="240" fill="#F7F5F0"/>
+  <rect x="20" y="20" width="600" height="200" rx="8" fill="#131C2E"/>
+  <text x="40" y="48" font-family="sans-serif" font-size="13" font-weight="700" fill="#2E9E5B">Clicked Phishing Emails by Department</text>
+  <g font-family="sans-serif" font-size="10" fill="#9FB1BE">
+    <rect x="60" y="80" width="40" height="100" fill="#C97A2E"/><text x="80" y="195" text-anchor="middle">HR</text>
+    <rect x="150" y="130" width="40" height="50" fill="#2E5C8A"/><text x="170" y="195" text-anchor="middle">CS</text>
+    <rect x="240" y="150" width="40" height="30" fill="#1F7A44"/><text x="260" y="195" text-anchor="middle">Sec</text>
+    <rect x="330" y="50" width="40" height="130" fill="#A5301D"/><text x="350" y="195" text-anchor="middle">PR</text>
+    <rect x="420" y="100" width="40" height="80" fill="#4A7FB5"/><text x="440" y="195" text-anchor="middle">Dev</text>
+  </g>
+  <text x="330" y="30" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#9FB1BE">Media Relations clicked the most — needs targeted training</text>
+</svg>
+<figcaption>Figure 3.1 — A simple dashboard turning raw click data into an immediately readable story</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<caption>Building a Dashboard in Google Sheets — Quick Steps</caption>
+<tbody>
+<tr><td>1. Enter data with clear column headers (e.g., Department, # of clicked phishing emails)</td></tr>
+<tr><td>2. Select the rows/columns containing your headers and data</td></tr>
+<tr><td>3. Click Insert → Chart</td></tr>
+<tr><td>4. Choose a chart type (e.g., bar chart) in the Chart editor</td></tr>
+<tr><td>5. Customize the chart and axis titles for clarity</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-706</span></div>
+  <div class="ticket-body"><p>Dashboards can be simple (one chart) or complex (multiple charts, graphs, tables) — match the complexity to the story and audience, not to how much data you happen to have available. A single clear bar chart often communicates more effectively than an overloaded dashboard nobody has time to fully read.</p></div>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning</span><span class="ticket-id">WRN-702</span></div>
+  <div class="ticket-body"><p>Be mindful of sensitive information in email and other written communications — always follow your organization's playbook guidance for communicating sensitive data, and double-check recipients before sending anything involving confidential details. A message sent to the wrong person is itself a security incident.</p></div>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice — Proactive Follow-Up</span><span class="ticket-id">BP-707</span></div>
+  <div class="ticket-body"><p>Stakeholders are busy and emails can get buried. If you haven't heard back on something time-sensitive, a friendly follow-up call or message is appropriate and often prevents a minor issue from escalating simply due to delayed response — this kind of initiative is also a way to stand out early in your career.</p></div>
+</div>
+
+<h3 id="sec-3-6" data-n="3.6">Case Study: Juliana's Effective Communication</h3>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>Case Study — Juliana Communicates Two Incidents</span><span class="ticket-id">CASE-703</span></div>
+  <div class="ticket-body">
+    <p><strong>Incident #1 (failed logins):</strong> Juliana's manager needs to report locked-account statistics across five departments to senior executives. Since the communication is primarily about numbers, Juliana builds a <strong>visual dashboard</strong> with charts and graphs — making it easy for busy, senior-level stakeholders to quickly review and decide on next steps.</p>
+    <p><strong>Incident #2 (attempted PII compromise):</strong> The CISO wants a more detailed account of what happened and what worked or didn't during the attempted compromise. Because this communication is complex and process-focused rather than numbers-focused, Juliana instead prepares a <strong>detailed document with a timeline</strong>, including her own analysis of what the security team, data owners, and data processors could improve going forward.</p>
+    <p>Same underlying incidents, two completely different — and appropriately matched — communication formats.</p>
+  </div>
+</div>
+
+<div class="ticket examtip">
+  <div class="ticket-head"><span><span class="icon">🎯</span>Exam Tip</span><span class="ticket-id">EXM-702</span></div>
+  <div class="ticket-body"><p>Juliana's dual approach is the cleanest possible illustration of "match the format to the content": numbers/comparisons → visual dashboard; process/narrative/timeline → detailed document. If an interview scenario asks how you'd communicate a finding, naming this distinction explicitly signals real communication maturity.</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs-3">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 3.1 — Channel Selection Drill</summary>
+  <div class="acc-body">
+    <p>Choose the best communication channel for each: (1) confirming a minor, routine system update completed successfully, (2) explaining a multi-week incident investigation's full timeline to the CISO, (3) showing which of five departments had the most phishing clicks last quarter.</p>
+    <p><strong>Answer key:</strong> 1 — Instant message. 2 — A detailed document (email attachment or shared doc). 3 — A visual dashboard/chart.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 3.2 — Build a Mini Security Story</summary>
+  <div class="acc-body">
+    <p>Using the three-part security story structure, write a short (3-sentence) communication about a fictional incident: SQL injection attempt detected on a login form. Include the challenge, the impact/playbook reference, and a proposed solution.</p>
+    <p><strong>Sample answer:</strong> "We detected a SQL injection attempt against the customer login form this morning. Per our web application security playbook, this pattern matches known OWASP Top 10 injection attacks and could expose the customer database if successful. I'd recommend immediately reviewing input validation on that form and temporarily rate-limiting login attempts while we investigate further."</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Portfolio Project 3.1 — Build a Real Dashboard</summary>
+  <div class="acc-body">
+    <p>Using Google Sheets or a similar tool, build a simple bar chart dashboard from fictional data (e.g., incidents by type over six months). Save a screenshot or link to your portfolio — this is a concrete, presentable artifact demonstrating visual communication skills.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview-3">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Beginner Question</span><span class="ticket-id">INT-705</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: How would you explain a technical security issue to a non-technical executive?</strong></p>
+    <p><strong>Ideal answer:</strong> "I'd focus on what they need to know, why it matters to the business, and what action (if any) is needed from them — avoiding unnecessary technical jargon. I'd lead with the business impact rather than the technical mechanism, and I'd choose a format that fits the content: a quick summary for something simple, or a visual dashboard if the story is mostly about numbers and trends."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Scenario Question</span><span class="ticket-id">INT-706</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: You've sent an important email to a stakeholder about a time-sensitive security issue, but haven't heard back in a day. What do you do?</strong></p>
+    <p><strong>Ideal answer:</strong> "I'd follow up proactively — a quick phone call or instant message — rather than assuming the email was seen and waiting indefinitely. Stakeholders are busy and things get buried; a friendly, direct follow-up is a normal and expected part of ensuring time-sensitive issues actually get addressed."</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice-3">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. Which stakeholder is typically the first line of defense, overseeing daily security operations?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">CFO</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Operations Manager</button>
+  <button class="opt" onclick="checkAnswer(this,false)">CEO</button>
+  <div class="fb">Correct — operations managers oversee security professionals and daily security maintenance.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: A visual dashboard is generally the best choice when communicating a complex, process-heavy timeline of events.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — a detailed document is generally better suited to complex, narrative, process-focused communication; dashboards excel at numbers and comparisons.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. What is the third part of the "security story" structure?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">A description of the challenge</button>
+  <button class="opt" onclick="checkAnswer(this,false)">A reference to the incident response playbook</button>
+  <button class="opt" onclick="checkAnswer(this,true)">A proposed solution</button>
+  <div class="fb">Correct — the structure ends with a proposed (not final) solution.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision-3">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-703</span></div>
+  <div class="ticket-body"><p>5 stakeholders: Risk Managers, CEO, CFO, CISO, Operations Managers. Get to the point: what/why/when/how (nontechnical). Security story = challenge → impact (playbook reference) → proposed solution. Channel choice: IM/call (quick), email/meeting (complex), dashboard (numbers). Visual dashboards display data quickly in one place — simple or complex, matched to the story. Follow up proactively on unanswered time-sensitive communications.</p></div>
+</div>
+
+<div class="summary-block" id="summary-3">
+  <h4>Module Summary</h4>
+  <p>This module turned raw findings into stakeholder-ready communication — identifying the five key stakeholder roles, structuring a "security story," choosing the right channel, and building visual dashboards — all demonstrated through Juliana's parallel handling of two very differently-shaped incidents.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>Different stakeholder levels care about different details — tailor communication to the audience, not just the facts.</li>
+    <li>The three-part security story (challenge, impact, proposed solution) structures almost any incident communication.</li>
+    <li>Channel choice should match content: quick/simple → IM or call; complex → email or meeting; numeric → dashboard.</li>
+    <li>Visual dashboards turn raw data into an immediately readable story for busy decision-makers.</li>
+    <li>Proactive follow-up on unanswered communications is expected professional behavior, not overstepping.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives-3">◂ Back to Module 3 Objectives</a>
+  <a href="#module-4">Module 4 · Engage with the Community ▸</a>
+</div>
+
+<div class="endmark">— End of Module 3 —</div>
+<!-- ============================================================
+     MODULE 4 · WEEK 4 — ENGAGE WITH THE CYBERSECURITY COMMUNITY
+     ============================================================ -->
+<h2 class="module-head" id="module-4"><span class="tag">Module 4 · Week 4</span>Engage with the Cybersecurity Community</h2>
+
+<div class="objectives" id="objectives-4">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Identify reliable cybersecurity news and resource sources.</li>
+    <li>Explain the OWASP Top 10's role as an industry-standard awareness document.</li>
+    <li>Describe strategies for finding relevant cybersecurity organizations and conferences.</li>
+    <li>Use social media, particularly LinkedIn, to build a professional cybersecurity network safely.</li>
+    <li>Explain how to write an effective professional networking message.</li>
+  </ul>
+</div>
+
+<h3 id="sec-4-1" data-n="4.1">Reliable Cybersecurity Resources</h3>
+
+<p>Security is a rapidly evolving field — nearly everything in this certificate will need periodic updating in your own head as new threats, tools, and best practices emerge. Building a habit of following a few trustworthy sources is one of the most practical, low-effort ways to stay current after this program ends.</p>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-709</span></div>
+  <div class="ticket-body"><p><strong>OWASP Top 10:</strong> A globally recognized standard awareness document listing the top 10 most critical security risks to web applications, updated roughly every three to four years to reflect the field's evolving threat landscape.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Recommended Cybersecurity News Resources</caption>
+<thead><tr><th>Resource</th><th>Focus</th></tr></thead>
+<tbody>
+<tr><td><strong>CSO Online</strong></td><td>News, analysis, and research across security and risk management topics, valuable for CSOs and working security professionals</td></tr>
+<tr><td><strong>Krebs on Security</strong></td><td>In-depth security blog by Brian Krebs (former Washington Post reporter), covering cyber attack news and investigations</td></tr>
+<tr><td><strong>Dark Reading</strong></td><td>Popular among security professionals; covers analytics, application security, mobile/cloud security, and IoT</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-708</span></div>
+  <div class="ticket-body"><p>Continuing security education after certification demonstrably helps you stand out to hiring managers — it shows a willingness to remain current on industry developments, which is exactly the trait every "ideal candidate" description in this certificate's interview-prep material keeps returning to.</p></div>
+</div>
+
+<h3 id="sec-4-2" data-n="4.2">Finding Organizations &amp; Conferences</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Three Ways to Find Relevant Organizations &amp; Conferences</caption>
+<thead><tr><th>Method</th><th>How To</th></tr></thead>
+<tbody>
+<tr><td><strong>Web search</strong></td><td>Search a specific interest area plus "conferences in my area" (e.g., "incident response cybersecurity conferences in my area")</td></tr>
+<tr><td><strong>Social media (LinkedIn)</strong></td><td>Search queries like "incident response cybersecurity groups" or "organizations for cybersecurity analysts"</td></tr>
+<tr><td><strong>Mailing lists</strong></td><td>CISA offers two: one on threat information/best practices, one with weekly new-vulnerability summaries</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important — Know Your Interest First</span><span class="ticket-id">IMP-704</span></div>
+  <div class="ticket-body"><p>Before searching for an organization or conference, clarify your own interest: reacting to incidents or preventing them? Forensic security or data logging? Aspiring toward a CISO track? A clear self-assessment narrows the search dramatically and points you toward genuinely relevant communities rather than generic ones.</p></div>
+</div>
+
+<div class="ticket warning">
+  <div class="ticket-head"><span><span class="icon">⚠️</span>Warning</span><span class="ticket-id">WRN-703</span></div>
+  <div class="ticket-body"><p>Social media is a useful way to find professional communities, but it's also a known social engineering vector. Never click unexpected links or attachments from unfamiliar users on social platforms — the same skepticism you've built throughout this certificate applies fully to your own professional networking activity, not just to work systems.</p></div>
+</div>
+
+<h3 id="sec-4-3" data-n="4.3">Building Your Network on LinkedIn</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Two Networking Strategies</caption>
+<thead><tr><th>Strategy</th><th>Why It Helps</th></tr></thead>
+<tbody>
+<tr><td><strong>Follow CISOs</strong></td><td>CISOs stay current on every aspect of security by necessity; following them surfaces useful tips and news, sharpening your own security mindset</td></tr>
+<tr><td><strong>Connect with fellow analysts</strong></td><td>Both entry-level peers and seasoned professionals can offer perspective; search terms like "cybersecurity analysts" and explore related groups/events</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Three Tips for a Strong First Networking Message</caption>
+<tbody>
+<tr><td>Use a conversational tone</td></tr>
+<tr><td>Provide a clear reason for wanting to connect</td></tr>
+<tr><td>Avoid spelling and grammatical errors</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Example LinkedIn Message</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>Hi, Tim. I recently completed the Google Cybersecurity Certificate
+program, and I'd like to connect with other security professionals.
+It seems like you have a lot of experience in the security industry
+that I can learn from. Let's keep in touch!</code></pre>
+  <div class="code-note"><strong>Why this works:</strong> It's conversational, states a clear reason for connecting, and doesn't ask the recipient to do anything unusual or suspicious (like downloading a file) — which is precisely what distinguishes a genuine networking message from a social-engineering attempt.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs-4">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 4.1 — Draft Your Own Networking Message</summary>
+  <div class="acc-body">
+    <p>Using the three tips above, draft your own first-connection message to a hypothetical security professional you'd like to follow or connect with. Keep it under four sentences.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 4.2 — Resource Search Practice</summary>
+  <div class="acc-body">
+    <p>Identify your own specific area of interest within cybersecurity (e.g., incident response, cloud security, forensics). Write the exact search query you'd use to find a relevant organization or conference.</p>
+    <p><strong>Sample answer:</strong> "cloud security cybersecurity conferences 2026" or "cloud security professional organizations."</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Portfolio Project 4.1 — Build Your Starting Network List</summary>
+  <div class="acc-body">
+    <p>Identify one CISO to follow, one cybersecurity organization relevant to your interests, and one news resource (CSO Online, Krebs on Security, or Dark Reading) to check periodically. Document this as a short list in your portfolio — a simple but concrete demonstration of professional engagement.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview-4">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Beginner Question</span><span class="ticket-id">INT-707</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: How do you stay current on the latest cybersecurity trends and threats?</strong></p>
+    <p><strong>Ideal answer:</strong> "I follow a few trusted sources regularly — resources like Krebs on Security and Dark Reading, and industry-standard references like the OWASP Top 10, which gets updated periodically as the threat landscape evolves. I also follow CISOs and other professionals on LinkedIn to see what's actively on their minds, which often surfaces emerging trends before they hit mainstream coverage."</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Behavioral Question</span><span class="ticket-id">INT-708</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Tell me about a professional community or network you've built, even outside cybersecurity.</strong></p>
+    <p><strong>Ideal answer approach:</strong> If you're new to the field, it's completely fair to describe your intended networking strategy (following CISOs, joining specific LinkedIn groups, identifying relevant conferences) as a demonstration of proactive career-building, even without an established network yet — interviewers evaluate the instinct as much as the track record.</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice-4">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. How frequently is the OWASP Top 10 typically updated?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Every month</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Every three to four years</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Every ten years</button>
+  <div class="fb">Correct — it's updated roughly every three to four years to reflect the evolving threat landscape.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: It's safe to click any link sent by a fellow "cybersecurity professional" on social media without verification.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — social engineering can occur through social media regardless of the sender's claimed profession; always verify before clicking unexpected links.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. Which agency offers cybersecurity mailing lists including weekly vulnerability summaries?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">OWASP</button>
+  <button class="opt" onclick="checkAnswer(this,true)">CISA</button>
+  <button class="opt" onclick="checkAnswer(this,false)">NIST</button>
+  <div class="fb">Correct — CISA (Cybersecurity & Infrastructure Security Agency) offers these mailing lists.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision-4">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-704</span></div>
+  <div class="ticket-body"><p>Trusted resources: CSO Online, Krebs on Security, Dark Reading, OWASP Top 10 (updated every 3–4 years). Find organizations via web search, LinkedIn search, or CISA mailing lists — clarify your specific interest first. Stay alert to social engineering on social media even while networking. Strong first LinkedIn message: conversational, clear reason, no errors. Follow CISOs for current industry insight.</p></div>
+</div>
+
+<div class="summary-block" id="summary-4">
+  <h4>Module Summary</h4>
+  <p>This shorter module closed the loop on ongoing professional development — where to get reliable information, how to find organizations and conferences matching your specific interests, and how to build a professional network on LinkedIn without falling for the same social engineering tactics this certificate has spent seven courses teaching you to recognize.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>A handful of trusted, regularly-checked resources keeps your security knowledge current well beyond this certificate.</li>
+    <li>The OWASP Top 10 is a periodically updated industry standard worth revisiting as new versions release.</li>
+    <li>Clarifying your specific area of interest first makes finding relevant organizations and conferences far more efficient.</li>
+    <li>Social media is a genuine networking tool, but the same social engineering caution applies to professional platforms as to any other.</li>
+    <li>A strong first networking message is conversational, states a clear reason, and is free of errors.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives-4">◂ Back to Module 4 Objectives</a>
+  <a href="#module-5">Module 5 · Find &amp; Apply for Jobs ▸</a>
+</div>
+
+<div class="endmark">— End of Module 4 —</div>
+<!-- ============================================================
+     MODULE 5 · WEEK 5 — FIND & APPLY FOR JOBS
+     ============================================================ -->
+<h2 class="module-head" id="module-5"><span class="tag">Module 5 · Week 5</span>Find &amp; Apply for Cybersecurity Jobs</h2>
+
+<div class="objectives" id="objectives-5">
+  <h4>Learning Objectives</h4>
+  <ul>
+    <li>Identify common entry-level cybersecurity job titles and where to search for them.</li>
+    <li>Build a resume structured around the certificate's skills and transferable strengths.</li>
+    <li>Write a cover letter that conveys genuine motivation, not just facts already on the resume.</li>
+    <li>Navigate the full interview process: phone screening, additional interviews, and offers.</li>
+    <li>Apply the STAR method to answer behavioral and situational questions.</li>
+    <li>Prepare for technical interviews covering Python, frameworks, and networking fundamentals.</li>
+    <li>Build rapport with interviewers and ask thoughtful questions of your own.</li>
+    <li>Develop and deliver a 60-second elevator pitch.</li>
+    <li>Prepare for remote interviews and manage imposter syndrome.</li>
+  </ul>
+</div>
+
+<h3 id="sec-5-1" data-n="5.1">Cybersecurity Job Titles &amp; Job Sites</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Entry-Level Job Titles, Revisited</caption>
+<thead><tr><th>Title</th><th>Focus</th><th>Relevant Skills</th></tr></thead>
+<tbody>
+<tr><td><strong>Security Analyst</strong></td><td>Monitoring networks, developing security strategies, researching IT security trends</td><td>Log monitoring, SIEM tools</td></tr>
+<tr><td><strong>Information Security Analyst</strong></td><td>Creating and implementing measures to protect networks and systems</td><td>Controls, frameworks, risk identification tools</td></tr>
+<tr><td><strong>SOC Analyst</strong></td><td>Efficiently handling security incidents per established policies and procedures</td><td>Security playbooks, incident response processes</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Where to Search for Jobs</caption>
+<thead><tr><th>Site</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><strong>ZipRecruiter</strong></td><td>Matches based on geographic/work preferences; upload a resume for direct employer outreach</td></tr>
+<tr><td><strong>Indeed</strong></td><td>Search by title, keyword, or company plus preferred location; resume upload enables recruiter outreach</td></tr>
+<tr><td><strong>Monster</strong></td><td>Similar search structure; widely used in the U.S. and internationally</td></tr>
+<tr><td><strong>LinkedIn</strong></td><td>Job search plus insight into company culture, values, and community initiatives</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-5-2" data-n="5.2">Building a Resume</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Five-Part Resume Structure</caption>
+<thead><tr><th>Section</th><th>Contents</th></tr></thead>
+<tbody>
+<tr><td><strong>1. Header</strong></td><td>Name, professional title (e.g., "Security Analyst"), contact information</td></tr>
+<tr><td><strong>2. Summary statement</strong></td><td>Brief overview of strengths and relevant skills, incorporating keywords from the job description</td></tr>
+<tr><td><strong>3. Skills</strong></td><td>Bulleted list of skills relevant to the specific position</td></tr>
+<tr><td><strong>4. Experience</strong></td><td>Work history with responsibilities; use action verbs and quantify accomplishments where possible</td></tr>
+<tr><td><strong>5. Education &amp; certifications</strong></td><td>Most recent education/certifications first; in-progress credentials are worth including</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>What to Include from This Certificate</caption>
+<thead><tr><th>Category</th><th>Examples</th></tr></thead>
+<tbody>
+<tr><td>Programming languages</td><td>Python, SQL</td></tr>
+<tr><td>Knowledge areas</td><td>Security mindset, NIST CSF, CIA triad model, SIEM tools, packet sniffers</td></tr>
+<tr><td>Transferable skills</td><td>Detail-oriented, collaborative, strong written/verbal communication</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Resume Formatting Tips</caption>
+<tbody>
+<tr><td>Check carefully for spelling and grammatical errors</td></tr>
+<tr><td>Keep the resume to roughly two pages</td></tr>
+<tr><td>List the last 10 years or less of work experience</td></tr>
+<tr><td>Use a word processing application or a reputable online template</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-709</span></div>
+  <div class="ticket-body"><p>Don't worry if you lack prior professional cybersecurity experience — this entire certificate <em>is</em> legitimate, describable experience. "Built and analyzed regex patterns to extract security-relevant data from log files using Python" is a real, resume-worthy line drawn directly from Course VII's coursework, not an exaggeration.</p></div>
+</div>
+
+<h3 id="sec-5-3" data-n="5.3">Writing a Cover Letter</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-710</span></div>
+  <div class="ticket-body"><p>A cover letter's purpose isn't to restate your resume — it's to answer a question a resume can't: <strong>why cybersecurity, and why you?</strong> Hiring managers use it to understand your motivation and personal connection to the field, which a bulleted skills list simply can't convey.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Cover Letter Structure (per a Google Global Staffing Manager)</caption>
+<tbody>
+<tr><td>Brief introduction</td></tr>
+<tr><td>Personal details and what makes you unique</td></tr>
+<tr><td>Your motivations for pursuing cybersecurity</td></tr>
+<tr><td>Relevant soft skills</td></tr>
+<tr><td>Reasons behind a career transition, if applicable</td></tr>
+<tr><td>Alignment with the specific company's mission</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket industry">
+  <div class="ticket-head"><span><span class="icon">🏢</span>Industry Insight — What Hiring Managers Actually Want</span><span class="ticket-id">IND-701</span></div>
+  <div class="ticket-body"><p>According to a Google global staffing manager who hires cybersecurity engineers, many candidates have a personal connection to the field — being a victim of cybercrime, or witnessing its impact firsthand. Naming that motivation directly, rather than writing something generic, is exactly what makes a cover letter memorable. There's no strict length rule, but simplicity and boldness in language are both explicitly recommended over dense, over-formal writing.</p></div>
+</div>
+
+<h3 id="sec-5-4" data-n="5.4">The Interview Process</h3>
+
+<figure>
+<svg viewBox="0 0 640 160" width="100%" role="img" aria-label="Diagram of the typical cybersecurity interview process: recruiter contact, preliminary phone screening, additional interviews including technical, then final offer">
+  <rect x="0" y="0" width="640" height="160" fill="#F7F5F0"/>
+  <g font-family="sans-serif" font-size="10.5" font-weight="700" fill="#fff">
+    <rect x="10" y="55" width="140" height="50" rx="6" fill="#2E5C8A"/><text x="80" y="76" text-anchor="middle">Recruiter</text><text x="80" y="92" text-anchor="middle" font-weight="400" font-size="9">Contact</text>
+    <rect x="170" y="55" width="140" height="50" rx="6" fill="#1F7A44"/><text x="240" y="76" text-anchor="middle">Phone</text><text x="240" y="92" text-anchor="middle" font-weight="400" font-size="9">Screening</text>
+    <rect x="330" y="55" width="140" height="50" rx="6" fill="#9A5A1F"/><text x="400" y="76" text-anchor="middle">Additional</text><text x="400" y="92" text-anchor="middle" font-weight="400" font-size="9">Interviews</text>
+    <rect x="490" y="55" width="140" height="50" rx="6" fill="#A5301D"/><text x="560" y="76" text-anchor="middle">Final</text><text x="560" y="92" text-anchor="middle" font-weight="400" font-size="9">Offer</text>
+  </g>
+  <path d="M150 80 L170 80" stroke="#0B1120" stroke-width="2" marker-end="url(#a8b)"/>
+  <path d="M310 80 L330 80" stroke="#0B1120" stroke-width="2" marker-end="url(#a8b)"/>
+  <path d="M470 80 L490 80" stroke="#0B1120" stroke-width="2" marker-end="url(#a8b)"/>
+  <defs><marker id="a8b" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#0B1120"/></marker></defs>
+  <text x="320" y="140" text-anchor="middle" font-family="monospace" font-size="10" fill="#3A4456">Send a thank-you note after every single stage</text>
+</svg>
+<figcaption>Figure 5.1 — The typical cybersecurity interview process</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<caption>Interview Stages</caption>
+<thead><tr><th>Stage</th><th>What Happens</th></tr></thead>
+<tbody>
+<tr><td><strong>Preliminary interview / phone screening</strong></td><td>Shorter conversation with a recruiter; company/role overview plus getting-to-know-you questions; prepare a few questions of your own</td></tr>
+<tr><td><strong>Additional interviews</strong></td><td>Typically with the hiring manager and/or team; may include a technical interview; possibly multiple rounds</td></tr>
+<tr><td><strong>Final offer</strong></td><td>You can ask for a day or two to decide, and negotiate salary/benefits if appropriate</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-710</span></div>
+  <div class="ticket-body"><p>Send a thank-you email within 24 hours of every interview stage — expressing gratitude and briefly restating your fit for the role. This is a small, consistently recommended action that costs almost nothing and reliably differentiates candidates.</p></div>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice — Handling Rejection</span><span class="ticket-id">BP-711</span></div>
+  <div class="ticket-body"><p>If you don't get the job, it's appropriate to thank the company for the opportunity, express interest in future roles, and directly ask for feedback on what you could improve. According to a Google security engineering manager, finding a first role commonly takes applying to hundreds of positions — persistence, not perfection, is the realistic expectation.</p></div>
+</div>
+
+<h3 id="sec-5-5" data-n="5.5">The STAR Method</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-711</span></div>
+  <div class="ticket-body"><p><strong>STAR method:</strong> An interview technique used to answer behavioral and situational questions, structured as Situation, Task, Action, Result.</p></div>
+</div>
+
+<figure>
+<svg viewBox="0 0 640 200" width="100%" role="img" aria-label="Diagram of the STAR method: Situation, Task, Action, Result, in sequence">
+  <rect x="0" y="0" width="640" height="200" fill="#F7F5F0"/>
+  <text x="320" y="24" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#0B1120">The STAR Method</text>
+  <g font-family="sans-serif" font-size="12" font-weight="700" fill="#fff">
+    <rect x="20" y="55" width="140" height="90" rx="6" fill="#2E5C8A"/><text x="90" y="90" text-anchor="middle">Situation</text><text x="90" y="108" text-anchor="middle" font-weight="400" font-size="9">Context/challenge</text>
+    <rect x="180" y="55" width="140" height="90" rx="6" fill="#1F7A44"/><text x="250" y="90" text-anchor="middle">Task</text><text x="250" y="108" text-anchor="middle" font-weight="400" font-size="9">Your role/goal</text>
+    <rect x="340" y="55" width="140" height="90" rx="6" fill="#9A5A1F"/><text x="410" y="90" text-anchor="middle">Action</text><text x="410" y="108" text-anchor="middle" font-weight="400" font-size="9">What you did</text>
+    <rect x="500" y="55" width="140" height="90" rx="6" fill="#A5301D"/><text x="570" y="90" text-anchor="middle">Result</text><text x="570" y="108" text-anchor="middle" font-weight="400" font-size="9">Outcome/lesson</text>
+  </g>
+  <path d="M160 100 L180 100" stroke="#0B1120" stroke-width="2" marker-end="url(#a8c)"/>
+  <path d="M320 100 L340 100" stroke="#0B1120" stroke-width="2" marker-end="url(#a8c)"/>
+  <path d="M480 100 L500 100" stroke="#0B1120" stroke-width="2" marker-end="url(#a8c)"/>
+  <defs><marker id="a8c" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#0B1120"/></marker></defs>
+  <text x="320" y="175" text-anchor="middle" font-family="monospace" font-size="11" fill="#3A4456">Aim for a positive result — or a clear lesson learned if it wasn't</text>
+</svg>
+<figcaption>Figure 5.2 — The STAR method's four components</figcaption>
+</figure>
+
+<div class="table-wrap">
+<table>
+<caption>STAR Components Explained</caption>
+<thead><tr><th>Component</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><strong>Situation</strong></td><td>The project or challenge you had to overcome — give enough detail for the interviewer to understand the stakes</td></tr>
+<tr><td><strong>Task</strong></td><td>Your specific role or responsibility within that situation</td></tr>
+<tr><td><strong>Action</strong></td><td>The exact steps you took — this is the part that shows how you think and decide under pressure</td></tr>
+<tr><td><strong>Result</strong></td><td>The outcome — ideally positive; if not, focus on what you learned and how it made you better</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>Worked Example — STAR in Practice</span><span class="ticket-id">SOC-701</span></div>
+  <div class="ticket-body">
+    <p><strong>Question:</strong> "Describe an experience advising internal business units on a security-related issue."</p>
+    <p><strong>Situation:</strong> While working as a junior analyst, there was a noticeable increase in employees clicking phishing links, traced to a lack of department-level awareness of the risk.</p>
+    <p><strong>Task:</strong> Identify which departments had the highest click rates and communicate those findings to their leaders.</p>
+    <p><strong>Action:</strong> Scheduled meetings with senior analysts, created visual presentations of the data, coordinated calls with department leaders, and collaboratively built an employee awareness campaign with a set timeline.</p>
+    <p><strong>Result:</strong> A 20% decrease in phishing incidents within one month of the campaign's launch.</p>
+  </div>
+</div>
+
+<div class="ticket examtip">
+  <div class="ticket-head"><span><span class="icon">🎯</span>Exam Tip</span><span class="ticket-id">EXM-703</span></div>
+  <div class="ticket-body"><p>Notice the worked example combines visual communication (Module 3's dashboards), cross-team coordination, and a quantified result — exactly the kind of specific, measurable detail that separates a strong STAR answer from a vague one. "It went well" is not a Result; "20% decrease within one month" is.</p></div>
+</div>
+
+<h3 id="sec-5-6" data-n="5.6">Technical Interview Preparation</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Technical Interview Focus Areas</caption>
+<thead><tr><th>Area</th><th>What to Review</th></tr></thead>
+<tbody>
+<tr><td><strong>Python</strong></td><td>Basic terminology, potential live pseudocode/whiteboarding, automation use cases</td></tr>
+<tr><td><strong>Security frameworks</strong></td><td>NIST CSF and other named frameworks from Courses I, II, and V</td></tr>
+<tr><td><strong>Network security</strong></td><td>TCP/IP and OSI models, key protocols and ports from Course III</td></tr>
+<tr><td><strong>SIEM tools</strong></td><td>What they do and why, from Courses II and VI</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-712</span></div>
+  <div class="ticket-body"><p>Write the full question down on paper before answering a technical question. Multi-part technical questions are common, and rushing to demonstrate knowledge on the first part often means missing the rest. Writing it down also gives you a moment to organize a structured response rather than answering reactively.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Sample Technical Interview Questions with Model Answers</caption>
+<thead><tr><th>Question</th><th>Model Answer</th></tr></thead>
+<tbody>
+<tr><td>What is the TCP/IP model?</td><td>A framework used to visualize how data is organized and transmitted across a network.</td></tr>
+<tr><td>What is the OSI model?</td><td>A standardized concept describing the seven layers computers use to communicate and send data over a network.</td></tr>
+<tr><td>What are SIEM tools used for?</td><td>Applications used by security professionals to identify and analyze security threats, risks, and vulnerabilities.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket important">
+  <div class="ticket-head"><span><span class="icon">❗</span>Important</span><span class="ticket-id">IMP-705</span></div>
+  <div class="ticket-body"><p>It's completely acceptable to say you don't know an answer during a technical interview — as long as you follow up by explaining <em>how you would find out</em>. Per a Google security engineering manager: ideal candidates are curious, humble, honest, and navigate ambiguity well — not candidates who already know everything.</p></div>
+</div>
+
+<h3 id="sec-5-7" data-n="5.7">Building Rapport &amp; Asking Questions</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-712</span></div>
+  <div class="ticket-body"><p><strong>Rapport:</strong> A friendly relationship in which the people involved understand each other's ideas and communicate well with each other.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Building Rapport at Each Stage</caption>
+<thead><tr><th>Stage</th><th>Technique</th></tr></thead>
+<tbody>
+<tr><td>Written communication (email)</td><td>Professional, polite, friendly tone; express appreciation for the opportunity</td></tr>
+<tr><td>Phone screening</td><td>Friendly, conversational tone — smiling while speaking genuinely sounds friendlier, even unseen</td></tr>
+<tr><td>In-person/video interview</td><td>Friendly greeting, maintain eye contact (or camera contact on video), engage naturally</td></tr>
+<tr><td>After the interview</td><td>A brief follow-up email mentioning something specific from the conversation</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Good Questions to Ask an Interviewer</caption>
+<tbody>
+<tr><td>"What's the biggest challenge for a new person in this role?"</td></tr>
+<tr><td>"In what ways can I contribute to the success of the team and the organization?"</td></tr>
+<tr><td>"What qualities or traits are most important for working well with the team?"</td></tr>
+<tr><td>"What would you say is the best part about working for this company?"</td></tr>
+<tr><td>"What is the potential for growth in this role?"</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-5-8" data-n="5.8">The Elevator Pitch</h3>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-713</span></div>
+  <div class="ticket-body"><p><strong>Elevator pitch:</strong> A brief summary of your experience, skills, and background — deliverable in 60 seconds or less, the time of a typical elevator ride.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Four Parts of an Elevator Pitch</caption>
+<thead><tr><th>Part</th><th>Content</th></tr></thead>
+<tbody>
+<tr><td><strong>1. Introduction</strong></td><td>Who you are and a brief professional background — past roles/skills that translate to security if this is your first role in the field</td></tr>
+<tr><td><strong>2. Career interests &amp; transferable skills</strong></td><td>What draws you to security specifically, and which of your existing skills apply (problem-solving, communication, time management)</td></tr>
+<tr><td><strong>3. Excitement</strong></td><td>Genuine passion for the field and your longer-term goals within it</td></tr>
+<tr><td><strong>4. Interest in the specific company</strong></td><td>Why this company specifically, not just the role — shows real preparation</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code-block">
+  <div class="code-head"><span class="lang">Elevator Pitch Example</span><span class="copy-btn" onclick="copyCode(this)">Copy</span></div>
+  <pre><code>"I love security because it gives me the opportunity to safeguard
+valuable information from malicious actors attempting to cause
+unnecessary harm to people and organizations. Long term, I'd love to
+develop a security and hacker mindset to play my part in defending
+against the constantly evolving threat actor tactics and techniques."</code></pre>
+  <div class="code-note"><strong>Why this works:</strong> It's specific about motivation (not generic "I like technology"), forward-looking about growth, and uses precise field vocabulary ("threat actor tactics and techniques") that signals genuine familiarity with the material.</div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Elevator Pitch Pitfalls to Avoid</caption>
+<tbody>
+<tr><td><strong>Rambling</strong> — stick to essential information, not every past accomplishment</td></tr>
+<tr><td><strong>Over-practicing to the point of sounding robotic</strong> — speak naturally, like a real conversation</td></tr>
+<tr><td><strong>Speaking too quickly</strong> — brevity tempts rushing, which can bury your key skills</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="sec-5-9" data-n="5.9">Remote Interviews &amp; Imposter Syndrome</h3>
+
+<div class="table-wrap">
+<table>
+<caption>Remote Interview Preparation Checklist</caption>
+<tbody>
+<tr><td>Test your camera and microphone with the specific platform a day or two beforehand</td></tr>
+<tr><td>Practice video communication with a friend to get used to slight audio delay</td></tr>
+<tr><td>Create a well-lit, uncluttered, professional-looking background</td></tr>
+<tr><td>Look at the interviewer (not the camera) when speaking, to convey engagement</td></tr>
+<tr><td>Sign in early — it signals respect for the interviewer's time and reliability</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket def">
+  <div class="ticket-head"><span><span class="icon">📖</span>Definition</span><span class="ticket-id">DEF-714</span></div>
+  <div class="ticket-body"><p><strong>Imposter syndrome:</strong> A common professional experience involving cycles of feeling accomplished followed by moments of self-doubt — normal, not a sign that you don't belong in the field.</p></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<caption>Five Ways to Combat Imposter Syndrome</caption>
+<thead><tr><th>Strategy</th><th>How It Helps</th></tr></thead>
+<tbody>
+<tr><td><strong>Community engagement</strong></td><td>Joining cybersecurity associations provides a support system and visible examples of others' growth</td></tr>
+<tr><td><strong>Networking</strong></td><td>Connecting with experienced professionals normalizes not knowing everything yet</td></tr>
+<tr><td><strong>Trusted mentorship</strong></td><td>A mentor reassures you that knowing everything is impossible for anyone, fostering confidence</td></tr>
+<tr><td><strong>Acknowledging small wins</strong></td><td>Keeping a record of positive feedback and accomplishments helps during harder moments</td></tr>
+<tr><td><strong>Reflecting on your career journey</strong></td><td>A concrete reminder of real progress made and value already brought to the field</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket bestpractice">
+  <div class="ticket-head"><span><span class="icon">✅</span>Best Practice</span><span class="ticket-id">BP-713</span></div>
+  <div class="ticket-body"><p>According to a Google program manager specializing in security education, the security field's constant pace of change means <strong>no one</strong> knows everything, ever — staying flexible and open to learning is the actual professional norm, not a personal shortcoming. Asking questions in a new job is expected and contributes to collective, not just individual, success.</p></div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="labs-5">Hands-On Labs &amp; Practical Exercises</h2>
+
+<details class="acc">
+  <summary>Lab 5.1 — Draft Your Resume Summary Statement</summary>
+  <div class="acc-body">
+    <p>Write a 2–3 sentence resume summary statement for an entry-level Security Analyst role, incorporating at least three specific skills or tools from this certificate.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Lab 5.2 — STAR Method Worksheet</summary>
+  <div class="acc-body">
+    <p>Choose a real challenge from your own life or work history (it doesn't need to be security-related). Write it out in full STAR format: Situation, Task, Action, Result. Draft at least three of these before your first real interview — different questions will call for different stories.</p>
+  </div>
+</details>
+
+<details class="acc">
+  <summary>Portfolio Project 5.1 — Full Application Package</summary>
+  <div class="acc-body">
+    <p>Assemble a complete application package: a one-page resume, a half-page cover letter, and a written 60-second elevator pitch script, all tailored to a specific (real or hypothetical) entry-level security role. This is the single most valuable artifact you can add to your portfolio — save all three documents together.</p>
+  </div>
+</details>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="interview-5">Interview Preparation</h2>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Classic Question</span><span class="ticket-id">INT-709</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Tell me about yourself.</strong></p>
+    <p><strong>Ideal answer:</strong> This is precisely what your elevator pitch is for — introduction, career interest and transferable skills, genuine excitement for the field, and (if you know the audience) interest in the specific company. Deliver it at a natural, unhurried pace rather than rushing through a memorized script.</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Behavioral Question</span><span class="ticket-id">INT-710</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Tell me about a time you faced a security leak or urgent issue requiring immediate action.</strong></p>
+    <p><strong>Ideal answer approach:</strong> Use STAR. Even without direct professional security experience, you can draw on a lab exercise, a personal project, or an analogous urgent situation from another job — the structure and reasoning matter more than the specific domain, especially at entry level.</p>
+  </div>
+</div>
+
+<div class="ticket interview">
+  <div class="ticket-head"><span><span class="icon">🎤</span>Closing Question</span><span class="ticket-id">INT-711</span></div>
+  <div class="ticket-body">
+    <p><strong>Q: Do you have any questions for me?</strong></p>
+    <p><strong>Ideal answer:</strong> Always say yes, and have at least two questions ready — ideally informed by research on the specific company. Asking about growth potential, team culture, or the biggest challenge a new hire faces all demonstrate genuine engagement rather than passive interest.</p>
+  </div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="practice-5">Practice Section</h2>
+
+<div class="quiz">
+  <div class="q">1. What does the "R" in the STAR method stand for?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">Requirement</button>
+  <button class="opt" onclick="checkAnswer(this,true)">Result</button>
+  <button class="opt" onclick="checkAnswer(this,false)">Recommendation</button>
+  <div class="fb">Correct — Situation, Task, Action, Result.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">2. True or False: It's better to pretend you know an answer in a technical interview than to admit you don't.</div>
+  <button class="opt" onclick="checkAnswer(this,false)">True</button>
+  <button class="opt" onclick="checkAnswer(this,true)">False</button>
+  <div class="fb">False — honesty about not knowing, followed by an explanation of how you'd find out, is the recommended and respected approach.</div>
+</div>
+
+<div class="quiz">
+  <div class="q">3. An elevator pitch should be deliverable in approximately how much time?</div>
+  <button class="opt" onclick="checkAnswer(this,false)">10 seconds</button>
+  <button class="opt" onclick="checkAnswer(this,true)">60 seconds or less</button>
+  <button class="opt" onclick="checkAnswer(this,false)">5 minutes</button>
+  <div class="fb">Correct — an elevator pitch is named for fitting within a typical elevator ride, roughly 60 seconds.</div>
+</div>
+
+<h2 style="font-family:var(--sans); font-size:1.7rem; margin-top:64px;" id="revision-5">Revision Notes &amp; Cheat Sheet</h2>
+
+<div class="ticket quickrev">
+  <div class="ticket-head"><span><span class="icon">⚡</span>30-Second Revision</span><span class="ticket-id">QR-705</span></div>
+  <div class="ticket-body"><p>Resume: header, summary, skills, experience, education (5 parts). Cover letter answers "why cybersecurity, why you." Interview process: phone screening → additional/technical interviews → offer; thank-you email within 24 hours each time. STAR method: Situation, Task, Action, Result — quantify the result when possible. Technical prep: Python, frameworks, network models, SIEM tools; write questions down before answering; it's OK to not know, just explain how you'd find out. Rapport: friendly tone throughout, ask genuine questions. Elevator pitch: intro + interests/skills + excitement + company interest, 60 seconds. Imposter syndrome is universal — combat it with community, mentorship, and tracked small wins.</p></div>
+</div>
+
+<div class="summary-block" id="summary-5">
+  <h4>Module Summary</h4>
+  <p>This final, largest module of the entire certificate walked through the complete job-search journey: finding roles, building a resume and cover letter, navigating every stage of the interview process, mastering the STAR method, preparing for technical questions, building rapport, delivering an elevator pitch, and managing the very human experience of imposter syndrome along the way.</p>
+  <h4 style="margin-top:20px;">Key Takeaways</h4>
+  <ul>
+    <li>Your certificate coursework is legitimate, resume-worthy experience — describe it concretely and specifically.</li>
+    <li>A cover letter's job is to convey motivation and personality that a resume's bullet points cannot.</li>
+    <li>The STAR method (Situation, Task, Action, Result) is the single most useful interview-answer structure to internalize.</li>
+    <li>Admitting you don't know something, followed by how you'd find out, is a strength in technical interviews, not a weakness.</li>
+    <li>Imposter syndrome is close to universal in this field — community, mentorship, and tracking your own progress are the practical antidotes.</li>
+  </ul>
+</div>
+
+<div class="module-nav">
+  <a href="#objectives-5">◂ Back to Module 5 Objectives</a>
+  <a href="#course-summary">Course Summary ▸</a>
+</div>
+
+<div class="endmark">— End of Module 5 —</div>
+<!-- ============================================================
+     COURSE SUMMARY
+     ============================================================ -->
+<h2 class="module-head" id="course-summary"><span class="tag">Course Summary</span>Put It to Work: Prepare for Cybersecurity Jobs — Complete</h2>
+
+<p>Course VIII closed the certificate by turning seven courses of technical learning into a career. You now understand how to apply a security mindset on the job, escalate incidents correctly, communicate with every level of stakeholder, engage with the broader security community, and — critically — find, apply for, and interview for your first role with genuine confidence.</p>
+
+<div class="table-wrap">
+<table>
+<caption>Course VIII — Module-by-Module Recap</caption>
+<thead><tr><th>Module</th><th>Core Theme</th><th>Signature Concepts</th></tr></thead>
+<tbody>
+<tr><td><strong>1. Protect Assets &amp; Detect Incidents</strong></td><td>The security mindset, applied</td><td>Data/asset classification, security events vs. incidents, BCP/DR plans, Juliana's first day</td></tr>
+<tr><td><strong>2. Escalate Incidents</strong></td><td>Recognizing and routing incidents correctly</td><td>3 incident types, 5 escalation roles, priority by asset criticality, Juliana's dual-incident day</td></tr>
+<tr><td><strong>3. Communicate with Stakeholders</strong></td><td>Turning findings into stakeholder-ready stories</td><td>5 key stakeholders, the security story structure, visual dashboards, Juliana's two communication formats</td></tr>
+<tr><td><strong>4. Engage with the Community</strong></td><td>Staying current after certification</td><td>Trusted resources, OWASP Top 10, finding organizations, LinkedIn networking</td></tr>
+<tr><td><strong>5. Find &amp; Apply for Jobs</strong></td><td>The complete job-search and interview journey</td><td>Resume/cover letter, interview stages, STAR method, technical prep, rapport, elevator pitch, imposter syndrome</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket expert">
+  <div class="ticket-head"><span><span class="icon">🎓</span>Expert Note</span><span class="ticket-id">EXP-701</span></div>
+  <div class="ticket-body"><p>If you remember only five things from Course VIII going into your first real interview: (1) the STAR method, cold, applied to at least three of your own real stories; (2) the security mindset as your answer to "why should we hire you"; (3) the three incident classification types and how to prioritize between competing ones; (4) a rehearsed 60-second elevator pitch that sounds natural, not memorized; (5) that it's genuinely fine not to know a technical answer, as long as you explain how you'd find out. This course is the one most likely to directly determine whether you get hired.</p></div>
+</div>
+
+<!-- ============================================================
+     CERTIFICATE WRAP-UP
+     ============================================================ -->
+<h2 class="module-head" id="certificate-wrapup"><span class="tag">Certificate Wrap-Up</span>The Complete Google Cybersecurity Certificate</h2>
+
+<p>You've now completed all eight courses of the Google Cybersecurity Certificate. This is a genuine achievement — the material was rigorous, technically dense in places, and covered an enormous breadth of the security field in a relatively short program. Take a moment to recognize the work this represents before looking ahead.</p>
+
+<div class="table-wrap">
+<table>
+<caption>The Complete Eight-Course Journey</caption>
+<thead><tr><th>Course</th><th>Title</th><th>Core Contribution</th></tr></thead>
+<tbody>
+<tr><td><strong>I</strong></td><td>Foundations of Cybersecurity</td><td>Defined security, introduced core skills, the CIA triad, and the eight CISSP domains</td></tr>
+<tr><td><strong>II</strong></td><td>Play It Safe: Manage Security Risks</td><td>Frameworks, controls, the NIST CSF and RMF, SIEM/SOAR, and incident response playbooks</td></tr>
+<tr><td><strong>III</strong></td><td>Connect and Protect: Networks and Network Security</td><td>Network architecture, the OSI/TCP-IP models, protocols, firewalls, VPNs, and network attacks</td></tr>
+<tr><td><strong>IV</strong></td><td>Tools of the Trade: Linux and SQL</td><td>The command line, file permissions, user management, and SQL querying and joins</td></tr>
+<tr><td><strong>V</strong></td><td>Assets, Threats, and Vulnerabilities</td><td>Asset classification, encryption/hashing, CVE/CVSS/OWASP, malware, and threat modeling</td></tr>
+<tr><td><strong>VI</strong></td><td>Sound the Alarm: Detection and Response</td><td>The incident response lifecycle, packet analysis, the Pyramid of Pain, logs, IDS, and SIEM</td></tr>
+<tr><td><strong>VII</strong></td><td>Automate Cybersecurity Tasks with Python</td><td>Python fundamentals, functions, strings/lists/regex, files, and debugging</td></tr>
+<tr><td><strong>VIII</strong></td><td>Put It to Work: Prepare for Cybersecurity Jobs</td><td>Applying the security mindset, escalation, stakeholder communication, and the full job search</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="ticket soc">
+  <div class="ticket-head"><span><span class="icon">🛰️</span>Program Reflection</span><span class="ticket-id">SOC-702</span></div>
+  <div class="ticket-body">
+    <p>The security field continues to grow rapidly, and the demand for professionals who can safeguard organizations and individuals globally is only increasing. Each course built deliberately on the last: Course I gave you vocabulary and concepts; Courses II–VI gave you the technical depth across risk, networking, systems, threats, and detection/response; Course VII gave you the ability to automate what you'd otherwise do by hand; and Course VIII gave you the tools to turn all of it into an actual career.</p>
+    <p>The field is dynamic by nature — new threats, tools, and frameworks will continue emerging after this certificate ends. The habit of continuous learning built into this program (Module 4's community engagement, the security mindset itself) matters as much as any single fact memorized along the way.</p>
+  </div>
+</div>
+
+<div class="summary-block">
+  <h4>Your Portfolio, End to End</h4>
+  <p>Across all eight courses, this program has pointed you toward building a genuine portfolio of artifacts — not just notes, but demonstrable work:</p>
+  <ul>
+    <li>An incident handler's journal and multiple incident reports (Courses I, VI)</li>
+    <li>A completed security audit and vulnerability assessment (Courses II, V)</li>
+    <li>Linux command reference sheets and SQL query examples (Course IV)</li>
+    <li>A PASTA threat model and Pyramid of Pain application (Courses V, VI)</li>
+    <li>A full Python automation script combining files, regex, and functions (Course VII)</li>
+    <li>A resume, cover letter, and elevator pitch tailored to a real role (Course VIII)</li>
+  </ul>
+  <p>Together, these form a concrete, specific answer to "what have you actually built" — often the difference between a generic and a compelling entry-level candidate.</p>
+</div>
+
+<!-- ============================================================
+     FULL COURSE GLOSSARY
+     ============================================================ -->
+<h2 class="module-head" id="course-glossary"><span class="tag">Reference</span>Full Glossary — Weeks 1–5</h2>
+
+<div class="table-wrap">
+<table>
+<caption>Complete Course VIII Glossary</caption>
+<thead><tr><th>Term</th><th>Definition</th></tr></thead>
+<tbody>
+<tr><td><strong>Business continuity plan (BCP)</strong></td><td>A document outlining procedures to sustain business operations during and after a significant disruption</td></tr>
+<tr><td><strong>Chief Executive Officer (CEO)</strong></td><td>The highest-ranking person in an organization, responsible for overall management and shareholder reporting</td></tr>
+<tr><td><strong>Chief Financial Officer (CFO)</strong></td><td>A senior executive managing financial operations, concerned with the financial impact of security incidents</td></tr>
+<tr><td><strong>Chief Information Security Officer (CISO)</strong></td><td>A high-level executive responsible for security architecture, risk analysis, and business continuity plans</td></tr>
+<tr><td><strong>Confidential data</strong></td><td>Data with limited access, often protected by non-disclosure agreements</td></tr>
+<tr><td><strong>Data controller</strong></td><td>A person who determines the procedure and purpose for processing data</td></tr>
+<tr><td><strong>Data custodian</strong></td><td>A role that assigns/removes access and implements security controls for data</td></tr>
+<tr><td><strong>Data owner</strong></td><td>The person who decides who can access, edit, use, or destroy their information</td></tr>
+<tr><td><strong>Data processor</strong></td><td>A person responsible for processing data on behalf of the data controller, often a vendor</td></tr>
+<tr><td><strong>Data protection officer (DPO)</strong></td><td>An individual responsible for monitoring an organization's data protection compliance</td></tr>
+<tr><td><strong>Disaster recovery plan</strong></td><td>A plan outlining steps to minimize the impact of a security incident on systems and data</td></tr>
+<tr><td><strong>Elevator pitch</strong></td><td>A brief summary of your experience, skills, and background, deliverable in 60 seconds or less</td></tr>
+<tr><td><strong>Escalation policy</strong></td><td>A set of actions outlining who should be notified when an incident alert occurs and how it should be handled</td></tr>
+<tr><td><strong>Improper usage</strong></td><td>An incident type occurring when an employee violates acceptable use policies</td></tr>
+<tr><td><strong>Incident escalation</strong></td><td>The process of identifying, triaging, and handing off a potential security incident to a more experienced team member</td></tr>
+<tr><td><strong>Malware infection</strong></td><td>An incident type where malicious software infiltrates an organization's computers or network</td></tr>
+<tr><td><strong>OWASP Top 10</strong></td><td>A globally recognized standard document listing the top 10 most critical web application security risks</td></tr>
+<tr><td><strong>Private data</strong></td><td>Information that should be kept from the public, though not as sensitive as PII/PHI</td></tr>
+<tr><td><strong>Public data</strong></td><td>Data already accessible to the public, posing minimal organizational risk</td></tr>
+<tr><td><strong>Rapport</strong></td><td>A friendly relationship in which people understand each other's ideas and communicate well</td></tr>
+<tr><td><strong>Risk managers</strong></td><td>Stakeholders who identify risks and manage responses to security incidents</td></tr>
+<tr><td><strong>Security mindset</strong></td><td>The ability to evaluate risk and constantly identify potential or actual breaches</td></tr>
+<tr><td><strong>Sensitive data</strong></td><td>Data including PII, SPII, and PHI — requires protection from all unauthorized access</td></tr>
+<tr><td><strong>Stakeholder</strong></td><td>An individual or group with an interest in the decisions or activities of an organization</td></tr>
+<tr><td><strong>STAR method</strong></td><td>An interview technique for behavioral/situational questions: Situation, Task, Action, Result</td></tr>
+<tr><td><strong>Unauthorized access</strong></td><td>An incident type where an individual gains digital or physical access without permission</td></tr>
+<tr><td><strong>Visual dashboard</strong></td><td>A way of displaying various types of data quickly in one place, for stakeholder communication</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ============================================================
+     MASTER CHEAT SHEET
+     ============================================================ -->
+<h2 class="module-head" id="course-cheatsheet"><span class="tag">Reference</span>Master Cheat Sheet &amp; Final Revision Checklist</h2>
+
+<h4>Final Revision Checklist</h4>
+<div class="quiz" style="background:var(--paper-dim);">
+  <p>Before your first real interview, confirm you can do all of the following from memory:</p>
+  <ul>
+    <li>☐ Define the security mindset and give a personal example of applying it</li>
+    <li>☐ Classify data into public/private/sensitive/confidential correctly</li>
+    <li>☐ Name and distinguish the 3 incident classification types</li>
+    <li>☐ Explain the 5 key stakeholder roles and what each cares about</li>
+    <li>☐ Structure a "security story" (challenge → impact → proposed solution)</li>
+    <li>☐ Explain when a visual dashboard is the right communication choice</li>
+    <li>☐ Write a strong, error-free professional networking message</li>
+    <li>☐ Build a complete resume with all 5 sections</li>
+    <li>☐ Apply the STAR method to at least three of your own real stories</li>
+    <li>☐ Deliver a natural-sounding, 60-second elevator pitch</li>
+  </ul>
+</div>
+
+<h4>Course VIII Quick Reference</h4>
+<div class="table-wrap">
+<table>
+<tbody>
+<tr><td><strong>Data Classification</strong></td><td>Public, Private, Sensitive, Confidential</td></tr>
+<tr><td><strong>Incident Types</strong></td><td>Malware infection, Unauthorized access, Improper usage</td></tr>
+<tr><td><strong>Escalation Roles</strong></td><td>Data owner, controller, processor, custodian, DPO</td></tr>
+<tr><td><strong>5 Stakeholders</strong></td><td>Risk Managers, CEO, CFO, CISO, Operations Managers</td></tr>
+<tr><td><strong>Security Story</strong></td><td>Challenge → Impact (playbook) → Proposed solution</td></tr>
+<tr><td><strong>Resume Structure</strong></td><td>Header, Summary, Skills, Experience, Education</td></tr>
+<tr><td><strong>Interview Stages</strong></td><td>Phone screening → Additional/technical interviews → Offer</td></tr>
+<tr><td><strong>STAR Method</strong></td><td>Situation, Task, Action, Result</td></tr>
+<tr><td><strong>Elevator Pitch</strong></td><td>Intro + interests/skills + excitement + company interest (60 sec)</td></tr>
+<tr><td><strong>Job Sites</strong></td><td>ZipRecruiter, Indeed, Monster, LinkedIn</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="summary-block">
+  <h4>What Comes Next</h4>
+  <ul>
+    <li>Add every remaining portfolio artifact from this course (resume, cover letter, elevator pitch script) to your collection — Module 5's Portfolio Project is the capstone of the entire certificate.</li>
+    <li>Practice your STAR-method stories and elevator pitch out loud, not just on paper — delivery matters as much as content.</li>
+    <li>Set a recurring reminder to check your chosen cybersecurity news resources (Module 4) at least monthly — the field will keep moving after this certificate ends.</li>
+    <li>Apply. Google's own hiring managers are explicit that finding a first role often takes many applications — persistence is the realistic and expected path, not a sign of a weak candidacy.</li>
+  </ul>
+</div>
+
+<div class="endmark">— End of Course VIII: Put It to Work — Prepare for Cybersecurity Jobs —<br><br>— End of the Complete Google Cybersecurity Certificate, Courses I–VIII —</div>
+</div>
+</main>
+<script>
+// progress bar
+window.addEventListener('scroll', function(){
+  var h = document.documentElement;
+  var scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+  document.getElementById('progress-fill').style.width = scrolled + '%';
+});
+
+// TOC drawer
+var drawer = document.getElementById('toc-drawer');
+var scrim = document.getElementById('scrim');
+document.getElementById('toc-toggle').addEventListener('click', function(){
+  drawer.classList.add('open'); scrim.classList.add('show');
+  this.setAttribute('aria-expanded','true');
+});
+document.getElementById('toc-close').addEventListener('click', closeDrawer);
+scrim.addEventListener('click', closeDrawer);
+function closeDrawer(){
+  drawer.classList.remove('open'); scrim.classList.remove('show');
+  document.getElementById('toc-toggle').setAttribute('aria-expanded','false');
+}
+
+// flashcards
+document.querySelectorAll('.flash').forEach(function(card){
+  function flip(){
+    card.classList.toggle('flipped');
+    card.setAttribute('aria-pressed', card.classList.contains('flipped'));
+  }
+  card.addEventListener('click', flip);
+  card.addEventListener('keypress', function(e){ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); flip(); } });
+});
+
+// quiz
+function checkAnswer(btn, isCorrect){
+  var quiz = btn.closest('.quiz');
+  var opts = quiz.querySelectorAll('.opt');
+  opts.forEach(function(o){ o.disabled = true; });
+  if(isCorrect){ btn.classList.add('correct'); }
+  else { btn.classList.add('wrong'); }
+  quiz.querySelector('.fb').classList.add('show');
+}
+
+// copy code
+function copyCode(btn){
+  var code = btn.closest('.code-block').querySelector('pre').innerText;
+  navigator.clipboard.writeText(code).then(function(){
+    var old = btn.innerText; btn.innerText = 'Copied!';
+    setTimeout(function(){ btn.innerText = old; }, 1500);
+  });
+}
+
+// scroll-spy for TOC + spine
+var spySections = document.querySelectorAll('[id]');
+var tocLinks = document.querySelectorAll('#toc-drawer a[href^="#"]');
+var spineTabs = document.querySelectorAll('#spine .spine-tab');
+var moduleIds = ['module-1','module-2','module-3','module-4','module-5'];
+window.addEventListener('scroll', function(){
+  var current = '';
+  spySections.forEach(function(sec){
+    var rect = sec.getBoundingClientRect();
+    if(rect.top < 150) current = sec.id;
+  });
+  tocLinks.forEach(function(link){
+    link.classList.remove('current');
+    if(link.getAttribute('href') === '#' + current) link.classList.add('current');
+  });
+  // determine which module we're currently in for the spine rail
+  var currentModule = 'module-1';
+  moduleIds.forEach(function(mid){
+    var el = document.getElementById(mid);
+    if(el && el.getBoundingClientRect().top < 150) currentModule = mid;
+  });
+  spineTabs.forEach(function(tab){
+    tab.classList.remove('active');
+    if(tab.getAttribute('href') === '#' + currentModule) tab.classList.add('active');
+  });
+});
+</script>
+
+</body>
+</html>
